@@ -56,8 +56,8 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         include: { tee_boxes: true, holes: true }
     });
 
-    const coursePar = course?.holes.reduce((sum, h) => sum + h.par, 0) || 68;
-    const tees = course?.tee_boxes.map(t => ({ name: t.name, rating: t.rating, slope: t.slope })) || [];
+    const coursePar = course?.holes.reduce((sum: number, h: { par: number }) => sum + h.par, 0) || 68;
+    const tees = course?.tee_boxes.map((t: { name: string; rating: number; slope: number }) => ({ name: t.name, rating: t.rating, slope: t.slope })) || [];
 
     // 3. Fetch All Rounds (V2 + V3)
     const v2Rounds = await prisma.handicapRound.findMany({
