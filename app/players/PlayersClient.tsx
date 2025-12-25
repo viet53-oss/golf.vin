@@ -158,7 +158,7 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
         // Filter
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
-            data = data.filter(p =>
+            data = data.filter((p: any) =>
                 p.name.toLowerCase().includes(query) ||
                 (p.email && p.email.toLowerCase().includes(query)) ||
                 (p.phone && p.phone.includes(query))
