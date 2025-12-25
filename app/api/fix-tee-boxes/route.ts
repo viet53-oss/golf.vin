@@ -43,7 +43,7 @@ export async function POST() {
 
             // Find the matching tee box for this course
             const teeBox = rp.round.course.tee_boxes.find(
-                tb => tb.name.toLowerCase() === preferredTee.toLowerCase()
+                (tb: any) => tb.name.toLowerCase() === preferredTee.toLowerCase()
             );
 
             if (!teeBox) {
