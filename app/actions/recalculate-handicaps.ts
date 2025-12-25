@@ -27,8 +27,8 @@ export async function recalculateAllHandicaps() {
                 | { type: 'v2'; date: string; id: string; differential: number; timestamp: number };
 
             const v3Rounds: HistoryItem[] = player.rounds
-                .filter(r => r.tee_box) // Ensure complete data
-                .map(r => ({
+                .filter((r: any) => r.tee_box) // Ensure complete data
+                .map((r: any) => ({
                     type: 'v3',
                     date: r.round.date,
                     id: r.id,
@@ -38,7 +38,7 @@ export async function recalculateAllHandicaps() {
                     timestamp: new Date(r.round.date).getTime()
                 }));
 
-            const v2Rounds: HistoryItem[] = player.manual_rounds.map(r => ({
+            const v2Rounds: HistoryItem[] = player.manual_rounds.map((r: any) => ({
                 type: 'v2',
                 date: r.date_played,
                 id: r.id,
