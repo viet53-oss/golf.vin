@@ -3,6 +3,8 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
+type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
 export async function getBackupData() {
     try {
         const [players, courses, rounds, roundPlayers, handicapRounds] = await Promise.all([
@@ -50,7 +52,7 @@ export async function restoreBackupData(jsonString: string) {
         // Let's go with a cleaner Wipe-All-And-Replace inside a transaction to ensure integrity.
         // If it fails, nothing is lost.
 
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: TransactionClient) => {
             // 1. Clean existing data (Dependents first)
             await tx.roundPlayer.deleteMany();
             await tx.handicapRound.deleteMany();
