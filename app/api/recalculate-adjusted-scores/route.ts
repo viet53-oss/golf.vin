@@ -52,7 +52,7 @@ export async function POST() {
             const index = rp.index_at_time ?? rp.player.index;
             const slope = rp.tee_box?.slope ?? 113;
             const rating = rp.tee_box?.rating ?? 72;
-            const par = rp.round.course.holes.reduce((sum, h) => sum + h.par, 0);
+            const par = rp.round.course.holes.reduce((sum: number, h: any) => sum + h.par, 0);
             const courseHandicap = Math.round(index * (slope / 113) + (rating - par));
 
             // Prepare hole scores (no difficulty needed for simple Par+2 rule)
