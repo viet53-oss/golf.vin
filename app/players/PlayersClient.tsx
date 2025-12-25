@@ -353,7 +353,7 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
 
             {/* Main List */}
             <main className="px-3 py-4 space-y-2">
-                {displayedPlayers.map((player) => {
+                {displayedPlayers.map((player: any) => {
                     return (
                         <div key={player.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 
