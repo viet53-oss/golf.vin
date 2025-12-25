@@ -1,11 +1,13 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { calculateAdjustedGrossScore } from '@/lib/adjusted-score';
 import { calculateScoreDifferential } from '@/lib/handicap';
+
+type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
 
 export async function postScore(formData: FormData) {
     const playerId = formData.get('playerId') as string;
@@ -237,7 +239,7 @@ export async function updatePlayerScore(
         scoreDifferential = calculateScoreDifferential(adjustedGrossScore, rating, slope, 0);
     }
 
-    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
         // 1. Update the RoundPlayer summary
         await tx.roundPlayer.update({
             where: { id: roundPlayerId },
@@ -275,7 +277,7 @@ export async function updatePlayerScore(
 
 export async function updatePoolParticipants(roundId: string, inPoolPlayerIds: string[]) {
     try {
-        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        await prisma.$transaction(async (tx: TransactionClient) => {
             // 1. Get current players in round to verify valid IDs
             const players = await tx.roundPlayer.findMany({
                 where: { round_id: roundId },
@@ -303,7 +305,7 @@ export async function updatePoolParticipants(roundId: string, inPoolPlayerIds: s
 
 export async function saveRoundWinnings(roundId: string, payouts: { playerId: string, amount: number }[]) {
     try {
-        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        await prisma.$transaction(async (tx: TransactionClient) => {
             for (const p of payouts) {
                 await tx.$executeRawUnsafe(
                     `UPDATE round_players SET payout = $1 WHERE round_id = $2 AND player_id = $3`,
