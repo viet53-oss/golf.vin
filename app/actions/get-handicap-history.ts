@@ -72,7 +72,7 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
     // 4. Normalize & Sort (Ascending for calculation)
     // Find preferred tee box for V2 rounds
     const preferredTeeBox = player.preferred_tee_box && course
-        ? course.tee_boxes.find(tb => tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase())
+        ? course.tee_boxes.find((tb: { name: string }) => tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase())
         : null;
 
     let allRounds = [
@@ -92,7 +92,7 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             // Use tee box if available, otherwise find preferred tee box
             let teeBox = r.tee_box;
             if (!teeBox && player.preferred_tee_box && course) {
-                teeBox = course.tee_boxes.find(tb =>
+                teeBox = course.tee_boxes.find((tb: { name: string }) =>
                     tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase()
                 ) || null;
             }
