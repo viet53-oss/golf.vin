@@ -1,0 +1,155 @@
+import { prisma } from '@/lib/prisma';
+// Forced refresh: 2025-12-23T16:29:00
+import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { format } from 'date-fns';
+import CreateRoundButton from '@/components/CreateRoundButton';
+import ScoresDashboard from '@/components/ScoresDashboard';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ScoresPage() {
+    const cookieStore = await cookies();
+    const isAdmin = cookieStore.get('admin_session')?.value === 'true';
+
+    const yearStart = format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd');
+
+    const rounds = await prisma.round.findMany({
+        orderBy: {
+            date: 'desc',
+        },
+        include: {
+            course: {
+                include: {
+                    holes: true,
+                },
+            },
+            players: {
+                include: {
+                    player: true,
+                    tee_box: true,
+                    scores: {
+                        include: { hole: true }
+                    }
+                },
+                orderBy: {
+                    gross_score: 'asc',
+                },
+            },
+        },
+    });
+
+    // Build YTD winnings and points as a RUNNING TOTAL progression
+    const runningWinnings = new Map<string, number>();
+    const runningPoints = new Map<string, number>();
+    const currentYear = new Date().getFullYear();
+
+    // Sort rounds oldest to newest to calculate progression
+    const sortedRounds = [...rounds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Maps to store the snapshot total for each player at each round
+    const roundSnapshots = new Map<string, Map<string, { pts: number; money: number }>>();
+
+    sortedRounds.forEach(round => {
+        const roundYear = new Date(round.date).getFullYear();
+        if (roundYear !== currentYear) return;
+
+        const snapshots = new Map<string, { pts: number; money: number }>();
+
+        // 1. Process Winnings
+        (round.players || []).forEach((rp: any) => {
+            const currentMoney = (runningWinnings.get(rp.player_id) || 0) + (rp.payout || 0);
+            runningWinnings.set(rp.player_id, currentMoney);
+        });
+
+        // 2. Process Points (Tournament Only)
+        if (round.is_tournament) {
+            const par = round.course.holes.reduce((sum: number, h: any) => sum + h.par, 0);
+            const sortedPlayers = [...(round.players || [])].sort((a: any, b: any) => {
+                const idxA = a.index_at_time ?? a.player?.index ?? 0;
+                const idxB = b.index_at_time ?? b.player?.index ?? 0;
+                return idxA - idxB;
+            });
+
+            let flights: any[][] = [];
+            if (sortedPlayers.length > 0) {
+                const half = Math.floor(sortedPlayers.length / 2);
+                flights = [sortedPlayers.slice(0, half), sortedPlayers.slice(half)];
+            }
+
+            flights.forEach(flight => {
+                const scoredPlayers = flight.map((rp: any) => {
+                    if (!rp.gross_score) return { ...rp, net: 9999 };
+                    const idx = rp.index_at_time ?? rp.player?.index ?? 0;
+                    const slope = rp.tee_box?.slope ?? 113;
+                    const rating = rp.tee_box?.rating ?? par;
+                    const ch = Math.round(idx * (slope / 113) + (rating - par));
+                    return { ...rp, net: rp.gross_score - ch };
+                }).sort((a, b) => a.net - b.net);
+
+                scoredPlayers.forEach((p, rank) => {
+                    if (p.net === 9999) return;
+                    let pts = 20;
+                    if (rank === 0) pts = 100;
+                    else if (rank === 1) pts = 75;
+                    else if (rank === 2) pts = 50;
+
+                    const currentPts = (runningPoints.get(p.player_id) || 0) + pts;
+                    runningPoints.set(p.player_id, currentPts);
+                });
+            });
+        }
+
+        // 3. Take snapshot for this round
+        (round.players || []).forEach((rp: any) => {
+            snapshots.set(rp.player_id, {
+                pts: runningPoints.get(rp.player_id) || 0,
+                money: runningWinnings.get(rp.player_id) || 0
+            });
+        });
+        roundSnapshots.set(round.id, snapshots);
+    });
+
+    // Final mapping for display (rounds are already in correct order from findMany)
+    const processedRounds = (rounds as any[]).map(round => {
+        const snapshots = roundSnapshots.get(round.id);
+        return {
+            ...round,
+            players: (round.players || []).map((rp: any) => {
+                const stats = snapshots?.get(rp.player_id);
+                return {
+                    ...rp,
+                    ytdWinnings: stats?.money || 0,
+                    ytdPoints: stats?.pts || 0
+                };
+            })
+        };
+    });
+
+    return (
+        <div className="min-h-screen bg-slate-50 font-sans pb-10">
+            {/* Header */}
+            <header className="bg-white shadow-sm sticky top-0 z-10 px-3 py-3">
+                <div className="relative flex items-center justify-center p-1">
+                    <div className="absolute left-0">
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[16pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+                    </div>
+                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight">Scores</h1>
+                </div>
+            </header>
+
+            <main className="px-3 py-6 space-y-6">
+                {/* Action Bar */}
+                <div className="flex justify-between items-center">
+                    <CreateRoundButton />
+                    <button className="text-[16pt] font-bold text-gray-500 hover:text-black transition-colors">
+                        Refresh
+                    </button>
+                </div>
+
+                {/* Rounds Feed with Pagination */}
+                <ScoresDashboard rounds={processedRounds as any} isAdmin={isAdmin} />
+            </main>
+        </div>
+    );
+}

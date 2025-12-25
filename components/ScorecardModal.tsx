@@ -1,0 +1,269 @@
+
+'use client';
+
+import React from 'react';
+// Native SVG icon to bypass Lucide/Turbopack crash
+const CloseIcon = ({ size = 24 }: { size?: number }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+    </svg>
+);
+import { format } from 'date-fns';
+
+// Define types based on what we fetch
+type ScorecardData = {
+    id: string;
+    gross_score: number | null;
+    adjusted_gross_score: number | null;
+    score_differential: number | null;
+    index_at_time: number | null;
+    player: {
+        name: string;
+        index: number;
+    };
+    round: {
+        date: string;
+        is_tournament: boolean;
+        name: string | null;
+        course: {
+            name: string;
+            holes: Array<{
+                id: string;
+                hole_number: number;
+                par: number;
+                difficulty: number | null;
+            }>;
+        };
+    };
+    tee_box: {
+        name: string;
+        rating: number;
+        slope: number;
+    } | null;
+    scores: Array<{
+        id: string;
+        strokes: number;
+        hole: {
+            hole_number: number;
+        };
+    }>;
+};
+
+interface ScorecardModalProps {
+    data: ScorecardData;
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
+    if (!isOpen) return null;
+
+    const { player, round, tee_box, scores } = data;
+    const course = round.course;
+
+    // Organize scores by hole number for easy access
+    const scoreMap = new Map<number, number>();
+    scores.forEach(s => scoreMap.set(s.hole.hole_number, s.strokes));
+
+    // Calculate Totals
+    const front9 = course.holes.filter(h => h.hole_number <= 9);
+    const back9 = course.holes.filter(h => h.hole_number > 9);
+
+    const calcTotal = (holes: typeof front9, metric: 'par' | 'score') => {
+        return holes.reduce((sum, h) => {
+            if (metric === 'par') return sum + h.par;
+            return sum + (scoreMap.get(h.hole_number) || 0);
+        }, 0);
+    };
+
+    const front9Par = calcTotal(front9, 'par');
+    const front9Score = calcTotal(front9, 'score');
+    const back9Par = calcTotal(back9, 'par');
+    const back9Score = calcTotal(back9, 'score');
+
+    const totalPar = front9Par + back9Par;
+    const totalScore = front9Score + back9Score;
+
+    // Handicap Calcs
+    const slope = tee_box?.slope || 113;
+    const courseHcp = Math.round((data.index_at_time || 0) * (slope / 113));
+    const netScore = (totalScore || 0) - courseHcp;
+
+    // Helper for background colors
+    const getScoreClass = (par: number, score: number | undefined) => {
+        if (!score) return "bg-transparent";
+        const diff = score - par;
+        if (diff <= -2) return "bg-blue-200 text-blue-900"; // Eagle+
+        if (diff === -1) return "bg-emerald-200 text-emerald-900"; // Birdie
+        if (diff === 0) return "bg-white text-black"; // Par
+        if (diff === 1) return "bg-amber-100 text-amber-900"; // Bogey
+        return "bg-rose-200 text-rose-900"; // Double+
+    };
+
+    // Sub-component for a 9-hole section
+    const NineHoleSection = ({
+        title,
+        holes,
+        totalLabel,
+        totalPar,
+        totalScore
+    }: {
+        title: string,
+        holes: typeof front9,
+        totalLabel: string,
+        totalPar: number,
+        totalScore: number
+    }) => (
+        <div className="mb-6">
+            <h4 className="font-bold text-black mb-2 px-1">{title}</h4>
+            <div className="flex bg-white rounded-lg overflow-hidden border border-gray-100 shadow-sm">
+
+                {/* Scrollable Hole Data */}
+                <div className="flex-1 overflow-x-auto no-scrollbar">
+                    <table className="w-full text-center border-collapse min-w-[300px]">
+                        <tbody>
+                            {/* Header Row (Hole #) */}
+                            <tr className="border-b border-gray-100">
+                                <td className="px-3 py-2 text-[16pt] font-bold text-gray-400 uppercase text-left w-16">Hole</td>
+                                {holes.map(h => (
+                                    <td key={h.id} className="px-3 py-2 w-10 font-bold text-[16pt] text-black">{h.hole_number}</td>
+                                ))}
+                            </tr>
+                            {/* Par Row */}
+                            <tr className="border-b border-gray-100">
+                                <td className="px-3 py-2 text-[16pt] font-bold text-gray-400 uppercase text-left">Par</td>
+                                {holes.map(h => (
+                                    <td key={h.id} className="px-3 py-2 w-10 text-[16pt] text-gray-500">{h.par}</td>
+                                ))}
+                            </tr>
+                            {/* Score Row */}
+                            <tr className="border-b border-gray-100">
+                                <td className="px-3 py-2 text-[16pt] font-bold text-black uppercase text-left">Score</td>
+                                {holes.map(h => {
+                                    const score = scoreMap.get(h.hole_number);
+                                    return (
+                                        <td key={h.id} className={`px-3 py-2 w-10 font-black text-[16pt] ${getScoreClass(h.par, score)}`}>
+                                            {score || '-'}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                            {/* Difficulty Row */}
+                            <tr>
+                                <td className="px-3 py-2 text-[16pt] font-bold text-gray-400 uppercase text-left">Hardness</td>
+                                {holes.map(h => (
+                                    <td key={h.id} className="px-3 py-2 w-10 text-[16pt] text-gray-400">{h.difficulty || '-'}</td>
+                                ))}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Fixed Total Column */}
+                <div className="w-20 bg-gray-100 border-l border-gray-200 flex flex-col justify-center items-center shrink-0">
+                    <span className="text-[16pt] font-bold text-gray-500 uppercase mb-1">{totalLabel}</span>
+                    <span className="text-[16pt] font-black text-black">{totalScore || '-'}</span>
+                    <span className="text-[16pt] text-gray-400 mt-1">Par {totalPar}</span>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="bg-slate-50 w-full max-w-5xl rounded-2xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-in zoom-in-95 duration-200">
+
+                {/* Header Actions */}
+                <div className="flex justify-between items-center p-3 bg-white border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Scorecard</span>
+                    <button
+                        onClick={onClose}
+                        className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
+                    >
+                        <CloseIcon size={20} />
+                    </button>
+                </div>
+
+                <div className="overflow-y-auto p-3 pb-8 bg-slate-50">
+
+                    {/* Header Title & Date */}
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-black text-black tracking-tight flex items-center justify-center gap-2">
+                            {player.name}
+                        </h2>
+                        <div className="flex justify-center items-center gap-3 mt-2 text-sm text-gray-500 font-medium">
+                            <span>{format(new Date(round.date), 'MMMM d, yyyy')}</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span>{course.name}</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span>{tee_box?.name} Tee</span>
+                        </div>
+                    </div>
+
+                    {/* Big Stats Row */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mb-8 flex justify-around items-center text-center">
+                        <div>
+                            <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Gross Score</span>
+                            <span className="text-3xl sm:text-4xl font-black text-black">{totalScore || '-'}</span>
+                        </div>
+                        <div className="w-px h-10 bg-gray-100 mx-2"></div>
+                        <div>
+                            <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Course Hcp</span>
+                            <span className="text-3xl sm:text-4xl font-black text-black">{courseHcp}</span>
+                        </div>
+                        <div className="w-px h-10 bg-gray-100 mx-2"></div>
+                        <div>
+                            <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Net Score</span>
+                            <span className="text-3xl sm:text-4xl font-black text-black">{netScore || '-'}</span>
+                        </div>
+                    </div>
+
+                    {/* Front 9 */}
+                    <NineHoleSection
+                        title="Front 9"
+                        holes={front9}
+                        totalLabel="OUT"
+                        totalPar={front9Par}
+                        totalScore={front9Score}
+                    />
+
+                    {/* Back 9 */}
+                    <NineHoleSection
+                        title="Back 9"
+                        holes={back9}
+                        totalLabel="IN"
+                        totalPar={back9Par}
+                        totalScore={back9Score}
+                    />
+
+                    {/* Legend */}
+                    <div className="flex flex-wrap justify-center gap-3 mt-8">
+                        <div className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 bg-blue-200 border border-blue-300 rounded-sm"></span>
+                            <span className="text-[16pt] font-bold text-gray-500 uppercase">Eagle+</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 bg-emerald-200 border border-emerald-300 rounded-sm"></span>
+                            <span className="text-[16pt] font-bold text-gray-500 uppercase">Birdie</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></span>
+                            <span className="text-[16pt] font-bold text-gray-500 uppercase">Par</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 bg-amber-100 border border-amber-200 rounded-sm"></span>
+                            <span className="text-[16pt] font-bold text-gray-500 uppercase">Bogey</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 bg-rose-200 border border-rose-300 rounded-sm"></span>
+                            <span className="text-[16pt] font-bold text-gray-500 uppercase">Double+</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+}
+
+

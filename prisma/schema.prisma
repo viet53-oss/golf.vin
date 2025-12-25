@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Player {
+  id                 String          @id @default(uuid())
+  name               String
+  email              String?         @unique
+  phone              String?
+  address            String?
+  city               String?
+  state              String?
+  zip                String?
+  preferred_tee_box  String?
+  birthday           String?
+  year_joined        String?
+  index              Float           @default(0)
+  low_handicap_index Float?
+  created_at         DateTime        @default(now())
+  rounds             RoundPlayer[]
+  manual_rounds      HandicapRound[]
+
+  @@map("players")
+}
+
+model Course {
+  id         String   @id @default(uuid())
+  name       String
+  created_at DateTime @default(now())
+  tee_boxes  TeeBox[]
+  holes      Hole[]
+  rounds     Round[]
+
+  @@map("courses")
+}
+
+model TeeBox {
+  id           String        @id @default(uuid())
+  course_id    String
+  name         String
+  rating       Float
+  slope        Float
+  created_at   DateTime      @default(now())
+  course       Course        @relation(fields: [course_id], references: [id])
+  round_players RoundPlayer[]
+  
+  yardages     Int[]         @default([])
+
+  @@map("tee_boxes")
+}
+
+model Hole {
+  id          String  @id @default(uuid())
+  course_id   String
+  hole_number Int
+  par         Int
+  difficulty  Int?
+  course      Course  @relation(fields: [course_id], references: [id])
+  scores      Score[]
+
+  @@map("holes")
+}
+
+model Round {
+  id            String        @id @default(uuid())
+  date          String // YYYY-MM-DD
+  course_id     String
+  name          String?       // Optional name for the round (e.g. "Sunday")
+  is_tournament Boolean       @default(false)
+  created_at    DateTime      @default(now())
+  course        Course        @relation(fields: [course_id], references: [id])
+  players       RoundPlayer[]
+
+  @@map("rounds")
+}
+
+model RoundPlayer {
+  id                   String   @id @default(uuid())
+  round_id             String
+  player_id            String
+  tee_box_id           String?
+  gross_score          Int?     // Made optional to allow adding players without scores yet
+  adjusted_gross_score Int?     // For net double bogey
+  front_nine           Int?
+  back_nine            Int?
+  score_differential   Float?
+  index_at_time        Float?
+  index_after          Float?   // New: Resulting index after this round
+  points               Float    @default(0)
+  payout               Float    @default(0)
+  in_pool              Boolean  @default(false)
+  created_at           DateTime @default(now())
+  round                Round    @relation(fields: [round_id], references: [id])
+  player               Player   @relation(fields: [player_id], references: [id])
+  tee_box              TeeBox?  @relation(fields: [tee_box_id], references: [id])
+  scores               Score[]
+
+  @@map("round_players")
+}
+
+model HandicapRound {
+  id                 String   @id @default(uuid())
+  player_id          String
+  date_played        String
+  score_differential Float
+  gross_score        Int?     // Optional gross score if available
+  created_at         DateTime @default(now())
+  player             Player   @relation(fields: [player_id], references: [id])
+
+  @@map("handicap_rounds")
+}
+
+model Score {
+  id                  String      @id @default(uuid())
+  round_player_id     String
+  hole_id             String
+  strokes             Int
+  putts               Int?
+  fairway_hit         Boolean?
+  green_in_regulation Boolean?
+  created_at          DateTime    @default(now())
+
+  round_player        RoundPlayer @relation(fields: [round_player_id], references: [id])
+  hole                Hole        @relation(fields: [hole_id], references: [id])
+
+  @@map("scores")
+}
+
+model Photo {
+  id          String   @id @default(uuid())
+  url         String
+  date        String   // YYYY-MM-DD
+  caption     String?
+  uploaded_at DateTime @default(now())
+
+  @@map("photos")
+}
