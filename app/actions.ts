@@ -212,7 +212,7 @@ export async function updatePlayerScore(
     // 2. Calculate Adjusted Gross Score if hole scores provided
     if (holeScores && holeScores.length > 0) {
         // Map holeScores to include Par
-        const holesMap = new Map(roundPlayer.round.course.holes.map(h => [h.id, h]));
+        const holesMap = new Map(roundPlayer.round.course.holes.map((h: { id: string; hole_number: number; par: number }) => [h.id, h]));
 
         const calcHoles = holeScores.map(hs => {
             const hole = holesMap.get(hs.holeId);
