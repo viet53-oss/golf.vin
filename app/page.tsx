@@ -29,11 +29,11 @@ export default function Home() {
 
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-3 pb-10">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pb-10 w-full max-w-full">
 
         {/* Hero Text */}
-        <div className="mb-12 space-y-4 max-w-4xl">
-          <h1 className="text-[32pt] sm:text-[50pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] sm:leading-tight">
+        <div className="mb-12 space-y-4 w-full">
+          <h1 className="text-[32pt] sm:text-[50pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] sm:leading-tight w-full">
             <span className="relative inline-block">
               C
               <span className="absolute bottom-1 left-0 w-full h-[3px] sm:h-[5px] bg-red-600 rounded-sm"></span>
@@ -56,11 +56,11 @@ export default function Home() {
             lub{" "}
             of New Orleans
           </h1>
-          <div className="flex flex-col gap-1 text-shadow-md px-4 sm:px-0">
-            <p className="text-white text-[14pt] sm:text-[18pt] font-semibold drop-shadow-md leading-relaxed">
+          <div className="flex flex-col gap-1 text-shadow-md w-full">
+            <p className="text-white text-[14pt] sm:text-[18pt] font-semibold drop-shadow-md leading-relaxed w-full">
               Teeing off sunrise every Saturday at Bayou Oaks City Park Golf North Course.
             </p>
-            <p className="text-white/80 text-[14pt] sm:text-[18pt] mt-1 drop-shadow-sm font-medium">
+            <p className="text-white/80 text-[14pt] sm:text-[18pt] mt-1 drop-shadow-sm font-medium w-full">
               1040 Filmore Ave, New Orleans, LA 70124.
             </p>
           </div>
