@@ -42,9 +42,16 @@ export default async function ScoresPage() {
                 },
             },
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch rounds:', error);
-        debugError = error;
+        // Mask the password for display
+        const dbUrl = process.env.DATABASE_URL || 'MISSING';
+        const maskedUrl = dbUrl.replace(/:([^:@]+)@/, ':****@');
+        debugError = {
+            message: error.message,
+            stack: error.stack,
+            urlUsed: maskedUrl
+        };
     }
 
     // Build YTD winnings and points as a RUNNING TOTAL progression
@@ -151,6 +158,7 @@ export default async function ScoresPage() {
                 {debugError && (
                     <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm break-words mb-4">
                         <h3 className="font-bold mb-1">Database Connection Error:</h3>
+                        <p className="mb-2 text-xs font-mono bg-red-100 p-1 rounded">URL: {debugError.urlUsed}</p>
                         <pre className="whitespace-pre-wrap font-mono text-xs">{debugError.message || JSON.stringify(debugError, null, 2)}</pre>
                         <p className="mt-2 text-xs text-gray-500">Please check Vercel Environment Variables.</p>
                     </div>
