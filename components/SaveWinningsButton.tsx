@@ -39,7 +39,7 @@ export function SaveWinningsButton({
             <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] text-[16pt] uppercase tracking-wider flex items-center justify-center gap-2"
+                className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-4 py-2 rounded-full shadow-lg transition-all active:scale-[0.98] text-[12pt] sm:text-[16pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto"
             >
                 {isSaving ? (
                     <>
@@ -47,7 +47,7 @@ export function SaveWinningsButton({
                         Saving...
                     </>
                 ) : (
-                    'Save Pool Results & Winnings'
+                    'Save Pool'
                 )}
             </button>
         </div>

@@ -99,25 +99,24 @@ export default function PoolResults({
                                         {flight.frontWinners.map((w: any, i: number) => (
                                             <div key={i} className="flex justify-between items-center group">
                                                 <div className="flex gap-3 items-center flex-1">
-                                                    <span className="text-[12pt] font-bold text-gray-400 w-4">{i + 1}</span>
                                                     <button
                                                         onClick={() => handlePlayerClick(w.id)}
                                                         className="flex flex-col text-left group-hover:scale-[1.02] transition-transform"
                                                     >
-                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                        <span className="text-[12pt] sm:text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
                                                             {w.name.split(' ')[0]}
                                                         </span>
-                                                        <span className="text-[14pt] text-gray-600 leading-none">
+                                                        <span className="text-[12pt] sm:text-[14pt] text-gray-600 leading-none">
                                                             {w.name.split(' ').slice(1).join(' ')}
                                                         </span>
                                                     </button>
                                                     {isLoadingScorecard === w.id && <LoaderIcon className="w-4 h-4 animate-spin text-gray-400" />}
                                                 </div>
                                                 <div className="text-right flex items-center gap-0 w-[200px] justify-end">
-                                                    <span className="text-[14pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
-                                                    <span className="text-[14pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.frontHcp}</span>
-                                                    <span className="text-[14pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
-                                                    <span className="text-[14pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.frontHcp}</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -134,15 +133,14 @@ export default function PoolResults({
                                         {flight.backWinners.map((w: any, i: number) => (
                                             <div key={i} className="flex justify-between items-center group">
                                                 <div className="flex gap-3 items-center flex-1">
-                                                    <span className="text-[12pt] font-bold text-gray-400 w-4">{i + 1}</span>
                                                     <button
                                                         onClick={() => handlePlayerClick(w.id)}
                                                         className="flex flex-col text-left group-hover:scale-[1.02] transition-transform"
                                                     >
-                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                        <span className="text-[12pt] sm:text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
                                                             {w.name.split(' ')[0]}
                                                         </span>
-                                                        <span className="text-[14pt] text-gray-600 leading-none">
+                                                        <span className="text-[12pt] sm:text-[14pt] text-gray-600 leading-none">
                                                             {w.name.split(' ').slice(1).join(' ')}
                                                         </span>
                                                     </button>
@@ -150,10 +148,10 @@ export default function PoolResults({
 
                                                 </div>
                                                 <div className="text-right flex items-center gap-0 w-[200px] justify-end">
-                                                    <span className="text-[14pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
-                                                    <span className="text-[14pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.backHcp}</span>
-                                                    <span className="text-[14pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
-                                                    <span className="text-[14pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.backHcp}</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
+                                                    <span className="text-[12pt] sm:text-[14pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -174,25 +172,24 @@ export default function PoolResults({
                                     {flight.totalWinners.map((w: any, i: number) => (
                                         <div key={i} className="flex justify-between items-center group">
                                             <div className="flex gap-4 items-center flex-1">
-                                                <span className="text-[12pt] font-bold text-gray-400 w-4">{i + 1}</span>
                                                 <button
                                                     onClick={() => handlePlayerClick(w.id)}
                                                     className="flex flex-col text-left group-hover:scale-[1.02] transition-transform"
                                                 >
-                                                    <span className="text-[16pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                    <span className="text-[12pt] sm:text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
                                                         {w.name.split(' ')[0]}
                                                     </span>
-                                                    <span className="text-[16pt] text-gray-600 leading-none">
+                                                    <span className="text-[12pt] sm:text-[14pt] text-gray-600 leading-none">
                                                         {w.name.split(' ').slice(1).join(' ')}
                                                     </span>
                                                 </button>
                                                 {isLoadingScorecard === w.id && <LoaderIcon className="w-4 h-4 animate-spin text-gray-400" />}
                                             </div>
                                             <div className="text-right flex items-center gap-0 w-[240px] justify-end">
-                                                <span className="text-[16pt] text-gray-800 font-medium w-[40px] text-center" title="Gross">{w.gross}</span>
-                                                <span className="text-[16pt] text-gray-400 font-medium w-[40px] text-center" title="Net">{w.courseHcp}</span>
-                                                <span className="text-[16pt] font-black text-black w-[60px] text-center" title="Total">({w.score.toFixed(0)})</span>
-                                                <span className="text-[18pt] font-black text-green-600 w-[100px] text-right">${w.amount.toFixed(2)}</span>
+                                                <span className="text-[12pt] sm:text-[14pt] text-gray-800 font-medium w-[40px] text-center" title="Gross">{w.gross}</span>
+                                                <span className="text-[12pt] sm:text-[14pt] text-gray-400 font-medium w-[40px] text-center" title="Net">{w.courseHcp}</span>
+                                                <span className="text-[12pt] sm:text-[14pt] font-black text-black w-[60px] text-center" title="Total">({w.score.toFixed(0)})</span>
+                                                <span className="text-[12pt] sm:text-[14pt] font-black text-green-600 w-[100px] text-right">${w.amount.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     ))}

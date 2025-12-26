@@ -338,7 +338,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
                 {/* Header Actions */}
                 <div className="relative flex items-center justify-center mb-6 min-h-[50px]">
                     <div className="absolute left-0">
-                        <Link href="/" className="px-6 py-2 bg-black text-white rounded-md text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[12pt] sm:text-[16pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
                             Back
                         </Link>
                     </div>
