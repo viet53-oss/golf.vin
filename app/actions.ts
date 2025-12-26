@@ -180,6 +180,30 @@ export async function createDraftRound() {
     return round.id;
 }
 
+export async function createTournamentRound(name: string, date: string) {
+    // 1. Get a default course (needed for DB constraint)
+    const defaultCourse = await prisma.course.findFirst();
+    if (!defaultCourse) {
+        throw new Error('No courses found. Please create a course first.');
+    }
+
+    // 2. Create the round with provided details
+    // Ensure date has time component for proper sorting if needed, or just ISO string from input
+    // Input date usually YYYY-MM-DD. We append T12:00:00 to valid ISO timestamp if needed.
+    const isoDate = date.includes('T') ? date : `${date}T12:00:00`;
+
+    const round = await prisma.round.create({
+        data: {
+            date: isoDate,
+            course_id: defaultCourse.id,
+            name: name,
+            is_tournament: true,
+        },
+    });
+
+    return round.id;
+}
+
 export async function updatePlayerScore(
     roundPlayerId: string,
     grossScore: number,
