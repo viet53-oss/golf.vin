@@ -4,10 +4,22 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 export default async function PostScorePage() {
-    const players = await prisma.player.findMany({ orderBy: { name: 'asc' } });
-    const courses = await prisma.course.findMany({
-        include: { tee_boxes: true }
-    });
+    let players: any[] = [];
+    let courses: any[] = [];
+
+    try {
+        players = await prisma.player.findMany({ orderBy: { name: 'asc' } });
+    } catch (error) {
+        console.error('Failed to fetch players:', error);
+    }
+
+    try {
+        courses = await prisma.course.findMany({
+            include: { tee_boxes: true }
+        });
+    } catch (error) {
+        console.error('Failed to fetch courses:', error);
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-3">
