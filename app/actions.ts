@@ -346,6 +346,24 @@ export async function saveRoundWinnings(roundId: string, payouts: { playerId: st
     }
 }
 
+export async function createEvent(name: string, date: string) {
+    const event = await prisma.event.create({
+        data: {
+            name,
+            date,
+        },
+    });
+    revalidatePath('/schedule');
+    return event;
+}
+
+export async function deleteEvent(id: string) {
+    await prisma.event.delete({
+        where: { id },
+    });
+    revalidatePath('/schedule');
+}
+
 
 
 

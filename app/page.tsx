@@ -52,6 +52,7 @@ export default async function Home() {
     { name: "Scores", icon: Trophy, href: "/scores", color: "text-amber-500" },
     { name: "$5 Pool", icon: Banknote, href: "/pool", color: "text-green-500" },
     { name: "Players", icon: Users, href: "/players", color: "text-blue-500" },
+    { name: "Schedule", icon: Calendar, href: "/schedule", color: "text-purple-500" },
 
     { name: "FAQ's", icon: HelpCircle, href: "/faq", color: "text-orange-500" },
     { name: "Photos", icon: ImageIcon, href: "/photos", color: "text-pink-500" },

@@ -140,4 +140,14 @@ model Photo {
   @@map("photos")
 }
 
+model Event {
+  id          String   @id @default(uuid())
+  name        String
+  date        String
+  location    String?
+  created_at  DateTime @default(now())
+
+  @@map("events")
+}
+
 
