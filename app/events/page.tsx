@@ -13,8 +13,6 @@ export default async function EventsPage() {
     const tournaments = await prisma.round.findMany({
         where: {
             is_tournament: true,
-            // Optionally filter for future dates:
-            // date: { gte: new Date().toISOString().split('T')[0] } 
         },
         orderBy: {
             date: 'asc'
@@ -32,29 +30,6 @@ export default async function EventsPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
-            {/* Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-50 px-3 py-3">
-                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-                    <div className="flex justify-start">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">
-                            Back
-                        </Link>
-                    </div>
-
-                    <div className="flex justify-center">
-                        <h1 className="text-[18pt] font-bold text-green-600 tracking-tight text-center">Events</h1>
-                    </div>
-
-                    <div className="flex justify-end">
-                        {/* Passed to Client Component via children or props? 
-                             Actually, the Header "Add Button" needs to open a Modal. 
-                             So the Main Page should probably just wrap the Client Component 
-                             which handles the Header + Main Content interaction.
-                          */}
-                    </div>
-                </div>
-            </header>
-
             {/* We delegate the interactive list and modal to the Client Component */}
             <EventsClient initialEvents={events} />
         </div>
