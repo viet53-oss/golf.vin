@@ -15,6 +15,8 @@ export default async function ScoresPage() {
     const yearStart = format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd');
 
     let rounds: any[] = [];
+    let debugError: any = null;
+
     try {
         rounds = await prisma.round.findMany({
             orderBy: {
@@ -42,6 +44,7 @@ export default async function ScoresPage() {
         });
     } catch (error) {
         console.error('Failed to fetch rounds:', error);
+        debugError = error;
     }
 
     // Build YTD winnings and points as a RUNNING TOTAL progression
@@ -144,6 +147,14 @@ export default async function ScoresPage() {
             </header>
 
             <main className="px-3 py-6 space-y-6">
+                {/* Debug Error Display */}
+                {debugError && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm break-words mb-4">
+                        <h3 className="font-bold mb-1">Database Connection Error:</h3>
+                        <pre className="whitespace-pre-wrap font-mono text-xs">{debugError.message || JSON.stringify(debugError, null, 2)}</pre>
+                        <p className="mt-2 text-xs text-gray-500">Please check Vercel Environment Variables.</p>
+                    </div>
+                )}
                 {/* Action Bar */}
                 <div className="flex justify-between items-center">
                     <CreateRoundButton />
