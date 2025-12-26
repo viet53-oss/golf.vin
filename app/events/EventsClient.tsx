@@ -154,11 +154,11 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
             {isModalOpen && (
                 <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-6 shadow-2xl">
-                        <h2 className="text-2xl font-black text-gray-900 border-b pb-2">Add New Tournament</h2>
+                        <h2 className="text-2xl font-black text-gray-900 border-b pb-2">Add New Event</h2>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Tournament Name</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Event Name</label>
                                 <input
                                     type="text"
                                     value={newEventName}
