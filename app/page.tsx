@@ -29,11 +29,13 @@ export default function Home() {
 
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pb-10 w-full max-w-full">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-start text-center px-4 pb-10 w-full max-w-full pt-20">
 
         {/* Hero Text */}
         <div className="mb-12 space-y-4 w-full">
-          <h1 className="text-[32pt] sm:text-[50pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] sm:leading-tight w-full">
+          <p className="text-white/40 text-[14pt] font-bold tracking-[0.2em] mb-8">CPGC.app</p>
+
+          <h1 className="text-[32pt] sm:text-[50pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] sm:leading-tight w-full mt-10">
             <span className="relative inline-block">
               C
               <span className="absolute bottom-1 left-0 w-full h-[3px] sm:h-[5px] bg-red-600 rounded-sm"></span>
@@ -67,7 +69,7 @@ export default function Home() {
         </div>
 
         {/* Menu Grid */}
-        <div className="flex flex-wrap justify-center gap-4 w-full px-3">
+        <div className="flex flex-wrap justify-center gap-4 w-full px-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
