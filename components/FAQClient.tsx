@@ -672,8 +672,8 @@ export default function FAQClient({ players }: { players: Player[] }) {
     );
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <header className="bg-white fixed top-0 left-0 w-full z-[60] py-4 shadow-md px-4 border-b border-gray-100">
+        <div className="min-h-screen bg-slate-50 pb-10">
+            <header className="bg-white sticky top-0 z-50 py-4 shadow-md px-4 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto relative flex items-center justify-center">
                     <div className="absolute left-0">
                         <Link href="/" className="bg-black text-white px-4 py-2 rounded-full font-bold text-[18pt] hover:bg-gray-800 transition-all shadow-md">Back</Link>
@@ -682,7 +682,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 pt-28 pb-10">
+            <main className="max-w-7xl mx-auto px-4 py-8">
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 px-1">
                     <button onClick={() => openModal('App Logic & Rules', appLogicContent)} className="col-span-1 sm:col-span-2 bg-blue-900 text-white py-2 px-6 rounded-full font-black text-[12pt] sm:text-[15pt] shadow-lg hover:bg-blue-800 transition-all active:scale-95 border-b-2 border-blue-600 flex items-center justify-center gap-2">
