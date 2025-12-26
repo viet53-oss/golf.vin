@@ -306,10 +306,10 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
             {/* Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-10 px-3 py-3">
+            <header className="bg-white shadow-sm sticky top-0 z-50 px-3 py-3">
                 <div className="flex items-center justify-between">
-                    <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[12pt] sm:text-[15pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
-                    <h1 className="text-[12pt] sm:text-[15pt] font-bold text-green-700 tracking-tight">Players</h1>
+                    <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight">Players</h1>
                     <div className="flex gap-2">
                         <button
                             onClick={handleCopyMembers}
@@ -362,28 +362,30 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
                                 className="flex-1 min-w-0 cursor-pointer group"
                                 onClick={() => setSelectedPlayer(player)}
                             >
-                                <div className="flex flex-col group-hover:opacity-80 transition-opacity">
-                                    <span className="text-[12pt] sm:text-[15pt] font-bold text-blue-600 leading-tight underline decoration-red-500 decoration-2 underline-offset-2">
-                                        {player.firstName}
-                                    </span>
-                                    <span className="text-[12pt] sm:text-[15pt] font-semibold text-black leading-tight">
-                                        {player.lastName}
-                                    </span>
-                                </div>
+                                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 group-hover:opacity-80 transition-opacity">
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-blue-600 leading-tight underline decoration-red-500 decoration-2 underline-offset-2">
+                                            {player.firstName}
+                                        </span>
+                                        <span className="text-[12pt] sm:text-[15pt] font-semibold text-black leading-tight">
+                                            {player.lastName}
+                                        </span>
+                                    </div>
 
-                                <div className="mt-2 space-y-0.5 pointer-events-none">
-                                    {player.phone && (
-                                        <div className="flex items-center gap-1.5 text-[12pt] sm:text-[15pt] text-gray-500">
-                                            <Phone className="w-3 h-3 text-gray-400" />
-                                            <span>{player.phone}</span>
-                                        </div>
-                                    )}
-                                    {player.email && (
-                                        <div className="flex items-center gap-1.5 text-[12pt] sm:text-[15pt] text-gray-400 truncate max-w-[200px]">
-                                            <Mail className="w-3 h-3 text-gray-300" />
-                                            <span>{player.email}</span>
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-3 pointer-events-none">
+                                        {player.phone && (
+                                            <div className="flex items-center gap-1 text-[11pt] sm:text-[13pt] text-gray-500">
+                                                <Phone className="w-3 h-3 text-gray-400" />
+                                                <span>{player.phone}</span>
+                                            </div>
+                                        )}
+                                        {player.email && (
+                                            <div className="flex items-center gap-1 text-[11pt] sm:text-[13pt] text-gray-400 truncate max-w-[150px] sm:max-w-none">
+                                                <Mail className="w-3 h-3 text-gray-300" />
+                                                <span>{player.email}</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

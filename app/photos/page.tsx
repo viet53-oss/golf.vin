@@ -18,13 +18,12 @@ export default async function PhotosPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
-            {/* Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-10 px-3 py-3 mb-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[16pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+            <header className="bg-white shadow-sm sticky top-0 z-50 px-3 py-3 mb-6">
+                <div className="relative flex items-center justify-center p-1">
+                    <div className="absolute left-0">
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     </div>
-                    <h1 className="text-[16pt] font-bold text-green-600 tracking-tight">Club Photos</h1>
+                    <h1 className="text-[18pt] font-bold text-green-600 tracking-tight">Photos</h1>
                 </div>
             </header>
 

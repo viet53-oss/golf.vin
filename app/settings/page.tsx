@@ -71,12 +71,12 @@ export default async function SettingsPage() {
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
             {/* Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-10 px-3 py-3 mb-6">
+            <header className="bg-white shadow-sm sticky top-0 z-50 px-3 py-3 mb-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[12pt] sm:text-[15pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     </div>
-                    <h1 className="text-[12pt] sm:text-[15pt] font-bold text-gray-900 tracking-tight">System Settings</h1>
+                    <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight">System Settings</h1>
                 </div>
             </header>
 

@@ -59,11 +59,11 @@ export default function AppHeader() {
 
     return (
         <>
-            <div className="bg-black text-white py-1 flex justify-between items-center sticky top-0 z-[100] mx-3 rounded-full mt-2 shadow-xl border border-white/10">
+            <div className="bg-black text-white py-1 flex justify-between items-center relative z-[100] mx-3 rounded-full mt-2 shadow-xl border border-white/10">
                 <div className="flex items-center gap-2 px-3">
                     <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
                         <span role="img" aria-label="golf" className="text-xl">⛳</span>
-                        <span className="font-bold tracking-tight text-[12pt] sm:text-[15pt]">City Park Golf Club</span>
+                        <span className="font-bold tracking-tight text-[18pt]">City Park Golf Club</span>
                     </Link>
                 </div>
 

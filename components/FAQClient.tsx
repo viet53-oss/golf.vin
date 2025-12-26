@@ -673,11 +673,11 @@ export default function FAQClient({ players }: { players: Player[] }) {
 
     return (
         <main className="max-w-7xl mx-auto px-4 py-8">
-            <div className="relative flex items-center justify-center mb-10">
+            <div className="relative flex items-center justify-center mb-10 sticky top-0 bg-white z-50 py-4 px-1 shadow-sm">
                 <div className="absolute left-0">
-                    <Link href="/" className="bg-black text-white px-4 py-2 rounded-full font-bold text-[12pt] sm:text-[15pt] hover:bg-gray-800 transition-all shadow-md">Back</Link>
+                    <Link href="/" className="bg-black text-white px-4 py-2 rounded-full font-bold text-[18pt] hover:bg-gray-800 transition-all shadow-md">Back</Link>
                 </div>
-                <h1 className="text-[12pt] sm:text-[15pt] font-black text-[#22c55e] tracking-tighter uppercase">FAQ</h1>
+                <h1 className="text-[18pt] font-black text-[#22c55e] tracking-tighter uppercase">FAQ</h1>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 px-1">

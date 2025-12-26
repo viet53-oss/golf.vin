@@ -336,13 +336,13 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             <main className="px-3 py-6 w-full">
 
                 {/* Header Actions */}
-                <div className="relative flex items-center justify-center mb-6 min-h-[50px]">
+                <div className="relative flex items-center justify-center mb-6 min-h-[50px] sticky top-0 bg-white z-50 py-4 shadow-sm">
                     <div className="absolute left-0">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[12pt] sm:text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
                             Back
                         </Link>
                     </div>
-                    <h1 className="text-[12pt] sm:text-[15pt] font-black text-green-600 tracking-tight">$5 Pool</h1>
+                    <h1 className="text-[18pt] font-black text-green-600 tracking-tight">$5 Pool</h1>
                 </div>
 
                 {/* Date Selection Bar */}
