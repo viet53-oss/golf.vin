@@ -29,11 +29,10 @@ export default function Home() {
 
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-start text-center px-4 pb-10 w-full max-w-full pt-20">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-start text-center px-4 pb-10 w-full max-w-full pt-10">
 
         {/* Hero Text */}
         <div className="mb-12 space-y-4 w-full">
-          <p className="text-white/40 text-[14pt] font-bold tracking-[0.2em] mb-8">CPGC.app</p>
 
           <h1 className="text-[32pt] sm:text-[50pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] sm:leading-tight w-full mt-10">
             <span className="relative inline-block">
@@ -69,17 +68,17 @@ export default function Home() {
         </div>
 
         {/* Menu Grid */}
-        <div className="flex flex-wrap justify-center gap-4 w-full px-1">
+        <div className="grid grid-cols-3 gap-2 w-full px-1 sm:flex sm:flex-wrap sm:justify-center sm:gap-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center justify-center gap-3 hover:scale-105 transition-transform duration-200 w-[140px] h-[100px]"
+                className="bg-white rounded-xl shadow-lg p-2 sm:p-4 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-transform duration-200 sm:w-[140px] h-[85px] sm:h-[100px]"
               >
-                <Icon className={`w-8 h-8 ${item.color}`} />
-                <span className="text-gray-900 font-bold text-[12pt] sm:text-[14pt] whitespace-nowrap">{item.name}</span>
+                <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${item.color}`} />
+                <span className="text-gray-900 font-bold text-[10pt] sm:text-[14pt] whitespace-nowrap">{item.name}</span>
               </Link>
             )
           })}
