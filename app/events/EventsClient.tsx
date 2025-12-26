@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createTournamentRound, deleteRound } from '../actions';
+import { createEvent, deleteEvent } from '../actions';
 
 interface Event {
     id: string;
@@ -21,10 +21,6 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
-    // We rely on Props (fetched from Server) but maintain local state if we want optimistic updates,
-    // though for simple app, router.refresh() handles sync after Server Action.
-    // Actually, simpler to just use router refresh and not optimistic update for "Add Tournament" since it's admin action.
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newEventName, setNewEventName] = useState('');
     const [newEventDate, setNewEventDate] = useState('');
@@ -34,15 +30,14 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
 
         startTransition(async () => {
             try {
-                // By "Add Event", if we mean creating a scheduled tournament, we create a Round with Future date.
-                // We use the same server action.
-                await createTournamentRound(newEventName, newEventDate);
+                // Creates a standalone Event note
+                await createEvent(newEventName, newEventDate);
 
                 setNewEventName('');
                 setNewEventDate('');
                 setIsModalOpen(false);
 
-                // Refresh the server component to pull new round
+                // Refresh the server component to pull new event
                 router.refresh();
             } catch (error) {
                 console.error('Failed to create event:', error);
@@ -51,17 +46,11 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
         });
     };
 
-    const handleStartTournament = (event: Event) => {
-        // "Start Tournament" -> Assuming this just means "Go to Edit Page" since the round exists.
-        // It's already created.
-        router.push(`/scores/${event.id}/edit`);
-    };
-
     const handleDeleteEvent = (id: string) => {
-        if (confirm('Are you sure you want to delete this event? This will remove the tournament schedule.')) {
+        if (confirm('Are you sure you want to delete this event?')) {
             startTransition(async () => {
                 try {
-                    await deleteRound(id);
+                    await deleteEvent(id);
                     router.refresh();
                 } catch (error) {
                     console.error('Failed to delete:', error);
@@ -123,7 +112,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                             onClick={() => setIsModalOpen(true)}
                             className="bg-black text-white text-[12pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap"
                         >
-                            Add Tournament
+                            Add Event
                         </button>
                     </div>
                 </div>
@@ -137,7 +126,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                 )}
 
                 {initialEvents.map((event) => (
-                    <div key={event.id} className="bg-white border-2 border-gray-400 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+                    <div key={event.id} className="bg-white border-2 border-gray-400 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
                         <div className="space-y-1">
                             <h3 className="font-bold text-[15pt] text-black">{event.name}</h3>
                             <div className="flex items-center gap-2 text-gray-600 text-[12pt]">
@@ -147,20 +136,8 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                            <button
-                                onClick={() => handleStartTournament(event)}
-                                className="flex-1 md:flex-none bg-[#22c55e] text-white px-4 py-1.5 rounded-full font-bold text-[12pt] flex items-center justify-center gap-1 hover:bg-green-600 transition-colors shadow-sm whitespace-nowrap"
-                            >
-                                <span className="text-sm bg-white text-green-600 rounded-full w-4 h-4 flex items-center justify-center">▶</span>
-                                Start Tournament
-                            </button>
-                            <Link
-                                href={`/scores/${event.id}/edit`}
-                                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
-                            </Link>
+                        <div className="flex items-center gap-2">
+                            {/* Only Delete Button */}
                             <button
                                 onClick={() => handleDeleteEvent(event.id)}
                                 disabled={isPending}

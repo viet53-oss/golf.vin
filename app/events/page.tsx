@@ -10,22 +10,19 @@ export default async function EventsPage() {
     // We'll show all future tournaments ascending, or maybe recent past + future?
     // User image implied a list of future events. Let's fetch all Rounds marked as tournaments.
 
-    const tournaments = await prisma.round.findMany({
-        where: {
-            is_tournament: true,
-        },
+    const eventsList = await prisma.event.findMany({
         orderBy: {
             date: 'asc'
         }
     });
 
     // Transform to Event format expected by Client
-    const events = tournaments.map(t => ({
+    const events = eventsList.map(t => ({
         id: t.id,
-        name: t.name || 'Unnamed Tournament',
+        name: t.name,
         date: format(new Date(t.date), 'EEEE, MMMM d, yyyy'),
         rawDate: t.date,
-        location: 'City Park Golf Course' // Default for now
+        location: t.location || 'City Park Golf Course'
     }));
 
     return (
