@@ -398,7 +398,7 @@ export default function ScoresDashboard({
                 return (
                     <div key={round.id} className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden mb-8">
                         {/* Card Header */}
-                        <div className="px-3 py-5 border-b border-slate-100 bg-white">
+                        <div className="px-1 py-5 border-b border-slate-100 bg-white">
                             <div className="flex justify-between items-start">
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-3">
@@ -492,20 +492,20 @@ export default function ScoresDashboard({
                                         <table className="w-full text-sm">
                                             <thead className="text-[10pt] sm:text-[16pt] text-black uppercase font-black tracking-[0.05em] sm:tracking-[0.1em] border-b border-slate-100 bg-white">
                                                 <tr>
-                                                    <th className="px-3 py-4 text-center w-10">#</th>
-                                                    <th className="px-3 py-4 text-left min-w-[140px]">Name</th>
+                                                    <th className="px-1 py-4 text-center w-6 sm:w-10">#</th>
+                                                    <th className="px-1 py-4 text-left whitespace-nowrap">Name</th>
                                                     {round.is_tournament && (
                                                         <>
-                                                            <th className="px-3 py-4 text-center text-green-600">$</th>
-                                                            <th className="px-3 py-4 text-center">Pts</th>
-                                                            <th className="px-3 py-4 text-center text-blue-600">YTD</th>
+                                                            <th className="px-1 py-4 text-center text-green-600">$</th>
+                                                            <th className="px-1 py-4 text-center">Pts</th>
+                                                            <th className="px-1 py-4 text-center text-blue-600">YTD</th>
                                                         </>
                                                     )}
-                                                    <th className="px-3 py-4 text-center">Grs</th>
-                                                    <th className="px-3 py-4 text-center">Hcp</th>
-                                                    <th className="px-3 py-4 text-center bg-slate-50/50">Net</th>
-                                                    <th className="px-3 py-4 text-center">Hcp</th>
-                                                    <th className="px-3 py-4 text-center">Idx</th>
+                                                    <th className="px-1 py-4 text-center">Grs</th>
+                                                    <th className="px-1 py-4 text-center">Hcp</th>
+                                                    <th className="px-1 py-4 text-center bg-slate-50/50">Net</th>
+                                                    <th className="px-1 py-4 text-center">Hcp</th>
+                                                    <th className="px-1 py-4 text-center">Idx</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-50">
@@ -544,7 +544,7 @@ export default function ScoresDashboard({
                                                                 <button
                                                                     onClick={() => handlePlayerClick(rp.id)}
                                                                     disabled={isLoading}
-                                                                    className="text-left group/name flex flex-col"
+                                                                    className="text-left group/name flex flex-col whitespace-nowrap"
                                                                 >
                                                                     <span className="font-bold text-blue-600 text-[11pt] sm:text-[16pt] underline decoration-2 decoration-red-600 group-hover/name:text-blue-700 group-hover/name:decoration-red-700 transition-colors uppercase leading-tight">
                                                                         {firstName}
@@ -602,7 +602,7 @@ export default function ScoresDashboard({
                         </div>
 
                         {hasMorePlayers && (
-                            <div className="p-3 bg-slate-50/50 text-center border-t border-slate-100">
+                            <div className="p-1 bg-slate-50/50 text-center border-t border-slate-100">
                                 <button
                                     onClick={() => toggleRound(round.id)}
                                     className="text-slate-500 hover:text-black font-black text-[12pt] sm:text-[16pt] uppercase tracking-widest transition-colors"

@@ -24,7 +24,7 @@ export default function CreateRoundButton() {
         <button
             onClick={handleClick}
             disabled={isPending}
-            className="bg-black hover:bg-gray-800 text-white text-[16pt] font-bold px-3 py-2 rounded-full transition-colors disabled:opacity-50"
+            className="bg-black hover:bg-gray-800 text-white text-[12pt] sm:text-[16pt] font-bold px-4 py-2 rounded-full transition-colors disabled:opacity-50"
         >
             {isPending ? 'Creating...' : 'Add Round'}
         </button>

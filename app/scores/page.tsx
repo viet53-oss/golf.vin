@@ -144,7 +144,7 @@ export default async function ScoresPage() {
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
             {/* Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-10 px-3 py-3">
+            <header className="bg-white shadow-sm sticky top-0 z-10 px-1 py-3">
                 <div className="relative flex items-center justify-center p-1">
                     <div className="absolute left-0">
                         <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[12pt] sm:text-[16pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
@@ -153,7 +153,7 @@ export default async function ScoresPage() {
                 </div>
             </header>
 
-            <main className="px-3 py-6 space-y-6">
+            <main className="px-1 py-6 space-y-6">
                 {/* Debug Error Display */}
                 {debugError && (
                     <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm break-words mb-4">
