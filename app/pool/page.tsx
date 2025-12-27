@@ -337,31 +337,31 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3">
                 <div className="relative flex items-center justify-center p-1">
                     <div className="absolute left-0">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[16pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
                             Back
                         </Link>
                     </div>
-                    <h1 className="text-[18pt] font-black text-green-600 tracking-tight">$5 Pool</h1>
+                    <h1 className="text-[16pt] font-black text-green-600 tracking-tight">$5 Pool</h1>
                 </div>
             </header>
 
             <main className="px-3 py-6">
 
                 {/* Date Selection Bar */}
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex items-center gap-3 mb-6 shadow-sm">
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-1.5 sm:p-3 flex items-center justify-between gap-1 sm:gap-3 mb-6 shadow-sm">
                     <PoolDateSelector
                         allRounds={allRounds}
                         currentRoundId={round.id}
                     />
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex gap-1 sm:gap-2 shrink-0">
                         <PoolCopyButton
                             date={round.date}
                             roundName={round.name}
                             isTournament={round.is_tournament}
                             flights={processedFlights}
                         />
-                        <button className="p-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        <button className="p-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-gray-500">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                         </button>
                     </div>
                 </div>

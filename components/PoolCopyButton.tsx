@@ -140,10 +140,10 @@ export function PoolCopyButton({ date, roundName, isTournament, flights }: PoolC
     return (
         <button
             onClick={handleCopy}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full text-[14pt] font-bold hover:bg-green-700 transition-all shadow-md active:scale-95"
+            className="p-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-gray-500"
+            title="Copy Results"
         >
-            <Copy size={20} />
-            <span>Copy</span>
+            <Copy className="w-5 h-5" />
         </button>
     );
 }

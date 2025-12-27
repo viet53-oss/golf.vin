@@ -68,7 +68,7 @@ export default function PoolResults({
                         </svg>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-[20pt] font-black text-gray-900 tracking-tight">Waiting for Scores</h3>
+                        <h3 className="text-[16pt] font-black text-gray-900 tracking-tight">Waiting for Scores</h3>
                         <p className="text-[14pt] text-gray-500 max-w-md mx-auto">
                             {allPoolParticipants.length} players are set for the pool, but they haven't posted scores for this round yet.
                         </p>
@@ -81,7 +81,7 @@ export default function PoolResults({
                             {/* Flight Header */}
                             {flights.length > 1 && (
                                 <div className="border-b-2 border-gray-900 pb-2">
-                                    <h2 className="text-[22pt] font-black text-gray-900 uppercase tracking-tighter">{flight.name}</h2>
+                                    <h2 className="text-[16pt] font-black text-gray-900 uppercase tracking-tighter">{flight.name}</h2>
                                 </div>
                             )}
 
@@ -93,7 +93,7 @@ export default function PoolResults({
                                 <div className="space-y-4">
                                     <div className="text-center pb-2 border-b border-gray-900 mb-4">
                                         <h3 className="text-[14pt] font-black text-gray-900 uppercase tracking-widest">Front Nine</h3>
-                                        <div className="text-[12pt] sm:text-[15pt] font-black text-green-600 mt-0.5">${flight.pots.front.toFixed(2)}</div>
+                                        <div className="text-[14pt] font-black text-green-600 mt-0.5">${flight.pots.front.toFixed(2)}</div>
                                     </div>
                                     <div className="space-y-3">
                                         {flight.frontWinners.map((w: any, i: number) => (
@@ -103,20 +103,20 @@ export default function PoolResults({
                                                         onClick={() => handlePlayerClick(w.id)}
                                                         className="flex flex-col text-left group-hover:scale-[1.02] transition-transform"
                                                     >
-                                                        <span className="text-[12pt] sm:text-[15pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
                                                             {w.name.split(' ')[0]}
                                                         </span>
-                                                        <span className="text-[12pt] sm:text-[15pt] text-gray-600 leading-none">
+                                                        <span className="text-[14pt] text-gray-600 leading-none">
                                                             {w.name.split(' ').slice(1).join(' ')}
                                                         </span>
                                                     </button>
                                                     {isLoadingScorecard === w.id && <LoaderIcon className="w-4 h-4 animate-spin text-gray-400" />}
                                                 </div>
                                                 <div className="text-right flex items-center gap-0 w-[200px] justify-end">
-                                                    <span className="text-[12pt] sm:text-[15pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
-                                                    <span className="text-[12pt] sm:text-[15pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.frontHcp}</span>
-                                                    <span className="text-[12pt] sm:text-[15pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
-                                                    <span className="text-[12pt] sm:text-[15pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
+                                                    <span className="text-[14pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
+                                                    <span className="text-[14pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.frontHcp}</span>
+                                                    <span className="text-[14pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
+                                                    <span className="text-[14pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -127,7 +127,7 @@ export default function PoolResults({
                                 <div className="space-y-4">
                                     <div className="text-center pb-2 border-b border-gray-900 mb-4">
                                         <h3 className="text-[14pt] font-black text-gray-900 uppercase tracking-widest">Back Nine</h3>
-                                        <div className="text-[12pt] sm:text-[15pt] font-black text-green-600 mt-0.5">${flight.pots.back.toFixed(2)}</div>
+                                        <div className="text-[14pt] font-black text-green-600 mt-0.5">${flight.pots.back.toFixed(2)}</div>
                                     </div>
                                     <div className="space-y-3">
                                         {flight.backWinners.map((w: any, i: number) => (
@@ -148,10 +148,10 @@ export default function PoolResults({
 
                                                 </div>
                                                 <div className="text-right flex items-center gap-0 w-[200px] justify-end">
-                                                    <span className="text-[12pt] sm:text-[15pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
-                                                    <span className="text-[12pt] sm:text-[15pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.backHcp}</span>
-                                                    <span className="text-[12pt] sm:text-[15pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
-                                                    <span className="text-[12pt] sm:text-[15pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
+                                                    <span className="text-[14pt] text-gray-800 font-medium w-[30px] text-center" title="Gross">{w.gross}</span>
+                                                    <span className="text-[14pt] text-gray-400 font-medium w-[30px] text-center" title="Half Hcp">{w.backHcp}</span>
+                                                    <span className="text-[14pt] font-black text-black w-[50px] text-center" title="Net">({w.score.toFixed(0)})</span>
+                                                    <span className="text-[14pt] font-black text-green-600 w-[70px] text-right">${w.amount.toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -166,7 +166,7 @@ export default function PoolResults({
                             <div className="space-y-6">
                                 <div className="text-center pb-2 border-b border-gray-900 max-w-sm mx-auto mb-6">
                                     <h3 className="text-[14pt] font-black text-gray-900 uppercase tracking-widest leading-none">Total</h3>
-                                    <div className="text-[12pt] sm:text-[15pt] font-black text-green-600 mt-1">${flight.pots.total.toFixed(2)}</div>
+                                    <div className="text-[14pt] font-black text-green-600 mt-1">${flight.pots.total.toFixed(2)}</div>
                                 </div>
                                 <div className="space-y-4 max-w-2xl mx-auto">
                                     {flight.totalWinners.map((w: any, i: number) => (
@@ -186,10 +186,10 @@ export default function PoolResults({
                                                 {isLoadingScorecard === w.id && <LoaderIcon className="w-4 h-4 animate-spin text-gray-400" />}
                                             </div>
                                             <div className="text-right flex items-center gap-0 w-[240px] justify-end">
-                                                <span className="text-[12pt] sm:text-[15pt] text-gray-800 font-medium w-[40px] text-center" title="Gross">{w.gross}</span>
-                                                <span className="text-[12pt] sm:text-[15pt] text-gray-400 font-medium w-[40px] text-center" title="Net">{w.courseHcp}</span>
-                                                <span className="text-[12pt] sm:text-[15pt] font-black text-black w-[60px] text-center" title="Total">({w.score.toFixed(0)})</span>
-                                                <span className="text-[12pt] sm:text-[15pt] font-black text-green-600 w-[100px] text-right">${w.amount.toFixed(2)}</span>
+                                                <span className="text-[14pt] text-gray-800 font-medium w-[40px] text-center" title="Gross">{w.gross}</span>
+                                                <span className="text-[14pt] text-gray-400 font-medium w-[40px] text-center" title="Net">{w.courseHcp}</span>
+                                                <span className="text-[14pt] font-black text-black w-[60px] text-center" title="Total">({w.score.toFixed(0)})</span>
+                                                <span className="text-[14pt] font-black text-green-600 w-[100px] text-right">${w.amount.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -206,9 +206,9 @@ export default function PoolResults({
                                 <div key={name} className="bg-[#f4fbf7] border border-green-100 rounded-lg p-3 flex justify-between items-center">
                                     <div className="flex flex-col overflow-hidden">
                                         <span className="text-[14pt] font-black text-black leading-none">{name.split(' ')[0]}</span>
-                                        <span className="text-[12pt] sm:text-[15pt] text-gray-600 truncate">{name.split(' ').slice(1).join(' ')}</span>
+                                        <span className="text-[14pt] text-gray-600 truncate">{name.split(' ').slice(1).join(' ')}</span>
                                     </div>
-                                    <span className="text-[15pt] font-black text-green-600 ml-2 whitespace-nowrap">${amount.toFixed(2)}</span>
+                                    <span className="text-[16pt] font-black text-green-600 ml-2 whitespace-nowrap">${amount.toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>

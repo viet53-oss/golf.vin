@@ -23,7 +23,7 @@ export function PoolManagementButton({
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="bg-black text-white px-4 py-2 rounded-full text-[12pt] sm:text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-sm"
+                className="bg-black text-white px-4 py-2 rounded-full text-[16pt] font-bold hover:bg-gray-800 transition-colors shadow-sm"
             >
                 Pick Players ({currentParticipantIds.length})
             </button>
