@@ -133,7 +133,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
             {/* Upload Form - Visible to Everyone */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
                 <h2 className="flex items-center gap-2 font-bold text-[16pt] mb-4">
-                    <Upload className="w-5 h-5" /> Upload Photo
+                    <Upload className="w-5 h-5" /> Upload Photo/Video
                 </h2>
 
                 <form
@@ -149,13 +149,13 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                 ${dragActive ? 'border-black bg-gray-50' : 'border-gray-300 hover:border-gray-400'}`}
                     >
                         <ImageIcon className="w-12 h-12 text-gray-400 mb-2" />
-                        <p className="font-bold text-gray-700">Drag and drop photo here</p>
+                        <p className="font-bold text-gray-700">Drag and drop media here</p>
                         <p className="text-[16pt] text-gray-500 mb-4">or click to browse</p>
                         <input
                             type="file"
                             id="file-upload"
                             className="hidden"
-                            accept="image/*"
+                            accept="image/*,video/*"
                             onChange={handleChange}
                             disabled={isPending}
                         />
@@ -213,49 +213,62 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {sortedPhotos.map(photo => (
-                        <div key={photo.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group hover:shadow-md transition-shadow">
-                            <div className="relative aspect-[4/3] bg-gray-100">
-                                <Image
-                                    src={photo.url}
-                                    alt={photo.caption || 'Club Photo'}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="p-3">
-                                <div className="flex justify-between items-start gap-2">
-                                    <div>
-                                        <p className="text-gray-900 font-medium line-clamp-2">
-                                            {photo.caption}
-                                        </p>
-                                        <p className="text-[16pt] text-gray-500 mt-1">
-                                            {new Date(photo.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        </p>
-                                    </div>
-                                </div>
+                    {sortedPhotos.map(photo => {
+                        const isVideo = ['.mp4', '.mov', '.webm', '.ogg'].some(ext => photo.url.toLowerCase().endsWith(ext));
 
-                                {isAdmin && (
-                                    <div className="mt-4 flex gap-2">
-                                        <button
-                                            onClick={() => handleEditClick(photo)}
-                                            disabled={isPending}
-                                            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-[16pt] transition-colors"
-                                        >
-                                            <Edit2 className="w-4 h-4" /> Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(photo.id)}
-                                            disabled={isPending}
-                                            className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold text-[16pt] transition-colors"
-                                        >
-                                            <Trash2 className="w-4 h-4" /> Delete
-                                        </button>
+                        return (
+                            <div key={photo.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group hover:shadow-md transition-shadow">
+                                <div className="relative aspect-[4/3] bg-gray-100 flex items-center justify-center">
+                                    {isVideo ? (
+                                        <video
+                                            src={photo.url}
+                                            controls
+                                            className="w-full h-full object-cover"
+                                            playsInline
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={photo.url}
+                                            alt={photo.caption || 'Club Photo'}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    )}
+                                </div>
+                                <div className="p-3">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <div>
+                                            <p className="text-gray-900 font-medium line-clamp-2">
+                                                {photo.caption}
+                                            </p>
+                                            <p className="text-[16pt] text-gray-500 mt-1">
+                                                {new Date(photo.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </p>
+                                        </div>
                                     </div>
-                                )}
+
+                                    {isAdmin && (
+                                        <div className="mt-4 flex gap-2">
+                                            <button
+                                                onClick={() => handleEditClick(photo)}
+                                                disabled={isPending}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-[16pt] transition-colors"
+                                            >
+                                                <Edit2 className="w-4 h-4" /> Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(photo.id)}
+                                                disabled={isPending}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold text-[16pt] transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" /> Delete
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {photos.length === 0 && (
