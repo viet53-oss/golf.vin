@@ -246,14 +246,20 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-gray-500">Hcp ({item.teeColor || 'Est'}):</span>
                                             <span className="font-mono text-gray-400 min-w-[50px] text-right">
-                                                {calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}
-                                                {' -> '}
-                                                <span className={`font-bold ${calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72) >
-                                                    calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)
-                                                    ? 'text-red-600' : 'text-green-600'
-                                                    }`}>
-                                                    {calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72)}
-                                                </span>
+                                                {(() => {
+                                                    const hcpBefore = calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72);
+                                                    const hcpAfter = calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72);
+                                                    const colorClass = hcpAfter === hcpBefore ? 'text-gray-900' : hcpAfter > hcpBefore ? 'text-red-600' : 'text-green-600';
+                                                    return (
+                                                        <>
+                                                            {hcpBefore}
+                                                            {' -> '}
+                                                            <span className={`font-bold ${colorClass}`}>
+                                                                {hcpAfter}
+                                                            </span>
+                                                        </>
+                                                    );
+                                                })()}
                                             </span>
                                         </div>
 
@@ -263,7 +269,8 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                             <div className="flex items-center gap-1">
                                                 <span className="text-gray-400">{item.indexBefore.toFixed(1)}</span>
                                                 <span className="text-gray-300">→</span>
-                                                <span className={`font-bold ${item.indexAfter > item.indexBefore ? 'text-red-600' : 'text-green-600'
+                                                <span className={`font-bold ${item.indexAfter === item.indexBefore ? 'text-gray-900' :
+                                                        item.indexAfter > item.indexBefore ? 'text-red-600' : 'text-green-600'
                                                     }`}>{item.indexAfter.toFixed(1)}</span>
 
                                                 {item.isLowHi && (
