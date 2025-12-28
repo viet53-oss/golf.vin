@@ -8,6 +8,44 @@ export async function recalculateAllHandicaps() {
     try {
         console.log('🚀 Starting Full Handicap Recalculation...');
 
+        // 0. Fix Tee Box Assignments First
+        console.log('🔧 Fixing tee box assignments...');
+
+        // Get all tee boxes
+        const teeBoxes = await prisma.teeBox.findMany({
+            where: { course: { name: 'City Park North' } }
+        });
+
+        const teeBoxMap = new Map(teeBoxes.map(tb => [tb.name.toLowerCase(), tb.id]));
+
+        // Fix rounds where tee box doesn't match player's preference
+        const allPlayers = await prisma.player.findMany({
+            where: { preferred_tee_box: { not: null } },
+            include: {
+                rounds: {
+                    include: { tee_box: true }
+                }
+            }
+        });
+
+        let teeBoxFixCount = 0;
+        for (const player of allPlayers) {
+            const preferredTeeId = teeBoxMap.get(player.preferred_tee_box!.toLowerCase());
+            if (!preferredTeeId) continue;
+
+            for (const round of player.rounds) {
+                if (round.tee_box_id !== preferredTeeId) {
+                    await prisma.roundPlayer.update({
+                        where: { id: round.id },
+                        data: { tee_box_id: preferredTeeId }
+                    });
+                    teeBoxFixCount++;
+                }
+            }
+        }
+
+        console.log(`✅ Fixed ${teeBoxFixCount} tee box assignments`);
+
         // 1. Fetch all players
         const players = await prisma.player.findMany({
             include: {
