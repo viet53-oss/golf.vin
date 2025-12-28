@@ -27,6 +27,7 @@ export default async function ScoresPage() {
                 course: {
                     include: {
                         holes: true,
+                        tee_boxes: true,
                     },
                 },
                 players: {

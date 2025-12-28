@@ -37,6 +37,7 @@ type RoundWithPlayers = {
     is_tournament: boolean;
     course: {
         holes: Array<{ par: number }>;
+        tee_boxes: Array<{ name: string; rating: number; slope: number }>;
     };
     players: Array<{
         id: string;
@@ -140,8 +141,16 @@ export default function ScoresDashboard({
         // Helper: Calculate Course Handicap & Net Score components
         const getPlayerStats = (rp: any) => {
             const idxBefore = rp.index_at_time ?? rp.player?.index ?? 0;
-            const slope = rp.tee_box?.slope ?? 113;
-            const rating = rp.tee_box?.rating ?? par;
+            // Override with preferred tee box if available
+            let preferredTee = null;
+            if (rp.player.preferred_tee_box && round.course.tee_boxes) {
+                preferredTee = round.course.tee_boxes.find((tb: any) =>
+                    tb.name.toLowerCase() === rp.player.preferred_tee_box!.toLowerCase()
+                );
+            }
+
+            const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
+            const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
             const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
             const netTotal = (rp.gross_score ?? 999) - courseHandicap;
 
@@ -248,8 +257,16 @@ export default function ScoresDashboard({
             flight.players.forEach((rp, idx) => {
                 const idxBefore = rp.index_at_time ?? rp.player.index;
                 const idxAfter = rp.index_after;
-                const slope = rp.tee_box?.slope ?? 113;
-                const rating = rp.tee_box?.rating ?? par;
+                // Override with preferred tee box logic (Copy Logic)
+                let preferredTee = null; // Assuming preferred tee not strictly needed for basic copy, but let's be safe.
+                // Note: rp might not have full structure here in copy mode if simplified, but let's try.
+                if (rp.player && rp.player.preferred_tee_box && round.course.tee_boxes) {
+                    preferredTee = round.course.tee_boxes.find((tb: any) =>
+                        tb.name.toLowerCase() === rp.player.preferred_tee_box.toLowerCase()
+                    );
+                }
+                const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
+                const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
                 const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
 
                 let courseHandicapAfter = courseHandicap;
@@ -341,8 +358,16 @@ export default function ScoresDashboard({
                 // Sort by Net Score + Hardest Hole Tie Breaker
                 const getPlayerStats = (rp: any) => {
                     const idxBefore = rp.index_at_time ?? rp.player?.index ?? 0;
-                    const slope = rp.tee_box?.slope ?? 113;
-                    const rating = rp.tee_box?.rating ?? par;
+                    // Override with preferred tee box if available
+                    let preferredTee = null;
+                    if (rp.player.preferred_tee_box && round.course.tee_boxes) {
+                        preferredTee = round.course.tee_boxes.find((tb: any) =>
+                            tb.name.toLowerCase() === rp.player.preferred_tee_box!.toLowerCase()
+                        );
+                    }
+
+                    const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
+                    const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
                     const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
                     const netTotal = (rp.gross_score ?? 999) - courseHandicap;
 
@@ -518,8 +543,16 @@ export default function ScoresDashboard({
                                                     const idxBefore = rp.index_at_time ?? player.index;
                                                     const idxAfter = rp.index_after;
 
-                                                    const slope = rp.tee_box?.slope ?? 113;
-                                                    const rating = rp.tee_box?.rating ?? par;
+                                                    // Override with preferred tee box if available
+                                                    let preferredTee = null;
+                                                    if (player.preferred_tee_box && round.course.tee_boxes) {
+                                                        preferredTee = round.course.tee_boxes.find((tb: any) =>
+                                                            tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase()
+                                                        );
+                                                    }
+
+                                                    const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
+                                                    const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
                                                     const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
 
                                                     let courseHandicapAfter = courseHandicap;
