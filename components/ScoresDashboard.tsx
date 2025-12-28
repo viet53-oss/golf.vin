@@ -600,11 +600,6 @@ export default function ScoresDashboard({
                                                                     </span>
                                                                     <span className="text-[14pt] text-black font-medium leading-none">
                                                                         {lastName}
-                                                                        {isAdmin && (
-                                                                            <span className="text-[10px] text-red-500 block">
-                                                                                S:{slope} I:{rp.index_at_time ?? 'null'}
-                                                                            </span>
-                                                                        )}
                                                                     </span>
                                                                     {isLoading && <LoaderIcon className="w-3 h-3 animate-spin text-slate-300 mt-1" />}
                                                                 </button>
