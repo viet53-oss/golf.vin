@@ -122,151 +122,161 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white w-full rounded-xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
-
-                {/* Header */}
-                <div className="relative p-6 border-b border-gray-100 flex items-center justify-center bg-white rounded-t-xl z-10">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-white animate-in fade-in slide-in-from-bottom-10 duration-200">
+            {/* Header */}
+            {/* Header */}
+            <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0 safe-top">
+                <div className="flex flex-col">
+                    <h2 className="text-[15pt] font-black text-gray-900 leading-tight">
+                        {data?.player.name || 'Loading...'}
+                    </h2>
+                    <p className="text-[14pt] text-blue-600 font-bold">Handicap History</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleCopyFullHistory}
+                        className="p-2 bg-white hover:bg-gray-100 border border-gray-200 rounded-full transition-colors flex items-center justify-center group"
+                        title="Copy Full History"
+                    >
+                        <Copy size={24} className="text-gray-400 group-hover:text-gray-600" />
+                    </button>
                     <button
                         onClick={onClose}
-                        className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
                     >
-                        <X size={20} />
+                        <X size={28} />
                     </button>
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-[12pt] sm:text-[15pt] font-bold text-gray-900">{data?.player.name || 'Loading...'}</h2>
-                        <button
-                            onClick={handleCopyFullHistory}
-                            className="p-2 bg-gray-50 hover:bg-gray-200 rounded-full transition-colors flex items-center justify-center group"
-                            title="Copy Full History"
-                        >
-                            <Copy size={20} className="text-gray-400 group-hover:text-gray-600" />
-                        </button>
-                    </div>
                 </div>
+            </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto no-scrollbar bg-slate-50 p-4 sm:p-6">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                            <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-                            <p className="text-[12pt] sm:text-[15pt] text-gray-400 font-medium">Calculating Handicap History...</p>
-                        </div>
-                    ) : (data && (
-                        <div className="space-y-6">
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-1 py-4 bg-slate-50">
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+                        <p className="text-[14pt] text-gray-400 font-medium">Calculating Handicap History...</p>
+                    </div>
+                ) : (data && (
+                    <div className="space-y-6 w-full">
 
-                            {/* Official Handicap Card */}
-                            <div className="bg-gray-100 border border-gray-200 rounded-lg p-6 text-center shadow-sm">
-                                <h3 className="font-bold text-gray-900 text-[12pt] sm:text-[15pt] mb-2">Official Handicap (From Database)</h3>
-                                <div className="text-[12pt] sm:text-[15pt] font-bold text-gray-800 mb-6">
-                                    Handicap Index: <span className="text-black text-[12pt] sm:text-[15pt]">{data.player.currentIndex.toFixed(1)}</span>
-                                </div>
+                        {/* Official Handicap Card */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                            <h3 className="font-bold text-gray-900 text-[15pt] mb-2">Official Handicap (From Database)</h3>
+                            <div className="text-[14pt] font-bold text-gray-800 mb-6">
+                                Handicap Index: <span className="text-black text-[24pt]">{data.player.currentIndex.toFixed(1)}</span>
+                            </div>
 
-                                <div className="border-t border-gray-200 pt-4">
-                                    <p className="font-bold text-gray-700 mb-2 text-[12pt] sm:text-[15pt]">Course Handicap (City Park North, Par {data.courseData.par}):</p>
-                                    <div className="flex flex-col gap-1 items-center justify-center text-[12pt] sm:text-[15pt]">
-                                        {data.courseData.tees
-                                            .filter(t => ['White', 'Gold'].includes(t.name)) // Show specific tees if available preferred
-                                            .length === 0 ? (
-                                            data.courseData.tees.slice(0, 2).map(t => (
+                            <div className="border-t border-gray-100 pt-4">
+                                <p className="font-bold text-gray-700 mb-2 text-[14pt]">Course Handicap (City Park North, Par {data.courseData.par}):</p>
+                                <div className="flex flex-col gap-2 items-center justify-center text-[14pt]">
+                                    {data.courseData.tees
+                                        .filter(t => ['White', 'Gold'].includes(t.name))
+                                        .length === 0 ? (
+                                        data.courseData.tees.slice(0, 2).map(t => (
+                                            <TeeLine key={t.name} tee={t} index={data.player.currentIndex} par={data.courseData.par} />
+                                        ))
+                                    ) : (
+                                        data.courseData.tees
+                                            .filter(t => ['White', 'Gold'].includes(t.name))
+                                            .map(t => (
                                                 <TeeLine key={t.name} tee={t} index={data.player.currentIndex} par={data.courseData.par} />
                                             ))
-                                        ) : (
-                                            data.courseData.tees
-                                                .filter(t => ['White', 'Gold'].includes(t.name))
-                                                .map(t => (
-                                                    <TeeLine key={t.name} tee={t} index={data.player.currentIndex} par={data.courseData.par} />
-                                                ))
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Recent Scoring Record Header */}
-                            <h3 className="font-bold text-gray-900 text-[12pt] sm:text-[15pt]">Recent Scoring Record</h3>
+                        {/* Recent Scoring Record Header */}
+                        <div className="px-1">
+                            <h3 className="font-bold text-gray-900 text-[15pt]">Recent Scoring Record</h3>
+                            <p className="text-sm text-gray-500 mt-1">Showing last 20 rounds (Best 8 count toward Index)</p>
+                        </div>
 
-                            {/* List */}
-                            <div className="space-y-3">
-                                {data.history.map((item) => (
-                                    <div key={item.id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 relative overflow-hidden">
-                                        {/* Row 1: Date & Tee */}
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-bold text-gray-900">
-                                                    {format(new Date(item.date), 'MMM d, yyyy')}
-                                                </span>
-                                                {/* Used Badge */}
-                                                {item.used && (
-                                                    <span className="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">USED</span>
-                                                )}
-                                            </div>
-                                            {/* Diff */}
-                                            <div className="text-right">
-                                                <div className="font-bold text-gray-900 text-[12pt] sm:text-[15pt] leading-none">
-                                                    Diff: {item.differential.toFixed(1)}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Row 2: Details */}
-                                        <div className="text-[12pt] sm:text-[15pt] text-gray-500 mb-4 flex flex-col gap-0.5">
-                                            {item.gross ? (
-                                                <div>
-                                                    Gross: {item.gross} | <span className={item.adjusted && item.adjusted !== item.gross ? "text-red-600 font-bold" : ""}>Adjusted: {item.adjusted || item.gross}</span>
-                                                </div>
-                                            ) : (
-                                                <div>Adjusted Gross Score (Historical)</div>
-                                            )}
-                                            {item.rating && (
-                                                <div>
-                                                    Par {item.par} | Rating: {item.rating} | Slope: {item.slope}
-                                                </div>
+                        {/* List - Only show last 20 for calculation verification */}
+                        <div className="space-y-4">
+                            {data.history.slice(0, 20).map((item) => (
+                                <div key={item.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 relative overflow-hidden">
+                                    {/* Row 1: Date & Tee */}
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-bold text-gray-900 text-[14pt]">
+                                                {format(new Date(item.date), 'MMM d, yyyy')}
+                                            </span>
+                                            {/* Used Badge - Use usedForCurrent if available, fallback to historical used */}
+                                            {item.usedForCurrent && (
+                                                <span className="bg-green-600 text-white text-[12pt] font-bold px-2 py-0.5 rounded">USED</span>
                                             )}
                                         </div>
-
-                                        {/* Row 3: Progression (Divider) */}
-                                        < div className="border-t border-gray-100 pt-3 flex justify-between items-center text-[12pt] sm:text-[15pt]" >
-
-                                            {/* Handicap (Est) */}
-                                            < div className="flex items-center gap-2" >
-                                                <span className="font-bold text-gray-700 text-[12pt] sm:text-[15pt]">Handicap ({item.teeColor || 'Est'}):</span>
-                                                <span className="font-mono text-gray-400 text-[12pt] sm:text-[15pt] text-right min-w-[50px]">
-                                                    {calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}
-                                                    {' -> '}
-                                                    <span className={`font-bold text-[12pt] sm:text-[15pt] ${calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72) >
-                                                        calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)
-                                                        ? 'text-red-600' : 'text-green-600'
-                                                        }`}>
-                                                        {calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72)}
-                                                    </span>
-                                                </span>
+                                        {/* Diff */}
+                                        <div className="text-right">
+                                            <div className="font-black text-gray-900 text-[16pt] leading-none">
+                                                Diff: {item.differential.toFixed(1)}
                                             </div>
-
-                                            {/* Index */}
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-bold text-gray-700 text-[12pt] sm:text-[15pt]">Index:</span>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-gray-400 text-[12pt] sm:text-[15pt]">{item.indexBefore.toFixed(1)}</span>
-                                                    <span className="text-gray-300">→</span>
-                                                    <span className={`font-bold text-[12pt] sm:text-[15pt] ${item.indexAfter > item.indexBefore ? 'text-red-600' : 'text-green-600'
-                                                        }`}>{item.indexAfter.toFixed(1)}</span>
-
-                                                    {item.isLowHi && (
-                                                        <span className="ml-1 bg-blue-500 text-white text-[9px] font-bold px-1 rounded">LOW HI</span>
-                                                    )}
-                                                </div>
-                                            </div>
-
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+
+                                    {/* Row 2: Details */}
+                                    <div className="text-[14pt] text-gray-600 mb-4 flex flex-col gap-1">
+                                        {item.gross ? (
+                                            <div>
+                                                Gross: <span className="font-medium text-gray-900">{item.gross}</span>
+                                                <span className="mx-2 text-gray-300">|</span>
+                                                <span className={item.adjusted && item.adjusted !== item.gross ? "text-red-600 font-bold" : ""}>
+                                                    Adj: {item.adjusted || item.gross}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div>Adjusted Gross Score (Historical)</div>
+                                        )}
+                                        {item.rating && (
+                                            <div className="text-[13pt] text-gray-400">
+                                                Par {item.par} • Rating {item.rating} • Slope {item.slope} • {item.teeColor === 'White' ? 'W' : (item.teeColor === 'Gold' ? 'G' : (item.teeColor || 'Est'))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Row 3: Progression (Divider) */}
+                                    <div className="border-t border-gray-100 pt-3 flex justify-between items-center text-[14pt]">
+
+                                        {/* Handicap (Est) */}
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-gray-500">Hcp ({item.teeColor === 'White' ? 'W' : (item.teeColor === 'Gold' ? 'G' : (item.teeColor || 'Est'))}):</span>
+                                            <span className="font-mono text-gray-400 min-w-[50px] text-right">
+                                                {calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}
+                                                {' -> '}
+                                                <span className={`font-bold ${calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72) >
+                                                    calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)
+                                                    ? 'text-red-600' : 'text-green-600'
+                                                    }`}>
+                                                    {calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72)}
+                                                </span>
+                                            </span>
+                                        </div>
+
+                                        {/* Index */}
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-gray-500">Idx:</span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-gray-400">{item.indexBefore.toFixed(1)}</span>
+                                                <span className="text-gray-300">→</span>
+                                                <span className={`font-bold ${item.indexAfter > item.indexBefore ? 'text-red-600' : 'text-green-600'
+                                                    }`}>{item.indexAfter.toFixed(1)}</span>
+
+                                                {item.isLowHi && (
+                                                    <span className="ml-1 bg-blue-500 text-white text-[10pt] font-bold px-1.5 py-0.5 rounded">LOW HI</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))
-                    }
-                </div >
-            </div >
-        </div >
+                    </div>
+                ))
+                }
+            </div>
+        </div>
     );
 }
 
@@ -279,11 +289,12 @@ function calculateCourseHandicap(index: number, slope: number, rating: number, p
 
 function TeeLine({ tee, index, par }: { tee: { name: string, rating: number, slope: number }, index: number, par: number }) {
     const ch = calculateCourseHandicap(index, tee.slope, tee.rating, par);
+    const displayName = tee.name === 'White' ? 'W' : (tee.name === 'Gold' ? 'G' : tee.name);
     return (
-        <div className="font-medium text-gray-600">
-            <span className="text-black font-bold">{tee.name} Tees: {ch}</span>
-            <span className="text-[12pt] sm:text-[15pt] text-gray-400 ml-1">
-                (Par {par} | Rating: {tee.rating} | Slope: {tee.slope})
+        <div className="font-medium text-gray-600 text-[14pt]">
+            <span className="text-black font-bold">{displayName}: {ch}</span>
+            <span className="text-gray-400 ml-2">
+                (Rating:{tee.rating} / Slope:{tee.slope})
             </span>
         </div>
     );

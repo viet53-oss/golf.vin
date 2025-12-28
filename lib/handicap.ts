@@ -54,20 +54,19 @@ export function calculateScoreDifferential(
  */
 function getDifferentialsConfiguration(count: number): {
     itemsToUse: number;
-    adjustment: number;
 } {
-    if (count < 3) return { itemsToUse: 0, adjustment: 0 };
-    if (count === 3) return { itemsToUse: 1, adjustment: -2.0 };
-    if (count === 4) return { itemsToUse: 1, adjustment: -1.0 };
-    if (count === 5) return { itemsToUse: 1, adjustment: 0 };
-    if (count === 6) return { itemsToUse: 2, adjustment: -1.0 };
-    if (count <= 8) return { itemsToUse: 2, adjustment: 0 };
-    if (count <= 11) return { itemsToUse: 3, adjustment: 0 };
-    if (count <= 14) return { itemsToUse: 4, adjustment: 0 };
-    if (count <= 16) return { itemsToUse: 5, adjustment: 0 };
-    if (count <= 18) return { itemsToUse: 6, adjustment: 0 };
-    if (count === 19) return { itemsToUse: 7, adjustment: 0 };
-    return { itemsToUse: 8, adjustment: 0 }; // 20+
+    if (count < 3) return { itemsToUse: 0 };
+    if (count === 3) return { itemsToUse: 1 };
+    if (count === 4) return { itemsToUse: 1 };
+    if (count === 5) return { itemsToUse: 1 };
+    if (count === 6) return { itemsToUse: 2 };
+    if (count <= 8) return { itemsToUse: 2 };
+    if (count <= 11) return { itemsToUse: 3 };
+    if (count <= 14) return { itemsToUse: 4 };
+    if (count <= 16) return { itemsToUse: 5 };
+    if (count <= 18) return { itemsToUse: 6 };
+    if (count === 19) return { itemsToUse: 7 };
+    return { itemsToUse: 8 }; // 20+
 }
 
 /**
@@ -112,7 +111,7 @@ export function calculateHandicap(
     }
 
     // 4. Determine how many to use
-    const { itemsToUse, adjustment } = getDifferentialsConfiguration(count);
+    const { itemsToUse } = getDifferentialsConfiguration(count);
 
     // 5. Find the lowest differentials among the recent ones
     // We need to clone to sort without affecting the date order of 'recentDifferentials' if we want to preserve that
@@ -131,28 +130,13 @@ export function calculateHandicap(
     const sum = usedDifferentials.reduce((acc, d) => acc + d.value, 0);
     let rawIndex = sum / itemsToUse;
 
-    // Apply adjustment (e.g. for 3 rounds = -2.0)
-    rawIndex += adjustment;
-
-    // 7. Exceptional Score Reduction (ESR)
-    // If the most recent score is >= 7.0 strokes better than the calculated index, apply reduction.
-    // (-1.0 for 7.0-9.9, -2.0 for 10.0+)
-    if (recentDifferentials.length > 0) {
-        const sensitiveIndex = rawIndex;
-        const latestDiff = recentDifferentials[0].value;
-        const diff = sensitiveIndex - latestDiff;
-
-        if (diff >= 10.0) {
-            rawIndex -= 2.0;
-        } else if (diff >= 7.0) {
-            rawIndex -= 1.0;
-        }
-    }
+    // Apply 0.96 multiplier (User Rule 4)
+    rawIndex = rawIndex * 0.96;
 
     // Standard rounding to 1 decimal place (WHS rules)
     let index = Math.round(rawIndex * 10) / 10;
 
-    // 8. Apply Caps (Soft and Hard)
+    // 7. Apply Caps (Soft and Hard)
     // Only applies if user has at least 20 scores? No, WHS says caps apply once 20 scores exist usually,
     // but technically can apply if Low HI is established.
     // We will apply if Low HI is provided.

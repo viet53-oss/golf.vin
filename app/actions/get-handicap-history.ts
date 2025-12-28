@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { calculateHandicap, HandicapInput } from '@/lib/handicap';
+import { calculateHandicap, HandicapInput, calculateScoreDifferential } from '@/lib/handicap';
 
 export interface HandicapHistoryItem {
     id: string;
@@ -18,6 +18,7 @@ export interface HandicapHistoryItem {
     indexAfter: number;
     used: boolean;
     isLowHi: boolean;
+    usedForCurrent?: boolean;
 }
 
 export interface HandicapHistoryResponse {
@@ -89,24 +90,38 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             par: coursePar,
         })),
         ...v3Rounds.map((r: RoundWithDetails) => {
-            // Use tee box if available, otherwise find preferred tee box
-            let teeBox = r.tee_box;
-            if (!teeBox && player.preferred_tee_box && course) {
+            // STRICT RULE: Always prioritize player's preferred tee box if available
+            let teeBox = null;
+            if (player.preferred_tee_box && course) {
                 teeBox = course.tee_boxes.find((tb: { name: string }) =>
                     tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase()
                 ) || null;
             }
 
+            // Fallback to round's recorded tee box only if no preference (or preference invalid)
+            if (!teeBox) {
+                teeBox = r.tee_box;
+            }
+
+            const rating = teeBox?.rating || 72;
+            const slope = teeBox?.slope || 113;
+            const adjustedScore = r.adjusted_gross_score || r.gross_score!;
+
+            // Recalculate differential based on the Enforced Tee specs
+            // This ensures consistency if we are overriding the tee
+            // (113 / slope) * (adjGross - rating - pcc)
+            const diff = calculateScoreDifferential(adjustedScore, rating, slope);
+
             return {
                 id: r.id,
                 date: r.round.date,
                 type: 'V3' as const,
-                differential: r.score_differential || 0,
+                differential: diff,
                 gross: r.gross_score!,
-                adjusted: r.adjusted_gross_score || r.gross_score!,
+                adjusted: adjustedScore,
                 teeColor: teeBox?.name,
-                rating: teeBox?.rating,
-                slope: teeBox?.slope,
+                rating,
+                slope,
                 par: coursePar,
             };
         })
@@ -151,8 +166,22 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         });
     }
 
-    // 6. Reverse for Display (Newest First)
+    // 6. Determine which rounds are used for the CURRENT index
+    const finalCalc = calculateHandicap(allRounds, player.low_handicap_index);
+    const finalUsedIds = new Set(
+        finalCalc.differentials
+            .filter(d => d.used)
+            .map(d => d.id)
+    );
+
+    // 7. Reverse for Display (Newest First) and attach current usage info
     historyWithIndex.reverse();
+
+    // Map usage to the history items
+    const finalHistory = historyWithIndex.map(item => ({
+        ...item,
+        usedForCurrent: finalUsedIds.has(item.id)
+    }));
 
     return {
         player: {
@@ -165,6 +194,6 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             par: coursePar,
             tees
         },
-        history: historyWithIndex
+        history: finalHistory
     };
 }
