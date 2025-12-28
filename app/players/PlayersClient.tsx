@@ -489,10 +489,6 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
                                     </span>
                                 </div>
 
-                                {/* Edit Action */}
-                                <button className="p-1 hover:bg-gray-100 rounded-full text-gray-400 transition-colors cursor-pointer">
-                                    <Edit className="w-4 h-4" />
-                                </button>
                             </div>
 
                         </div>
