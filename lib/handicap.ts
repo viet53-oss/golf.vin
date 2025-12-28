@@ -42,9 +42,10 @@ export function calculateScoreDifferential(
     slope: number,
     pcc: number = 0
 ): number {
-    const diff = (113 / slope) * (grossScore - rating - pcc);
-    // Standard rounding to 1 decimal place
-    return Math.round(diff * 10) / 10;
+    // USGA Formula: ((Adjusted Gross Score - Course Rating) * 113) / Slope Rating
+    const diff = ((grossScore - rating - pcc) * 113) / slope;
+    // Round to 1 decimal place
+    return Number(diff.toFixed(1));
 }
 
 /**
@@ -130,11 +131,11 @@ export function calculateHandicap(
     const sum = usedDifferentials.reduce((acc, d) => acc + d.value, 0);
     let rawIndex = sum / itemsToUse;
 
-    // Apply 0.96 multiplier (User Rule 4)
+    // Apply 0.96 multiplier (USGA Rule)
     rawIndex = rawIndex * 0.96;
 
-    // Standard rounding to 1 decimal place (WHS rules)
-    let index = Math.round(rawIndex * 10) / 10;
+    // Round to 1 decimal place (USGA rules)
+    let index = Number(rawIndex.toFixed(1));
 
     // 7. Apply Caps (Soft and Hard)
     // Only applies if user has at least 20 scores? No, WHS says caps apply once 20 scores exist usually,
@@ -165,7 +166,7 @@ export function calculateHandicap(
     }
 
     return {
-        handicapIndex: Math.round(index * 10) / 10, // Final rounding for display
+        handicapIndex: Number(index.toFixed(1)), // Final rounding for display
         differentials: recentDifferentials,
         lowHandicapIndex: lowHandicapIndex || undefined,
         isSoftCapped,
