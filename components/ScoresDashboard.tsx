@@ -551,15 +551,10 @@ export default function ScoresDashboard({
                                                                         {firstName}
                                                                         {(() => {
                                                                             // Prioritize preferred tee box if available
-                                                                            const pref = rp.player.preferred_tee_box ? rp.player.preferred_tee_box.toLowerCase() : null;
-                                                                            const recorded = rp.tee_box?.name ? rp.tee_box.name.toLowerCase() : null;
+                                                                            const pref = rp.player.preferred_tee_box;
+                                                                            const recorded = rp.tee_box?.name;
 
-                                                                            let displayTee = null;
-                                                                            if (pref === 'gold' || pref === 'white') {
-                                                                                displayTee = pref === 'white' ? 'W' : 'G';
-                                                                            } else if (recorded === 'gold' || recorded === 'white') {
-                                                                                displayTee = recorded === 'white' ? 'W' : 'G';
-                                                                            }
+                                                                            const displayTee = pref || recorded;
 
                                                                             if (!displayTee) return null;
 

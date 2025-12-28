@@ -230,7 +230,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                         )}
                                         {item.rating && (
                                             <div className="text-[13pt] text-gray-400">
-                                                Par {item.par} • Rating {item.rating} • Slope {item.slope} • {item.teeColor === 'White' ? 'W' : (item.teeColor === 'Gold' ? 'G' : (item.teeColor || 'Est'))}
+                                                Par {item.par} • Rating {item.rating} • Slope {item.slope} • {item.teeColor || 'Est'}
                                             </div>
                                         )}
                                     </div>
@@ -240,7 +240,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
 
                                         {/* Handicap (Est) */}
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-gray-500">Hcp ({item.teeColor === 'White' ? 'W' : (item.teeColor === 'Gold' ? 'G' : (item.teeColor || 'Est'))}):</span>
+                                            <span className="font-bold text-gray-500">Hcp ({item.teeColor || 'Est'}):</span>
                                             <span className="font-mono text-gray-400 min-w-[50px] text-right">
                                                 {calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}
                                                 {' -> '}
@@ -289,7 +289,7 @@ function calculateCourseHandicap(index: number, slope: number, rating: number, p
 
 function TeeLine({ tee, index, par }: { tee: { name: string, rating: number, slope: number }, index: number, par: number }) {
     const ch = calculateCourseHandicap(index, tee.slope, tee.rating, par);
-    const displayName = tee.name === 'White' ? 'W' : (tee.name === 'Gold' ? 'G' : tee.name);
+    const displayName = tee.name;
     return (
         <div className="font-medium text-gray-600 text-[14pt]">
             <span className="text-black font-bold">{displayName}: {ch}</span>
