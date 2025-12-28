@@ -4,6 +4,7 @@ import { useState, useRef, useTransition } from 'react';
 import { Upload, X, Trash2, Calendar, ImageIcon, Loader2, Edit2 } from 'lucide-react';
 import { uploadPhoto, deletePhoto, getPhotos } from '../actions/photos';
 import Image from 'next/image';
+import { getTodayLocal, formatLocalDate } from '@/lib/date-utils';
 
 type Photo = {
     id: string;
@@ -20,7 +21,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const [dragActive, setDragActive] = useState(false);
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [date, setDate] = useState(getTodayLocal());
     const [caption, setCaption] = useState('');
     const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
     const formRef = useRef<HTMLFormElement>(null);
@@ -242,7 +243,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                                 {photo.caption}
                                             </p>
                                             <p className="text-[16pt] text-gray-500 mt-1">
-                                                {new Date(photo.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                {formatLocalDate(photo.date)}
                                             </p>
                                         </div>
                                     </div>

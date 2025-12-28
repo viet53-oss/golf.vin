@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import ScheduleClient from './ScheduleClient';
+import { parseLocalDate } from '@/lib/date-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,7 @@ export default async function SchedulePage() {
     const events = eventsList.map(t => ({
         id: t.id,
         name: t.name,
-        date: format(new Date(t.date), 'EEEE, MMMM d, yyyy'),
+        date: format(parseLocalDate(t.date), 'EEEE, MMMM d, yyyy'),
         rawDate: t.date,
         location: t.location || 'City Park Golf Course'
     }));

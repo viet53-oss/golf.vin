@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { postScore } from '../actions';
 import Link from 'next/link';
+import { getTodayLocal } from '@/lib/date-utils';
 export const dynamic = 'force-dynamic';
 
 export default async function PostScorePage() {
@@ -50,7 +51,7 @@ export default async function PostScorePage() {
                             type="date"
                             name="date"
                             required
-                            defaultValue={new Date().toISOString().split('T')[0]}
+                            defaultValue={getTodayLocal()}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border"
                         />
                     </div>
