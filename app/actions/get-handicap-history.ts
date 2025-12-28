@@ -90,26 +90,14 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             par: coursePar,
         })),
         ...v3Rounds.map((r: RoundWithDetails) => {
-            // STRICT RULE: Always prioritize player's preferred tee box if available
-            let teeBox = null;
-            if (player.preferred_tee_box && course) {
-                teeBox = course.tee_boxes.find((tb: { name: string }) =>
-                    tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase()
-                ) || null;
-            }
-
-            // Fallback to round's recorded tee box only if no preference (or preference invalid)
-            if (!teeBox) {
-                teeBox = r.tee_box;
-            }
+            // Use the actual tee box assigned to this round (no override)
+            const teeBox = r.tee_box;
 
             const rating = teeBox?.rating || 72;
             const slope = teeBox?.slope || 113;
             const adjustedScore = r.adjusted_gross_score || r.gross_score!;
 
-            // Recalculate differential based on the Enforced Tee specs
-            // This ensures consistency if we are overriding the tee
-            // (113 / slope) * (adjGross - rating - pcc)
+            // Calculate differential based on the actual tee box used
             const diff = calculateScoreDifferential(adjustedScore, rating, slope);
 
             return {
