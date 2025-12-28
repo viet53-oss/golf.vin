@@ -53,11 +53,11 @@ export default async function SettingsPage() {
                     </div>
                     <div className="space-y-2">
                         <h1 className="text-2xl font-black text-gray-900 tracking-tight">Access Denied</h1>
-                        <p className="text-gray-500 text-[12pt] sm:text-[15pt]">You must be logged in as an administrator to access system settings.</p>
+                        <p className="text-gray-500 text-[14pt]">You must be logged in as an administrator to access system settings.</p>
                     </div>
                     <div className="pt-4 space-y-3">
-                        <p className="text-gray-400 text-xs italic text-[12pt] sm:text-[15pt]">Please use the 'Login' button at the top of the page to authenticate.</p>
-                        <Link href="/" className="block w-full py-3 bg-black text-white rounded-full font-bold text-[12pt] sm:text-[15pt] hover:bg-gray-800 transition-all active:scale-95">Return Home</Link>
+                        <p className="text-gray-400 text-xs italic text-[14pt]">Please use the 'Login' button at the top of the page to authenticate.</p>
+                        <Link href="/" className="block w-full py-3 bg-black text-white rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-all active:scale-95">Return Home</Link>
                     </div>
                 </div>
             </div>
@@ -71,16 +71,16 @@ export default async function SettingsPage() {
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
             {/* Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-50 px-3 py-3 mb-6">
+            <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3 mb-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     </div>
-                    <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight">System Settings</h1>
+                    <h1 className="text-[14pt] font-bold text-gray-900 tracking-tight">System Settings</h1>
                 </div>
             </header>
 
-            <main className="px-3 space-y-6">
+            <main className="px-1 space-y-6">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -88,10 +88,10 @@ export default async function SettingsPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
                         <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
                             <ShieldIcon className="w-5 h-5 text-blue-600" />
-                            <h2 className="font-bold text-blue-900 text-[12pt] sm:text-[15pt]">USGA Handicap System</h2>
+                            <h2 className="font-bold text-blue-900 text-[14pt]">USGA Handicap System</h2>
                         </div>
                         <div className="p-3 space-y-4">
-                            <p className="text-[12pt] sm:text-[15pt] text-gray-500">
+                            <p className="text-[14pt] text-gray-500">
                                 Recalculate player handicaps using WHS rules. This will scan all rounds and update the Handicap Index for all players.
                             </p>
                             <RecalculateButton />
@@ -102,10 +102,10 @@ export default async function SettingsPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-purple-100 overflow-hidden">
                         <div className="p-3 bg-purple-50 border-b border-purple-100 flex items-center gap-2">
                             <GlobeIcon className="w-5 h-5 text-purple-600" />
-                            <h2 className="font-bold text-purple-900 text-[12pt] sm:text-[15pt]">Site Configuration</h2>
+                            <h2 className="font-bold text-purple-900 text-[14pt]">Site Configuration</h2>
                         </div>
                         <div className="p-3 space-y-4">
-                            <p className="text-[12pt] sm:text-[15pt] text-gray-500">
+                            <p className="text-[14pt] text-gray-500">
                                 Manage global SEO settings and meta tags. Update the site title, description, and keywords.
                             </p>
                             <MetaTagEditor />
@@ -118,24 +118,24 @@ export default async function SettingsPage() {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
                         <MapPinIcon className="w-5 h-5 text-gray-700" />
-                        <h2 className="font-bold text-gray-900 text-[12pt] sm:text-[15pt]">Courses</h2>
+                        <h2 className="font-bold text-gray-900 text-[14pt]">Courses</h2>
                     </div>
                     <div className="p-3 space-y-4">
                         {courses.map((course: any) => (
                             <div key={course.id} className="border border-gray-200 rounded-lg p-3 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-                                <h3 className="font-bold text-[12pt] sm:text-[15pt]">{course.name}</h3>
+                                <h3 className="font-bold text-[14pt]">{course.name}</h3>
                                 <div className="flex items-center gap-2 w-full md:w-auto">
-                                    <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none bg-black text-white px-8 py-2 rounded-full font-bold text-[12pt] sm:text-[15pt] text-center hover:bg-gray-800 transition-colors active:scale-95">
+                                    <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] text-center hover:bg-gray-800 transition-colors active:scale-95">
                                         View
                                     </Link>
-                                    <Link href={`/settings/course/${course.id}/edit`} className="bg-white border border-gray-200 text-gray-700 px-6 py-2 rounded-full font-bold text-[12pt] sm:text-[15pt] hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
+                                    <Link href={`/settings/course/${course.id}/edit`} className="bg-white border border-gray-200 text-gray-700 px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
                                         Edit
                                     </Link>
                                 </div>
                             </div>
                         ))}
                         {courses.length === 0 && (
-                            <div className="text-center py-8 text-gray-500 text-[12pt] sm:text-[15pt]">No courses found.</div>
+                            <div className="text-center py-8 text-gray-500 text-[14pt]">No courses found.</div>
                         )}
                     </div>
                 </div>
@@ -144,10 +144,10 @@ export default async function SettingsPage() {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
                         <DatabaseIcon className="w-5 h-5 text-gray-700" />
-                        <h2 className="font-bold text-gray-900 text-[12pt] sm:text-[15pt]">Data Backup & Restore</h2>
+                        <h2 className="font-bold text-gray-900 text-[14pt]">Data Backup & Restore</h2>
                     </div>
                     <div className="p-3">
-                        <p className="text-[12pt] sm:text-[15pt] text-gray-500 mb-4">
+                        <p className="text-[14pt] text-gray-500 mb-4">
                             Download a backup of all your data to protect against data loss.
                         </p>
                         <BackupManager />

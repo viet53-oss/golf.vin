@@ -30,7 +30,7 @@ export function StatsHistoryModal({ isOpen, onClose, playerName, type, history }
             {/* Header */}
             <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0 safe-top">
                 <div className="flex flex-col">
-                    <h2 className="text-[15pt] font-black text-gray-900 leading-tight">
+                    <h2 className="text-[14pt] font-black text-gray-900 leading-tight">
                         {playerName}
                     </h2>
                     <p className="text-[14pt] text-blue-600 font-bold">
@@ -66,11 +66,11 @@ export function StatsHistoryModal({ isOpen, onClose, playerName, type, history }
                                             <span className="font-bold text-gray-900 text-[14pt]">
                                                 {dateStr}
                                             </span>
-                                            <span className="text-[13pt] text-gray-500 font-medium">
+                                            <span className="text-[14pt] text-gray-500 font-medium">
                                                 {label}
                                             </span>
                                         </div>
-                                        <div className={`font-black text-[16pt] leading-none ${type === 'money' ? 'text-green-600' : 'text-blue-600'}`}>
+                                        <div className={`font-black text-[14pt] leading-none ${type === 'money' ? 'text-green-600' : 'text-blue-600'}`}>
                                             {type === 'money' ? `$${item.amount.toFixed(2)}` : item.amount}
                                         </div>
                                     </div>
@@ -84,7 +84,7 @@ export function StatsHistoryModal({ isOpen, onClose, playerName, type, history }
             {/* Footer Total */}
             <div className="border-t border-gray-100 p-6 bg-slate-50 flex justify-between items-center shrink-0 safe-bottom">
                 <span className="font-bold text-gray-500 uppercase tracking-wider text-[14pt]">Total</span>
-                <span className={`text-[20pt] font-black ${type === 'money' ? 'text-green-600' : 'text-blue-600'}`}>
+                <span className={`text-[14pt] font-black ${type === 'money' ? 'text-green-600' : 'text-blue-600'}`}>
                     {type === 'money' ? `$${total.toFixed(2)}` : total}
                 </span>
             </div>

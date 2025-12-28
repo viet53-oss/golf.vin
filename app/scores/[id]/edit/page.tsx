@@ -37,15 +37,15 @@ export default async function EditRoundPage({ params }: { params: Promise<{ id: 
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
-            <header className="bg-white shadow-sm sticky top-0 z-10 px-3 py-3">
+            <header className="bg-white shadow-sm sticky top-0 z-10 px-1 py-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/scores" className="px-4 py-2 bg-black text-white rounded-full text-[16pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+                        <Link href="/scores" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     </div>
                 </div>
             </header>
 
-            <main className="px-3 py-6">
+            <main className="px-1 py-6">
                 <EditRoundForm round={round} allPlayers={allPlayers} />
             </main>
         </div>

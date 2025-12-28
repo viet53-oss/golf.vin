@@ -64,7 +64,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
 
                 <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                     {/* Header */}
-                    <div className="relative pt-8 pb-4 px-6 text-center border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
+                    <div className="relative pt-8 pb-4 px-1 text-center border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
                         <button
                             type="button"
                             onClick={onClose}
@@ -73,14 +73,14 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                             <X size={24} />
                         </button>
 
-                        <h2 className="text-[12pt] sm:text-[15pt] font-extrabold text-gray-900 tracking-tight">
+                        <h2 className="text-[14pt] font-extrabold text-gray-900 tracking-tight">
                             {player.name}
                         </h2>
-                        <p className="text-gray-500 font-medium mt-1 uppercase tracking-wide text-[12pt] sm:text-[15pt]">Player Profile</p>
+                        <p className="text-gray-500 font-medium mt-1 uppercase tracking-wide text-[14pt]">Player Profile</p>
                     </div>
 
                     {/* Scrollable Content */}
-                    <div className="overflow-y-auto px-6 py-6 space-y-8 no-scrollbar bg-white flex-1">
+                    <div className="overflow-y-auto px-1 py-6 space-y-8 no-scrollbar bg-white flex-1">
 
                         {!isEditing ? (
                             // --- VIEW MODE ---
@@ -88,34 +88,34 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                 {/* Stats Row */}
                                 <div className="grid grid-cols-4 gap-3">
                                     <div className="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center text-center border border-slate-100">
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-gray-400 uppercase tracking-widest mb-1">HCP</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-black text-slate-800">{Math.round(liveIndex)}</span>
+                                        <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-widest mb-1">HCP</span>
+                                        <span className="text-[14pt] font-black text-slate-800">{Math.round(liveIndex)}</span>
                                     </div>
                                     <div className="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center text-center border border-slate-100">
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-gray-400 uppercase tracking-widest mb-1">INDEX</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-black text-slate-800">{liveIndex.toFixed(1)}</span>
+                                        <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-widest mb-1">INDEX</span>
+                                        <span className="text-[14pt] font-black text-slate-800">{liveIndex.toFixed(1)}</span>
                                     </div>
                                     <div className="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center text-center border border-slate-100">
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-gray-400 uppercase tracking-widest mb-1">POINTS</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-black text-slate-800">{points}</span>
+                                        <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-widest mb-1">POINTS</span>
+                                        <span className="text-[14pt] font-black text-slate-800">{points}</span>
                                     </div>
                                     <div className="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center text-center border border-slate-100">
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-gray-400 uppercase tracking-widest mb-1">LOW INDEX</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-black text-slate-800">{lowIndex}</span>
+                                        <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-widest mb-1">LOW INDEX</span>
+                                        <span className="text-[14pt] font-black text-slate-800">{lowIndex}</span>
                                     </div>
                                 </div>
 
                                 {/* Winnings Row */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-100 flex flex-col items-center justify-center text-center shadow-sm">
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-emerald-600 uppercase tracking-wider mb-2">YTD Winning</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-black text-emerald-700">${ytdWinnings.toFixed(2)}</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-emerald-400 mt-1">2025</span>
+                                        <span className="text-[14pt] font-bold text-emerald-600 uppercase tracking-wider mb-2">YTD Winning</span>
+                                        <span className="text-[14pt] font-black text-emerald-700">${ytdWinnings.toFixed(2)}</span>
+                                        <span className="text-[14pt] font-bold text-emerald-400 mt-1">2025</span>
                                     </div>
                                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-orange-100 flex flex-col items-center justify-center text-center shadow-sm">
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-orange-600 uppercase tracking-wider mb-2">Gross Winning</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-black text-orange-700">${allTimeWinnings.toFixed(2)}</span>
-                                        <span className="text-[12pt] sm:text-[15pt] font-bold text-orange-400 mt-1">All Time</span>
+                                        <span className="text-[14pt] font-bold text-orange-600 uppercase tracking-wider mb-2">Gross Winning</span>
+                                        <span className="text-[14pt] font-black text-orange-700">${allTimeWinnings.toFixed(2)}</span>
+                                        <span className="text-[14pt] font-bold text-orange-400 mt-1">All Time</span>
                                     </div>
                                 </div>
 
@@ -123,7 +123,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                 <div>
                                     <div className="flex items-center gap-2 mb-3">
                                         <span className="text-purple-500">#</span>
-                                        <h3 className="font-bold text-gray-900 text-[12pt] sm:text-[15pt]">Contact Information</h3>
+                                        <h3 className="font-bold text-gray-900 text-[14pt]">Contact Information</h3>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="border border-gray-100 rounded-xl p-4 flex gap-4 items-start">
@@ -131,7 +131,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                                 <Mail size={18} />
                                             </div>
                                             <div>
-                                                <span className="text-[12pt] sm:text-[15pt] font-bold text-gray-400 uppercase block mb-0.5">Email</span>
+                                                <span className="text-[14pt] font-bold text-gray-400 uppercase block mb-0.5">Email</span>
                                                 <span className="font-semibold text-gray-900 break-all">{player.email || '-'}</span>
                                             </div>
                                         </div>
@@ -140,7 +140,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                                 <Phone size={18} />
                                             </div>
                                             <div>
-                                                <span className="text-[12pt] sm:text-[15pt] font-bold text-gray-400 uppercase block mb-0.5">Phone</span>
+                                                <span className="text-[14pt] font-bold text-gray-400 uppercase block mb-0.5">Phone</span>
                                                 <span className="font-semibold text-gray-900">{player.phone || '-'}</span>
                                             </div>
                                         </div>
@@ -151,12 +151,12 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                 <div>
                                     <div className="flex items-center gap-2 mb-3">
                                         <MapPin className="text-blue-500 w-5 h-5" />
-                                        <h3 className="font-bold text-gray-900 text-[12pt] sm:text-[15pt]">Address & Personal</h3>
+                                        <h3 className="font-bold text-gray-900 text-[14pt]">Address & Personal</h3>
                                     </div>
                                     <div className="border border-gray-100 rounded-xl p-0 overflow-hidden divide-y divide-gray-50">
                                         <div className="grid grid-cols-1 md:grid-cols-2">
                                             <div className="p-5">
-                                                <span className="text-[12pt] sm:text-[15pt] font-bold text-blue-900/40 uppercase block mb-1">Address</span>
+                                                <span className="text-[14pt] font-bold text-blue-900/40 uppercase block mb-1">Address</span>
                                                 <div className="font-medium text-gray-700 space-y-0.5">
                                                     <p>{player.address || '-'}</p>
                                                     <p>
@@ -165,12 +165,12 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                                 </div>
                                             </div>
                                             <div className="p-5 bg-gray-50/30">
-                                                <span className="text-[12pt] sm:text-[15pt] font-bold text-blue-900/40 uppercase block mb-1">Birthday</span>
-                                                <p className="font-semibold text-gray-700 font-mono text-[12pt] sm:text-[15pt]">{player.birthday || '-'}</p>
+                                                <span className="text-[14pt] font-bold text-blue-900/40 uppercase block mb-1">Birthday</span>
+                                                <p className="font-semibold text-gray-700 font-mono text-[14pt]">{player.birthday || '-'}</p>
                                             </div>
                                         </div>
                                         <div className="p-5">
-                                            <span className="text-[12pt] sm:text-[15pt] font-bold text-blue-900/40 uppercase block mb-1">Player Since</span>
+                                            <span className="text-[14pt] font-bold text-blue-900/40 uppercase block mb-1">Player Since</span>
                                             <p className="font-bold text-gray-900">{player.year_joined || '-'}</p>
                                         </div>
                                     </div>
@@ -180,7 +180,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                 <div>
                                     <div className="flex items-center gap-2 mb-3">
                                         <TrophyIcon className="text-yellow-500 w-5 h-5" />
-                                        <h3 className="font-bold text-gray-900 text-[12pt] sm:text-[15pt]">Golf Profile</h3>
+                                        <h3 className="font-bold text-gray-900 text-[14pt]">Golf Profile</h3>
                                     </div>
                                     <div className="border border-gray-100 rounded-xl p-5">
                                         <div className="flex gap-4 items-center">
@@ -188,8 +188,8 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                                 <Calendar size={18} />
                                             </div>
                                             <div>
-                                                <span className="text-[12pt] sm:text-[15pt] font-bold text-gray-400 uppercase block mb-0.5">Preferred Tee Box</span>
-                                                <span className="font-bold text-gray-900 text-[12pt] sm:text-[15pt]">{displayTee}</span>
+                                                <span className="text-[14pt] font-bold text-gray-400 uppercase block mb-0.5">Preferred Tee Box</span>
+                                                <span className="font-bold text-gray-900 text-[14pt]">{displayTee}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -200,39 +200,39 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                             <div className="space-y-6">
                                 {/* Contact Inputs */}
                                 <div>
-                                    <h4 className="text-[12pt] sm:text-[15pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Contact</h4>
+                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Contact</h4>
                                     <div className="grid grid-cols-1 gap-4">
                                         <div>
-                                            <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">Email</label>
-                                            <input name="email" defaultValue={player.email || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="email@example.com" />
+                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Email</label>
+                                            <input name="email" defaultValue={player.email || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="email@example.com" />
                                         </div>
                                         <div>
-                                            <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">Phone</label>
-                                            <input name="phone" defaultValue={player.phone || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="555-555-5555" />
+                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Phone</label>
+                                            <input name="phone" defaultValue={player.phone || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="555-555-5555" />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Address Inputs */}
                                 <div>
-                                    <h4 className="text-[12pt] sm:text-[15pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Address</h4>
+                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Address</h4>
                                     <div className="space-y-3">
                                         <div>
-                                            <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">Street Address</label>
-                                            <input name="address" defaultValue={player.address || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="123 Golf Lane" />
+                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Street Address</label>
+                                            <input name="address" defaultValue={player.address || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="123 Golf Lane" />
                                         </div>
                                         <div className="grid grid-cols-3 gap-3">
                                             <div className="col-span-1">
-                                                <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">City</label>
-                                                <input name="city" defaultValue={player.city || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">City</label>
+                                                <input name="city" defaultValue={player.city || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
                                             </div>
                                             <div className="col-span-1">
-                                                <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">State</label>
-                                                <input name="state" defaultValue={player.state || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">State</label>
+                                                <input name="state" defaultValue={player.state || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
                                             </div>
                                             <div className="col-span-1">
-                                                <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">Zip</label>
-                                                <input name="zip" defaultValue={player.zip || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Zip</label>
+                                                <input name="zip" defaultValue={player.zip || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
                                             </div>
                                         </div>
                                     </div>
@@ -240,25 +240,25 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
 
                                 {/* Personal Inputs */}
                                 <div>
-                                    <h4 className="text-[12pt] sm:text-[15pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Personal</h4>
+                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Personal</h4>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">Birthday</label>
-                                            <input type="date" name="birthday" defaultValue={player.birthday || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Birthday</label>
+                                            <input type="date" name="birthday" defaultValue={player.birthday || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
                                         </div>
                                         <div>
-                                            <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">Player Since</label>
-                                            <input type="number" name="year_joined" defaultValue={player.year_joined || ''} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="YYYY" />
+                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Player Since</label>
+                                            <input type="number" name="year_joined" defaultValue={player.year_joined || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="YYYY" />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Golf Inputs */}
                                 <div>
-                                    <h4 className="text-[12pt] sm:text-[15pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Golf Preferences</h4>
+                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Golf Preferences</h4>
                                     <div>
-                                        <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-500 mb-1 uppercase">Preferred Tee Box</label>
-                                        <select name="preferred_tee_box" defaultValue={player.preferred_tee_box || 'White'} className="w-full text-[12pt] sm:text-[15pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                                        <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Preferred Tee Box</label>
+                                        <select name="preferred_tee_box" defaultValue={player.preferred_tee_box || 'White'} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                                             <option value="White">White</option>
                                             <option value="Gold">Gold</option>
                                             <option value="Blue">Blue</option>
@@ -278,14 +278,14 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                 <button
                                     type="button"
                                     onClick={() => setIsEditing(false)}
-                                    className="px-5 py-2.5 rounded-full font-bold text-[12pt] sm:text-[15pt] text-gray-600 hover:bg-gray-200 transition-colors"
+                                    className="px-1 py-2.5 rounded-full font-bold text-[14pt] text-gray-600 hover:bg-gray-200 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-bold text-[12pt] sm:text-[15pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
+                                    className="bg-green-600 hover:bg-green-700 text-white px-1 py-2.5 rounded-full font-bold text-[14pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
                                 >
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
@@ -294,7 +294,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                             <button
                                 type="button"
                                 onClick={() => setIsEditing(true)}
-                                className="bg-gray-900 hover:bg-black text-white px-5 py-2.5 rounded-full font-bold text-[12pt] sm:text-[15pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95"
+                                className="bg-gray-900 hover:bg-black text-white px-1 py-2.5 rounded-full font-bold text-[14pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95"
                             >
                                 Edit Player Profile
                             </button>

@@ -80,23 +80,23 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
 
     return (
         <div className="w-full">
-            <header className="bg-white shadow-sm sticky top-0 z-50 px-3 py-3 mb-6">
+            <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3 mb-6">
                 <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
                     <div className="flex justify-start">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[18pt] font-bold hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">
+                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">
                             Back
                         </Link>
                     </div>
 
                     <div className="flex justify-center">
-                        <h1 className="text-[18pt] font-bold text-green-600 tracking-tight text-center">Schedule</h1>
+                        <h1 className="text-[14pt] font-bold text-green-600 tracking-tight text-center">Schedule</h1>
                     </div>
 
                     <div className="flex justify-end">
                         {isAdmin && (
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="bg-black text-white text-[18pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
+                                className="bg-black text-white text-[14pt] font-bold px-1 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
                             >
                                 New
                             </button>
@@ -105,7 +105,7 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
                 </div>
             </header>
 
-            <main className="px-3 space-y-4">
+            <main className="px-1 space-y-4">
                 {initialEvents.length === 0 && (
                     <div className="text-center py-10 text-gray-500 text-lg">
                         No upcoming events found. {isAdmin ? 'Add one to get started!' : 'Check back later!'}
@@ -115,8 +115,8 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
                 {initialEvents.map((event) => (
                     <div key={event.id} className="bg-white border-2 border-gray-400 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
                         <div className="space-y-1">
-                            <h3 className="font-bold text-[15pt] text-black">{event.name}</h3>
-                            <div className="flex items-center gap-2 text-gray-600 text-[12pt]">
+                            <h3 className="font-bold text-[14pt] text-black">{event.name}</h3>
+                            <div className="flex items-center gap-2 text-gray-600 text-[14pt]">
                                 <span className="text-gray-400">📅</span>
                                 <span>{event.date}</span>
                                 {event.location && <span className="text-gray-400 text-sm ml-2">📍 {event.location}</span>}

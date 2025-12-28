@@ -149,9 +149,9 @@ export default async function ScoresPage() {
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3">
                 <div className="relative flex items-center justify-center p-1">
                     <div className="absolute left-0">
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[16pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     </div>
-                    <h1 className="text-[16pt] font-bold text-green-700 tracking-tight">Scores</h1>
+                    <h1 className="text-[14pt] font-bold text-green-700 tracking-tight">Scores</h1>
                 </div>
             </header>
 

@@ -29,7 +29,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         <div className="min-h-screen bg-white p-6 md:p-12 font-sans text-gray-900">
             {/* Header */}
             <div className="max-w-5xl mx-auto mb-8 flex items-center justify-between">
-                <Link href="/settings" className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/settings" className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-1 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                     Back to Courses
                 </Link>
                 <div className="hidden md:block"></div>
@@ -42,7 +42,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     <h1 className="text-4xl font-extrabold tracking-tight">{course.name}</h1>
                     <Link
                         href={`/settings/course/${course.id}/edit`}
-                        className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-1 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                         Edit <Edit className="w-3 h-3" />
                     </Link>
@@ -79,19 +79,19 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                                     <table className="w-full text-center text-sm">
                                         <thead className="bg-gray-100 font-bold text-gray-700">
                                             <tr>
-                                                <th className="py-2 w-24 text-left pl-4">Hole</th>
+                                                <th className="py-2 w-24 text-left pl-1">Hole</th>
                                                 {frontNine.map((h: any) => <th key={h.id} className="py-2 border-l border-gray-200">{h.hole_number}</th>)}
                                                 <th className="py-2 border-l border-gray-200 bg-gray-200">OUT</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
                                             <tr>
-                                                <td className="py-3 font-bold text-left pl-4">Par</td>
+                                                <td className="py-3 font-bold text-left pl-1">Par</td>
                                                 {frontNine.map((h: any) => <td key={h.id} className="py-3 border-l border-gray-200">{h.par}</td>)}
                                                 <td className="py-3 border-l border-gray-200 font-bold bg-gray-50">{frontPar}</td>
                                             </tr>
                                             <tr>
-                                                <td className="py-3 font-bold text-left pl-4 text-gray-500">Hardness</td>
+                                                <td className="py-3 font-bold text-left pl-1 text-gray-500">Hardness</td>
                                                 {frontNine.map((h: any) => <td key={h.id} className="py-3 border-l border-gray-200 text-gray-500">{h.difficulty ?? '-'}</td>)}
                                                 <td className="py-3 border-l border-gray-200 bg-gray-50">-</td>
                                             </tr>
@@ -107,7 +107,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                                     <table className="w-full text-center text-sm">
                                         <thead className="bg-gray-100 font-bold text-gray-700">
                                             <tr>
-                                                <th className="py-2 w-24 text-left pl-4">Hole</th>
+                                                <th className="py-2 w-24 text-left pl-1">Hole</th>
                                                 {backNine.map((h: any) => <th key={h.id} className="py-2 border-l border-gray-200">{h.hole_number}</th>)}
                                                 <th className="py-2 border-l border-gray-200 bg-gray-200">IN</th>
                                                 <th className="py-2 border-l border-gray-200 bg-gray-300">TOT</th>
@@ -115,13 +115,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
                                             <tr>
-                                                <td className="py-3 font-bold text-left pl-4">Par</td>
+                                                <td className="py-3 font-bold text-left pl-1">Par</td>
                                                 {backNine.map((h: any) => <td key={h.id} className="py-3 border-l border-gray-200">{h.par}</td>)}
                                                 <td className="py-3 border-l border-gray-200 font-bold bg-gray-50">{backPar}</td>
                                                 <td className="py-3 border-l border-gray-200 font-bold bg-gray-100">{totalPar}</td>
                                             </tr>
                                             <tr>
-                                                <td className="py-3 font-bold text-left pl-4 text-gray-500">Hardness</td>
+                                                <td className="py-3 font-bold text-left pl-1 text-gray-500">Hardness</td>
                                                 {backNine.map((h: any) => <td key={h.id} className="py-3 border-l border-gray-200 text-gray-500">{h.difficulty ?? '-'}</td>)}
                                                 <td className="py-3 border-l border-gray-200 bg-gray-50">-</td>
                                                 <td className="py-3 border-l border-gray-200 bg-gray-100">-</td>

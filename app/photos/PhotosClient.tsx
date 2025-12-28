@@ -133,7 +133,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
         <div className="space-y-8">
             {/* Upload Form - Visible to Everyone */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
-                <h2 className="flex items-center gap-2 font-bold text-[16pt] mb-4">
+                <h2 className="flex items-center gap-2 font-bold text-[14pt] mb-4">
                     <Upload className="w-5 h-5" /> Upload Photo/Video
                 </h2>
 
@@ -151,7 +151,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                     >
                         <ImageIcon className="w-12 h-12 text-gray-400 mb-2" />
                         <p className="font-bold text-gray-700">Drag and drop media here</p>
-                        <p className="text-[16pt] text-gray-500 mb-4">or click to browse</p>
+                        <p className="text-[14pt] text-gray-500 mb-4">or click to browse</p>
                         <input
                             type="file"
                             id="file-upload"
@@ -162,7 +162,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                         />
                         <label
                             htmlFor="file-upload"
-                            className="cursor-pointer bg-white border border-gray-300 px-4 py-2 rounded-lg font-bold text-[16pt] hover:bg-gray-50"
+                            className="cursor-pointer bg-white border border-gray-300 px-1 py-2 rounded-lg font-bold text-[14pt] hover:bg-gray-50"
                         >
                             Browse Files
                         </label>
@@ -170,7 +170,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-[16pt] font-bold text-gray-700 mb-1">Date</label>
+                            <label className="block text-[14pt] font-bold text-gray-700 mb-1">Date</label>
                             <div className="relative">
                                 <input
                                     type="date"
@@ -182,7 +182,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                             </div>
                         </div>
                         <div>
-                            <label className="block text-[16pt] font-bold text-gray-700 mb-1">Caption (Optional)</label>
+                            <label className="block text-[14pt] font-bold text-gray-700 mb-1">Caption (Optional)</label>
                             <input
                                 type="text"
                                 value={caption}
@@ -194,7 +194,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                     </div>
 
                     {isPending && (
-                        <div className="flex justify-center text-gray-500 text-[16pt] animate-pulse">
+                        <div className="flex justify-center text-gray-500 text-[14pt] animate-pulse">
                             Uploading...
                         </div>
                     )}
@@ -206,7 +206,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                 <div className="flex justify-end">
                     <button
                         onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
-                        className="flex items-center gap-2 text-[16pt] font-bold text-gray-600 hover:text-black transition-colors bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm"
+                        className="flex items-center gap-2 text-[14pt] font-bold text-gray-600 hover:text-black transition-colors bg-white px-1 py-1.5 rounded-lg border border-gray-200 shadow-sm"
                     >
                         <Calendar className="w-4 h-4" />
                         Sort: {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
@@ -242,7 +242,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                             <p className="text-gray-900 font-medium line-clamp-2">
                                                 {photo.caption}
                                             </p>
-                                            <p className="text-[16pt] text-gray-500 mt-1">
+                                            <p className="text-[14pt] text-gray-500 mt-1">
                                                 {formatLocalDate(photo.date)}
                                             </p>
                                         </div>
@@ -253,14 +253,14 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                             <button
                                                 onClick={() => handleEditClick(photo)}
                                                 disabled={isPending}
-                                                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-[16pt] transition-colors"
+                                                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-[14pt] transition-colors"
                                             >
                                                 <Edit2 className="w-4 h-4" /> Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(photo.id)}
                                                 disabled={isPending}
-                                                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold text-[16pt] transition-colors"
+                                                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold text-[14pt] transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" /> Delete
                                             </button>
@@ -275,7 +275,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                 {photos.length === 0 && (
                     <div className="text-center py-20 text-gray-500">
                         <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                        <h3 className="text-[16pt] font-bold text-gray-900 mb-2">No Photos Yet</h3>
+                        <h3 className="text-[14pt] font-bold text-gray-900 mb-2">No Photos Yet</h3>
                         <p>Upload photos to start your gallery.</p>
                     </div>
                 )}
@@ -285,7 +285,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                         <button
                             onClick={loadMore}
                             disabled={isLoadingMore}
-                            className="bg-black text-white px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform flex items-center gap-2"
+                            className="bg-black text-white px-1 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform flex items-center gap-2"
                         >
                             {isLoadingMore ? (
                                 <>
@@ -302,10 +302,10 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
             {editingPhoto && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80">
                     <div className="bg-white rounded-xl shadow-2xl w-full p-3" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-[16pt] font-bold mb-4">Edit Photo</h3>
+                        <h3 className="text-[14pt] font-bold mb-4">Edit Photo</h3>
                         <form onSubmit={handleEditSave} className="space-y-4">
                             <div>
-                                <label className="block text-[16pt] font-bold text-gray-700 mb-1">Date</label>
+                                <label className="block text-[14pt] font-bold text-gray-700 mb-1">Date</label>
                                 <input
                                     type="date"
                                     value={editingPhoto.date}
@@ -314,7 +314,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                 />
                             </div>
                             <div>
-                                <label className="block text-[16pt] font-bold text-gray-700 mb-1">Caption</label>
+                                <label className="block text-[14pt] font-bold text-gray-700 mb-1">Caption</label>
                                 <textarea
                                     value={editingPhoto.caption || ''}
                                     onChange={(e) => setEditingPhoto({ ...editingPhoto, caption: e.target.value })}
@@ -326,14 +326,14 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                 <button
                                     type="button"
                                     onClick={() => setEditingPhoto(null)}
-                                    className="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg"
+                                    className="px-1 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isPending}
-                                    className="px-4 py-2 bg-black text-white font-bold rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                                    className="px-1 py-2 bg-black text-white font-bold rounded-lg hover:bg-gray-800 disabled:opacity-50"
                                 >
                                     {isPending ? 'Saving...' : 'Save Changes'}
                                 </button>

@@ -59,7 +59,7 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
                         <select
                             value={selectedPlayerId}
                             onChange={(e) => setSelectedPlayerId(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         >
                             <option value="">Choose member or manual entry</option>
                             <option value="manual">Manual Entry</option>
@@ -77,7 +77,7 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
                             value={index}
                             onChange={(e) => setIndex(e.target.value)}
                             placeholder="Enter your index"
-                            className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
 
@@ -88,7 +88,7 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
                             value={par}
                             onChange={(e) => setPar(e.target.value)}
                             placeholder="Enter course par"
-                            className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
 
@@ -100,7 +100,7 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
                             value={rating}
                             onChange={(e) => setRating(e.target.value)}
                             placeholder="Enter course rating"
-                            className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
 
@@ -111,7 +111,7 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
                             value={slope}
                             onChange={(e) => setSlope(e.target.value)}
                             placeholder="Enter slope rating"
-                            className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
                 </div>

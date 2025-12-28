@@ -68,7 +68,7 @@ export default function PoolResults({
                         </svg>
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-[16pt] font-black text-gray-900 tracking-tight">Waiting for Scores</h3>
+                        <h3 className="text-[14pt] font-black text-gray-900 tracking-tight">Waiting for Scores</h3>
                         <p className="text-[14pt] text-gray-500 max-w-md mx-auto">
                             {allPoolParticipants.length} players are set for the pool, but they haven't posted scores for this round yet.
                         </p>
@@ -81,7 +81,7 @@ export default function PoolResults({
                             {/* Flight Header */}
                             {flights.length > 1 && (
                                 <div className="border-b-2 border-gray-900 pb-2">
-                                    <h2 className="text-[16pt] font-black text-gray-900 uppercase tracking-tighter">{flight.name}</h2>
+                                    <h2 className="text-[14pt] font-black text-gray-900 uppercase tracking-tighter">{flight.name}</h2>
                                 </div>
                             )}
 
@@ -137,10 +137,10 @@ export default function PoolResults({
                                                         onClick={() => handlePlayerClick(w.id)}
                                                         className="flex flex-col text-left cursor-pointer"
                                                     >
-                                                        <span className="text-[12pt] sm:text-[15pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
                                                             {w.name.split(' ')[0]}
                                                         </span>
-                                                        <span className="text-[12pt] sm:text-[15pt] text-gray-600 leading-none">
+                                                        <span className="text-[14pt] text-gray-600 leading-none">
                                                             {w.name.split(' ').slice(1).join(' ')}
                                                         </span>
                                                     </button>
@@ -176,10 +176,10 @@ export default function PoolResults({
                                                     onClick={() => handlePlayerClick(w.id)}
                                                     className="flex flex-col text-left cursor-pointer"
                                                 >
-                                                    <span className="text-[12pt] sm:text-[15pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                    <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
                                                         {w.name.split(' ')[0]}
                                                     </span>
-                                                    <span className="text-[12pt] sm:text-[15pt] text-gray-600 leading-none">
+                                                    <span className="text-[14pt] text-gray-600 leading-none">
                                                         {w.name.split(' ').slice(1).join(' ')}
                                                     </span>
                                                 </button>
@@ -208,7 +208,7 @@ export default function PoolResults({
                                         <span className="text-[14pt] font-black text-black leading-none">{name.split(' ')[0]}</span>
                                         <span className="text-[14pt] text-gray-600 truncate">{name.split(' ').slice(1).join(' ')}</span>
                                     </div>
-                                    <span className="text-[16pt] font-black text-green-600 ml-2 whitespace-nowrap">${amount.toFixed(2)}</span>
+                                    <span className="text-[14pt] font-black text-green-600 ml-2 whitespace-nowrap">${amount.toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>

@@ -23,7 +23,7 @@ export default async function PostScorePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-3">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-1">
             <div className="max-w-md w-full bg-white p-3 rounded-lg shadow-md">
                 <h1 className="text-2xl font-bold mb-6 text-center">Post a Score</h1>
 
@@ -126,7 +126,7 @@ export default async function PostScorePage() {
                     {/* Submit */}
                     <button
                         type="submit"
-                        className="w-full flex justify-center py-2 px-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        className="w-full flex justify-center py-2 px-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     >
                         Post Score
                     </button>

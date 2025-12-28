@@ -56,14 +56,14 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
         <div className="min-h-screen bg-white p-6 md:p-12 font-sans text-gray-900">
             {/* Header */}
             <div className="max-w-5xl mx-auto mb-8 flex items-center justify-between">
-                <Link href={`/settings/course/${initialCourse.id}`} className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href={`/settings/course/${initialCourse.id}`} className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-1 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Cancel
                 </Link>
                 <div className="flex gap-4">
                     <button
                         onClick={handleSubmit}
                         disabled={isPending}
-                        className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-bold hover:bg-gray-800 disabled:opacity-50"
+                        className="flex items-center gap-2 bg-black text-white px-1 py-2 rounded-lg font-bold hover:bg-gray-800 disabled:opacity-50"
                     >
                         {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Save Changes
@@ -136,13 +136,13 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                         <table className="w-full text-center bg-white border border-gray-200 rounded-lg">
                             <thead className="bg-gray-100 font-bold text-sm text-gray-700">
                                 <tr>
-                                    <th className="py-2 px-2 text-left">Hole</th>
+                                    <th className="py-2 px-1 text-left">Hole</th>
                                     {frontNine.map((h: any) => <th key={h.id} className="py-2 px-1 w-12">{h.hole_number}</th>)}
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr className="border-t border-gray-100">
-                                    <td className="py-2 px-2 text-left font-bold text-sm">Par</td>
+                                    <td className="py-2 px-1 text-left font-bold text-sm">Par</td>
                                     {frontNine.map((h: any, i: number) => (
                                         <td key={h.id} className="p-1">
                                             <input
@@ -155,7 +155,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                     ))}
                                 </tr>
                                 <tr className="border-t border-gray-100">
-                                    <td className="py-2 px-2 text-left font-bold text-sm text-gray-500">Hardness</td>
+                                    <td className="py-2 px-1 text-left font-bold text-sm text-gray-500">Hardness</td>
                                     {frontNine.map((h: any, i: number) => (
                                         <td key={h.id} className="p-1">
                                             <input
@@ -177,13 +177,13 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                         <table className="w-full text-center bg-white border border-gray-200 rounded-lg">
                             <thead className="bg-gray-100 font-bold text-sm text-gray-700">
                                 <tr>
-                                    <th className="py-2 px-2 text-left">Hole</th>
+                                    <th className="py-2 px-1 text-left">Hole</th>
                                     {backNine.map((h: any) => <th key={h.id} className="py-2 px-1 w-12">{h.hole_number}</th>)}
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr className="border-t border-gray-100">
-                                    <td className="py-2 px-2 text-left font-bold text-sm">Par</td>
+                                    <td className="py-2 px-1 text-left font-bold text-sm">Par</td>
                                     {backNine.map((h: any, i: number) => ( // Note: i is relative to this array!
                                         // Need to find global index.
                                         // frontNine len is 9. Index = 9 + i
@@ -198,7 +198,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                     ))}
                                 </tr>
                                 <tr className="border-t border-gray-100">
-                                    <td className="py-2 px-2 text-left font-bold text-sm text-gray-500">Hcp</td>
+                                    <td className="py-2 px-1 text-left font-bold text-sm text-gray-500">Hcp</td>
                                     {backNine.map((h: any, i: number) => (
                                         <td key={h.id} className="p-1">
                                             <input

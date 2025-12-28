@@ -22,7 +22,7 @@ export function PoolDateSelector({
 
     return (
         <select
-            className="flex-1 mx-1 bg-white border border-gray-300 rounded-lg px-2 sm:px-4 py-2 sm:py-2.5 text-[14pt] font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 appearance-none min-w-0 cursor-pointer hover:bg-gray-50 transition-colors"
+            className="flex-1 mx-1 bg-white border border-gray-300 rounded-lg px-1 sm:px-1 py-2 sm:py-2.5 text-[14pt] font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 appearance-none min-w-0 cursor-pointer hover:bg-gray-50 transition-colors"
             defaultValue={currentRoundId}
             onChange={(e) => {
                 router.push(`/pool?roundId=${e.target.value}`);

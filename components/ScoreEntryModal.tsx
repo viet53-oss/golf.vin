@@ -66,13 +66,13 @@ const NineHoleSection = ({
                         {/* Header Row (Hole #) */}
                         <tr className="border-b border-gray-100">
                             {holes.map(h => (
-                                <td key={h.id} className="px-3 py-2 w-10 font-bold text-[16pt] text-black">{h.hole_number}</td>
+                                <td key={h.id} className="px-1 py-2 w-10 font-bold text-[14pt] text-black">{h.hole_number}</td>
                             ))}
                         </tr>
                         {/* Par Row */}
                         <tr className="border-b border-gray-100">
                             {holes.map(h => (
-                                <td key={h.id} className="px-3 py-2 w-10 text-[16pt] text-gray-500">{h.par}</td>
+                                <td key={h.id} className="px-1 py-2 w-10 text-[14pt] text-gray-500">{h.par}</td>
                             ))}
                         </tr>
                         {/* Score Row */}
@@ -81,7 +81,7 @@ const NineHoleSection = ({
                                 const scoreIdx = startIdx + idx;
                                 const score = scores[scoreIdx];
                                 return (
-                                    <td key={h.id} className={`p-1 w-10 font-black text-[16pt] ${getScoreClass(score, h.par)}`}>
+                                    <td key={h.id} className={`p-1 w-10 font-black text-[14pt] ${getScoreClass(score, h.par)}`}>
                                         <input
                                             id={`hole-input-${scoreIdx}`}
                                             type="number"
@@ -103,7 +103,7 @@ const NineHoleSection = ({
                                                     }
                                                 }
                                             }}
-                                            className="w-full h-full text-center bg-transparent border-none outline-none font-black text-[16pt] focus:ring-2 focus:ring-inset focus:ring-blue-600 focus:bg-blue-50 rounded-md caret-black"
+                                            className="w-full h-full text-center bg-transparent border-none outline-none font-black text-[14pt] focus:ring-2 focus:ring-inset focus:ring-blue-600 focus:bg-blue-50 rounded-md caret-black"
                                         />
                                     </td>
                                 );
@@ -112,7 +112,7 @@ const NineHoleSection = ({
                         {/* Hardness Row */}
                         <tr>
                             {holes.map(h => (
-                                <td key={h.id} className="px-3 py-2 w-10 text-[16pt] text-gray-400">{h.difficulty || '-'}</td>
+                                <td key={h.id} className="px-1 py-2 w-10 text-[14pt] text-gray-400">{h.difficulty || '-'}</td>
                             ))}
                         </tr>
                     </tbody>
@@ -126,19 +126,19 @@ const NineHoleSection = ({
                     <tbody>
                         {/* Row 1: Header (Empty) */}
                         <tr className="border-b border-gray-100">
-                            <td className="px-1 py-2 text-[16pt] font-bold text-transparent">&nbsp;</td>
+                            <td className="px-1 py-2 text-[14pt] font-bold text-transparent">&nbsp;</td>
                         </tr>
                         {/* Row 2: Total Par */}
                         <tr className="border-b border-gray-100">
-                            <td className="px-1 py-2 text-[16pt] font-bold text-gray-400">{totalPar}</td>
+                            <td className="px-1 py-2 text-[14pt] font-bold text-gray-400">{totalPar}</td>
                         </tr>
                         {/* Row 3: Total Score */}
                         <tr className="border-b border-gray-100">
-                            <td className="px-1 py-2 text-[16pt] font-black text-black">{totalScore || '-'}</td>
+                            <td className="px-1 py-2 text-[14pt] font-black text-black">{totalScore || '-'}</td>
                         </tr>
                         {/* Row 4: Hardness (Empty) */}
                         <tr>
-                            <td className="px-1 py-2 text-[16pt] text-transparent">&nbsp;</td>
+                            <td className="px-1 py-2 text-[14pt] text-transparent">&nbsp;</td>
                         </tr>
                     </tbody>
                 </table>
@@ -335,23 +335,23 @@ export default function ScoreEntryModal({
                         <div className="flex flex-wrap justify-center gap-3 mt-8">
                             <div className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 bg-blue-200 border border-blue-300 rounded-sm"></span>
-                                <span className="text-[16pt] font-bold text-gray-500 uppercase">Eagle+</span>
+                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Eagle+</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 bg-emerald-200 border border-emerald-300 rounded-sm"></span>
-                                <span className="text-[16pt] font-bold text-gray-500 uppercase">Birdie</span>
+                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Birdie</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></span>
-                                <span className="text-[16pt] font-bold text-gray-500 uppercase">Par</span>
+                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Par</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 bg-amber-100 border border-amber-200 rounded-sm"></span>
-                                <span className="text-[16pt] font-bold text-gray-500 uppercase">Bogey</span>
+                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Bogey</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-3 h-3 bg-rose-200 border border-rose-300 rounded-sm"></span>
-                                <span className="text-[16pt] font-bold text-gray-500 uppercase">Double+</span>
+                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Double+</span>
                             </div>
                         </div>
 
@@ -361,12 +361,12 @@ export default function ScoreEntryModal({
                                 <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">GRS</span>
                                 <span className="text-3xl sm:text-4xl font-black text-black">{grossTotal || '-'}</span>
                             </div>
-                            <div className="w-px h-10 bg-gray-100 mx-2"></div>
+                            <div className="w-px h-10 bg-gray-100 mx-1"></div>
                             <div>
                                 <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">HCP</span>
                                 <span className="text-3xl sm:text-4xl font-black text-black">{courseHcp}</span>
                             </div>
-                            <div className="w-px h-10 bg-gray-100 mx-2"></div>
+                            <div className="w-px h-10 bg-gray-100 mx-1"></div>
                             <div>
                                 <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">NET</span>
                                 <span className="text-3xl sm:text-4xl font-black text-black">{netScore || '-'}</span>
@@ -384,7 +384,7 @@ export default function ScoreEntryModal({
                             </button>
                             <button
                                 onClick={onClose}
-                                className="px-8 py-3 border border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition-colors"
+                                className="px-1 py-3 border border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition-colors"
                             >
                                 Cancel
                             </button>

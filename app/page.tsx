@@ -73,46 +73,46 @@ export default async function Home() {
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-start text-center px-4 pb-10 w-full max-w-full pt-10">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-start text-center px-1 pb-10 w-full max-w-full pt-10">
 
         {/* Hero Text */}
         <div className="mb-12 space-y-4 w-full">
 
-          <h1 className="text-[32pt] sm:text-[50pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] sm:leading-tight w-full mt-10">
+          <h1 className="text-[40pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] w-full mt-10">
             <span className="relative inline-block">
               C
-              <span className="absolute bottom-1 left-0 w-full h-[3px] sm:h-[5px] bg-red-600 rounded-sm"></span>
+              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
             </span>
             ity{" "}
             <span className="relative inline-block">
               P
-              <span className="absolute bottom-1 left-0 w-full h-[3px] sm:h-[5px] bg-red-600 rounded-sm"></span>
+              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
             </span>
             ark{" "}
             <span className="relative inline-block">
               G
-              <span className="absolute bottom-1 left-0 w-full h-[3px] sm:h-[5px] bg-red-600 rounded-sm"></span>
+              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
             </span>
             olf{" "}
             <span className="relative inline-block">
               C
-              <span className="absolute bottom-1 left-0 w-full h-[3px] sm:h-[5px] bg-red-600 rounded-sm"></span>
+              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
             </span>
             lub{" "}
             of New Orleans
           </h1>
           <div className="flex flex-col gap-1 text-shadow-md w-full">
-            <p className="text-white text-[14pt] sm:text-[16pt] font-semibold drop-shadow-md leading-relaxed w-full">
+            <p className="text-white text-[14pt] font-semibold drop-shadow-md leading-relaxed w-full">
               Teeing off sunrise every Saturday at Bayou Oaks City Park Golf North Course.
             </p>
-            <p className="text-white/80 text-[14pt] sm:text-[16pt] mt-1 drop-shadow-sm font-medium w-full">
+            <p className="text-white/80 text-[14pt] mt-1 drop-shadow-sm font-medium w-full">
               1040 Filmore Ave, New Orleans, LA 70124.
             </p>
           </div>
         </div>
 
         {/* Menu Grid */}
-        <div className="grid grid-cols-3 gap-2 w-full px-1 sm:flex sm:flex-wrap sm:justify-center sm:gap-4">
+        <div className="grid grid-cols-3 gap-2 w-full px-1 sm:flex sm:flex-wrap sm:justify-center">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -122,17 +122,16 @@ export default async function Home() {
                 className="bg-white rounded-xl shadow-lg p-2 sm:p-4 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-transform duration-200 sm:w-[140px] h-[85px] sm:h-[100px]"
               >
                 <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${item.color}`} />
-                <span className="text-gray-900 font-bold text-[12pt] sm:text-[15pt] whitespace-nowrap">{item.name}</span>
+                <span className="text-gray-900 font-bold text-[14pt] whitespace-nowrap">{item.name}</span>
               </Link>
             )
           })}
         </div>
 
         {/* Footer Info */}
-        <div className="mt-16 text-white/60 text-[12pt] sm:text-[15pt] space-y-1">
+        <div className="mt-16 text-white/60 text-[14pt] space-y-1">
           <p className="font-bold text-white">CPGC.app</p>
-          <p>Last updated: December 23, 2025</p>
-          <p>100% Custom app by: Vchu.app</p>
+          <p>Custom app by: Vchu.app</p>
           <p>Question: Info@Vchu.app</p>
         </div>
 

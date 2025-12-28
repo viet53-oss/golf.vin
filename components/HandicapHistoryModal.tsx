@@ -127,7 +127,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
             {/* Header */}
             <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0 safe-top">
                 <div className="flex flex-col">
-                    <h2 className="text-[15pt] font-black text-gray-900 leading-tight">
+                    <h2 className="text-[14pt] font-black text-gray-900 leading-tight">
                         {data?.player.name || 'Loading...'}
                     </h2>
                     <p className="text-[14pt] text-blue-600 font-bold">Handicap History</p>
@@ -161,9 +161,9 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
 
                         {/* Official Handicap Card */}
                         <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
-                            <h3 className="font-bold text-gray-900 text-[15pt] mb-2">Official Handicap (From Database)</h3>
+                            <h3 className="font-bold text-gray-900 text-[14pt] mb-2">Official Handicap (From Database)</h3>
                             <div className="text-[14pt] font-bold text-gray-800 mb-6">
-                                Handicap Index: <span className="text-black text-[24pt]">{data.player.currentIndex.toFixed(1)}</span>
+                                Handicap Index: <span className="text-black text-[14pt]">{data.player.currentIndex.toFixed(1)}</span>
                             </div>
 
                             <div className="border-t border-gray-100 pt-4">
@@ -188,7 +188,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
 
                         {/* Recent Scoring Record Header */}
                         <div className="px-1">
-                            <h3 className="font-bold text-gray-900 text-[15pt]">Recent Scoring Record</h3>
+                            <h3 className="font-bold text-gray-900 text-[14pt]">Recent Scoring Record</h3>
                             <p className="text-sm text-gray-500 mt-1">Showing last 20 rounds (Best 8 count toward Index)</p>
                         </div>
 
@@ -204,12 +204,12 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                             </span>
                                             {/* Used Badge - Use usedForCurrent if available, fallback to historical used */}
                                             {item.usedForCurrent && (
-                                                <span className="bg-green-600 text-white text-[12pt] font-bold px-2 py-0.5 rounded">USED</span>
+                                                <span className="bg-green-600 text-white text-[14pt] font-bold px-1 py-0.5 rounded">USED</span>
                                             )}
                                         </div>
                                         {/* Diff */}
                                         <div className="text-right">
-                                            <div className="font-black text-gray-900 text-[16pt] leading-none">
+                                            <div className="font-black text-gray-900 text-[14pt] leading-none">
                                                 Diff: {item.differential.toFixed(1)}
                                             </div>
                                         </div>
@@ -224,7 +224,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                                 <span className="text-gray-500">{calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}</span>
                                                 <span className="text-gray-400 mx-1">=</span>
                                                 <span className="font-black text-blue-600">Net: {item.gross - calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}</span>
-                                                <span className="mx-2 text-gray-300">|</span>
+                                                <span className="mx-1 text-gray-300">|</span>
                                                 <span className={item.adjusted && item.adjusted !== item.gross ? "text-red-600 font-bold" : ""}>
                                                     Adj: {item.adjusted || item.gross}
                                                 </span>
@@ -233,7 +233,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                             <div>Adjusted Gross Score (Historical)</div>
                                         )}
                                         {item.rating && (
-                                            <div className="text-[13pt] text-gray-400">
+                                            <div className="text-[14pt] text-gray-400">
                                                 Par {item.par} • Rating {item.rating} • Slope {item.slope} • {item.teeColor || 'Est'}
                                             </div>
                                         )}
@@ -270,11 +270,11 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                                 <span className="text-gray-400">{item.indexBefore.toFixed(1)}</span>
                                                 <span className="text-gray-300">→</span>
                                                 <span className={`font-bold ${item.indexAfter === item.indexBefore ? 'text-gray-900' :
-                                                        item.indexAfter > item.indexBefore ? 'text-red-600' : 'text-green-600'
+                                                    item.indexAfter > item.indexBefore ? 'text-red-600' : 'text-green-600'
                                                     }`}>{item.indexAfter.toFixed(1)}</span>
 
                                                 {item.isLowHi && (
-                                                    <span className="ml-1 bg-blue-500 text-white text-[10pt] font-bold px-1.5 py-0.5 rounded">LOW HI</span>
+                                                    <span className="ml-1 bg-blue-500 text-white text-[14pt] font-bold px-1 py-0.5 rounded">LOW HI</span>
                                                 )}
                                             </div>
                                         </div>

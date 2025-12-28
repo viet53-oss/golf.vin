@@ -61,7 +61,7 @@ export default function MetaTagEditor() {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="w-full flex justify-center items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 px-4 rounded-full text-[12pt] sm:text-[15pt] transition-colors active:scale-95"
+                className="w-full flex justify-center items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 px-1 rounded-full text-[14pt] transition-colors active:scale-95"
             >
                 <PenTool className="w-4 h-4" />
                 Edit Meta Tags
@@ -77,7 +77,7 @@ export default function MetaTagEditor() {
                             <X className="w-6 h-6" />
                         </button>
 
-                        <h2 className="text-[12pt] sm:text-[15pt] font-bold mb-6 flex items-center gap-2">
+                        <h2 className="text-[14pt] font-bold mb-6 flex items-center gap-2">
                             <PenTool className="w-5 h-5" /> Edit Site Metadata
                         </h2>
 
@@ -88,33 +88,33 @@ export default function MetaTagEditor() {
                         ) : (
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-700 mb-1">Site Title</label>
+                                    <label className="block text-[14pt] font-bold text-gray-700 mb-1">Site Title</label>
                                     <input
                                         type="text"
                                         value={config.title}
                                         onChange={e => setConfig({ ...config, title: e.target.value })}
-                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black text-[12pt] sm:text-[15pt]"
+                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black text-[14pt]"
                                     />
-                                    <p className="text-[10pt] text-gray-500 mt-1">Appears in browser tab and search results.</p>
+                                    <p className="text-[14pt] text-gray-500 mt-1">Appears in browser tab and search results.</p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-700 mb-1">Description</label>
+                                    <label className="block text-[14pt] font-bold text-gray-700 mb-1">Description</label>
                                     <textarea
                                         rows={3}
                                         value={config.description}
                                         onChange={e => setConfig({ ...config, description: e.target.value })}
-                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black text-[12pt] sm:text-[15pt]"
+                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black text-[14pt]"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-[12pt] sm:text-[15pt] font-bold text-gray-700 mb-1">Keywords</label>
+                                    <label className="block text-[14pt] font-bold text-gray-700 mb-1">Keywords</label>
                                     <input
                                         type="text"
                                         value={config.keywords}
                                         onChange={e => setConfig({ ...config, keywords: e.target.value })}
-                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black text-[12pt] sm:text-[15pt]"
+                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-black focus:border-black text-[14pt]"
                                         placeholder="golf, sports, scores..."
                                     />
                                 </div>
@@ -122,14 +122,14 @@ export default function MetaTagEditor() {
                                 <div className="pt-4 flex justify-end gap-2">
                                     <button
                                         onClick={() => setIsOpen(false)}
-                                        className="px-4 py-2 text-gray-600 font-medium hover:text-black text-[12pt] sm:text-[15pt]"
+                                        className="px-1 py-2 text-gray-600 font-medium hover:text-black text-[14pt]"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSave}
                                         disabled={isLoading}
-                                        className="px-6 py-2 bg-black text-white rounded-full font-bold hover:bg-gray-800 flex items-center gap-2 text-[12pt] sm:text-[15pt] active:scale-95"
+                                        className="px-1 py-2 bg-black text-white rounded-full font-bold hover:bg-gray-800 flex items-center gap-2 text-[14pt] active:scale-95"
                                     >
                                         <Save className="w-4 h-4" /> Save
                                     </button>

@@ -54,8 +54,8 @@ export function ManagePoolModal({
             <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
 
                 {/* Header */}
-                <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-[#f8fafc]">
-                    <h2 className="text-[12pt] sm:text-[15pt] font-black text-gray-800 tracking-tight">Manage Pool Participants</h2>
+                <div className="px-1 py-5 border-b border-gray-100 flex justify-between items-center bg-[#f8fafc]">
+                    <h2 className="text-[14pt] font-black text-gray-800 tracking-tight">Manage Pool Participants</h2>
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-gray-200 rounded-full transition-colors"
@@ -69,13 +69,13 @@ export function ManagePoolModal({
                     <div className="flex gap-4 mb-6">
                         <button
                             onClick={() => setSelectedIds(allPlayers.map(p => p.id))}
-                            className="text-[12pt] sm:text-[15pt] font-bold text-green-600 hover:text-green-700 transition-colors"
+                            className="text-[14pt] font-bold text-green-600 hover:text-green-700 transition-colors"
                         >
                             Select All
                         </button>
                         <button
                             onClick={() => setSelectedIds([])}
-                            className="text-[12pt] sm:text-[15pt] font-bold text-red-600 hover:text-red-700 transition-colors"
+                            className="text-[14pt] font-bold text-red-600 hover:text-red-700 transition-colors"
                         >
                             Uncheck All
                         </button>
@@ -101,7 +101,7 @@ export function ManagePoolModal({
                                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                                         )}
                                     </div>
-                                    <span className={`text-[12pt] sm:text-[15pt] font-bold ${isSelected ? 'text-green-800' : 'text-gray-700'}`}>
+                                    <span className={`text-[14pt] font-bold ${isSelected ? 'text-green-800' : 'text-gray-700'}`}>
                                         {player.name}
                                     </span>
                                 </button>
@@ -111,10 +111,10 @@ export function ManagePoolModal({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="px-6 py-5 bg-[#f8fafc] border-t border-gray-100 flex justify-end gap-3">
+                <div className="px-1 py-5 bg-[#f8fafc] border-t border-gray-100 flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2.5 rounded-xl text-[12pt] sm:text-[15pt] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+                        className="px-1 py-2.5 rounded-xl text-[14pt] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
                         disabled={isSaving}
                     >
                         Cancel
@@ -122,7 +122,7 @@ export function ManagePoolModal({
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="bg-[#04d361] hover:bg-[#04b754] text-white px-8 py-2.5 rounded-xl text-[12pt] sm:text-[15pt] font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                        className="bg-[#04d361] hover:bg-[#04b754] text-white px-1 py-2.5 rounded-xl text-[14pt] font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
                     >
                         {isSaving ? (
                             <>

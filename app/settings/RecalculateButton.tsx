@@ -45,21 +45,21 @@ export default function RecalculateButton() {
             <button
                 onClick={handleRecalculate}
                 disabled={isPending}
-                className="w-full flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-4 rounded-full text-[12pt] sm:text-[15pt] transition-colors shadow-sm active:scale-95"
+                className="w-full flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-1 rounded-full text-[14pt] transition-colors shadow-sm active:scale-95"
             >
                 <RefreshCw className={`w-4 h-4 ${isPending ? 'animate-spin' : ''}`} />
                 {isPending ? 'Recalculating...' : 'Recalculate All Handicaps'}
             </button>
 
             {status === 'success' && (
-                <div className="flex items-center gap-2 text-green-600 text-[12pt] sm:text-[15pt] font-medium animate-in fade-in slide-in-from-top-1">
+                <div className="flex items-center gap-2 text-green-600 text-[14pt] font-medium animate-in fade-in slide-in-from-top-1">
                     <CheckCircle className="w-4 h-4" />
                     Successfully updated all handicaps!
                 </div>
             )}
 
             {status === 'error' && (
-                <div className="flex items-center gap-2 text-red-600 text-[12pt] sm:text-[15pt] font-medium animate-in fade-in slide-in-from-top-1">
+                <div className="flex items-center gap-2 text-red-600 text-[14pt] font-medium animate-in fade-in slide-in-from-top-1">
                     <AlertCircle className="w-4 h-4" />
                     Failed to recalculate. Check logs.
                 </div>

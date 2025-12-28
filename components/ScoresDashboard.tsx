@@ -433,7 +433,7 @@ export default function ScoresDashboard({
                                             {dateStr}
                                         </h2>
                                         {round.is_tournament && (
-                                            <span className="text-[14pt] font-black text-amber-700 bg-amber-100 px-2 sm:px-3 py-1 rounded border border-amber-200 uppercase tracking-widest leading-none">
+                                            <span className="text-[14pt] font-black text-amber-700 bg-amber-100 px-1 sm:px-1 py-1 rounded border border-amber-200 uppercase tracking-widest leading-none">
                                                 Tournament
                                             </span>
                                         )}
@@ -441,7 +441,7 @@ export default function ScoresDashboard({
 
                                     {round.name && (
                                         <div className="mt-1">
-                                            <div className="text-blue-600 font-bold text-[14pt] tracking-[0.1em] sm:tracking-[0.15em] uppercase border border-slate-100 px-2 py-1 rounded inline-block bg-slate-50/50">
+                                            <div className="text-blue-600 font-bold text-[14pt] tracking-[0.1em] sm:tracking-[0.15em] uppercase border border-slate-100 px-1 py-1 rounded inline-block bg-slate-50/50">
                                                 {round.name}
                                             </div>
                                         </div>
@@ -466,7 +466,7 @@ export default function ScoresDashboard({
                                             </button>
                                             <Link
                                                 href={`/scores/${round.id}/edit`}
-                                                className="bg-black text-white text-[16pt] font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm ml-2 cursor-pointer"
+                                                className="bg-black text-white text-[14pt] font-bold px-1 sm:px-1 py-1.5 sm:py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm ml-2 cursor-pointer"
                                             >
                                                 Edit
                                             </Link>
@@ -508,7 +508,7 @@ export default function ScoresDashboard({
                                 return flights.map((flight, fIdx) => (
                                     <div key={fIdx} className={fIdx > 0 ? 'border-t-8 border-slate-50' : ''}>
                                         {flight.name && (
-                                            <div className="px-3 py-3 bg-slate-50/50 border-b border-slate-100">
+                                            <div className="px-1 py-3 bg-slate-50/50 border-b border-slate-100">
                                                 <h3 className="text-[14pt] font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
                                                     <span className="w-1.5 h-1.5 bg-slate-900 rounded-full"></span>
                                                     {flight.name}
@@ -573,8 +573,8 @@ export default function ScoresDashboard({
 
                                                     return (
                                                         <tr key={rp.id} className="hover:bg-slate-50/50 transition-colors group">
-                                                            <td className="px-1 sm:px-3 py-3 text-center text-black font-bold text-[14pt]">{pIdx + 1}</td>
-                                                            <td className="px-3 py-3">
+                                                            <td className="px-1 sm:px-1 py-3 text-center text-black font-bold text-[14pt]">{pIdx + 1}</td>
+                                                            <td className="px-1 py-3">
                                                                 <button
                                                                     onClick={() => handlePlayerClick(rp.id)}
                                                                     disabled={isLoading}
@@ -592,7 +592,7 @@ export default function ScoresDashboard({
                                                                             if (!displayTee) return null;
 
                                                                             return (
-                                                                                <span className="text-[10pt] text-gray-400 font-normal no-underline ml-1 inline-block">
+                                                                                <span className="text-[14pt] text-gray-400 font-normal no-underline ml-1 inline-block">
                                                                                     {displayTee}
                                                                                 </span>
                                                                             );
@@ -606,36 +606,36 @@ export default function ScoresDashboard({
                                                             </td>
                                                             {round.is_tournament && (
                                                                 <>
-                                                                    <td className="px-3 py-3 text-center">
+                                                                    <td className="px-1 py-3 text-center">
                                                                         <span className="font-black text-green-600 text-[14pt]">
                                                                             {pIdx === 0 ? '$35' : pIdx === 1 ? '$25' : pIdx === 2 ? '$15' : '-'}
                                                                         </span>
                                                                     </td>
-                                                                    <td className="px-1 sm:px-3 py-3 text-center">
+                                                                    <td className="px-1 sm:px-1 py-3 text-center">
                                                                         <span className="font-bold text-slate-500 text-[14pt]">
                                                                             +{pIdx === 0 ? '100' : pIdx === 1 ? '75' : pIdx === 2 ? '50' : '20'}
                                                                         </span>
                                                                     </td>
-                                                                    <td className="px-1 sm:px-3 py-3 text-center">
+                                                                    <td className="px-1 sm:px-1 py-3 text-center">
                                                                         <span className="font-bold text-blue-600 text-[14pt]">
                                                                             {rp.ytdPoints || '-'}
                                                                         </span>
                                                                     </td>
                                                                 </>
                                                             )}
-                                                            <td className="px-1 sm:px-3 py-3 text-center font-bold text-black text-[14pt]">{gross ?? '-'}</td>
-                                                            <td className="px-1 sm:px-3 py-3 text-center font-bold text-black text-[14pt]">{courseHandicap}</td>
-                                                            <td className="px-1 sm:px-3 py-3 text-center bg-slate-50/50">
+                                                            <td className="px-1 sm:px-1 py-3 text-center font-bold text-black text-[14pt]">{gross ?? '-'}</td>
+                                                            <td className="px-1 sm:px-1 py-3 text-center font-bold text-black text-[14pt]">{courseHandicap}</td>
+                                                            <td className="px-1 sm:px-1 py-3 text-center bg-slate-50/50">
                                                                 <span className="font-black text-blue-600 text-[14pt]">
                                                                     {net ?? '-'}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-1 sm:px-3 py-3 text-center">
+                                                            <td className="px-1 sm:px-1 py-3 text-center">
                                                                 <div className="flex items-center justify-center gap-1 leading-none">
                                                                     <span className={`text-[14pt] font-black ${hcpColor}`}>{courseHandicapAfter}</span>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-1 sm:px-3 py-3 text-center">
+                                                            <td className="px-1 sm:px-1 py-3 text-center">
                                                                 <div className="flex items-center justify-center gap-1 leading-none">
                                                                     <span className={`text-[14pt] font-black ${idxColor}`}>{(idxAfter ?? idxBefore).toFixed(1)}</span>
                                                                 </div>
@@ -654,7 +654,7 @@ export default function ScoresDashboard({
                             <div className="p-1 bg-slate-50/50 text-center border-t border-slate-100">
                                 <button
                                     onClick={() => toggleRound(round.id)}
-                                    className="text-slate-500 hover:text-black font-black text-[16pt] uppercase tracking-widest transition-colors cursor-pointer"
+                                    className="text-slate-500 hover:text-black font-black text-[14pt] uppercase tracking-widest transition-colors cursor-pointer"
                                 >
                                     {isExpanded ? 'Show less' : `+${round.players.length - 3} more player${round.players.length - 3 !== 1 ? 's' : ''}`}
                                 </button>
@@ -678,7 +678,7 @@ export default function ScoresDashboard({
                     <div className="flex justify-center pt-4">
                         <button
                             onClick={loadMore}
-                            className="bg-black text-white px-8 py-2 rounded-full font-bold text-[16pt] hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
+                            className="bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
                         >
                             More Rounds
                         </button>

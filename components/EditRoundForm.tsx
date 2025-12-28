@@ -151,7 +151,7 @@ export default function EditRoundForm({
             {/* Round Details Section */}
             <div className="p-3 border-b border-gray-200 space-y-4">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-[16pt] font-bold text-gray-900">Add/Edit Round</h2>
+                    <h2 className="text-[14pt] font-bold text-gray-900">Add/Edit Round</h2>
                     <div className="flex gap-2">
                         <div className="flex flex-col items-end gap-1">
                             <div className="flex gap-2">
@@ -160,35 +160,35 @@ export default function EditRoundForm({
                                     onClick={handleDeleteClick}
                                     disabled={isPending}
                                     className={`${deleteConfirm ? 'bg-red-800 ring-2 ring-red-400' : 'bg-red-600 hover:bg-red-700'
-                                        } text-white text-[16pt] font-bold px-3 py-1.5 rounded-full transition-all`}
+                                        } text-white text-[14pt] font-bold px-1 py-1.5 rounded-full transition-all`}
                                 >
                                     {isPending ? 'Deleting...' : deleteConfirm ? 'Click AGAIN to Confirm' : 'Delete Round'}
                                 </button>
-                                <Link href="/scores" className="text-gray-400 text-[16pt] font-bold hover:text-black flex items-center">
+                                <Link href="/scores" className="text-gray-400 text-[14pt] font-bold hover:text-black flex items-center">
                                     Close
                                 </Link>
                             </div>
-                            {errorMessage && <span className="text-red-600 text-[16pt] font-bold">{errorMessage}</span>}
+                            {errorMessage && <span className="text-red-600 text-[14pt] font-bold">{errorMessage}</span>}
                         </div>
                     </div>
                 </div>
 
                 <div className="grid gap-4">
                     <div>
-                        <label className="block text-[16pt] font-bold text-gray-700 mb-1">Date</label>
+                        <label className="block text-[14pt] font-bold text-gray-700 mb-1">Date</label>
                         <input
                             type="date"
-                            className="w-full border border-gray-300 rounded px-3 py-2 text-[16pt]"
+                            className="w-full border border-gray-300 rounded px-1 py-2 text-[14pt]"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="block text-[16pt] font-bold text-gray-700 mb-1">Name</label>
+                        <label className="block text-[14pt] font-bold text-gray-700 mb-1">Name</label>
                         <input
                             type="text"
                             placeholder="e.g. Sunday Game"
-                            className="w-full border border-gray-300 rounded px-3 py-2 text-[16pt]"
+                            className="w-full border border-gray-300 rounded px-1 py-2 text-[14pt]"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
@@ -201,29 +201,29 @@ export default function EditRoundForm({
                             checked={isTournament}
                             onChange={(e) => setIsTournament(e.target.checked)}
                         />
-                        <label htmlFor="tournament" className="text-[16pt] text-gray-700">Tournament (with Flight 1 & 2)</label>
+                        <label htmlFor="tournament" className="text-[14pt] text-gray-700">Tournament (with Flight 1 & 2)</label>
                     </div>
                 </div>
             </div>
 
             {/* Add Players Section */}
             <div className="p-3 border-b border-gray-200 bg-gray-50/50">
-                <h3 className="font-bold text-[16pt] text-gray-900 mb-3">Add Players to Round/Tournament</h3>
+                <h3 className="font-bold text-[14pt] text-gray-900 mb-3">Add Players to Round/Tournament</h3>
                 <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg bg-white p-2 space-y-1">
                     {/* List Added Players (Disabled) */}
                     {round.players.map(rp => (
-                        <div key={rp.id} className="flex items-center gap-2 px-2 py-1.5 opacity-50">
+                        <div key={rp.id} className="flex items-center gap-2 px-1 py-1.5 opacity-50">
                             <input type="checkbox" checked disabled className="rounded border-gray-300" />
-                            <span className="text-[16pt] text-gray-500">
-                                {rp.player.name} <span className="text-[16pt]">(HCP: {Math.round(rp.player.index)})</span>
-                                <span className="ml-2 text-[16pt] font-bold">(Added)</span>
+                            <span className="text-[14pt] text-gray-500">
+                                {rp.player.name} <span className="text-[14pt]">(HCP: {Math.round(rp.player.index)})</span>
+                                <span className="ml-2 text-[14pt] font-bold">(Added)</span>
                             </span>
                         </div>
                     ))}
 
                     {/* List Available Players */}
                     {sortedAvailablePlayers.map(p => (
-                        <div key={p.id} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50">
+                        <div key={p.id} className="flex items-center gap-2 px-1 py-1.5 hover:bg-gray-50">
                             <input
                                 type="checkbox"
                                 id={`player-${p.id}`}
@@ -231,8 +231,8 @@ export default function EditRoundForm({
                                 checked={selectedPlayerIds.has(p.id)}
                                 onChange={() => togglePlayerSelection(p.id)}
                             />
-                            <label htmlFor={`player-${p.id}`} className="text-[16pt] text-gray-900 cursor-pointer w-full">
-                                {p.name} <span className="text-gray-400 text-[16pt]">(HCP: {getCourseHcp(p.index)})</span>
+                            <label htmlFor={`player-${p.id}`} className="text-[14pt] text-gray-900 cursor-pointer w-full">
+                                {p.name} <span className="text-gray-400 text-[14pt]">(HCP: {getCourseHcp(p.index)})</span>
                             </label>
                         </div>
                     ))}
@@ -241,7 +241,7 @@ export default function EditRoundForm({
                 <button
                     onClick={handleAddSelected}
                     disabled={selectedPlayerIds.size === 0 || isPending}
-                    className="mt-3 w-full bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 rounded-lg text-[16pt] transition-colors"
+                    className="mt-3 w-full bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 rounded-lg text-[14pt] transition-colors"
                 >
                     Add Selected Players ({selectedPlayerIds.size})
                 </button>
@@ -249,10 +249,10 @@ export default function EditRoundForm({
 
             {/* Players in Round Table */}
             <div className="p-3">
-                <h3 className="font-bold text-[16pt] text-gray-900 mb-3">Players in This Round</h3>
+                <h3 className="font-bold text-[14pt] text-gray-900 mb-3">Players in This Round</h3>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-[16pt]">
-                        <thead className="text-[16pt] text-black uppercase font-bold border-b border-gray-200">
+                    <table className="w-full text-[14pt]">
+                        <thead className="text-[14pt] text-black uppercase font-bold border-b border-gray-200">
                             <tr>
                                 <th className="py-2 text-left">Player</th>
                                 <th className="py-2 text-center">Tee Box</th>
@@ -300,13 +300,13 @@ export default function EditRoundForm({
                                                             setSelectedPlayer(rp);
                                                             setScoreModalOpen(true);
                                                         }}
-                                                        className="px-3 py-1 border border-gray-300 rounded text-[16pt] font-bold hover:bg-gray-100"
+                                                        className="px-1 py-1 border border-gray-300 rounded text-[14pt] font-bold hover:bg-gray-100"
                                                     >
                                                         Edit
                                                     </button>
                                                     <button
                                                         onClick={() => handleRemovePlayer(rp.id)}
-                                                        className="px-3 py-1 text-red-600 font-bold text-[16pt] hover:bg-red-50 rounded"
+                                                        className="px-1 py-1 text-red-600 font-bold text-[14pt] hover:bg-red-50 rounded"
                                                     >
                                                         Remove
                                                     </button>
@@ -326,7 +326,7 @@ export default function EditRoundForm({
                 <button
                     onClick={handleSaveRound}
                     disabled={isPending}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-sm transition-colors text-[16pt]"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-sm transition-colors text-[14pt]"
                 >
                     {isPending ? 'Saving...' : 'Save & Update Round'}
                 </button>
