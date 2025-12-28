@@ -582,21 +582,6 @@ export default function ScoresDashboard({
                                                                 >
                                                                     <span className="font-bold text-blue-600 text-[14pt] underline decoration-2 decoration-red-600 group-hover/name:text-blue-700 group-hover/name:decoration-red-700 transition-colors uppercase leading-tight">
                                                                         {firstName}
-                                                                        {(() => {
-                                                                            // Prioritize preferred tee box if available
-                                                                            const pref = rp.player.preferred_tee_box;
-                                                                            const recorded = rp.tee_box?.name;
-
-                                                                            const displayTee = pref || recorded;
-
-                                                                            if (!displayTee) return null;
-
-                                                                            return (
-                                                                                <span className="text-[14pt] text-gray-400 font-normal no-underline ml-1 inline-block">
-                                                                                    {displayTee}
-                                                                                </span>
-                                                                            );
-                                                                        })()}
                                                                     </span>
                                                                     <span className="text-[14pt] text-black font-medium leading-none">
                                                                         {lastName}

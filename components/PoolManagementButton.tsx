@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ManagePoolModal } from './ManagePoolModal';
+import Cookies from 'js-cookie';
 
 interface Player {
     id: string;
@@ -18,6 +19,29 @@ export function PoolManagementButton({
     currentParticipantIds: string[];
 }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // Check admin status on mount and when admin status changes
+    useEffect(() => {
+        const checkAdmin = () => {
+            const adminCookie = Cookies.get('admin_session');
+            setIsAdmin(adminCookie === 'true');
+        };
+
+        checkAdmin();
+
+        // Listen for admin status changes
+        window.addEventListener('admin-change', checkAdmin);
+        return () => window.removeEventListener('admin-change', checkAdmin);
+    }, []);
+
+    // Also check admin status whenever modal opens
+    useEffect(() => {
+        if (isOpen) {
+            const adminCookie = Cookies.get('admin_session');
+            setIsAdmin(adminCookie === 'true');
+        }
+    }, [isOpen]);
 
     return (
         <>
@@ -34,6 +58,7 @@ export function PoolManagementButton({
                 initialSelectedIds={currentParticipantIds}
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
+                isAdmin={isAdmin}
             />
         </>
     );

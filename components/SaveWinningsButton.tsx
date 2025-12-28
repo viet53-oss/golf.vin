@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { saveRoundWinnings } from '@/app/actions';
+import Cookies from 'js-cookie';
 
 interface PayoutEntry {
     playerId: string;
@@ -16,6 +17,21 @@ export function SaveWinningsButton({
     payouts: PayoutEntry[]
 }) {
     const [isSaving, setIsSaving] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // Check admin status on mount and when admin status changes
+    useEffect(() => {
+        const checkAdmin = () => {
+            const adminCookie = Cookies.get('admin_session');
+            setIsAdmin(adminCookie === 'true');
+        };
+
+        checkAdmin();
+
+        // Listen for admin status changes
+        window.addEventListener('admin-change', checkAdmin);
+        return () => window.removeEventListener('admin-change', checkAdmin);
+    }, []);
 
     const handleSave = async () => {
         if (!confirm('This will save these calculated winnings to the database. Continue?')) {
@@ -33,6 +49,9 @@ export function SaveWinningsButton({
             setIsSaving(false);
         }
     };
+
+    // Only render for admins
+    if (!isAdmin) return null;
 
     return (
         <div className="pt-4">

@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { calculateAdjustedGrossScore } from '@/lib/adjusted-score';
 import { calculateScoreDifferential } from '@/lib/handicap';
+import { recalculatePlayerHandicap } from './actions/recalculate-player';
 
 type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
 
@@ -70,6 +71,9 @@ export async function postScore(formData: FormData) {
             score_differential: differential,
         },
     });
+
+    // Automatically recalculate handicap for this player
+    await recalculatePlayerHandicap(playerId);
 
     revalidatePath('/players');
     revalidatePath('/scores');
@@ -294,6 +298,15 @@ export async function updatePlayerScore(
             });
         }
     });
+
+    // Automatically recalculate handicap for this player
+    const playerInfo = await prisma.roundPlayer.findUnique({
+        where: { id: roundPlayerId },
+        select: { player_id: true }
+    });
+    if (playerInfo) {
+        await recalculatePlayerHandicap(playerInfo.player_id);
+    }
 
     revalidatePath('/scores');
 }

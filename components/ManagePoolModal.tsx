@@ -13,13 +13,15 @@ export function ManagePoolModal({
     allPlayers, // These are now ONLY players in the round
     initialSelectedIds,
     isOpen,
-    onClose
+    onClose,
+    isAdmin
 }: {
     roundId: string;
     allPlayers: Player[];
     initialSelectedIds: string[];
     isOpen: boolean;
     onClose: () => void;
+    isAdmin: boolean;
 }) {
     const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
     const [isSaving, setIsSaving] = useState(false);
@@ -27,6 +29,7 @@ export function ManagePoolModal({
     if (!isOpen) return null;
 
     const togglePlayer = (id: string) => {
+        if (!isAdmin) return; // Only admins can toggle
         setSelectedIds(prev =>
             prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
         );
@@ -66,20 +69,22 @@ export function ManagePoolModal({
 
                 {/* Body - Player Grid */}
                 <div className="flex-1 overflow-y-auto p-6">
-                    <div className="flex gap-4 mb-6">
-                        <button
-                            onClick={() => setSelectedIds(allPlayers.map(p => p.id))}
-                            className="text-[14pt] font-bold text-green-600 hover:text-green-700 transition-colors"
-                        >
-                            Select All
-                        </button>
-                        <button
-                            onClick={() => setSelectedIds([])}
-                            className="text-[14pt] font-bold text-red-600 hover:text-red-700 transition-colors"
-                        >
-                            Uncheck All
-                        </button>
-                    </div>
+                    {isAdmin && (
+                        <div className="flex gap-4 mb-6">
+                            <button
+                                onClick={() => setSelectedIds(allPlayers.map(p => p.id))}
+                                className="text-[14pt] font-bold text-green-600 hover:text-green-700 transition-colors"
+                            >
+                                Select All
+                            </button>
+                            <button
+                                onClick={() => setSelectedIds([])}
+                                className="text-[14pt] font-bold text-red-600 hover:text-red-700 transition-colors"
+                            >
+                                Uncheck All
+                            </button>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {sortedPlayers.map(player => {
@@ -88,10 +93,11 @@ export function ManagePoolModal({
                                 <button
                                     key={player.id}
                                     onClick={() => togglePlayer(player.id)}
+                                    disabled={!isAdmin}
                                     className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${isSelected
                                         ? 'border-green-500 bg-green-50 shadow-sm'
                                         : 'border-gray-100 bg-white hover:border-gray-200'
-                                        }`}
+                                        } ${!isAdmin ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                                 >
                                     <div className={`w-7 h-7 rounded flex items-center justify-center border-2 transition-colors ${isSelected
                                         ? 'bg-green-600 border-green-600'
@@ -117,22 +123,24 @@ export function ManagePoolModal({
                         className="px-1 py-2.5 rounded-xl text-[14pt] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
                         disabled={isSaving}
                     >
-                        Cancel
+                        {isAdmin ? 'Cancel' : 'Close'}
                     </button>
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="bg-[#04d361] hover:bg-[#04b754] text-white px-1 py-2.5 rounded-xl text-[14pt] font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
-                    >
-                        {isSaving ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                Saving...
-                            </>
-                        ) : (
-                            'Save Pool Participants'
-                        )}
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className="bg-[#04d361] hover:bg-[#04b754] text-white px-1 py-2.5 rounded-xl text-[14pt] font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                        >
+                            {isSaving ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Saving...
+                                </>
+                            ) : (
+                                'Save Pool Participants'
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
