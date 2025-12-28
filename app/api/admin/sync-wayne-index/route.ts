@@ -31,26 +31,17 @@ export async function GET() {
         return NextResponse.json({ error: 'Latest round has no index_after value' });
     }
 
-    // Update player's current index to match the index_after from latest round
-    if (currentIndexInDB !== indexAfterLatestRound) {
-        await prisma.player.update({
-            where: { id: wayne.id },
-            data: { index: indexAfterLatestRound }
-        });
-
-        return NextResponse.json({
-            success: true,
-            message: 'Updated Wayne\'s current index',
-            old: currentIndexInDB,
-            new: indexAfterLatestRound,
-            latestRoundDate: latestRound.round.date
-        });
-    }
+    // Always update player's current index to match the index_after from latest round
+    await prisma.player.update({
+        where: { id: wayne.id },
+        data: { index: indexAfterLatestRound }
+    });
 
     return NextResponse.json({
         success: true,
-        message: 'Index already correct',
-        currentIndex: currentIndexInDB,
+        message: currentIndexInDB !== indexAfterLatestRound ? 'Updated Wayne\'s current index' : 'Index was already correct',
+        old: currentIndexInDB,
+        new: indexAfterLatestRound,
         latestRoundDate: latestRound.round.date
     });
 }
