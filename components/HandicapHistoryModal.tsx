@@ -219,7 +219,11 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                     <div className="text-[14pt] text-gray-600 mb-4 flex flex-col gap-1">
                                         {item.gross ? (
                                             <div>
-                                                Gross: <span className="font-medium text-gray-900">{item.gross}</span>
+                                                <span className="font-medium text-gray-900">Grs: {item.gross}</span>
+                                                <span className="text-gray-400 mx-1">-</span>
+                                                <span className="text-gray-500">{calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}</span>
+                                                <span className="text-gray-400 mx-1">=</span>
+                                                <span className="font-black text-blue-600">Net: {item.gross - calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72)}</span>
                                                 <span className="mx-2 text-gray-300">|</span>
                                                 <span className={item.adjusted && item.adjusted !== item.gross ? "text-red-600 font-bold" : ""}>
                                                     Adj: {item.adjusted || item.gross}
