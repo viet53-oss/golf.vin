@@ -67,7 +67,7 @@ export default async function Home() {
           src="/background-final.jpg"
           alt="Golf Club Group"
           fill
-          className="object-cover brightness-50"
+          className="object-cover object-top brightness-50"
           priority
         />
       </div>
