@@ -19,7 +19,7 @@ export default async function SchedulePage() {
         name: t.name,
         date: format(parseLocalDate(t.date), 'EEEE, MMMM d, yyyy'),
         rawDate: t.date,
-        location: t.location || 'City Park Golf Course'
+        location: t.location || ''
     }));
 
     return (
