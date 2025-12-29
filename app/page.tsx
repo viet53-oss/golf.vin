@@ -78,7 +78,7 @@ export default async function Home() {
         {/* Hero Text */}
         <div className="mb-12 space-y-4 w-full">
 
-          <h1 className="text-[40pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] w-full mt-10">
+          <h1 className="text-[35pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] w-full mt-10">
             <span className="relative inline-block">
               C
               <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>

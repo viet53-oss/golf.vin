@@ -103,7 +103,7 @@ export default function PoolResults({
                                                         onClick={() => handlePlayerClick(w.id)}
                                                         className="flex flex-col text-left cursor-pointer"
                                                     >
-                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-black decoration-2 leading-tight">
                                                             {w.name.split(' ')[0]}
                                                         </span>
                                                         <span className="text-[14pt] text-gray-600 leading-none">
@@ -137,7 +137,7 @@ export default function PoolResults({
                                                         onClick={() => handlePlayerClick(w.id)}
                                                         className="flex flex-col text-left cursor-pointer"
                                                     >
-                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                        <span className="text-[14pt] font-black text-blue-600 underline decoration-black decoration-2 leading-tight">
                                                             {w.name.split(' ')[0]}
                                                         </span>
                                                         <span className="text-[14pt] text-gray-600 leading-none">
@@ -176,7 +176,7 @@ export default function PoolResults({
                                                     onClick={() => handlePlayerClick(w.id)}
                                                     className="flex flex-col text-left cursor-pointer"
                                                 >
-                                                    <span className="text-[14pt] font-black text-blue-600 underline decoration-red-500 decoration-2 leading-tight">
+                                                    <span className="text-[14pt] font-black text-blue-600 underline decoration-black decoration-2 leading-tight">
                                                         {w.name.split(' ')[0]}
                                                     </span>
                                                     <span className="text-[14pt] text-gray-600 leading-none">

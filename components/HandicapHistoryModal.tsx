@@ -135,10 +135,10 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                 <div className="flex items-center gap-2">
                     <button
                         onClick={handleCopyFullHistory}
-                        className="p-2 bg-white hover:bg-gray-100 border border-gray-200 rounded-full transition-colors flex items-center justify-center group"
+                        className="p-2 bg-black hover:bg-gray-800 rounded-full transition-colors flex items-center justify-center group"
                         title="Copy Full History"
                     >
-                        <Copy size={24} className="text-gray-400 group-hover:text-gray-600" />
+                        <Copy size={24} className="text-white" />
                     </button>
                     <button
                         onClick={onClose}

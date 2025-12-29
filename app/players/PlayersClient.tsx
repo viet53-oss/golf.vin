@@ -11,6 +11,7 @@ import { StatsHistoryModal } from '@/components/StatsHistoryModal';
 interface PlayersClientProps {
     initialPlayers: PlayerWithRounds[];
     course?: any; // Avoiding deep typing for now, strictly used for HCP calc
+    isAdmin: boolean;
 }
 
 type SortKey = 'last_name' | 'first_name' | 'hcp' | 'rank' | 'pts' | 'money';
@@ -29,7 +30,7 @@ interface ProcessedPlayer extends PlayerWithRounds {
     moneyBreakdown: Array<{ date: string; roundName?: string; amount: number; isTournament?: boolean }>;
 }
 
-export default function PlayersClient({ initialPlayers, course }: PlayersClientProps) {
+export default function PlayersClient({ initialPlayers, course, isAdmin }: PlayersClientProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPlayer, setSelectedPlayer] = useState<ProcessedPlayer | null>(null);
     const [selectedHandicapPlayerId, setSelectedHandicapPlayerId] = useState<string | null>(null);
@@ -231,7 +232,7 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
     const SortButton = ({ label, sortKey }: { label: string, sortKey: SortKey }) => (
         <button
             onClick={() => handleSort(sortKey)}
-            className={`hover:text-black flex items-center gap-0.5 transition-colors cursor-pointer ${sortConfig.key === sortKey ? 'text-black font-bold' : ''}`}
+            className={`hover:text-black flex items-center gap-0.5 transition-colors cursor-pointer underline decoration-black decoration-2 ${sortConfig.key === sortKey ? 'text-black font-bold' : ''}`}
         >
             {label}
             {sortConfig.key === sortKey && (
@@ -344,31 +345,34 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
                 <div className="flex items-center justify-between">
                     <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     <h1 className="text-[14pt] font-bold text-green-700 tracking-tight">Players</h1>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleCopyMembers}
-                            className="flex items-center justify-center p-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors shadow-sm cursor-pointer"
-                            title="Copy Member List"
-                        >
-                            <Copy size={20} />
-                        </button>
-                        <button
-                            onClick={handleCopyEmails}
-                            className="flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
-                            title="Copy Emails"
-                        >
-                            <Mail size={20} />
-                        </button>
-                    </div>
+                    {isAdmin && (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleCopyMembers}
+                                className="flex items-center justify-center p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
+                                title="Copy Member List"
+                            >
+                                <Copy size={20} />
+                            </button>
+                            <button
+                                onClick={handleCopyEmails}
+                                className="flex items-center justify-center p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
+                                title="Copy Emails"
+                            >
+                                <Mail size={20} />
+                            </button>
+                        </div>
+                    )}
+                    {!isAdmin && <div className="w-[88px]"></div>}
                 </div>
 
                 {/* Search & Sort Bar */}
                 <div className="mt-4 flex items-center gap-2">
                     <div className="flex gap-4 text-[14pt] font-bold text-gray-500 uppercase tracking-wide items-center overflow-x-auto">
-                        <span className="shrink-0 text-gray-400">Sort:</span>
+
                         <SortButton label="Last" sortKey="last_name" />
                         <SortButton label="First" sortKey="first_name" />
-                        <SortButton label="Rank" sortKey="rank" />
+                        <SortButton label="#" sortKey="rank" />
                         <SortButton label="Pts" sortKey="pts" />
                         <SortButton label="$" sortKey="money" />
                     </div>
@@ -398,7 +402,7 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
                             >
                                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 group-hover:opacity-80 transition-opacity">
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-[14pt] font-bold text-blue-600 leading-tight underline decoration-red-500 decoration-2 underline-offset-2">
+                                        <span className="text-[14pt] font-bold text-blue-600 leading-tight underline decoration-black decoration-2 underline-offset-2">
                                             {player.firstName}
                                         </span>
                                         <span className="text-[14pt] font-semibold text-black leading-tight">
@@ -456,7 +460,7 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
                                     onClick={() => setSelectedHandicapPlayerId(player.id)}
                                 >
                                     <span className="text-[14pt] text-gray-400 font-bold tracking-wider">Idx</span>
-                                    <span className="font-bold text-[14pt] text-green-600 underline decoration-red-600 decoration-2 underline-offset-2 group-hover:text-green-800">
+                                    <span className="font-bold text-[14pt] text-green-600 underline decoration-black decoration-2 underline-offset-2 group-hover:text-green-800">
                                         {player.liveIndex.toFixed(1)}
                                     </span>
                                 </div>
@@ -470,7 +474,7 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
                                     }}
                                 >
                                     <span className="text-[14pt] text-gray-400 font-bold tracking-wider">Pts</span>
-                                    <span className="font-bold text-[14pt] text-blue-600 group-hover:text-blue-800 underline decoration-blue-200 decoration-2 underline-offset-2">
+                                    <span className="font-bold text-[14pt] text-blue-600 group-hover:text-blue-800 underline decoration-black decoration-2 underline-offset-2">
                                         {player.points}
                                     </span>
                                 </div>
@@ -484,7 +488,7 @@ export default function PlayersClient({ initialPlayers, course }: PlayersClientP
                                     }}
                                 >
                                     <span className="text-[14pt] text-gray-400 uppercase font-bold tracking-wider">$</span>
-                                    <span className="font-bold text-[14pt] text-green-600 group-hover:text-green-800 underline decoration-green-200 decoration-2 underline-offset-2">
+                                    <span className="font-bold text-[14pt] text-green-600 group-hover:text-green-800 underline decoration-black decoration-2 underline-offset-2">
                                         ${player.money.toFixed(2)}
                                     </span>
                                 </div>

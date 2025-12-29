@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import PlayersClient from './PlayersClient';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,5 +48,8 @@ export default async function PlayersPage() {
         return lastNameA.localeCompare(lastNameB);
     });
 
-    return <PlayersClient initialPlayers={players} course={course} />;
+    const cookieStore = await cookies();
+    const isAdmin = cookieStore.get('admin_session')?.value === 'true';
+
+    return <PlayersClient initialPlayers={players} course={course} isAdmin={isAdmin} />;
 }

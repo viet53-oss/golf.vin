@@ -6,6 +6,7 @@ import { PoolDateSelector } from '@/components/PoolDateSelector';
 import { PoolManagementButton } from '@/components/PoolManagementButton';
 import { SaveWinningsButton } from '@/components/SaveWinningsButton';
 import PoolResults from '@/components/PoolResults'; // Import the client component
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,10 @@ interface Winner {
 export default async function PoolPage(props: { searchParams: Promise<{ roundId?: string }> }) {
     const searchParams = await props.searchParams;
     const selectedRoundId = searchParams.roundId;
+
+    // Check admin status
+    const cookieStore = await cookies();
+    const isAdmin = cookieStore.get('admin_session')?.value === 'true';
 
     // 1. Initialize Safe Defaults
     let allRounds: any[] = [];
@@ -353,17 +358,19 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
                         allRounds={allRounds}
                         currentRoundId={round.id}
                     />
-                    <div className="flex gap-1 shrink-0">
-                        <PoolCopyButton
-                            date={round.date}
-                            roundName={round.name}
-                            isTournament={round.is_tournament}
-                            flights={processedFlights}
-                        />
-                        <button className="p-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-gray-500 cursor-pointer">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                        </button>
-                    </div>
+                    {isAdmin && (
+                        <div className="flex gap-1 shrink-0">
+                            <PoolCopyButton
+                                date={round.date}
+                                roundName={round.name}
+                                isTournament={round.is_tournament}
+                                flights={processedFlights}
+                            />
+                            <button className="p-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-gray-500 cursor-pointer">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Main Results Dashboard */}

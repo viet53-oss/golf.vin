@@ -452,14 +452,14 @@ export default function ScoresDashboard({
                                         <>
                                             <button
                                                 onClick={() => handleCopyRound(round)}
-                                                className="p-2 text-black hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-200 transition-colors shadow-sm flex items-center justify-center cursor-pointer"
+                                                className="p-2 text-white bg-black hover:bg-gray-800 rounded-full transition-colors shadow-sm flex items-center justify-center cursor-pointer"
                                                 title="Copy to Email"
                                             >
                                                 <CopyIcon className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => handleCopyEmails(round)}
-                                                className="p-2 text-black hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-200 transition-colors shadow-sm flex items-center justify-center cursor-pointer"
+                                                className="p-2 text-white bg-black hover:bg-gray-800 rounded-full transition-colors shadow-sm flex items-center justify-center cursor-pointer"
                                                 title="Copy Emails"
                                             >
                                                 <MailIcon className="w-4 h-4" />
@@ -580,7 +580,7 @@ export default function ScoresDashboard({
                                                                     disabled={isLoading}
                                                                     className="text-left group/name flex flex-col whitespace-nowrap cursor-pointer"
                                                                 >
-                                                                    <span className="font-bold text-blue-600 text-[14pt] underline decoration-2 decoration-red-600 group-hover/name:text-blue-700 group-hover/name:decoration-red-700 transition-colors uppercase leading-tight">
+                                                                    <span className="font-bold text-blue-600 text-[14pt] underline decoration-2 decoration-black group-hover/name:text-blue-700 group-hover/name:decoration-black transition-colors uppercase leading-tight">
                                                                         {firstName}
                                                                     </span>
                                                                     <span className="text-[14pt] text-black font-medium leading-none">
