@@ -64,7 +64,7 @@ export default async function Home() {
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="/background-final.jpg"
+          src="/golf-club-group.jpg"
           alt="Golf Club Group"
           fill
           className="object-cover object-top brightness-50"
