@@ -400,27 +400,29 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                                 className="flex-1 min-w-0 cursor-pointer group"
                                 onClick={() => setSelectedPlayer(player)}
                             >
-                                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 group-hover:opacity-80 transition-opacity">
-                                    <div className="flex items-baseline gap-1">
+                                <div className="flex flex-col gap-1 group-hover:opacity-80 transition-opacity">
+                                    {/* Line 1: First Name + Phone */}
+                                    <div className="flex items-center gap-3">
                                         <span className="text-[14pt] font-bold text-blue-600 leading-tight underline decoration-black decoration-2 underline-offset-2">
                                             {player.firstName}
                                         </span>
-                                        <span className="text-[14pt] font-semibold text-black leading-tight">
-                                            {player.lastName}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-center gap-3 pointer-events-none">
                                         {player.phone && (
-                                            <div className="flex items-center gap-1 text-[14pt] text-gray-500">
+                                            <div className="flex items-center gap-1 text-[14pt] text-gray-500 pointer-events-none">
                                                 <Phone className="w-3 h-3 text-gray-400" />
                                                 <span>{player.phone}</span>
                                             </div>
                                         )}
+                                    </div>
+
+                                    {/* Line 2: Last Name + Email */}
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-[14pt] font-semibold text-black leading-tight">
+                                            {player.lastName}
+                                        </span>
                                         {player.email && (
-                                            <div className="flex items-center gap-1 text-[14pt] text-gray-400 truncate max-w-[150px] sm:max-w-none">
+                                            <div className="flex items-center gap-1 text-[14pt] text-gray-400 truncate pointer-events-none">
                                                 <Mail className="w-3 h-3 text-gray-300" />
-                                                <span>{player.email}</span>
+                                                <span className="truncate">{player.email}</span>
                                             </div>
                                         )}
                                     </div>
@@ -428,10 +430,10 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                             </div>
 
                             {/* Right: Stats Grid */}
-                            <div className="flex items-center gap-6 sm:gap-8 text-center shrink-0 w-full sm:w-auto overflow-x-auto">
+                            <div className="flex items-center gap-4 text-center shrink-0">
 
                                 {/* HCP (Playing Handicap) */}
-                                <div className="flex flex-col items-center min-w-[30px]">
+                                <div className="flex flex-col items-center w-[40px]">
                                     <span className="text-[14pt] text-gray-400 font-bold tracking-wider">Hcp</span>
                                     <span className="font-bold text-[14pt] text-black">
                                         {player.courseHandicap}
@@ -439,7 +441,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                                 </div>
 
                                 {/* # (Rank) */}
-                                <div className="flex flex-col items-center min-w-[30px]">
+                                <div className="flex flex-col items-center w-[30px]">
                                     <span className="text-[14pt] text-gray-400 uppercase font-bold tracking-wider">#</span>
                                     <span className="font-bold text-[14pt] text-black">
                                         {player.rank}
@@ -447,7 +449,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                                 </div>
 
                                 {/* Tee */}
-                                <div className="flex flex-col items-center min-w-[30px]">
+                                <div className="flex flex-col items-center w-[35px]">
                                     <span className="text-[14pt] text-gray-400 font-bold tracking-wider">Tee</span>
                                     <span className="font-bold text-[14pt] text-gray-500">
                                         {(player as any).preferred_tee_box ? (player as any).preferred_tee_box.charAt(0) : 'W'}
@@ -456,7 +458,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
                                 {/* INDEX (Important) */}
                                 <div
-                                    className="flex flex-col items-center min-w-[40px] cursor-pointer hover:bg-green-50 rounded-lg p-1 transition-colors relative group"
+                                    className="flex flex-col items-center w-[45px] cursor-pointer hover:bg-green-50 rounded-lg p-1 transition-colors relative group"
                                     onClick={() => setSelectedHandicapPlayerId(player.id)}
                                 >
                                     <span className="text-[14pt] text-gray-400 font-bold tracking-wider">Idx</span>
@@ -467,7 +469,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
                                 {/* YTD Points */}
                                 <div
-                                    className="flex flex-col items-center min-w-[30px] cursor-pointer hover:bg-blue-50 rounded-lg p-1 transition-colors group"
+                                    className="flex flex-col items-center w-[40px] cursor-pointer hover:bg-blue-50 rounded-lg p-1 transition-colors group"
                                     onClick={() => {
                                         setSelectedStatsPlayer(player);
                                         setStatsType('points');
@@ -481,7 +483,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
                                 {/* Money */}
                                 <div
-                                    className="flex flex-col items-center min-w-[50px] cursor-pointer hover:bg-green-50 rounded-lg p-1 transition-colors group"
+                                    className="flex flex-col items-center w-[65px] cursor-pointer hover:bg-green-50 rounded-lg p-1 transition-colors group"
                                     onClick={() => {
                                         setSelectedStatsPlayer(player);
                                         setStatsType('money');
