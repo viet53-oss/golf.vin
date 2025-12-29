@@ -3,6 +3,7 @@ import Link from 'next/link';
 import RecalculateButton from './RecalculateButton';
 import BackupManager from './BackupManager';
 import MetaTagEditor from './MetaTagEditor';
+import AppLogicButton from './AppLogicButton';
 import { prisma } from '@/lib/prisma';
 
 // Native SVG components for settings/page.tsx
@@ -137,6 +138,22 @@ export default async function SettingsPage() {
                         {courses.length === 0 && (
                             <div className="text-center py-8 text-gray-500 text-[14pt]">No courses found.</div>
                         )}
+                    </div>
+                </div>
+
+                {/* App Logic & Rules */}
+                <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+                    <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+                        </svg>
+                        <h2 className="font-bold text-blue-900 text-[14pt]">App Logic & Rules</h2>
+                    </div>
+                    <div className="p-3 space-y-4">
+                        <p className="text-[14pt] text-gray-500">
+                            View detailed documentation about the app's internal logic, scoring rules, and calculations.
+                        </p>
+                        <AppLogicButton />
                     </div>
                 </div>
 

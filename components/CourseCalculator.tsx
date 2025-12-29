@@ -43,10 +43,10 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
     }, [index, par, rating, slope]);
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden max-w-2xl mx-auto mt-8">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden w-full m-1 mt-8">
             <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                <h3 className="text-xl font-bold text-center text-gray-900">Quick Course Calculator</h3>
-                <div className="mt-2 text-center text-xs text-gray-500">
+                <h3 className="text-[14pt] font-bold text-center text-gray-900">Quick Course Calculator</h3>
+                <div className="mt-2 text-center text-[14pt] text-gray-500">
                     <p className="font-medium">Other Course Handicap Calculator:</p>
                     <p>Calculate your course handicap for a new course</p>
                 </div>
@@ -55,11 +55,11 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
             <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-5">
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1.5">Select Member</label>
+                        <label className="block text-[14pt] font-bold text-gray-700 mb-1.5">Select Member</label>
                         <select
                             value={selectedPlayerId}
                             onChange={(e) => setSelectedPlayerId(e.target.value)}
-                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         >
                             <option value="">Choose member or manual entry</option>
                             <option value="manual">Manual Entry</option>
@@ -70,58 +70,58 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight text-[10px]">Index</label>
+                        <label className="block text-[14pt] font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight">Index</label>
                         <input
                             type="number"
                             step="0.1"
                             value={index}
                             onChange={(e) => setIndex(e.target.value)}
                             placeholder="Enter your index"
-                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight text-[10px]">Par</label>
+                        <label className="block text-[14pt] font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight">Par</label>
                         <input
                             type="number"
                             value={par}
                             onChange={(e) => setPar(e.target.value)}
                             placeholder="Enter course par"
-                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight text-[10px]">Rating</label>
+                        <label className="block text-[14pt] font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight">Rating</label>
                         <input
                             type="number"
                             step="0.1"
                             value={rating}
                             onChange={(e) => setRating(e.target.value)}
                             placeholder="Enter course rating"
-                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight text-[10px]">Slope</label>
+                        <label className="block text-[14pt] font-bold text-gray-700 mb-1.5 font-mono uppercase tracking-tight">Slope</label>
                         <input
                             type="number"
                             value={slope}
                             onChange={(e) => setSlope(e.target.value)}
                             placeholder="Enter slope rating"
-                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
+                            className="w-full px-1 py-2.5 bg-white border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"
                         />
                     </div>
                 </div>
 
                 <div className="flex flex-col items-center justify-center space-y-4 bg-gray-50 rounded-2xl border border-gray-100 p-6 self-start md:mt-10">
-                    <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">Course HCP</span>
+                    <span className="text-[14pt] font-bold text-gray-500 uppercase tracking-widest">Course HCP</span>
                     <div className="text-6xl font-black text-green-700">
                         {courseHcp !== null ? courseHcp : '--'}
                     </div>
-                    <div className="text-[10px] text-gray-400 font-mono mt-4 text-center">
+                    <div className="text-[14pt] text-gray-400 font-mono mt-4 text-center">
                         Formula: (Index × Slope / 113) + (Rating - Par)
                     </div>
                 </div>

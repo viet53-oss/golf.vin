@@ -685,9 +685,6 @@ export default function FAQClient({ players }: { players: Player[] }) {
             <main className="max-w-7xl mx-auto px-1 py-8">
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 px-1">
-                    <button onClick={() => openModal('App Logic & Rules', appLogicContent)} className="col-span-1 sm:col-span-2 bg-blue-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-blue-800 transition-all active:scale-95 border-b-2 border-blue-600 flex items-center justify-center gap-2">
-                        <span className="text-xl">📘</span> App Logic & Rules
-                    </button>
                     <button onClick={() => openModal('Club Rules', clubRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Club Rules</button>
                     <button onClick={() => openModal('Round Rules', roundRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-green-600">Round Rules</button>
                     <button onClick={() => openModal('Handicap Rules', handicapRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Handicap Rules</button>
