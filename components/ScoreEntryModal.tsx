@@ -278,7 +278,7 @@ export default function ScoreEntryModal({
             <div className="bg-white shadow-xl w-full h-full overflow-hidden flex flex-col">
 
                 {/* Header Actions */}
-                <div className="flex justify-between items-center p-3 bg-white border-b border-gray-100">
+                <div className="flex justify-between items-center px-1 py-3 bg-white border-b border-gray-100">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Scorecard</span>
                     <button
                         onClick={onClose}
@@ -296,7 +296,7 @@ export default function ScoreEntryModal({
                         <p className="text-sm text-gray-400 mt-2">Please add hole information in the database first.</p>
                     </div>
                 ) : (
-                    <div className="overflow-y-auto p-3 pb-8 bg-slate-50">
+                    <div className="overflow-y-auto px-1 pb-8 bg-slate-50">
 
                         {/* Header Title */}
                         <div className="text-center mb-8">

@@ -11,7 +11,7 @@ export function MapModal({ isOpen, onClose }: MapModalProps) {
     if (!isOpen) return null;
 
     const address = "1040 Filmore Ave, New Orleans, LA 70124";
-    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}`;
+    const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm">

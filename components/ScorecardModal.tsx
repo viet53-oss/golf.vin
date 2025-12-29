@@ -203,10 +203,10 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                     </button>
                 </div>
 
-                <div className="overflow-y-auto p-3 pb-8 bg-slate-50">
+                <div className="overflow-y-auto px-1 pb-8 bg-slate-50">
 
                     {/* Header Title & Date */}
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-8 px-1">
                         <h2 className="text-[14pt] font-black text-black tracking-tight flex items-center justify-center gap-2">
                             {player.name}
                         </h2>
@@ -215,8 +215,8 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                             <span>{course.name}</span>
                         </div>
-                        <div className="flex justify-center items-center gap-3 mt-1 text-[14pt] text-gray-600 font-bold whitespace-nowrap overflow-x-auto no-scrollbar">
-                            <span className="text-blue-600">{tee_box?.name} Tee</span>
+                        <div className="flex justify-center items-center gap-3 mt-1 text-[14pt] text-gray-600 font-medium whitespace-nowrap overflow-x-auto no-scrollbar">
+                            <span className="text-blue-600">{tee_box?.name}</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                             <span>Par {totalPar}</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
