@@ -189,17 +189,17 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
     );
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="bg-slate-50 w-full max-w-5xl rounded-2xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="bg-slate-50 w-full h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
 
                 {/* Header Actions */}
                 <div className="flex justify-between items-center p-3 bg-white border-b border-gray-100">
                     <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-widest">Scorecard</span>
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
+                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
                     >
-                        <CloseIcon size={20} />
+                        <CloseIcon size={24} />
                     </button>
                 </div>
 
@@ -214,8 +214,15 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                             <span>{format(new Date(round.date), 'MMMM d, yyyy')}</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                             <span>{course.name}</span>
+                        </div>
+                        <div className="flex justify-center items-center gap-3 mt-1 text-[14pt] text-gray-600 font-bold whitespace-nowrap overflow-x-auto no-scrollbar">
+                            <span className="text-blue-600">{tee_box?.name} Tee</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                            <span>{tee_box?.name} Tee</span>
+                            <span>Par {totalPar}</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span>Rating {tee_box?.rating.toFixed(1)}</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span>Slope {tee_box?.slope}</span>
                         </div>
                     </div>
 

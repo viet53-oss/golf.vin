@@ -59,8 +59,8 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white w-full rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white w-full h-full shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
 
                 <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                     {/* Header */}
@@ -68,7 +68,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                         <button
                             type="button"
                             onClick={onClose}
-                            className="absolute right-6 top-6 p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="absolute right-6 top-6 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
                         >
                             <X size={24} />
                         </button>

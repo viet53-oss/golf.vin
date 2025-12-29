@@ -274,17 +274,17 @@ export default function ScoreEntryModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-            <div className="bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200]">
+            <div className="bg-white shadow-xl w-full h-full overflow-hidden flex flex-col">
 
                 {/* Header Actions */}
                 <div className="flex justify-between items-center p-3 bg-white border-b border-gray-100">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Scorecard</span>
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
+                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
                     >
-                        <CloseIcon size={20} />
+                        <CloseIcon size={24} />
                     </button>
                 </div>
 

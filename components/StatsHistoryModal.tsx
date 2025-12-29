@@ -26,7 +26,7 @@ export function StatsHistoryModal({ isOpen, onClose, playerName, type, history }
     const total = sortedHistory.reduce((sum, item) => sum + item.amount, 0);
 
     return (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-white animate-in fade-in slide-in-from-bottom-10 duration-200">
+        <div className="fixed inset-0 z-[200] flex flex-col bg-white animate-in fade-in slide-in-from-bottom-10 duration-200">
             {/* Header */}
             <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0 safe-top">
                 <div className="flex flex-col">
@@ -39,9 +39,9 @@ export function StatsHistoryModal({ isOpen, onClose, playerName, type, history }
                 </div>
                 <button
                     onClick={onClose}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                    className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
                 >
-                    <X size={28} />
+                    <X size={24} />
                 </button>
             </div>
 

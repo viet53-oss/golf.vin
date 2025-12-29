@@ -13,7 +13,7 @@ export default function RulesModal({ isOpen, onClose, title, content }: RulesMod
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -21,13 +21,13 @@ export default function RulesModal({ isOpen, onClose, title, content }: RulesMod
             />
 
             {/* Modal Content */}
-            <div className="relative bg-white w-full max-w-6xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-all border border-gray-100">
+            <div className="relative bg-white w-full h-full shadow-2xl overflow-hidden flex flex-col transform transition-all border border-gray-100">
                 {/* Header */}
                 <div className="flex items-center justify-between px-1 py-4 border-b border-gray-100 bg-gray-50/50">
                     <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
+                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
