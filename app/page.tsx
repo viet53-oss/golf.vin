@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { AddressButton } from "@/components/AddressButton";
 
 const Trophy = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -107,7 +106,9 @@ export default async function Home() {
             <p className="text-white text-[14pt] font-semibold drop-shadow-md leading-relaxed w-full">
               Teeing off sunrise every Saturday at Bayou Oaks City Park Golf North Course.
             </p>
-            <AddressButton />
+            <p className="text-white/80 text-[14pt] mt-1 drop-shadow-sm font-medium w-full">
+              1040 Filmore Ave, New Orleans, LA 70124.
+            </p>
           </div>
         </div>
 
