@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { AddressButton } from "@/components/AddressButton";
 
 const Trophy = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -78,7 +79,7 @@ export default async function Home() {
         {/* Hero Text */}
         <div className="mb-12 space-y-4 w-full">
 
-          <h1 className="text-[30pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] w-full mt-10">
+          <h1 className="text-[30pt] md:text-[40pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] w-full mt-10">
             <span className="relative inline-block">
               C
               <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
@@ -98,16 +99,15 @@ export default async function Home() {
               C
               <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
             </span>
-            lub{" "}
+            lub
+            <br />
             of New Orleans
           </h1>
           <div className="flex flex-col gap-1 text-shadow-md w-full">
             <p className="text-white text-[14pt] font-semibold drop-shadow-md leading-relaxed w-full">
               Teeing off sunrise every Saturday at Bayou Oaks City Park Golf North Course.
             </p>
-            <p className="text-white/80 text-[14pt] mt-1 drop-shadow-sm font-medium w-full">
-              1040 Filmore Ave, New Orleans, LA 70124.
-            </p>
+            <AddressButton />
           </div>
         </div>
 
