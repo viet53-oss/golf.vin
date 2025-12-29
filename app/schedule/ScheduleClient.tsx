@@ -89,7 +89,7 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
                     </div>
 
                     <div className="flex justify-center">
-                        <h1 className="text-[14pt] font-bold text-green-600 tracking-tight text-center">Schedule</h1>
+                        <h1 className="text-[16pt] font-bold text-green-600 tracking-tight text-center">Schedule</h1>
                     </div>
 
                     <div className="flex justify-end">

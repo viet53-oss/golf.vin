@@ -346,7 +346,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
                             Back
                         </Link>
                     </div>
-                    <h1 className="text-[14pt] font-black text-green-600 tracking-tight">$5 Pool</h1>
+                    <h1 className="text-[16pt] font-black text-green-600 tracking-tight">$5 Pool</h1>
                 </div>
             </header>
 

@@ -76,7 +76,7 @@ export default async function SettingsPage() {
                     <div className="flex items-center gap-4">
                         <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     </div>
-                    <h1 className="text-[14pt] font-bold text-gray-900 tracking-tight">System Settings</h1>
+                    <h1 className="text-[16pt] font-bold text-gray-900 tracking-tight">System Settings</h1>
                 </div>
             </header>
 
