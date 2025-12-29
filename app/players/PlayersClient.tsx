@@ -14,7 +14,7 @@ interface PlayersClientProps {
     isAdmin: boolean;
 }
 
-type SortKey = 'last_name' | 'first_name' | 'hcp' | 'rank' | 'pts' | 'money';
+type SortKey = 'last_name' | 'first_name' | 'hcp' | 'rank' | 'pts' | 'money' | 'live_index';
 
 // Define a type for players after processing
 interface ProcessedPlayer extends PlayerWithRounds {
@@ -212,6 +212,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                 case 'rank': valA = a.rank; valB = b.rank; break;
                 case 'pts': valA = a.points; valB = b.points; break;
                 case 'money': valA = a.money; valB = b.money; break;
+                case 'live_index': valA = a.liveIndex; valB = b.liveIndex; break;
             }
 
             if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -223,10 +224,16 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
     }, [processedPlayers, searchQuery, sortConfig]);
 
     const handleSort = (key: SortKey) => {
-        setSortConfig(current => ({
-            key,
-            direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
-        }));
+        setSortConfig(current => {
+            if (current.key !== key) {
+                const initialDirection = (key === 'pts' || key === 'money') ? 'desc' : 'asc';
+                return { key, direction: initialDirection };
+            }
+            return {
+                key,
+                direction: current.direction === 'asc' ? 'desc' : 'asc'
+            };
+        });
     };
 
     const SortButton = ({ label, sortKey }: { label: string, sortKey: SortKey }) => (
@@ -372,7 +379,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
                         <SortButton label="Last" sortKey="last_name" />
                         <SortButton label="First" sortKey="first_name" />
-                        <SortButton label="#" sortKey="rank" />
+                        <SortButton label="Idx" sortKey="live_index" />
                         <SortButton label="Pts" sortKey="pts" />
                         <SortButton label="$" sortKey="money" />
                     </div>
