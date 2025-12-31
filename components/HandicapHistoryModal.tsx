@@ -199,7 +199,12 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                         <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
                             <h3 className="font-bold text-gray-900 text-[14pt] mb-2">Official Handicap (From Database)</h3>
                             <div className="text-[14pt] font-bold text-gray-800 mb-6">
-                                Handicap Index: <span className="text-black text-[14pt]">{data.player.currentIndex.toFixed(1)}</span>
+                                <div className="mb-1">
+                                    Handicap Index: <span className="text-black text-[14pt]">{data.player.currentIndex.toFixed(1)}</span>
+                                </div>
+                                <div className="text-gray-500 text-sm">
+                                    Low Index (12-mo): <span className="text-gray-900 font-bold">{data.player.lowIndex !== null ? data.player.lowIndex.toFixed(1) : 'N/A'}</span>
+                                </div>
                             </div>
 
                             <div className="border-t border-gray-100 pt-4">
