@@ -7,23 +7,29 @@ type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0
 
 export async function getBackupData() {
     try {
-        const [players, courses, rounds, roundPlayers, handicapRounds] = await Promise.all([
+        const [players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events] = await Promise.all([
             prisma.player.findMany(),
             prisma.course.findMany({ include: { tee_boxes: true, holes: true } }),
             prisma.round.findMany(),
             prisma.roundPlayer.findMany(),
-            prisma.handicapRound.findMany()
+            prisma.handicapRound.findMany(),
+            prisma.score.findMany(),
+            prisma.photo.findMany(),
+            prisma.event.findMany()
         ]);
 
         const backup = {
-            version: 1,
+            version: 2, // Increment version for new backup format
             timestamp: new Date().toISOString(),
             data: {
                 players,
                 courses,
                 rounds,
                 roundPlayers,
-                handicapRounds
+                handicapRounds,
+                scores,
+                photos,
+                events
             }
         };
 
@@ -40,7 +46,7 @@ export async function restoreBackupData(jsonString: string) {
 
         if (!backup.data) throw new Error('Invalid backup format');
 
-        const { players, courses, rounds, roundPlayers, handicapRounds } = backup.data;
+        const { players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events } = backup.data;
 
         // Transactional Restore: Wipe and Replace strategy for consistency
         // Note: In a real prod app, we might check for existing IDs or use upsert. 
@@ -54,9 +60,12 @@ export async function restoreBackupData(jsonString: string) {
 
         await prisma.$transaction(async (tx: TransactionClient) => {
             // 1. Clean existing data (Dependents first)
+            await tx.score.deleteMany();
             await tx.roundPlayer.deleteMany();
             await tx.handicapRound.deleteMany();
             await tx.round.deleteMany();
+            await tx.photo.deleteMany();
+            await tx.event.deleteMany();
             await tx.hole.deleteMany();
             await tx.teeBox.deleteMany();
             await tx.course.deleteMany();
@@ -95,6 +104,21 @@ export async function restoreBackupData(jsonString: string) {
             // 6. Restore Manual Rounds
             if (handicapRounds?.length) {
                 await tx.handicapRound.createMany({ data: handicapRounds });
+            }
+
+            // 7. Restore Scores (hole-by-hole data)
+            if (scores?.length) {
+                await tx.score.createMany({ data: scores });
+            }
+
+            // 8. Restore Photos
+            if (photos?.length) {
+                await tx.photo.createMany({ data: photos });
+            }
+
+            // 9. Restore Events
+            if (events?.length) {
+                await tx.event.createMany({ data: events });
             }
         });
 
