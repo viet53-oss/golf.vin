@@ -89,7 +89,6 @@ export async function recalculateAllHandicaps() {
 
             // 3. Replay History
             let currentHistory: HandicapInput[] = [];
-            let lowestIndex: number | null = null; // Track the lowest index achieved
 
             for (const round of allHistory) {
                 // A. Calculate Index BEFORE this round
@@ -117,11 +116,6 @@ export async function recalculateAllHandicaps() {
                 const statsAfter = calculateHandicap(convertToHandicapInput(currentHistory), player.low_handicap_index);
                 const indexAfter = statsAfter.handicapIndex;
 
-                // Track the lowest index
-                if (lowestIndex === null || indexAfter < lowestIndex) {
-                    lowestIndex = indexAfter;
-                }
-
                 // D. Update DB if it's a V3 round
                 if (round.type === 'v3') {
                     await prisma.roundPlayer.update({
@@ -135,14 +129,11 @@ export async function recalculateAllHandicaps() {
                 }
             }
 
-            // 4. Update Final Player Index and Low Handicap Index
+            // 4. Update Final Player Index (do NOT update low_handicap_index here)
             const finalStats = calculateHandicap(convertToHandicapInput(currentHistory), player.low_handicap_index);
             await prisma.player.update({
                 where: { id: player.id },
-                data: {
-                    index: finalStats.handicapIndex,
-                    low_handicap_index: lowestIndex // Update the low index
-                }
+                data: { index: finalStats.handicapIndex }
             });
         }
 
