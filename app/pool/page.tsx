@@ -208,18 +208,14 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
         const backNet = backGross - backHcp;
         const totalNet = totalGross - courseHcp;
 
-        // Calculate Net Hole Scores for Tie Breakers
-        const netHoleScores = rp.scores.map((s: any) => {
+        // Calculate Gross Hole Scores for Tie Breakers (sorted by difficulty)
+        const grossHoleScores = rp.scores.map((s: any) => {
             const h = s.hole;
             const diff = h.difficulty || 18;
-            const baseStrokes = Math.floor(courseHcp / 18);
-            const remainder = courseHcp % 18;
-            const extraStroke = diff <= remainder ? 1 : 0;
-            const hcpStrokes = baseStrokes + extraStroke;
             return {
                 holeNumber: h.hole_number,
                 difficulty: diff,
-                netScore: s.strokes - hcpStrokes
+                grossScore: s.strokes
             };
         }).sort((a: any, b: any) => a.difficulty - b.difficulty);
 
@@ -235,7 +231,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             frontNet,
             backNet,
             totalNet,
-            netHoleScores
+            grossHoleScores
         };
     };
 
@@ -253,20 +249,20 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             const sorted = [...results].sort((a: any, b: any) => {
                 if (a[category] !== b[category]) return a[category] - b[category];
 
-                // Tie Breaker: Use hardess holes (difficulty 1, 2, 3...)
+                // Tie Breaker: Use hardest holes by Gross Score (difficulty 1, 2, 3...)
                 const filter = (h: any) => {
                     if (category === 'frontNet') return h.holeNumber <= 9;
                     if (category === 'backNet') return h.holeNumber > 9;
                     return true;
                 };
 
-                const aHoles = a.netHoleScores.filter(filter);
-                const bHoles = b.netHoleScores.filter(filter);
+                const aHoles = a.grossHoleScores.filter(filter);
+                const bHoles = b.grossHoleScores.filter(filter);
 
                 // Both should be same length and already sorted by difficulty in calc()
                 for (let i = 0; i < aHoles.length; i++) {
-                    if (aHoles[i].netScore !== bHoles[i].netScore) {
-                        return aHoles[i].netScore - bHoles[i].netScore;
+                    if (aHoles[i].grossScore !== bHoles[i].grossScore) {
+                        return aHoles[i].grossScore - bHoles[i].grossScore;
                     }
                 }
                 return 0;
@@ -280,13 +276,13 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             let i = 0;
             while (prizeIndex < percentages.length && i < sorted.length) {
                 const currentScore = sorted[i][category];
-                const currentNetHoles = sorted[i].netHoleScores;
+                const currentGrossHoles = sorted[i].grossHoleScores;
 
-                // Find absolute ties (exact same score AND exact same net holes)
+                // Find absolute ties (exact same score AND exact same gross holes)
                 // These players must split the prizes belonging to their rank range
                 const absoluteTies = sorted.slice(i).filter((r: any) =>
                     r[category] === currentScore &&
-                    JSON.stringify(r.netHoleScores) === JSON.stringify(currentNetHoles)
+                    JSON.stringify(r.grossHoleScores) === JSON.stringify(currentGrossHoles)
                 );
 
                 const count = absoluteTies.length;
@@ -366,7 +362,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
                                 isTournament={round.is_tournament}
                                 flights={processedFlights}
                             />
-                            <button className="p-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-gray-500 cursor-pointer">
+                            <button className="p-2.5 bg-black rounded-lg hover:bg-gray-800 transition-colors shadow-sm text-white cursor-pointer">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                             </button>
                         </div>

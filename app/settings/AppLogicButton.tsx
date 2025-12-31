@@ -19,33 +19,39 @@ export default function AppLogicButton() {
                     </p>
                     <ol className="list-decimal pl-8 space-y-4 marker:font-bold marker:text-blue-600 text-[14pt]">
                         <li>
-                            <span className="font-bold text-gray-900">Step 1:</span> We compare the Net Score on the <span className="font-bold text-red-600">#1 Hardest Hole</span> (Stroke Index 1). Lower score wins.
+                            <span className="font-bold text-gray-900">Step 1:</span> We compare the <span className="font-bold text-red-600">Gross Score</span> on the <span className="font-bold text-red-600">#1 Hardest Hole</span> (Stroke Index 1). Lower gross score wins.
                         </li>
                         <li>
-                            <span className="font-bold text-gray-900">Step 2:</span> If tied on the #1 hole, we move to the <span className="font-bold text-red-600">#2 Hardest Hole</span>, and so on.
+                            <span className="font-bold text-gray-900">Step 2:</span> If tied on the #1 hole, we move to the <span className="font-bold text-red-600">#2 Hardest Hole</span>, and so on, comparing gross scores.
                         </li>
                         <li>
-                            <span className="font-bold text-gray-900">Why?</span> This rewards performance on the most difficult parts of the course.
+                            <span className="font-bold text-gray-900">Why?</span> This rewards performance on the most difficult parts of the course using actual strokes taken (gross), not adjusted scores.
                         </li>
                     </ol>
                     <div className="bg-blue-50 p-6 rounded-xl mt-4 text-[14pt] border-l-8 border-blue-500">
                         <strong className="block text-[14pt] mb-2">Example:</strong>
-                        Tom and Charlie both shoot Net 71.<br />
-                        - Hole #18 is Rank 1 (Hardest). Both make Net 5. (Still Tied)<br />
-                        - Hole #9 is Rank 2. Tom makes 5, Charlie makes 6.<br />
-                        ✅ <strong className="text-[14pt] text-blue-900">Tom Wins</strong> the tie-breaker.
+                        Tom and Barry both shoot Net 71.<br />
+                        - Hole #18 is Rank 1 (Hardest). Both make Gross 5. (Still Tied)<br />
+                        - Hole #9 is Rank 2. Both make Gross 4. (Still Tied)<br />
+                        - Hole #5 is Rank 3. Tom makes Gross 5, Barry makes Gross 4.<br />
+                        ✅ <strong className="text-[14pt] text-blue-900">Barry Wins</strong> the tie-breaker.
                     </div>
 
                     <div className="space-y-6 pt-6">
                         <div className="bg-emerald-50 border-l-8 border-emerald-500 p-6 rounded-xl shadow-sm">
                             <p className="font-black text-emerald-900 text-[14pt] mb-2 uppercase tracking-tight">Pool Front 9 Category</p>
-                            <p className="text-[14pt] text-emerald-800 leading-relaxed mb-2">Compare net scores starting from the <span className="font-bold underline text-emerald-900">hardest handicap hole on the front nine only</span> (holes 1-9) and work backwards through front nine holes until a lower score is found.</p>
-                            <p className="text-[14pt] text-emerald-700 italic font-bold">Example: If hole #9 is the hardest on front 9, compare #9 first, then the next hardest front 9 hole, etc.</p>
+                            <p className="text-[14pt] text-emerald-800 leading-relaxed mb-2">Compare <span className="font-bold underline text-emerald-900">gross scores</span> starting from the hardest handicap hole on the <span className="font-bold underline text-emerald-900">front nine only</span> (holes 1-9) and work backwards through front nine holes until a lower gross score is found.</p>
+                            <p className="text-[14pt] text-emerald-700 italic font-bold">Example: If hole #9 is the hardest on front 9, compare gross scores on #9 first, then the next hardest front 9 hole, etc.</p>
                         </div>
                         <div className="bg-indigo-50 border-l-8 border-indigo-500 p-6 rounded-xl shadow-sm">
                             <p className="font-black text-indigo-900 text-[14pt] mb-2 uppercase tracking-tight">Pool Back 9 Category</p>
-                            <p className="text-[14pt] text-indigo-800 leading-relaxed mb-2">Compare net scores starting from the <span className="font-bold underline text-indigo-900">hardest handicap hole on the back nine only</span> (holes 10-18) and work backwards through back nine holes until a lower score is found.</p>
-                            <p className="text-[14pt] text-indigo-700 italic font-bold">Example: If hole #11 is the hardest on back 9, compare #11 first, then the next hardest back 9 hole, etc.</p>
+                            <p className="text-[14pt] text-indigo-800 leading-relaxed mb-2">Compare <span className="font-bold underline text-indigo-900">gross scores</span> starting from the hardest handicap hole on the <span className="font-bold underline text-indigo-900">back nine only</span> (holes 10-18) and work backwards through back nine holes until a lower gross score is found.</p>
+                            <p className="text-[14pt] text-indigo-700 italic font-bold">Example: If hole #18 is the hardest on back 9, compare gross scores on #18 first, then the next hardest back 9 hole, etc.</p>
+                        </div>
+                        <div className="bg-purple-50 border-l-8 border-purple-500 p-6 rounded-xl shadow-sm">
+                            <p className="font-black text-purple-900 text-[14pt] mb-2 uppercase tracking-tight">Pool Total & Scores Page</p>
+                            <p className="text-[14pt] text-purple-800 leading-relaxed mb-2">Compare <span className="font-bold underline text-purple-900">gross scores</span> starting from the hardest handicap hole across <span className="font-bold underline text-purple-900">all 18 holes</span> and work backwards until a lower gross score is found.</p>
+                            <p className="text-[14pt] text-purple-700 italic font-bold">Example: Compare gross scores starting from difficulty 1, then 2, then 3, etc. across all 18 holes.</p>
                         </div>
                     </div>
                 </div>

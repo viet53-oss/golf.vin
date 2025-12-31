@@ -154,26 +154,20 @@ export default function ScoresDashboard({
             const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
             const netTotal = (rp.gross_score ?? 999) - courseHandicap;
 
-            // Calculate Net Hole Scores for Tie Breaker
+            // Calculate Gross Hole Scores for Tie Breaker (sorted by difficulty)
             const scores = rp.scores || [];
-            const netHoleScores = scores.map((s: any) => {
+            const grossHoleScores = scores.map((s: any) => {
                 const h = s.hole;
                 const diff = h.difficulty || 18;
-
-                // Calculate hole allocation
-                const baseStrokes = Math.floor(courseHandicap / 18);
-                const remainder = courseHandicap % 18;
-                const extraStroke = diff <= remainder ? 1 : 0;
-                const hcpStrokes = baseStrokes + extraStroke;
 
                 return {
                     holeNumber: h.hole_number,
                     difficulty: diff,
-                    netScore: s.strokes - hcpStrokes
+                    grossScore: s.strokes
                 };
             }).sort((a: any, b: any) => a.difficulty - b.difficulty);
 
-            return { netTotal, netHoleScores };
+            return { netTotal, grossHoleScores };
         };
 
         const comparePlayers = (a: any, b: any) => {
@@ -183,14 +177,14 @@ export default function ScoresDashboard({
             // 1. Primary: Net Score
             if (statsA.netTotal !== statsB.netTotal) return statsA.netTotal - statsB.netTotal;
 
-            // 2. Tie Breaker: Hardest Holes (1, 2, 3...)
-            const aHoles = statsA.netHoleScores;
-            const bHoles = statsB.netHoleScores;
+            // 2. Tie Breaker: Hardest Holes by Gross Score (1, 2, 3...)
+            const aHoles = statsA.grossHoleScores;
+            const bHoles = statsB.grossHoleScores;
 
             // Find first difference in hole score (sorted by difficulty)
             for (let i = 0; i < Math.min(aHoles.length, bHoles.length); i++) {
-                if (aHoles[i].netScore !== bHoles[i].netScore) {
-                    return aHoles[i].netScore - bHoles[i].netScore;
+                if (aHoles[i].grossScore !== bHoles[i].grossScore) {
+                    return aHoles[i].grossScore - bHoles[i].grossScore;
                 }
             }
             return 0;
@@ -371,27 +365,20 @@ export default function ScoresDashboard({
                     const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
                     const netTotal = (rp.gross_score ?? 999) - courseHandicap;
 
-                    // Calculate Net Hole Scores for Tie Breaker
-                    const scores = rp.scores || []; // Assuming scores are available in round data
-                    const netHoleScores = scores.map((s: any) => {
+                    // Calculate Gross Hole Scores for Tie Breaker (sorted by difficulty)
+                    const scores = rp.scores || [];
+                    const grossHoleScores = scores.map((s: any) => {
                         const h = s.hole;
-                        // Determine difficulty. If missing (e.g. partial data), default to 18 to avoid errors
                         const diff = h?.difficulty || 18;
-
-                        // Calculate hole allocation
-                        const baseStrokes = Math.floor(courseHandicap / 18);
-                        const remainder = courseHandicap % 18;
-                        const extraStroke = diff <= remainder ? 1 : 0;
-                        const hcpStrokes = baseStrokes + extraStroke;
 
                         return {
                             holeNumber: h?.hole_number || 0,
                             difficulty: diff,
-                            netScore: s.strokes - hcpStrokes
+                            grossScore: s.strokes
                         };
                     }).sort((a: any, b: any) => a.difficulty - b.difficulty);
 
-                    return { netTotal, netHoleScores };
+                    return { netTotal, grossHoleScores };
                 };
 
                 const comparePlayers = (a: any, b: any) => {
@@ -401,15 +388,15 @@ export default function ScoresDashboard({
                     // 1. Primary: Net Score
                     if (statsA.netTotal !== statsB.netTotal) return statsA.netTotal - statsB.netTotal;
 
-                    // 2. Tie Breaker: Hardest Holes (1, 2, 3...)
-                    const aHoles = statsA.netHoleScores;
-                    const bHoles = statsB.netHoleScores;
+                    // 2. Tie Breaker: Hardest Holes by Gross Score (1, 2, 3...)
+                    const aHoles = statsA.grossHoleScores;
+                    const bHoles = statsB.grossHoleScores;
 
                     if (aHoles.length === 0 || bHoles.length === 0) return 0;
 
                     for (let i = 0; i < Math.min(aHoles.length, bHoles.length); i++) {
-                        if (aHoles[i].netScore !== bHoles[i].netScore) {
-                            return aHoles[i].netScore - bHoles[i].netScore;
+                        if (aHoles[i].grossScore !== bHoles[i].grossScore) {
+                            return aHoles[i].grossScore - bHoles[i].grossScore;
                         }
                     }
                     return 0;
