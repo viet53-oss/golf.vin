@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import RecalculateButton from './RecalculateButton';
+import FixLowIndexButton from './FixLowIndexButton';
 import BackupManager from './BackupManager';
 import MetaTagEditor from './MetaTagEditor';
 import AppLogicButton from './AppLogicButton';
@@ -96,6 +97,13 @@ export default async function SettingsPage() {
                                 Recalculate player handicaps using WHS rules. This will scan all rounds and update the Handicap Index for all players.
                             </p>
                             <RecalculateButton />
+                            <div className="pt-2 border-t border-gray-200">
+                                <p className="text-[14pt] text-orange-600 font-bold mb-2">⚠️ Emergency Fix</p>
+                                <p className="text-[14pt] text-gray-500 mb-3">
+                                    If all handicaps are showing as 0, click this button to reset the low handicap indexes.
+                                </p>
+                                <FixLowIndexButton />
+                            </div>
                         </div>
                     </div>
 
