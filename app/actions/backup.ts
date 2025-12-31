@@ -106,23 +106,24 @@ export async function restoreBackupData(jsonString: string) {
                 await tx.handicapRound.createMany({ data: handicapRounds });
             }
 
-            // 7. Restore Scores (hole-by-hole data)
+            // 7. Restore Scores (hole-by-hole data) - Optional for v1 backups
             if (scores?.length) {
                 await tx.score.createMany({ data: scores });
             }
 
-            // 8. Restore Photos
+            // 8. Restore Photos - Optional for v1 backups
             if (photos?.length) {
                 await tx.photo.createMany({ data: photos });
             }
 
-            // 9. Restore Events
+            // 9. Restore Events - Optional for v1 backups
             if (events?.length) {
                 await tx.event.createMany({ data: events });
             }
         });
 
         revalidatePath('/');
+        console.log('✅ Restore completed successfully');
         return { success: true };
     } catch (error) {
         console.error('Restore failed:', error);
