@@ -59,138 +59,142 @@ export async function recalculateAllHandicaps() {
         let updatedCount = 0;
 
         for (const player of players) {
-            // 2. Combine and Sort All Rounds Chronologically
-            type HistoryItem =
-                | { type: 'v3'; date: string; id: string; score: number; rating: number; slope: number; timestamp: number }
-                | { type: 'v2'; date: string; id: string; differential: number; timestamp: number };
+            try {
+                // 2. Combine and Sort All Rounds Chronologically
+                type HistoryItem =
+                    | { type: 'v3'; date: string; id: string; score: number; rating: number; slope: number; timestamp: number }
+                    | { type: 'v2'; date: string; id: string; differential: number; timestamp: number };
 
-            const v3Rounds: HistoryItem[] = player.rounds
-                .filter((r: any) => r.tee_box) // Ensure complete data
-                .map((r: any) => ({
-                    type: 'v3',
-                    date: r.round.date,
+                const v3Rounds: HistoryItem[] = player.rounds
+                    .filter((r: any) => r.tee_box) // Ensure complete data
+                    .map((r: any) => ({
+                        type: 'v3',
+                        date: r.round.date,
+                        id: r.id,
+                        score: r.adjusted_gross_score || r.gross_score || 0,
+                        rating: r.tee_box!.rating,
+                        slope: r.tee_box!.slope,
+                        timestamp: new Date(r.round.date).getTime()
+                    }));
+
+                const v2Rounds: HistoryItem[] = player.manual_rounds.map((r: any) => ({
+                    type: 'v2',
+                    date: r.date_played,
                     id: r.id,
-                    score: r.adjusted_gross_score || r.gross_score || 0,
-                    rating: r.tee_box!.rating,
-                    slope: r.tee_box!.slope,
-                    timestamp: new Date(r.round.date).getTime()
+                    differential: r.score_differential,
+                    timestamp: new Date(r.date_played).getTime()
                 }));
 
-            const v2Rounds: HistoryItem[] = player.manual_rounds.map((r: any) => ({
-                type: 'v2',
-                date: r.date_played,
-                id: r.id,
-                differential: r.score_differential,
-                timestamp: new Date(r.date_played).getTime()
-            }));
+                // 3. Replay History with Dynamic Low Handicap Index
+                // For true accuracy, we must calculate the Low HI *at that specific moment in time*
+                // for every single round.
 
-            // 3. Replay History with Dynamic Low Handicap Index
-            // For true accuracy, we must calculate the Low HI *at that specific moment in time*
-            // for every single round.
+                let currentHistory: HandicapInput[] = [];
+                // We also need to store the raw history with calculated indices to look back on
+                let historyWithIndices: { date: string; indexAfter: number }[] = [];
 
-            let currentHistory: HandicapInput[] = [];
-            // We also need to store the raw history with calculated indices to look back on
-            let historyWithIndices: { date: string; indexAfter: number }[] = [];
+                let finalLowHandicapIndex: number | null = null;
+                const now = new Date();
+                const twelveMonthsAgoFromNow = new Date();
+                twelveMonthsAgoFromNow.setFullYear(now.getFullYear() - 1);
 
-            let finalLowHandicapIndex: number | null = null;
-            const now = new Date();
-            const twelveMonthsAgoFromNow = new Date();
-            twelveMonthsAgoFromNow.setFullYear(now.getFullYear() - 1);
+                for (const round of allHistory) {
+                    const roundDate = new Date(round.date);
 
-            for (const round of allHistory) {
-                const roundDate = new Date(round.date);
+                    // 3a. Calculate Dynamic Low Index for THIS round
+                    // Look back 12 months from THIS round's date
+                    const oneYearPrior = new Date(roundDate);
+                    oneYearPrior.setFullYear(oneYearPrior.getFullYear() - 1);
 
-                // 3a. Calculate Dynamic Low Index for THIS round
-                // Look back 12 months from THIS round's date
-                const oneYearPrior = new Date(roundDate);
-                oneYearPrior.setFullYear(oneYearPrior.getFullYear() - 1);
+                    let dynamicLowIndex: number | null = null;
 
-                let dynamicLowIndex: number | null = null;
+                    // Find lowest index in the window [oneYearPrior, roundDate]
+                    // Only consider indices that were established with at least 3 rounds
+                    // We use historyWithIndices which matches currentHistory 1-to-1
+                    for (let i = 0; i < historyWithIndices.length; i++) {
+                        // Check if this historical round is within the 12-month window of the CURRENT round
+                        const pastRoundDate = new Date(historyWithIndices[i].date);
+                        if (pastRoundDate >= oneYearPrior && pastRoundDate < roundDate) {
+                            // Check if at that time, we had enough history (index i corresponds to having i+1 rounds)
+                            if ((i + 1) >= 3) {
+                                const val = historyWithIndices[i].indexAfter;
+                                if (dynamicLowIndex === null || val < dynamicLowIndex) {
+                                    dynamicLowIndex = val;
+                                }
+                            }
+                        }
+                    }
 
-                // Find lowest index in the window [oneYearPrior, roundDate]
-                // Only consider indices that were established with at least 3 rounds
-                // We use historyWithIndices which matches currentHistory 1-to-1
+                    // A. Calculate Index BEFORE this round (using dynamic Low Index)
+                    const statsBefore = calculateHandicap(convertToHandicapInput(currentHistory), dynamicLowIndex);
+                    const indexBefore = statsBefore.handicapIndex;
+
+                    // B. Add this round to history
+                    if (round.type === 'v3') {
+                        currentHistory.push({
+                            id: round.id,
+                            date: round.date,
+                            score: round.score,
+                            rating: round.rating,
+                            slope: round.slope
+                        } as HandicapInput);
+                    } else {
+                        currentHistory.push({
+                            id: round.id,
+                            date: round.date,
+                            differential: round.differential
+                        } as HandicapInput);
+                    }
+
+                    // C. Calculate Index AFTER this round (using dynamic Low Index)
+                    const statsAfter = calculateHandicap(convertToHandicapInput(currentHistory), dynamicLowIndex);
+                    const indexAfter = statsAfter.handicapIndex;
+
+                    // Add to our lookback history
+                    historyWithIndices.push({
+                        date: round.date,
+                        indexAfter: indexAfter
+                    });
+
+                    // D. Update DB if it's a V3 round
+                    if (round.type === 'v3') {
+                        await prisma.roundPlayer.update({
+                            where: { id: round.id },
+                            data: {
+                                index_at_time: indexBefore,
+                                index_after: indexAfter
+                            } as any
+                        });
+                        updatedCount++;
+                    }
+                }
+
+                // 4. Calculate Final Low Index for the Player (for today)
+                // This is what gets stored in the player record
                 for (let i = 0; i < historyWithIndices.length; i++) {
-                    // Check if this historical round is within the 12-month window of the CURRENT round
                     const pastRoundDate = new Date(historyWithIndices[i].date);
-                    if (pastRoundDate >= oneYearPrior && pastRoundDate < roundDate) {
-                        // Check if at that time, we had enough history (index i corresponds to having i+1 rounds)
+                    if (pastRoundDate >= twelveMonthsAgoFromNow) {
                         if ((i + 1) >= 3) {
                             const val = historyWithIndices[i].indexAfter;
-                            if (dynamicLowIndex === null || val < dynamicLowIndex) {
-                                dynamicLowIndex = val;
+                            if (finalLowHandicapIndex === null || val < finalLowHandicapIndex) {
+                                finalLowHandicapIndex = val;
                             }
                         }
                     }
                 }
 
-                // A. Calculate Index BEFORE this round (using dynamic Low Index)
-                const statsBefore = calculateHandicap(convertToHandicapInput(currentHistory), dynamicLowIndex);
-                const indexBefore = statsBefore.handicapIndex;
-
-                // B. Add this round to history
-                if (round.type === 'v3') {
-                    currentHistory.push({
-                        id: round.id,
-                        date: round.date,
-                        score: round.score,
-                        rating: round.rating,
-                        slope: round.slope
-                    } as HandicapInput);
-                } else {
-                    currentHistory.push({
-                        id: round.id,
-                        date: round.date,
-                        differential: round.differential
-                    } as HandicapInput);
-                }
-
-                // C. Calculate Index AFTER this round (using dynamic Low Index)
-                const statsAfter = calculateHandicap(convertToHandicapInput(currentHistory), dynamicLowIndex);
-                const indexAfter = statsAfter.handicapIndex;
-
-                // Add to our lookback history
-                historyWithIndices.push({
-                    date: round.date,
-                    indexAfter: indexAfter
-                });
-
-                // D. Update DB if it's a V3 round
-                if (round.type === 'v3') {
-                    await prisma.roundPlayer.update({
-                        where: { id: round.id },
-                        data: {
-                            index_at_time: indexBefore,
-                            index_after: indexAfter
-                        } as any
-                    });
-                    updatedCount++;
-                }
-            }
-
-            // 4. Calculate Final Low Index for the Player (for today)
-            // This is what gets stored in the player record
-            for (let i = 0; i < historyWithIndices.length; i++) {
-                const pastRoundDate = new Date(historyWithIndices[i].date);
-                if (pastRoundDate >= twelveMonthsAgoFromNow) {
-                    if ((i + 1) >= 3) {
-                        const val = historyWithIndices[i].indexAfter;
-                        if (finalLowHandicapIndex === null || val < finalLowHandicapIndex) {
-                            finalLowHandicapIndex = val;
-                        }
+                // 5. Update Final Player Index AND Final Low Handicap Index
+                const finalStats = calculateHandicap(convertToHandicapInput(currentHistory), finalLowHandicapIndex);
+                await prisma.player.update({
+                    where: { id: player.id },
+                    data: {
+                        index: finalStats.handicapIndex,
+                        low_handicap_index: finalLowHandicapIndex
                     }
-                }
+                });
+            } catch (error) {
+                console.error(`failed to process player ${player.name}:`, error);
             }
-
-            // 5. Update Final Player Index AND Final Low Handicap Index
-            const finalStats = calculateHandicap(convertToHandicapInput(currentHistory), finalLowHandicapIndex);
-            await prisma.player.update({
-                where: { id: player.id },
-                data: {
-                    index: finalStats.handicapIndex,
-                    low_handicap_index: finalLowHandicapIndex
-                }
-            });
         }
 
         console.log(`✅ Recalculation Complete. Updated ${updatedCount} rounds.`);
