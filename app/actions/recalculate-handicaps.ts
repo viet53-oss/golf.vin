@@ -120,8 +120,10 @@ export async function recalculateAllHandicaps() {
                 const indexAfter = statsAfter.handicapIndex;
 
                 // Track lowest index in last 12 months
+                // CRITICAL: Only consider this as a "Low Index" if we have at least 3 rounds to form a valid handicap.
+                // Otherwise, calculateHandicap returns 0 (Not Established), which we do NOT want to set as the Low HI.
                 const roundDate = new Date(round.date);
-                if (roundDate >= twelveMonthsAgo) {
+                if (roundDate >= twelveMonthsAgo && currentHistory.length >= 3) {
                     if (lowestIndexLast12Months === null || indexAfter < lowestIndexLast12Months) {
                         lowestIndexLast12Months = indexAfter;
                     }
