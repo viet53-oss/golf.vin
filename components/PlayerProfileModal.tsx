@@ -19,9 +19,10 @@ interface PlayerProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
     liveIndex: number;
+    courseHandicap: number;
 }
 
-export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: PlayerProfileModalProps) {
+export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseHandicap }: PlayerProfileModalProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -89,7 +90,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex }: Playe
                                 <div className="grid grid-cols-4 gap-3">
                                     <div className="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center text-center border border-slate-100">
                                         <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-widest mb-1">HCP</span>
-                                        <span className="text-[14pt] font-black text-slate-800">{Math.round(liveIndex)}</span>
+                                        <span className="text-[14pt] font-black text-slate-800">{courseHandicap}</span>
                                     </div>
                                     <div className="bg-slate-50 rounded-xl p-3 flex flex-col items-center justify-center text-center border border-slate-100">
                                         <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-widest mb-1">INDEX</span>

@@ -535,6 +535,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                     isOpen={!!selectedPlayer}
                     onClose={() => setSelectedPlayer(null)}
                     liveIndex={selectedPlayer.liveIndex}
+                    courseHandicap={selectedPlayer.courseHandicap}
                 />
             )}
 
