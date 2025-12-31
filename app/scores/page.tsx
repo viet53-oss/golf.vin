@@ -114,12 +114,24 @@ export default async function ScoresPage() {
     // Sort rounds oldest to newest to calculate progression
     const sortedRounds = [...rounds].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+    // Track processing year to reset YTD stats
+    let processingYear = currentYear;
+    if (sortedRounds.length > 0) {
+        processingYear = new Date(sortedRounds[0].date).getFullYear();
+    }
+
     // Maps to store the snapshot total for each player at each round
     const roundSnapshots = new Map<string, Map<string, { pts: number; money: number }>>();
 
     sortedRounds.forEach((round: any) => {
         const roundYear = new Date(round.date).getFullYear();
-        if (roundYear !== currentYear) return;
+
+        // If we moved to a new year, reset YTD stats
+        if (roundYear !== processingYear) {
+            runningWinnings.clear();
+            runningPoints.clear();
+            processingYear = roundYear;
+        }
 
         const snapshots = new Map<string, { pts: number; money: number }>();
 

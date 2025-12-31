@@ -78,7 +78,7 @@ export default function ScoresDashboard({
     rounds: RoundWithPlayers[];
     isAdmin: boolean;
 }) {
-    const [visibleCount, setVisibleCount] = useState(5);
+    const [visibleCount, setVisibleCount] = useState(rounds.length);
     const [expandedRounds, setExpandedRounds] = useState<Set<string>>(new Set());
 
     // Modal State
