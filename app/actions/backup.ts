@@ -78,17 +78,19 @@ export async function restoreBackupData(jsonString: string) {
 
             // 3. Restore Courses (Deep insert often tricky with createMany, so we map)
             // Courses have relations (TeeBoxes, Holes). createMany doesn't support relations.
-            console.log('Restoring Courses...');
-            for (const course of courses) {
-                // We must separate the relation data
-                const { tee_boxes, holes, ...courseData } = course;
-                await tx.course.create({
-                    data: {
-                        ...courseData,
-                        tee_boxes: { create: tee_boxes },
-                        holes: { create: holes }
-                    }
-                });
+            if (courses?.length) {
+                console.log('Restoring Courses...');
+                for (const course of courses) {
+                    // We must separate the relation data
+                    const { tee_boxes, holes, ...courseData } = course;
+                    await tx.course.create({
+                        data: {
+                            ...courseData,
+                            tee_boxes: { create: tee_boxes },
+                            holes: { create: holes }
+                        }
+                    });
+                }
             }
 
             // 4. Restore Rounds
