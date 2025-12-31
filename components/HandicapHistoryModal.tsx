@@ -248,7 +248,13 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-3">
                                             <span className="font-bold text-gray-900 text-[14pt]">
-                                                {format(new Date(item.date.length === 10 ? item.date + 'T12:00:00' : item.date), 'MMM d, yyyy')}
+                                                {(() => {
+                                                    if (item.date.length === 10) {
+                                                        const [y, m, d] = item.date.split('-').map(Number);
+                                                        return format(new Date(y, m - 1, d, 12), 'MMM d, yyyy');
+                                                    }
+                                                    return format(new Date(item.date), 'MMM d, yyyy');
+                                                })()}
                                             </span>
                                             {/* Used Badge - Use usedForCurrent if available, fallback to historical used */}
                                             {item.usedForCurrent && (
