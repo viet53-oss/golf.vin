@@ -87,8 +87,11 @@ export async function recalculateAllHandicaps() {
             // Sort by Date ASC (Oldest first)
             const allHistory = [...v3Rounds, ...v2Rounds].sort((a, b) => a.timestamp - b.timestamp);
 
-            // 3. Replay History
+            // 3. Replay History and Track Low Handicap Index
             let currentHistory: HandicapInput[] = [];
+            let lowestIndexLast12Months: number | null = null;
+            const twelveMonthsAgo = new Date();
+            twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
 
             for (const round of allHistory) {
                 // A. Calculate Index BEFORE this round
@@ -116,6 +119,14 @@ export async function recalculateAllHandicaps() {
                 const statsAfter = calculateHandicap(convertToHandicapInput(currentHistory), player.low_handicap_index);
                 const indexAfter = statsAfter.handicapIndex;
 
+                // Track lowest index in last 12 months
+                const roundDate = new Date(round.date);
+                if (roundDate >= twelveMonthsAgo) {
+                    if (lowestIndexLast12Months === null || indexAfter < lowestIndexLast12Months) {
+                        lowestIndexLast12Months = indexAfter;
+                    }
+                }
+
                 // D. Update DB if it's a V3 round
                 if (round.type === 'v3') {
                     await prisma.roundPlayer.update({
@@ -129,11 +140,14 @@ export async function recalculateAllHandicaps() {
                 }
             }
 
-            // 4. Update Final Player Index (do NOT update low_handicap_index here)
+            // 4. Update Final Player Index AND Low Handicap Index
             const finalStats = calculateHandicap(convertToHandicapInput(currentHistory), player.low_handicap_index);
             await prisma.player.update({
                 where: { id: player.id },
-                data: { index: finalStats.handicapIndex }
+                data: {
+                    index: finalStats.handicapIndex,
+                    low_handicap_index: lowestIndexLast12Months
+                }
             });
         }
 
