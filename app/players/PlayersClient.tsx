@@ -97,14 +97,17 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                 const roundName = rp.round.name;
                 const isTournament = rp.round.is_tournament;
 
-                // Money
+                // Money (Current Year Only)
                 if (rp.payout && rp.payout > 0) {
-                    moneyBreakdown.push({
-                        date: roundDate,
-                        roundName,
-                        amount: rp.payout,
-                        isTournament
-                    });
+                    const roundYear = parseInt(roundDate?.split('-')[0] || '0');
+                    if (roundYear === currentYear) {
+                        moneyBreakdown.push({
+                            date: roundDate,
+                            roundName,
+                            amount: rp.payout,
+                            isTournament
+                        });
+                    }
                 }
 
                 // Points (Tournament & Gross Score Only)

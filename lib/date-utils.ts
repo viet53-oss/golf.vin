@@ -22,18 +22,31 @@ export function parseLocalDate(dateString: string): Date {
 
 /**
  * Format a date for display in local timezone
+ * For date-only strings, this preserves the exact date without timezone shifts
  */
 export function formatLocalDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
-    const dateObj = typeof date === 'string' ? parseLocalDate(date) : date;
+    // If it's already a string in YYYY-MM-DD format, parse it locally
+    if (typeof date === 'string') {
+        const [year, month, day] = date.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day);
 
+        const defaultOptions: Intl.DateTimeFormatOptions = {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        };
+
+        return dateObj.toLocaleDateString('en-US', { ...defaultOptions, ...options });
+    }
+
+    // For Date objects, format directly without timezone conversion
     const defaultOptions: Intl.DateTimeFormatOptions = {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
-        timeZone: 'America/Chicago', // Central Time (Louisiana)
     };
 
-    return dateObj.toLocaleDateString('en-US', { ...defaultOptions, ...options });
+    return date.toLocaleDateString('en-US', { ...defaultOptions, ...options });
 }
 
 /**
