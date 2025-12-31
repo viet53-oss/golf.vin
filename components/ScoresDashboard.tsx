@@ -3,6 +3,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import dynamic from 'next/dynamic';
+import { calculatePlayerStats, comparePlayers as comparePlayersUtil, calculateCourseHandicapAfter } from '@/lib/player-stats';
+
+// Dynamic import for code splitting
+const ScorecardModal = dynamic(() => import('./ScorecardModal').then(mod => ({ default: mod.ScorecardModal })), {
+    ssr: false,
+    loading: () => null
+});
+
 // Custom SVG Icons to bypass Lucide/Turbopack HMR bug
 const TrophyIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -28,7 +37,6 @@ const LoaderIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 import { getScorecardDetails } from '@/app/actions/get-scorecard';
-import { ScorecardModal } from './ScorecardModal';
 
 type RoundWithPlayers = {
     id: string;
@@ -138,57 +146,9 @@ export default function ScoresDashboard({
         // Always use ALL players for copy
         const allPlayers = round.players || [];
 
-        // Helper: Calculate Course Handicap & Net Score components
-        const getPlayerStats = (rp: any) => {
-            const idxBefore = rp.index_at_time ?? rp.player?.index ?? 0;
-            // Override with preferred tee box if available
-            let preferredTee = null;
-            if (rp.player.preferred_tee_box && round.course.tee_boxes) {
-                preferredTee = round.course.tee_boxes.find((tb: any) =>
-                    tb.name.toLowerCase() === rp.player.preferred_tee_box!.toLowerCase()
-                );
-            }
+        // Use shared utility for comparison
+        const comparePlayers = (a: any, b: any) => comparePlayersUtil(a, b, round.course, par);
 
-            const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
-            const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
-            const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
-            const netTotal = (rp.gross_score ?? 999) - courseHandicap;
-
-            // Calculate Gross Hole Scores for Tie Breaker (sorted by difficulty)
-            const scores = rp.scores || [];
-            const grossHoleScores = scores.map((s: any) => {
-                const h = s.hole;
-                const diff = h.difficulty || 18;
-
-                return {
-                    holeNumber: h.hole_number,
-                    difficulty: diff,
-                    grossScore: s.strokes
-                };
-            }).sort((a: any, b: any) => a.difficulty - b.difficulty);
-
-            return { netTotal, grossHoleScores };
-        };
-
-        const comparePlayers = (a: any, b: any) => {
-            const statsA = getPlayerStats(a);
-            const statsB = getPlayerStats(b);
-
-            // 1. Primary: Net Score
-            if (statsA.netTotal !== statsB.netTotal) return statsA.netTotal - statsB.netTotal;
-
-            // 2. Tie Breaker: Hardest Holes by Gross Score (1, 2, 3...)
-            const aHoles = statsA.grossHoleScores;
-            const bHoles = statsB.grossHoleScores;
-
-            // Find first difference in hole score (sorted by difficulty)
-            for (let i = 0; i < Math.min(aHoles.length, bHoles.length); i++) {
-                if (aHoles[i].grossScore !== bHoles[i].grossScore) {
-                    return aHoles[i].grossScore - bHoles[i].grossScore;
-                }
-            }
-            return 0;
-        };
 
         if (round.is_tournament) {
             const sortedByIdx = [...allPlayers].sort((a, b) => {
@@ -251,23 +211,17 @@ export default function ScoresDashboard({
             flight.players.forEach((rp, idx) => {
                 const idxBefore = rp.index_at_time ?? rp.player.index;
                 const idxAfter = rp.index_after;
-                // Override with preferred tee box logic (Copy Logic)
-                let preferredTee = null; // Assuming preferred tee not strictly needed for basic copy, but let's be safe.
-                // Note: rp might not have full structure here in copy mode if simplified, but let's try.
-                if (rp.player && rp.player.preferred_tee_box && round.course.tee_boxes) {
-                    preferredTee = round.course.tee_boxes.find((tb: any) =>
-                        tb.name.toLowerCase() === rp.player.preferred_tee_box.toLowerCase()
-                    );
-                }
-                const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
-                const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
-                const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
 
-                let courseHandicapAfter = courseHandicap;
-                if (typeof idxAfter === 'number') {
-                    const calc = Math.round((idxAfter * (slope / 113)) + (rating - par));
-                    if (!isNaN(calc)) courseHandicapAfter = calc;
-                }
+                // Use shared utility for stats
+                const stats = calculatePlayerStats(rp, round.course, par);
+                const courseHandicap = stats.courseHandicap;
+                const courseHandicapAfter = calculateCourseHandicapAfter(
+                    idxAfter,
+                    idxBefore,
+                    stats.slope,
+                    stats.rating,
+                    par
+                );
 
                 const gross = rp.gross_score;
                 const net = gross !== null ? gross - courseHandicap : null;
@@ -349,60 +303,9 @@ export default function ScoresDashboard({
 
                 let players = [...(round.players || [])];
 
-                // Sort by Net Score + Hardest Hole Tie Breaker
-                const getPlayerStats = (rp: any) => {
-                    const idxBefore = rp.index_at_time ?? rp.player?.index ?? 0;
-                    // Override with preferred tee box if available
-                    let preferredTee = null;
-                    if (rp.player.preferred_tee_box && round.course.tee_boxes) {
-                        preferredTee = round.course.tee_boxes.find((tb: any) =>
-                            tb.name.toLowerCase() === rp.player.preferred_tee_box!.toLowerCase()
-                        );
-                    }
+                // Use shared utility for sorting
+                players.sort((a, b) => comparePlayersUtil(a, b, round.course, par));
 
-                    const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
-                    const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
-                    const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
-                    const netTotal = (rp.gross_score ?? 999) - courseHandicap;
-
-                    // Calculate Gross Hole Scores for Tie Breaker (sorted by difficulty)
-                    const scores = rp.scores || [];
-                    const grossHoleScores = scores.map((s: any) => {
-                        const h = s.hole;
-                        const diff = h?.difficulty || 18;
-
-                        return {
-                            holeNumber: h?.hole_number || 0,
-                            difficulty: diff,
-                            grossScore: s.strokes
-                        };
-                    }).sort((a: any, b: any) => a.difficulty - b.difficulty);
-
-                    return { netTotal, grossHoleScores };
-                };
-
-                const comparePlayers = (a: any, b: any) => {
-                    const statsA = getPlayerStats(a);
-                    const statsB = getPlayerStats(b);
-
-                    // 1. Primary: Net Score
-                    if (statsA.netTotal !== statsB.netTotal) return statsA.netTotal - statsB.netTotal;
-
-                    // 2. Tie Breaker: Hardest Holes by Gross Score (1, 2, 3...)
-                    const aHoles = statsA.grossHoleScores;
-                    const bHoles = statsB.grossHoleScores;
-
-                    if (aHoles.length === 0 || bHoles.length === 0) return 0;
-
-                    for (let i = 0; i < Math.min(aHoles.length, bHoles.length); i++) {
-                        if (aHoles[i].grossScore !== bHoles[i].grossScore) {
-                            return aHoles[i].grossScore - bHoles[i].grossScore;
-                        }
-                    }
-                    return 0;
-                };
-
-                players.sort(comparePlayers);
 
                 const isExpanded = expandedRounds.has(round.id);
                 const displayPlayers = isExpanded ? players : players.slice(0, 3);
@@ -480,9 +383,9 @@ export default function ScoresDashboard({
                                     const flight1Players = sortedByIdx.slice(0, half);
                                     const flight2Players = sortedByIdx.slice(half);
 
-                                    // Sort using the robust tie-breaker logic defined in parent scope
-                                    flight1Players.sort(comparePlayers);
-                                    flight2Players.sort(comparePlayers);
+                                    // Sort using the shared utility
+                                    flight1Players.sort((a, b) => comparePlayersUtil(a, b, round.course, par));
+                                    flight2Players.sort((a, b) => comparePlayersUtil(a, b, round.course, par));
 
                                     flights = [
                                         { name: 'Flight 1', players: isExpanded ? flight1Players : flight1Players.slice(0, 3) },
@@ -530,23 +433,16 @@ export default function ScoresDashboard({
                                                     const idxBefore = rp.index_at_time ?? player.index;
                                                     const idxAfter = rp.index_after;
 
-                                                    // Override with preferred tee box if available
-                                                    let preferredTee = null;
-                                                    if (player.preferred_tee_box && round.course.tee_boxes) {
-                                                        preferredTee = round.course.tee_boxes.find((tb: any) =>
-                                                            tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase()
-                                                        );
-                                                    }
-
-                                                    const slope = preferredTee ? preferredTee.slope : (rp.tee_box?.slope ?? 113);
-                                                    const rating = preferredTee ? preferredTee.rating : (rp.tee_box?.rating ?? par);
-                                                    const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
-
-                                                    let courseHandicapAfter = courseHandicap;
-                                                    if (typeof idxAfter === 'number') {
-                                                        const calculated = Math.round((idxAfter * (slope / 113)) + (rating - par));
-                                                        if (!isNaN(calculated)) courseHandicapAfter = calculated;
-                                                    }
+                                                    // Use shared utility for stats
+                                                    const stats = calculatePlayerStats(rp, round.course, par);
+                                                    const courseHandicap = stats.courseHandicap;
+                                                    const courseHandicapAfter = calculateCourseHandicapAfter(
+                                                        idxAfter,
+                                                        idxBefore,
+                                                        stats.slope,
+                                                        stats.rating,
+                                                        par
+                                                    );
 
                                                     const hasIndexChanged = idxAfter !== null && Math.abs(idxAfter - idxBefore) > 0.05;
                                                     const hcpColor = courseHandicapAfter > courseHandicap ? "text-red-600" : courseHandicapAfter < courseHandicap ? "text-green-600" : "text-black";

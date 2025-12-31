@@ -202,15 +202,17 @@ export default function PoolResults({
                     <div className="pt-10 space-y-6">
                         <h3 className="text-[14pt] font-bold text-gray-900">Total by Winners:</h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {Array.from(winningsMap.entries()).map(([name, amount]) => (
-                                <div key={name} className="bg-[#f4fbf7] border border-green-100 rounded-lg p-3 flex justify-between items-center">
-                                    <div className="flex flex-col overflow-hidden">
-                                        <span className="text-[14pt] font-black text-black leading-none">{name.split(' ')[0]}</span>
-                                        <span className="text-[14pt] text-gray-600 truncate">{name.split(' ').slice(1).join(' ')}</span>
+                            {Array.from(winningsMap.entries())
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([name, amount]) => (
+                                    <div key={name} className="bg-[#f4fbf7] border border-green-100 rounded-lg p-3 flex justify-between items-center">
+                                        <div className="flex flex-col overflow-hidden">
+                                            <span className="text-[14pt] font-black text-black leading-none">{name.split(' ')[0]}</span>
+                                            <span className="text-[14pt] text-gray-600 truncate">{name.split(' ').slice(1).join(' ')}</span>
+                                        </div>
+                                        <span className="text-[14pt] font-black text-green-600 ml-2 whitespace-nowrap">${amount.toFixed(2)}</span>
                                     </div>
-                                    <span className="text-[14pt] font-black text-green-600 ml-2 whitespace-nowrap">${amount.toFixed(2)}</span>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
 

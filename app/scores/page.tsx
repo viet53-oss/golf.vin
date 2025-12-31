@@ -8,6 +8,8 @@ import RefreshButton from '@/components/RefreshButton';
 import ScoresDashboard from '@/components/ScoresDashboard';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 30; // Revalidate every 30 seconds
+
 
 export default async function ScoresPage() {
     const cookieStore = await cookies();
@@ -19,23 +21,71 @@ export default async function ScoresPage() {
     let debugError: any = null;
 
     try {
+        // Optimized query: Only select fields we actually need
         rounds = await prisma.round.findMany({
             orderBy: {
                 date: 'desc',
             },
-            include: {
+            select: {
+                id: true,
+                date: true,
+                name: true,
+                is_tournament: true,
                 course: {
-                    include: {
-                        holes: true,
-                        tee_boxes: true,
-                    },
+                    select: {
+                        holes: {
+                            select: {
+                                par: true
+                            }
+                        },
+                        tee_boxes: {
+                            select: {
+                                name: true,
+                                rating: true,
+                                slope: true
+                            }
+                        }
+                    }
                 },
                 players: {
-                    include: {
-                        player: true,
-                        tee_box: true,
+                    select: {
+                        id: true,
+                        gross_score: true,
+                        front_nine: true,
+                        back_nine: true,
+                        index_at_time: true,
+                        index_after: true,
+                        points: true,
+                        payout: true,
+                        in_pool: true,
+                        player_id: true,
+                        player: {
+                            select: {
+                                id: true,
+                                name: true,
+                                index: true,
+                                email: true,
+                                preferred_tee_box: true
+                            }
+                        },
+                        tee_box: {
+                            select: {
+                                name: true,
+                                slope: true,
+                                rating: true
+                            }
+                        },
+                        // Don't load scores here - they'll be loaded on-demand when scorecard is clicked
                         scores: {
-                            include: { hole: true }
+                            select: {
+                                strokes: true,
+                                hole: {
+                                    select: {
+                                        hole_number: true,
+                                        difficulty: true
+                                    }
+                                }
+                            }
                         }
                     },
                     orderBy: {

@@ -75,6 +75,8 @@ model Round {
   course        Course        @relation(fields: [course_id], references: [id])
   players       RoundPlayer[]
 
+  @@index([date])
+  @@index([course_id])
   @@map("rounds")
 }
 
@@ -99,6 +101,8 @@ model RoundPlayer {
   tee_box              TeeBox?  @relation(fields: [tee_box_id], references: [id])
   scores               Score[]
 
+  @@index([player_id])
+  @@index([round_id])
   @@map("round_players")
 }
 
@@ -111,6 +115,8 @@ model HandicapRound {
   created_at         DateTime @default(now())
   player             Player   @relation(fields: [player_id], references: [id])
 
+  @@index([player_id])
+  @@index([date_played])
   @@map("handicap_rounds")
 }
 

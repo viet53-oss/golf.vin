@@ -3,34 +3,86 @@ import PlayersClient from './PlayersClient';
 import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Revalidate every 60 seconds
+
 
 export default async function PlayersPage() {
     let playersRaw: any[] = [];
     let course: any = null;
 
     try {
+        // Optimized: Load only summary data, not all rounds with deep nesting
         playersRaw = await prisma.player.findMany({
-            include: {
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                address: true,
+                city: true,
+                state: true,
+                zip: true,
+                preferred_tee_box: true,
+                birthday: true,
+                year_joined: true,
+                index: true,
+                low_handicap_index: true,
+                created_at: true,
+                // Only load essential round data for calculations
                 rounds: {
-                    include: {
+                    select: {
+                        id: true,
+                        gross_score: true,
+                        front_nine: true,
+                        back_nine: true,
+                        index_at_time: true,
+                        index_after: true,
+                        points: true,
+                        payout: true,
+                        score_differential: true,
                         round: {
-                            include: {
+                            select: {
+                                id: true,
+                                date: true,
+                                name: true,
+                                is_tournament: true,
                                 course: {
-                                    include: { holes: true }
-                                },
-                                players: {
-                                    include: {
-                                        player: true,
-                                        tee_box: true
+                                    select: {
+                                        holes: {
+                                            select: {
+                                                par: true
+                                            }
+                                        }
                                     }
                                 }
                             }
                         },
-                        tee_box: true,
+                        tee_box: {
+                            select: {
+                                name: true,
+                                slope: true,
+                                rating: true
+                            }
+                        }
                     },
+                    orderBy: {
+                        round: {
+                            date: 'desc'
+                        }
+                    }
                 },
-                manual_rounds: true,
-            },
+                manual_rounds: {
+                    select: {
+                        id: true,
+                        date_played: true,
+                        score_differential: true,
+                        gross_score: true
+                    },
+                    orderBy: {
+                        date_played: 'desc'
+                    }
+                }
+            }
         });
 
         // Fetch Course Data for HCP Calculation
