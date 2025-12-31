@@ -212,7 +212,10 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
             let valB: any = 0;
 
             switch (sortConfig.key) {
-                case 'last_name': valA = a.lastName.toLowerCase(); valB = b.lastName.toLowerCase(); break;
+                case 'last_name':
+                    valA = a.lastName.toLowerCase();
+                    valB = b.lastName.toLowerCase();
+                    break;
                 case 'first_name': valA = a.firstName.toLowerCase(); valB = b.firstName.toLowerCase(); break;
                 case 'hcp': valA = a.courseHandicap; valB = b.courseHandicap; break;
                 case 'rank': valA = a.rank; valB = b.rank; break;
@@ -221,8 +224,18 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                 case 'live_index': valA = a.liveIndex; valB = b.liveIndex; break;
             }
 
+            // Primary sort
             if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
             if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+
+            // Secondary sort: if sorting by last name and they match, sort by first name
+            if (sortConfig.key === 'last_name' && valA === valB) {
+                const firstNameA = a.firstName.toLowerCase();
+                const firstNameB = b.firstName.toLowerCase();
+                if (firstNameA < firstNameB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (firstNameA > firstNameB) return sortConfig.direction === 'asc' ? 1 : -1;
+            }
+
             return 0;
         });
 
