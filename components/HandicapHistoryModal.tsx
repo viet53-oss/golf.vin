@@ -32,11 +32,13 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
     const [data, setData] = useState<HandicapHistoryResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [visibleRounds, setVisibleRounds] = useState(20);
 
     useEffect(() => {
         if (isOpen && playerId) {
             setLoading(true);
             setError(null);
+            setVisibleRounds(20);
             getHandicapHistory(playerId)
                 .then(setData)
                 .catch(err => {
@@ -235,12 +237,12 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                         {/* Recent Scoring Record Header */}
                         <div className="px-1">
                             <h3 className="font-bold text-gray-900 text-[14pt]">Recent Scoring Record</h3>
-                            <p className="text-sm text-gray-500 mt-1">Showing last 20 rounds (Best 8 count toward Index)</p>
+                            <p className="text-sm text-gray-500 mt-1">Showing {Math.min(visibleRounds, data.history.length)} of {data.history.length} rounds (Best 8 count toward Index)</p>
                         </div>
 
-                        {/* List - Only show last 20 for calculation verification */}
+                        {/* List - Show visible rounds */}
                         <div className="space-y-4">
-                            {data.history.slice(0, 20).map((item) => (
+                            {data.history.slice(0, visibleRounds).map((item) => (
                                 <div key={item.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-3 relative overflow-hidden">
                                     {/* Row 1: Date & Tee */}
                                     <div className="flex justify-between items-start mb-3">
@@ -335,6 +337,18 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                 </div>
                             ))}
                         </div>
+
+                        {/* Load More Button */}
+                        {visibleRounds < data.history.length && (
+                            <div className="pt-2 pb-4 text-center">
+                                <button
+                                    onClick={() => setVisibleRounds(prev => prev + 20)}
+                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold py-3 px-8 rounded-full text-[14pt] shadow-sm transition-all active:scale-95"
+                                >
+                                    Load More History ↓
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))
                 }
