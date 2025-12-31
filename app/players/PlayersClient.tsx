@@ -115,6 +115,9 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
                 const par = rp.round.course.holes.reduce((sum: number, h: any) => sum + h.par, 0);
 
+                // Safety check: ensure rp.round.players exists and is an array
+                if (!rp.round.players || !Array.isArray(rp.round.players)) return;
+
                 // Sort players by index for flighting (re-using logic from Scores to be consistent)
                 const sortedPlayers = [...rp.round.players].sort((a: any, b: any) => {
                     const idxA = a.index_at_time ?? a.player?.index ?? 0;
