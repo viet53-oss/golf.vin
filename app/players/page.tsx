@@ -33,6 +33,7 @@ export default async function PlayersPage() {
                     select: {
                         id: true,
                         gross_score: true,
+                        adjusted_gross_score: true,
                         front_nine: true,
                         back_nine: true,
                         index_at_time: true,

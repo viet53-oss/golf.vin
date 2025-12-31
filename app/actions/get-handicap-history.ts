@@ -175,7 +175,7 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         player: {
             id: player.id,
             name: player.name,
-            currentIndex: player.index,
+            currentIndex: finalCalc.handicapIndex, // Use recalculated index, not stored value
             lowIndex: player.low_handicap_index
         },
         courseData: {
