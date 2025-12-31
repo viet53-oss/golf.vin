@@ -204,6 +204,11 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                 </div>
                                 <div className="text-gray-500 text-sm">
                                     Low Index (12-mo): <span className="text-gray-900 font-bold">{data.player.lowIndex !== null ? data.player.lowIndex.toFixed(1) : 'N/A'}</span>
+                                    {data.player.lowIndex !== null && (
+                                        <span className="text-xs ml-2 text-gray-400">
+                                            (Soft Cap: {(data.player.lowIndex + 3).toFixed(1)}, Hard Cap: {(data.player.lowIndex + 5).toFixed(1)})
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
