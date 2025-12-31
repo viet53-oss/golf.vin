@@ -302,7 +302,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                         {/* Index */}
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-gray-500">Idx:</span>
-                                            <div className="flex items-center gap-1">
+                                            <div className="flex items-center gap-1 flex-wrap">
                                                 <span className="text-gray-400">{item.indexBefore.toFixed(1)}</span>
                                                 <span className="text-gray-300">→</span>
                                                 <span className={`font-bold ${item.indexAfter === item.indexBefore ? 'text-gray-900' :
@@ -311,6 +311,12 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
 
                                                 {item.isLowHi && (
                                                     <span className="ml-1 bg-blue-500 text-white text-[14pt] font-bold px-1 py-0.5 rounded">LOW HI</span>
+                                                )}
+                                                {item.isSoftCapped && (
+                                                    <span className="ml-1 bg-yellow-500 text-white text-[14pt] font-bold px-1 py-0.5 rounded">SOFT CAP</span>
+                                                )}
+                                                {item.isHardCapped && (
+                                                    <span className="ml-1 bg-red-500 text-white text-[14pt] font-bold px-1 py-0.5 rounded">HARD CAP</span>
                                                 )}
                                             </div>
                                         </div>

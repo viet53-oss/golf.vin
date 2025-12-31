@@ -18,6 +18,8 @@ export interface HandicapHistoryItem {
     indexAfter: number;
     used: boolean;
     isLowHi: boolean;
+    isSoftCapped: boolean;
+    isHardCapped: boolean;
     usedForCurrent?: boolean;
 }
 
@@ -149,12 +151,18 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             runningLowIndex = indexAfter;
         }
 
+        // Get cap flags from calculation
+        const isSoftCapped = calcAfter.isSoftCapped;
+        const isHardCapped = calcAfter.isHardCapped;
+
         historyWithIndex.push({
             ...round,
             indexBefore,
             indexAfter,
             used,
-            isLowHi
+            isLowHi,
+            isSoftCapped,
+            isHardCapped
         });
     }
 
