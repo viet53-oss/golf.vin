@@ -1,9 +1,26 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { X, Loader2, Copy } from 'lucide-react';
 import { getHandicapHistory, HandicapHistoryResponse } from '@/app/actions/get-handicap-history';
 import { format } from 'date-fns';
+
+const XIcon = ({ size = 24 }: { size?: number }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+    </svg>
+);
+
+const LoaderIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+);
+
+const CopyIcon = ({ size = 24, className }: { size?: number, className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+    </svg>
+);
 
 interface HandicapHistoryModalProps {
     playerId: string;
@@ -14,18 +31,38 @@ interface HandicapHistoryModalProps {
 export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHistoryModalProps) {
     const [data, setData] = useState<HandicapHistoryResponse | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen && playerId) {
             setLoading(true);
+            setError(null);
             getHandicapHistory(playerId)
                 .then(setData)
-                .catch(err => console.error(err))
+                .catch(err => {
+                    console.error(err);
+                    setError(err instanceof Error ? err.message : 'An unknown error occurred');
+                })
                 .finally(() => setLoading(false));
         }
     }, [isOpen, playerId]);
 
     if (!isOpen) return null;
+
+    if (error) {
+        return (
+            <div className="fixed inset-0 z-[200] flex flex-col bg-white animate-in fade-in items-center justify-center p-4">
+                <div className="text-red-600 text-[16pt] font-bold mb-4">Error Loading History</div>
+                <div className="text-gray-700 mb-6">{error}</div>
+                <button
+                    onClick={onClose}
+                    className="px-6 py-2 bg-black text-white rounded-full text-[14pt] font-bold"
+                >
+                    Close
+                </button>
+            </div>
+        );
+    }
 
     const handleCopyFullHistory = async () => {
         if (!data) return;
@@ -124,7 +161,6 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
     return (
         <div className="fixed inset-0 z-[200] flex flex-col bg-white animate-in fade-in slide-in-from-bottom-10 duration-200">
             {/* Header */}
-            {/* Header */}
             <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0 safe-top">
                 <div className="flex flex-col">
                     <h2 className="text-[14pt] font-black text-gray-900 leading-tight">
@@ -138,13 +174,13 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                         className="p-2 bg-black hover:bg-gray-800 rounded-full transition-colors flex items-center justify-center group"
                         title="Copy Full History"
                     >
-                        <Copy size={24} className="text-white" />
+                        <CopyIcon size={24} className="text-white" />
                     </button>
                     <button
                         onClick={onClose}
                         className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
                     >
-                        <X size={24} />
+                        <XIcon size={24} />
                     </button>
                 </div>
             </div>
@@ -153,7 +189,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
             <div className="flex-1 overflow-y-auto px-1 py-4 bg-slate-50">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+                        <LoaderIcon className="w-8 h-8 animate-spin text-green-600" />
                         <p className="text-[14pt] text-gray-400 font-medium">Calculating Handicap History...</p>
                     </div>
                 ) : (data && (
@@ -310,5 +346,3 @@ function TeeLine({ tee, index, par }: { tee: { name: string, rating: number, slo
         </div>
     );
 }
-
-
