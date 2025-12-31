@@ -121,6 +121,7 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
     // 5. Calculate Rolling History
     const historyWithIndex: HandicapHistoryItem[] = [];
     const windowRounds: HandicapInput[] = [];
+    let runningLowIndex: number | null = null; // Track the lowest index seen so far
 
     for (const round of allRounds) {
         // State BEFORE this round (using rounds 0 to n-1)
@@ -142,8 +143,11 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         // Did this specific round count towards the NEW index?
         const used = calcAfter.differentials.some(d => d.id === round.id && d.used);
 
-        // Check Low HI trigger (simplified)
-        const isLowHi = player.low_handicap_index === indexAfter;
+        // Check if this round established a new low handicap index
+        const isLowHi = runningLowIndex === null || indexAfter < runningLowIndex;
+        if (isLowHi) {
+            runningLowIndex = indexAfter;
+        }
 
         historyWithIndex.push({
             ...round,
