@@ -145,21 +145,6 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         // Did this specific round count towards the NEW index?
         const used = calcAfter.differentials.some(d => d.id === round.id && d.used);
 
-        // Check if this round established a new low handicap index
-        // WHS: Only applies after 20 scores
-        // We only badge it if it's an IMPROVEMENT (Round 21+), not just the establishment (Round 20)
-        let isLowHi = false;
-        if (windowRounds.length >= 20) {
-            if (runningLowIndex === null) {
-                // First establishment (Round 20) - just track it, don't badge it
-                runningLowIndex = indexAfter;
-            } else if (indexAfter < runningLowIndex) {
-                // Improvement (Round 21+) - badge it
-                isLowHi = true;
-                runningLowIndex = indexAfter;
-            }
-        }
-
         // Get cap flags from calculation
         const isSoftCapped = calcAfter.isSoftCapped;
         const isHardCapped = calcAfter.isHardCapped;
@@ -169,11 +154,36 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             indexBefore,
             indexAfter,
             used,
-            isLowHi,
+            isLowHi: false, // Calculate in Pass 2
             isSoftCapped,
             isHardCapped
         });
     }
+
+    // Pass 2: Identify the single lowest index in the last 12 months (ignoring first 19 rounds)
+    // This ensures we only show "LOW HI" on the round that sets the CURRENT Low Index
+    let minIndex = 999;
+
+    // Valid rounds for Low Index are those after the first 19
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+
+    historyWithIndex.forEach((r, i) => {
+        if (i >= 20 && new Date(r.date) >= twelveMonthsAgo) {
+            if (r.indexAfter < minIndex) {
+                minIndex = r.indexAfter;
+            }
+        }
+    });
+
+    // Mark the round(s) that match the minimum
+    historyWithIndex.forEach((r, i) => {
+        if (i >= 20 && new Date(r.date) >= twelveMonthsAgo) {
+            if (r.indexAfter === minIndex && minIndex < 999) {
+                r.isLowHi = true;
+            }
+        }
+    });
 
     // 6. Determine which rounds are used for the CURRENT index
     const finalCalc = calculateHandicap(allRounds, player.low_handicap_index);
