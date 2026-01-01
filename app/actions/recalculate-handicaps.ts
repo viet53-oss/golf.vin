@@ -85,6 +85,9 @@ export async function recalculateAllHandicaps() {
                     timestamp: new Date(r.date_played).getTime()
                 }));
 
+                // Combine and sort all rounds chronologically
+                const allHistory: HistoryItem[] = [...v3Rounds, ...v2Rounds].sort((a, b) => a.timestamp - b.timestamp);
+
                 // 3. Replay History with Dynamic Low Handicap Index
                 // For true accuracy, we must calculate the Low HI *at that specific moment in time*
                 // for every single round.
