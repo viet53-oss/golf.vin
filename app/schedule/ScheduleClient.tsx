@@ -81,18 +81,9 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
     return (
         <div className="w-full">
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3 mb-6">
-                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
-                    <div className="flex justify-start">
-                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">
-                            Back
-                        </Link>
-                    </div>
-
-                    <div className="flex justify-center">
-                        <h1 className="text-[16pt] font-bold text-green-600 tracking-tight text-center">Schedule</h1>
-                    </div>
-
-                    <div className="flex justify-end">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-[16pt] font-bold text-green-600 tracking-tight">Schedule</h1>
+                    <div className="flex items-center gap-2">
                         {isAdmin && (
                             <button
                                 onClick={() => setIsModalOpen(true)}
@@ -101,6 +92,9 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
                                 New
                             </button>
                         )}
+                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">
+                            Back
+                        </Link>
                     </div>
                 </div>
             </header>

@@ -176,14 +176,22 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         }
     });
 
-    // Mark the round(s) that match the minimum
-    historyWithIndex.forEach((r, i) => {
+    // Mark only the LATEST round that matches the minimum (most recent one)
+    let latestLowHiIndex = -1;
+    for (let i = historyWithIndex.length - 1; i >= 0; i--) {
+        const r = historyWithIndex[i];
         if (i >= 20 && new Date(r.date) >= twelveMonthsAgo) {
             if (r.indexAfter === minIndex && minIndex < 999) {
-                r.isLowHi = true;
+                latestLowHiIndex = i;
+                break; // Found the latest one, stop searching
             }
         }
-    });
+    }
+
+    // Mark only that single round
+    if (latestLowHiIndex !== -1) {
+        historyWithIndex[latestLowHiIndex].isLowHi = true;
+    }
 
     // 6. Determine which rounds are used for the CURRENT index
     const finalCalc = calculateHandicap(allRounds, player.low_handicap_index);

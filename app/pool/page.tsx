@@ -336,13 +336,11 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
         <div className="min-h-screen bg-white font-sans text-[#111] pb-10">
             {/* Header Actions */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3">
-                <div className="relative flex items-center justify-center p-1">
-                    <div className="absolute left-0">
-                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
-                            Back
-                        </Link>
-                    </div>
+                <div className="flex items-center justify-between p-1">
                     <h1 className="text-[16pt] font-black text-green-600 tracking-tight">$5 Pool</h1>
+                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm">
+                        Back
+                    </Link>
                 </div>
             </header>
 

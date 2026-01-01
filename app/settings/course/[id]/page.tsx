@@ -28,11 +28,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     return (
         <div className="min-h-screen bg-white p-6 md:p-12 font-sans text-gray-900">
             {/* Header */}
-            <div className="max-w-5xl mx-auto mb-8 flex items-center justify-between">
+            <div className="max-w-5xl mx-auto mb-8 flex items-center justify-end">
                 <Link href="/settings" className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-1 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                     Back to Courses
                 </Link>
-                <div className="hidden md:block"></div>
             </div>
 
             <div className="max-w-5xl mx-auto border border-black rounded-lg p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">

@@ -369,27 +369,28 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3">
                 <div className="flex items-center justify-between">
-                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
                     <h1 className="text-[16pt] font-bold text-green-700 tracking-tight">Players</h1>
-                    {isAdmin && (
-                        <div className="flex gap-2">
-                            <button
-                                onClick={handleCopyMembers}
-                                className="flex items-center justify-center p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
-                                title="Copy Member List"
-                            >
-                                <Copy size={20} />
-                            </button>
-                            <button
-                                onClick={handleCopyEmails}
-                                className="flex items-center justify-center p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
-                                title="Copy Emails"
-                            >
-                                <Mail size={20} />
-                            </button>
-                        </div>
-                    )}
-                    {!isAdmin && <div className="w-[88px]"></div>}
+                    <div className="flex items-center gap-2">
+                        {isAdmin && (
+                            <>
+                                <button
+                                    onClick={handleCopyMembers}
+                                    className="flex items-center justify-center p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
+                                    title="Copy Member List"
+                                >
+                                    <Copy size={20} />
+                                </button>
+                                <button
+                                    onClick={handleCopyEmails}
+                                    className="flex items-center justify-center p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
+                                    title="Copy Emails"
+                                >
+                                    <Mail size={20} />
+                                </button>
+                            </>
+                        )}
+                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Back</Link>
+                    </div>
                 </div>
 
                 {/* Search & Sort Bar */}

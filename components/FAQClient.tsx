@@ -674,11 +674,9 @@ export default function FAQClient({ players }: { players: Player[] }) {
     return (
         <div className="min-h-screen bg-slate-50 pb-10">
             <header className="bg-white sticky top-0 z-50 py-4 shadow-md px-1 border-b border-gray-100">
-                <div className="max-w-7xl mx-auto relative flex items-center justify-center">
-                    <div className="absolute left-0">
-                        <Link href="/" className="bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-all shadow-md">Back</Link>
-                    </div>
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <h1 className="text-[14pt] font-black text-[#22c55e] tracking-tighter uppercase">FAQ</h1>
+                    <Link href="/" className="bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-all shadow-md">Back</Link>
                 </div>
             </header>
 
