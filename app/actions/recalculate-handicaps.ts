@@ -116,7 +116,7 @@ export async function recalculateAllHandicaps() {
                         const pastRoundDate = new Date(historyWithIndices[i].date);
                         if (pastRoundDate >= oneYearPrior && pastRoundDate < roundDate) {
                             // Check if at that time, we had enough history (index i corresponds to having i+1 rounds)
-                            if ((i + 1) >= 3) {
+                            if ((i + 1) >= 20) {
                                 const val = historyWithIndices[i].indexAfter;
                                 if (dynamicLowIndex === null || val < dynamicLowIndex) {
                                     dynamicLowIndex = val;
@@ -174,7 +174,7 @@ export async function recalculateAllHandicaps() {
                 for (let i = 0; i < historyWithIndices.length; i++) {
                     const pastRoundDate = new Date(historyWithIndices[i].date);
                     if (pastRoundDate >= twelveMonthsAgoFromNow) {
-                        if ((i + 1) >= 3) {
+                        if ((i + 1) >= 20) {
                             const val = historyWithIndices[i].indexAfter;
                             if (finalLowHandicapIndex === null || val < finalLowHandicapIndex) {
                                 finalLowHandicapIndex = val;
