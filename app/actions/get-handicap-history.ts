@@ -146,9 +146,13 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         const used = calcAfter.differentials.some(d => d.id === round.id && d.used);
 
         // Check if this round established a new low handicap index
-        const isLowHi = runningLowIndex === null || indexAfter < runningLowIndex;
-        if (isLowHi) {
-            runningLowIndex = indexAfter;
+        // WHS: Only applies after 20 scores
+        let isLowHi = false;
+        if (windowRounds.length >= 20) {
+            if (runningLowIndex === null || indexAfter < runningLowIndex) {
+                isLowHi = true;
+                runningLowIndex = indexAfter;
+            }
         }
 
         // Get cap flags from calculation
