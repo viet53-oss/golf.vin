@@ -160,37 +160,30 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         });
     }
 
-    // Pass 2: Identify the single lowest index in the last 12 months (ignoring first 19 rounds)
-    // This ensures we only show "LOW HI" on the round that sets the CURRENT Low Index
-    let minIndex = 999;
-
-    // Valid rounds for Low Index are those after the first 19
+    // Pass 2: Mark the LATEST round (chronologically) that achieved the player's Low Handicap Index
+    // Use the player's stored low_handicap_index from the database
+    const targetLowIndex = player.low_handicap_index;
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
 
-    historyWithIndex.forEach((r, i) => {
-        if (i >= 20 && new Date(r.date) >= twelveMonthsAgo) {
-            if (r.indexAfter < minIndex) {
-                minIndex = r.indexAfter;
+    if (targetLowIndex !== null) {
+        // Search forward through the array to find the chronologically LATEST match
+        // (array is still in chronological order at this point, oldest first)
+        let latestLowHiIndex = -1;
+        for (let i = 0; i < historyWithIndex.length; i++) {
+            const r = historyWithIndex[i];
+            if (new Date(r.date) >= twelveMonthsAgo) {
+                // Use epsilon for floating point comparison
+                if (Math.abs(r.indexAfter - targetLowIndex) < 0.1) {
+                    latestLowHiIndex = i; // Keep updating to get the LATEST (most recent chronologically)
+                }
             }
         }
-    });
 
-    // Mark only the LATEST round that matches the minimum (most recent one)
-    let latestLowHiIndex = -1;
-    for (let i = historyWithIndex.length - 1; i >= 0; i--) {
-        const r = historyWithIndex[i];
-        if (i >= 20 && new Date(r.date) >= twelveMonthsAgo) {
-            if (r.indexAfter === minIndex && minIndex < 999) {
-                latestLowHiIndex = i;
-                break; // Found the latest one, stop searching
-            }
+        // Mark only that single round
+        if (latestLowHiIndex !== -1) {
+            historyWithIndex[latestLowHiIndex].isLowHi = true;
         }
-    }
-
-    // Mark only that single round
-    if (latestLowHiIndex !== -1) {
-        historyWithIndex[latestLowHiIndex].isLowHi = true;
     }
 
     // 6. Determine which rounds are used for the CURRENT index
