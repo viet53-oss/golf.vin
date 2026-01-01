@@ -32,10 +32,10 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
     const points = player.rounds.reduce((sum, r) => sum + (r.points || 0), 0);
     const allTimeWinnings = player.rounds.reduce((sum, r) => sum + (r.payout || 0), 0);
 
-    // YTD Winnings (for current year 2025)
+    // YTD Winnings (for current year)
     const currentYear = new Date().getFullYear().toString();
     const ytdWinnings = player.rounds
-        .filter(r => r.round.date.startsWith('2025')) // Keeping it fixed to 2025 as per UI label or use currentYear
+        .filter(r => r.round.date.startsWith(currentYear))
         .reduce((sum, r) => sum + (r.payout || 0), 0);
 
     const lowIndex = player.low_handicap_index ?? '-';
@@ -111,7 +111,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-100 flex flex-col items-center justify-center text-center shadow-sm">
                                         <span className="text-[14pt] font-bold text-emerald-600 uppercase tracking-wider mb-2">YTD Winning</span>
                                         <span className="text-[14pt] font-black text-emerald-700">${ytdWinnings.toFixed(2)}</span>
-                                        <span className="text-[14pt] font-bold text-emerald-400 mt-1">2025</span>
+                                        <span className="text-[14pt] font-bold text-emerald-400 mt-1">{currentYear}</span>
                                     </div>
                                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-orange-100 flex flex-col items-center justify-center text-center shadow-sm">
                                         <span className="text-[14pt] font-bold text-orange-600 uppercase tracking-wider mb-2">Gross Winning</span>
