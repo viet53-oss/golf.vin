@@ -147,9 +147,14 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
 
         // Check if this round established a new low handicap index
         // WHS: Only applies after 20 scores
+        // We only badge it if it's an IMPROVEMENT (Round 21+), not just the establishment (Round 20)
         let isLowHi = false;
         if (windowRounds.length >= 20) {
-            if (runningLowIndex === null || indexAfter < runningLowIndex) {
+            if (runningLowIndex === null) {
+                // First establishment (Round 20) - just track it, don't badge it
+                runningLowIndex = indexAfter;
+            } else if (indexAfter < runningLowIndex) {
+                // Improvement (Round 21+) - badge it
                 isLowHi = true;
                 runningLowIndex = indexAfter;
             }
