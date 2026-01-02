@@ -340,10 +340,10 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
             const isWhiteTee = r.preferredTee === 'White';
             const whiteStyle = isWhiteTee
                 ? 'padding: 6px; text-align: left; font-weight: bold; text-decoration: underline; border-right: 1px solid #cbd5e1;'
-                : 'padding: 6px; text-align: left; font-weight: bold; border-right: 1px solid #cbd5e1;';
+                : 'padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;';
             const goldStyle = !isWhiteTee
                 ? 'padding: 6px; text-align: left; font-weight: bold; text-decoration: underline; border-right: 1px solid #cbd5e1;'
-                : 'padding: 6px; text-align: left; font-weight: bold; border-right: 1px solid #cbd5e1;';
+                : 'padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;';
 
             html += `
                 <tr style="background: ${bg}; border-bottom: 1px solid #e2e8f0;">
