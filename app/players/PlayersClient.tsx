@@ -290,46 +290,40 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
     const handleCopyMembers = async () => {
         // Build Data Rows
         const rows = displayedPlayers.map((p: any) => {
-            const yr = (p as any).year_joined || '-';
-
-            const whiteHcp = getCourseHandicap(p.liveIndex, 'White');
-            const goldHcp = getCourseHandicap(p.liveIndex, 'Gold');
-            const index = p.liveIndex.toFixed(1);
             const preferredTee = (p as any).preferred_tee_box || 'White';
+            const hcp = getCourseHandicap(p.liveIndex, preferredTee);
+            const teePrefix = preferredTee === 'White' ? 'W:' : 'G:';
+            const hcpDisplay = `${teePrefix} ${hcp}`;
+            const index = p.liveIndex.toFixed(1);
 
             return {
                 nameLastBefore: p.lastName,
                 nameFirst: p.firstName,
-                whiteHcp,
-                goldHcp,
+                teePrefix,
+                hcp,
+                hcpDisplay,
                 index,
-                preferredTee,
-                rank: p.rank,
-                pts: p.points,
-                yr
+                pts: p.points
             };
         });
 
         // 1. Plain Text (Tab Separated)
-        let text = `Name\tW Hcp\tG Hcp\tIndex\tRank\tPts\tYr\n`;
+        let text = `Name\tHcp\tIndex\tPts\n`;
         rows.forEach((r: any) => {
-            text += `${r.nameLastBefore}, ${r.nameFirst}\tW: ${r.whiteHcp}\tG: ${r.goldHcp}\t${r.index}\t${r.rank}\t${r.pts}\t${r.yr}\n`;
+            text += `${r.nameLastBefore}, ${r.nameFirst}\t${r.hcpDisplay}\t${r.index}\t${r.pts}\n`;
         });
 
         // 2. HTML Table
         let html = `
         <div style="font-family: sans-serif;">
-            <h2 style="margin-bottom: 10px;">Players List</h2>
-            <table style="border-collapse: collapse; width: 100%; font-size: 14px;">
+            <h2 style="margin-bottom: 10px; font-size: 9pt;">Players List</h2>
+            <table style="border-collapse: collapse; width: 100%; font-size: 9pt;">
                 <thead>
-                    <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0; text-align: center;">
+                    <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
                         <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Name</th>
-                        <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">W Hcp</th>
-                        <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">G Hcp</th>
+                        <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Hcp</th>
                         <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Index</th>
-                        <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Rank</th>
-                        <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Pts</th>
-                        <th style="padding: 8px; text-align: left;">Yr</th>
+                        <th style="padding: 8px; text-align: left;">Pts</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -337,25 +331,14 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
         rows.forEach((r, idx) => {
             const bg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
-            const isWhiteTee = r.preferredTee === 'White';
-            const whiteStyle = isWhiteTee
-                ? 'padding: 6px; text-align: left; font-weight: bold; text-decoration: underline; border-right: 1px solid #cbd5e1;'
-                : 'padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;';
-            const goldStyle = !isWhiteTee
-                ? 'padding: 6px; text-align: left; font-weight: bold; text-decoration: underline; border-right: 1px solid #cbd5e1;'
-                : 'padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;';
-
             html += `
                 <tr style="background: ${bg}; border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">
                         <b>${r.nameLastBefore}</b>, ${r.nameFirst}
                     </td>
-                    <td style="${whiteStyle}">W: ${r.whiteHcp}</td>
-                    <td style="${goldStyle}">G: ${r.goldHcp}</td>
+                    <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">${r.teePrefix} <b>${r.hcp}</b></td>
                     <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">${r.index}</td>
-                    <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">${r.rank}</td>
-                    <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">${r.pts}</td>
-                    <td style="padding: 6px; text-align: left;">${r.yr}</td>
+                    <td style="padding: 6px; text-align: left;">${r.pts}</td>
                 </tr>
             `;
         });
