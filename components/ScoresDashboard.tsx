@@ -201,8 +201,8 @@ export default function ScoresDashboard({
                         <th style="padding: 8px; text-align: center;">Grs</th>
                         <th style="padding: 8px; text-align: center;">Hcp</th>
                         <th style="padding: 8px; text-align: center; background: #f8fafc;">Net</th>
-                        <th style="padding: 8px; text-align: center;">CH</th>
-                        <th style="padding: 8px; text-align: center;">Idx</th>
+                        <th style="padding: 8px; text-align: center;">New Hcp</th>
+                        <th style="padding: 8px; text-align: center;">New Idx</th>
                     </tr>
                 </thead>
                 <tbody>

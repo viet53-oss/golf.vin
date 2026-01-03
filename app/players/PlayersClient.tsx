@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Phone, Mail, Edit, Search, ArrowUp, ArrowDown, Copy } from 'lucide-react';
+import { Phone, Mail, Edit, Search, ArrowUp, ArrowDown, Copy, UserPlus } from 'lucide-react';
 import { calculateHandicap, HandicapInput } from '@/lib/handicap';
 import { PlayerWithRounds, PlayerProfileModal } from '@/components/PlayerProfileModal';
 import { HandicapHistoryModal } from '@/components/HandicapHistoryModal';
 import { StatsHistoryModal } from '@/components/StatsHistoryModal';
+import { AddPlayerModal } from '@/components/AddPlayerModal';
 
 interface PlayersClientProps {
     initialPlayers: PlayerWithRounds[];
@@ -38,6 +39,9 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
     // Stats History State
     const [selectedStatsPlayer, setSelectedStatsPlayer] = useState<ProcessedPlayer | null>(null);
     const [statsType, setStatsType] = useState<'points' | 'money'>('points');
+
+    // Add Player Modal State
+    const [isAddPlayerModalOpen, setIsAddPlayerModalOpen] = useState(false);
 
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({ key: 'last_name', direction: 'asc' });
 
@@ -308,7 +312,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
         });
 
         // 1. Plain Text (Tab Separated)
-        let text = `Name\tHcp\tIndex\tPts\n`;
+        let text = `Name\tHcp\tIdx\tPts\n`;
         rows.forEach((r: any) => {
             text += `${r.nameLastBefore}, ${r.nameFirst}\t${r.hcpDisplay}\t${r.index}\t${r.pts}\n`;
         });
@@ -322,7 +326,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                     <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
                         <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Name</th>
                         <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Hcp</th>
-                        <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Index</th>
+                        <th style="padding: 8px; text-align: left; border-right: 1px solid #cbd5e1;">Idx</th>
                         <th style="padding: 8px; text-align: left;">Pts</th>
                     </tr>
                 </thead>
@@ -336,7 +340,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                     <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">
                         <b>${r.nameLastBefore}</b>, ${r.nameFirst}
                     </td>
-                    <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">${r.teePrefix} <b>${r.hcp}</b></td>
+                    <td style="padding: 6px; text-align: left; white-space: nowrap; border-right: 1px solid #cbd5e1;">${r.teePrefix}<b>${r.hcp}</b></td>
                     <td style="padding: 6px; text-align: left; border-right: 1px solid #cbd5e1;">${r.index}</td>
                     <td style="padding: 6px; text-align: left;">${r.pts}</td>
                 </tr>
@@ -370,6 +374,13 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                     <div className="flex items-center gap-2">
                         {isAdmin && (
                             <>
+                                <button
+                                    onClick={() => setIsAddPlayerModalOpen(true)}
+                                    className="flex items-center justify-center p-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors shadow-sm cursor-pointer"
+                                    title="Add Player"
+                                >
+                                    <UserPlus size={20} />
+                                </button>
                                 <button
                                     onClick={handleCopyMembers}
                                     className="flex items-center justify-center p-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
@@ -556,6 +567,12 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                     history={statsType === 'points' ? selectedStatsPlayer.pointsBreakdown : selectedStatsPlayer.moneyBreakdown}
                 />
             )}
+
+            {/* Add Player Modal */}
+            <AddPlayerModal
+                isOpen={isAddPlayerModalOpen}
+                onClose={() => setIsAddPlayerModalOpen(false)}
+            />
         </div>
     );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+// Updated: 2026-01-03 - Fixed Total Payouts sorting
 import { Copy } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -35,25 +36,25 @@ export function PoolCopyButton({ date, roundName, isTournament, flights }: PoolC
             if (!isTournament) {
                 // Front 9
                 html += `<h3>Front Nine ($${flight.pots.front.toFixed(2)})</h3>`;
-                html += renderWinnerTable(flight.frontWinners);
+                html += renderWinnerTable(flight.frontWinners, 'front');
 
                 // Seperator
                 html += `<hr style="border: 0; border-top: 2px dashed #9ca3af; margin: 20px 0;">`;
 
                 // Back 9
                 html += `<h3>Back Nine ($${flight.pots.back.toFixed(2)})</h3>`;
-                html += renderWinnerTable(flight.backWinners);
+                html += renderWinnerTable(flight.backWinners, 'back');
 
                 // Seperator
                 html += `<hr style="border: 0; border-top: 2px dashed #9ca3af; margin: 20px 0;">`;
 
                 // Total
                 html += `<h3>Total ($${flight.pots.total.toFixed(2)})</h3>`;
-                html += renderWinnerTable(flight.totalWinners);
+                html += renderWinnerTable(flight.totalWinners, 'total');
             } else {
                 // Tournament Placement
                 html += `<h3>Tournament Placement</h3>`;
-                html += renderWinnerTable(flight.totalWinners, true);
+                html += renderWinnerTable(flight.totalWinners, 'total');
             }
 
             html += `</div>`;
@@ -72,23 +73,30 @@ export function PoolCopyButton({ date, roundName, isTournament, flights }: PoolC
         });
 
         html += `
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 8px;">
-                <h3 style="margin-top: 0; color: #166534;">Total Payouts:</h3>
-                <table style="width: 100%; border-collapse: collapse;">
+            <div style="padding: 20px 0;">
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: #111; font-size: 11pt; font-weight: bold;">Total by Winners:</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
         `;
 
-        Array.from(winningsMap.entries()).forEach(([name, amount]) => {
-            html += `
-                <tr>
-                    <td style="padding: 4px 0; font-weight: bold;">${name}</td>
-                    <td style="padding: 4px 0; text-align: right; color: #16a34a; font-weight: bold;">$${amount.toFixed(2)}</td>
-                </tr>
-            `;
-        });
+        Array.from(winningsMap.entries())
+            .sort((a, b) => b[1] - a[1]) // Sort by amount descending (highest first)
+            .forEach(([name, amount]) => {
+                const [firstName, ...lastNameParts] = name.split(' ');
+                const lastName = lastNameParts.join(' ');
+                html += `
+                    <div style="background: #f4fbf7; border: 1px solid #d1fae5; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; flex-direction: column; overflow: hidden;">
+                            <span style="font-size: 11pt; font-weight: 900; color: #000; line-height: 1.2; margin-bottom: 2px;">${firstName}</span>
+                            <span style="font-size: 11pt; color: #6b7280; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lastName}</span>
+                        </div>
+                        <span style="font-size: 11pt; font-weight: 900; color: #16a34a; margin-left: 8px; white-space: nowrap;">$${amount.toFixed(2)}</span>
+                    </div>
+                `;
+            });
 
-        html += `</table></div></div>`;
+        html += `</div></div></div>`;
 
-        function renderWinnerTable(winners: any[], isTournamentPos = false) {
+        function renderWinnerTable(winners: any[], category: 'front' | 'back' | 'total' = 'total') {
             if (winners.length === 0) return '<p style="color: #9ca3af; font-style: italic;">No entries</p>';
             let table = `
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px;">
@@ -97,6 +105,7 @@ export function PoolCopyButton({ date, roundName, isTournament, flights }: PoolC
                             <th style="padding: 6px 0;">Pos</th>
                             <th style="padding: 6px 0;">Player</th>
                             <th style="padding: 6px 0; text-align: center;">Gross</th>
+                            <th style="padding: 6px 0; text-align: center;">Hcp</th>
                             <th style="padding: 6px 0; text-align: center;">Net</th>
                             <th style="padding: 6px 0; text-align: right;">Amount</th>
                         </tr>
@@ -105,12 +114,14 @@ export function PoolCopyButton({ date, roundName, isTournament, flights }: PoolC
             `;
 
             winners.forEach((w, idx) => {
+                const hcp = category === 'front' ? (w.frontHcp || 0) : category === 'back' ? (w.backHcp || 0) : (w.courseHcp || 0);
                 table += `
                     <tr style="border-bottom: 1px solid #f3f4f6;">
                         <td style="padding: 8px 0;">${w.position || idx + 1}</td>
                         <td style="padding: 8px 0;"><b>${w.name}</b></td>
                         <td style="padding: 8px 0; text-align: center;">${w.gross}</td>
-                        <td style="padding: 8px 0; text-align: center; color: #16a34a; font-weight: bold;">${w.score.toFixed(1)}</td>
+                        <td style="padding: 8px 0; text-align: center; color: #9ca3af;">${hcp}</td>
+                        <td style="padding: 8px 0; text-align: center; color: #16a34a; font-weight: bold;">(${Math.round(w.score)})</td>
                         <td style="padding: 8px 0; text-align: right; font-weight: bold;">$${w.amount.toFixed(2)}</td>
                     </tr>
                 `;

@@ -6,6 +6,7 @@ import BackupManager from './BackupManager';
 import MetaTagEditor from './MetaTagEditor';
 import AppLogicButton from './AppLogicButton';
 import { prisma } from '@/lib/prisma';
+import ManualScoreForm from './ManualScoreForm';
 
 // Native SVG components for settings/page.tsx
 const SettingsIcon = ({ className }: { className?: string }) => (
@@ -67,8 +68,24 @@ export default async function SettingsPage() {
     }
 
     const courses = await prisma.course.findMany({
+        include: {
+            tee_boxes: true,
+            holes: true
+        },
         orderBy: { name: 'asc' }
     });
+
+    const players = await prisma.player.findMany({
+        select: {
+            id: true,
+            name: true,
+            preferred_tee_box: true
+        },
+        orderBy: { name: 'asc' }
+    });
+
+    // Calculate course par (assuming first course)
+    const coursePar = courses[0]?.holes.reduce((sum, h) => sum + h.par, 0) || 72;
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
@@ -174,6 +191,25 @@ export default async function SettingsPage() {
                             Download a backup of all your data to protect against data loss.
                         </p>
                         <BackupManager />
+                    </div>
+                </div>
+
+                {/* Manual Score Entry */}
+                <div className="bg-white rounded-xl shadow-sm border border-green-100 overflow-hidden">
+                    <div className="p-3 bg-green-50 border-b border-green-100 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="12" y1="18" x2="12" y2="12" />
+                            <line x1="9" y1="15" x2="15" y2="15" />
+                        </svg>
+                        <h2 className="font-bold text-green-900 text-[14pt]">Manual Score for Player</h2>
+                    </div>
+                    <div className="p-3">
+                        <p className="text-[14pt] text-gray-500 mb-4">
+                            Add a past score for a player. This is useful for importing historical rounds or scores from other courses.
+                        </p>
+                        <ManualScoreForm players={players} course={courses[0]} coursePar={coursePar} />
                     </div>
                 </div>
 
