@@ -16,8 +16,8 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
     // Round selection state
     const [selectedRoundId, setSelectedRoundId] = useState<string>(rounds[0]?.id || '');
     const selectedRound = rounds.find(r => r.id === selectedRoundId);
-    // If no round selected, fallback to first course found ?? or handle gracefully.
-    // Ideally selectedRound should exist if rounds > 0.
+
+    // Safely get course from selected round, handle potential missing data
     const course = selectedRound?.course;
 
     // State for interactive scoring
@@ -41,61 +41,95 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
             playerIds.forEach((playerId) => {
                 const playerScores = newScores.get(playerId) || new Map<number, number>();
 
-                // If player has no scores, initialize all holes to par
-                if (playerScores.size === 0) {
-                    course.holes.forEach((hole: any) => {
-                        playerScores.set(hole.hole_number, hole.par);
-                    });
+                // Initialize empty scores map for new players if not exists
+                if (!newScores.has(playerId)) {
                     newScores.set(playerId, playerScores);
                 }
             });
 
-            // Remove scores for unselected players
-            const playerIdSet = new Set(playerIds);
-            Array.from(newScores.keys()).forEach(id => {
-                if (!playerIdSet.has(id)) {
-                    newScores.delete(id);
-                }
-            });
-
             return newScores;
         });
+
+        setIsPlayerModalOpen(false);
     };
 
-    // Update score for active hole
-    const updateScore = (playerId: string, delta: number) => {
+    // Helper to get score for a specific player and hole
+    const getScore = (playerId: string, holeNumber: number): number | null => {
+        const playerScores = localScores.get(playerId);
+        // Return null if no score set
+        return playerScores?.get(holeNumber) || null;
+    };
+
+    // Helper to get total score
+    const getTotalScore = (playerId: string): number => {
+        const playerScores = localScores.get(playerId);
+        if (!playerScores) return 0;
+
+        let total = 0;
+        playerScores.forEach((score) => {
+            total += score;
+        });
+        return total;
+    };
+
+    // Update score locally
+    const updateScore = (playerId: string, change: number) => {
         setLocalScores(prev => {
             const newScores = new Map(prev);
-            const playerScores = new Map(newScores.get(playerId) || new Map());
-            const currentScore = playerScores.get(activeHole) || 0;
-            const newScore = Math.max(1, currentScore + delta); // Minimum score is 1
-            playerScores.set(activeHole, newScore);
+            const playerScores = newScores.get(playerId) || new Map<number, number>();
+
+            // Get current score or default to par for this hole
+            const currentHolePar = course.holes.find((h: any) => h.hole_number === activeHole)?.par || 4;
+            const currentVal = playerScores.get(activeHole);
+
+            let newVal;
+            if (currentVal === undefined || currentVal === null) {
+                newVal = currentHolePar + change; // Start at Par + change
+            } else {
+                newVal = currentVal + change;
+            }
+
+            // Prevent unrealistic scores
+            if (newVal < 1) newVal = 1;
+            if (newVal > 15) newVal = 15;
+
+            playerScores.set(activeHole, newVal);
             newScores.set(playerId, playerScores);
             return newScores;
         });
-        setLastUpdate(new Date());
     };
 
-    // Get score for a player on a specific hole
-    const getScore = (playerId: string, holeNumber: number): number | null => {
-        const score = localScores.get(playerId)?.get(holeNumber);
-        return score !== undefined ? score : null;
-    };
+    // Initialize ALL hole scores to par if not set
+    useEffect(() => {
+        if (selectedPlayers.length > 0 && course) {
+            setLocalScores(prev => {
+                const newScores = new Map(prev);
+                let overallChanged = false;
 
-    // Get hole par
-    const getHolePar = (holeNumber: number) => {
-        const hole = course.holes.find((h: any) => h.hole_number === holeNumber);
-        return hole?.par || 4;
-    };
+                selectedPlayers.forEach(player => {
+                    const existingScores = prev.get(player.id);
+                    // Create a new Map to ensure React detects changes
+                    const playerScores = existingScores ? new Map(existingScores) : new Map<number, number>();
+                    let playerChanged = false;
 
-    // Calculate total score for a player
-    const getTotalScore = (playerId: string) => {
-        const playerScores = localScores.get(playerId);
-        if (!playerScores || playerScores.size === 0) return 0;
-        let total = 0;
-        playerScores.forEach(score => total += score);
-        return total;
-    };
+                    // Initialize all 18 holes to par
+                    course.holes.forEach((hole: any) => {
+                        if (!playerScores.has(hole.hole_number)) {
+                            playerScores.set(hole.hole_number, hole.par);
+                            playerChanged = true;
+                        }
+                    });
+
+                    if (playerChanged) {
+                        newScores.set(player.id, playerScores);
+                        overallChanged = true;
+                    }
+                });
+
+                return overallChanged ? newScores : prev;
+            });
+        }
+    }, [selectedPlayers, course]);
 
     // Get score color based on relation to par
     const getScoreColor = (strokes: number | null, par: number) => {
@@ -112,7 +146,6 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
     const saveScores = async () => {
         try {
             // TODO: Implement save functionality
-            // TODO: Implement save functionality
             console.log('Saving round:', { selectedRoundId, selectedPlayerIds, localScores });
 
             // Mark the current hole as saved (completed)
@@ -122,43 +155,65 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
             if (activeHole < 18) {
                 setActiveHole(activeHole + 1);
             }
-
-            alert('✅ Scores saved successfully! (Save functionality to be implemented)');
         } catch (error) {
             console.error('Failed to save scores:', error);
             alert('❌ Failed to save scores');
         }
     };
 
+    // Helper to verify if hole is completed (saved)
+    const isHoleCompleted = (holeNumber: number) => {
+        return savedHoles.has(holeNumber);
+    };
+
+    if (!course) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Course</h2>
+                    <p className="text-gray-600">Could not load course data for the selected round.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 p-1">
-            <div className="w-full">
-                {/* Header */}
-                <div className="mb-1">
-                    <div className="flex items-center justify-between mb-1">
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pb-20 font-sans">
+            {/* Header */}
+            <header className="bg-black text-white px-2 py-3 shadow-md sticky top-0 z-50">
+                <div className="flex justify-between items-center w-full px-2">
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full bg-red-600 animate-pulse"></div>
+                        <h1 className="text-[14pt] font-bold tracking-tight">Live Scoring</h1>
+                    </div>
+                </div>
+            </header>
+
+            <main className="w-full p-1">
+                {/* Header Card */}
+                <div className="bg-white rounded-xl shadow-sm p-2 mb-1 border-l-4 border-blue-600">
+                    <div className="flex justify-between items-start">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
-                                🔴 Live Scoring
-                            </h1>
-                            <p className="text-sm text-gray-600">
+                            <h2 className="text-[14pt] font-bold text-gray-900 leading-tight">City Park Golf Club</h2>
+                            <p className="text-gray-600 text-[12pt] font-medium mt-0.5">
                                 {course.name}
                             </p>
                         </div>
                         <Link
                             href="/"
-                            className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm"
+                            className="px-3 py-1 bg-black text-white rounded-full text-[12pt] font-bold hover:bg-gray-800 transition-colors shadow-sm"
                         >
                             Back
                         </Link>
                     </div>
 
                     {/* Round Selection */}
-                    <div className="bg-white rounded-lg shadow-sm p-1 mb-1">
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Select Round</label>
+                    <div className="mt-2 bg-gray-50 rounded-lg p-1.5 border border-gray-100">
+                        <label className="block text-[12pt] font-bold text-gray-500 uppercase tracking-wider mb-1">Select Round</label>
                         <select
                             value={selectedRoundId}
                             onChange={(e) => setSelectedRoundId(e.target.value)}
-                            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                            className="w-full px-2 py-1.5 text-[12pt] border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
                         >
                             {rounds.map((round) => (
                                 <option key={round.id} value={round.id}>
@@ -168,239 +223,234 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
                         </select>
                     </div>
 
-                    {/* Status */}
-                    <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm p-1 text-xs text-gray-600">
-                        <div>
-                            Updated: {lastUpdate.toLocaleTimeString()}
-                        </div>
-                        <div>
-                            {selectedPlayers.length} players
-                        </div>
+                    <div className="mt-2 flex items-center gap-1 text-[12pt] text-gray-500 font-medium">
+                        <span>Updated: {lastUpdate.toLocaleTimeString()}</span>
+                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                        <span>{selectedPlayers.length} players</span>
                     </div>
                 </div>
 
                 {/* My Group - Interactive */}
                 <div className="mb-1 bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-1 py-2 flex justify-between items-center rounded-t-xl">
-                        <h2 className="text-lg font-bold">My Group</h2>
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-2 flex justify-between items-center rounded-t-xl">
+                        <h2 className="text-[14pt] font-bold">My Group</h2>
                         <button
                             onClick={() => setIsPlayerModalOpen(true)}
-                            className="px-3 py-1 bg-white text-blue-600 rounded-full font-bold hover:bg-blue-50 transition text-sm"
+                            className="px-2 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-[12pt] font-semibold backdrop-blur-sm transition text-white flex items-center gap-1 border border-white/30"
                         >
-                            Players ({selectedPlayers.length})
+                            <span className="bg-white text-blue-600 w-5 h-5 rounded-full flex items-center justify-center text-[12pt] font-bold">
+                                {selectedPlayers.length}
+                            </span>
+                            Players
                         </button>
                     </div>
 
                     {selectedPlayers.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
-                            <p className="text-base mb-1">No players selected</p>
-                            <p className="text-xs">Click "Players (0)" to select players</p>
+                        <div className="p-4 text-center">
+                            <p className="text-gray-500 text-[12pt] mb-3">No players selected.</p>
+                            <button
+                                onClick={() => setIsPlayerModalOpen(true)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-[12pt] font-bold shadow-md hover:bg-blue-700 transition"
+                            >
+                                + Add Players to Group
+                            </button>
                         </div>
                     ) : (
-                        <>
-                            {/* Active Hole Selector */}
-                            <div className="bg-gray-50 p-1 border-b border-gray-200">
-                                <label className="block text-xs font-bold text-gray-700 mb-1">Active Hole:</label>
-                                <div className="grid grid-cols-6 gap-1">
-                                    {course.holes.map((hole: any) => {
-                                        const isActive = activeHole === hole.hole_number;
-                                        // Hole is completed (black) only if it has been saved
-                                        const isCompleted = savedHoles.has(hole.hole_number);
-
-                                        let buttonClass = '';
-                                        if (isActive) {
-                                            // Active hole - green
-                                            buttonClass = 'bg-green-600 text-white ring-2 ring-green-300';
-                                        } else if (isCompleted) {
-                                            // Completed hole - black
-                                            buttonClass = 'bg-black text-white';
-                                        } else {
-                                            // Future hole - white
-                                            buttonClass = 'bg-white text-gray-700 border-2 border-gray-300';
-                                        }
-
-                                        return (
+                        <div className="p-1">
+                            {/* Hole Selector - 6 per line for mobile */}
+                            <div className="mb-2">
+                                <div className="flex justify-between items-end mb-1 px-1">
+                                    <h3 className="text-[12pt] font-bold text-gray-700">Active Hole:</h3>
+                                </div>
+                                <div className="grid grid-cols-6 gap-1 p-1 bg-gray-50 rounded-lg border border-gray-100">
+                                    {course.holes.map((hole: any) => (
+                                        <div key={hole.id} className="relative">
+                                            {isHoleCompleted(hole.hole_number) && !activeHole === hole.hole_number && (
+                                                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border border-white z-20"></div>
+                                            )}
                                             <button
-                                                key={hole.id}
                                                 onClick={() => setActiveHole(hole.hole_number)}
-                                                className={`w-full h-10 rounded-lg font-bold transition text-sm ${buttonClass} hover:opacity-80`}
+                                                className={`w-full py-1.5 rounded-md text-[12pt] font-bold transition-all shadow-sm border ${activeHole === hole.hole_number
+                                                    ? 'bg-green-600 text-white border-green-700 scale-105 z-10 ring-1 ring-green-300'
+                                                    : isHoleCompleted(hole.hole_number)
+                                                        ? 'bg-black text-white border-black hover:bg-gray-800'
+                                                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
+                                                    }`}
                                             >
                                                 {hole.hole_number}
                                             </button>
-                                        );
-                                    })}
+                                        </div>
+                                    ))}
                                 </div>
-                                <p className="text-xs text-gray-600 mt-1">
-                                    Hole {activeHole} • Par {getHolePar(activeHole)}
-                                </p>
+                                <div className="text-center mt-1">
+                                    <span className="text-[12pt] font-semibold text-gray-500">
+                                        Hole {activeHole} • Par {course.holes.find((h: any) => h.hole_number === activeHole)?.par}
+                                    </span>
+                                </div>
                             </div>
 
-                            {/* Player Scoring */}
-                            <div className="p-1">
-                                <div className="space-y-1">
-                                    {selectedPlayers.map((player) => {
-                                        const score = getScore(player.id, activeHole);
-                                        const par = getHolePar(activeHole);
-                                        const total = getTotalScore(player.id);
-                                        const totalPar = course.holes.reduce((sum: number, h: any) => sum + h.par, 0);
-                                        const scoreToPar = total - totalPar;
+                            {/* Scoring Cards */}
+                            <div className="space-y-1">
+                                {selectedPlayers.map((player) => {
+                                    const score = getScore(player.id, activeHole);
+                                    const par = course.holes.find((h: any) => h.hole_number === activeHole)?.par || 4;
+                                    const total = getTotalScore(player.id);
 
-                                        return (
-                                            <div
-                                                key={player.id}
-                                                className="border-2 border-blue-500 bg-blue-50 rounded-lg p-1"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    {/* Player Info */}
-                                                    <div>
-                                                        <div className="font-bold text-base">{player.name}</div>
-                                                        <div className="text-xs text-gray-600">
-                                                            Total: {total} ({scoreToPar > 0 ? '+' : ''}{scoreToPar})
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Active Hole Score Controls */}
-                                                    <div className="flex items-center gap-1">
-                                                        <button
-                                                            onClick={() => updateScore(player.id, -1)}
-                                                            className="w-10 h-10 bg-red-500 text-white rounded-lg font-bold text-xl hover:bg-red-600 transition active:scale-95"
-                                                        >
-                                                            −
-                                                        </button>
-                                                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold ${getScoreColor(score, par)}`}>
-                                                            {score || '-'}
-                                                        </div>
-                                                        <button
-                                                            onClick={() => updateScore(player.id, 1)}
-                                                            className="w-10 h-10 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 transition active:scale-95"
-                                                        >
-                                                            +
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                    return (
+                                        <div key={player.id} className="bg-blue-50/50 rounded-lg p-1.5 border border-blue-100 flex items-center justify-between">
+                                            <div className="flex flex-col min-w-0 flex-1">
+                                                <span className="font-bold text-[12pt] text-gray-900 truncate pr-2">{player.name}</span>
+                                                <span className="text-[12pt] text-gray-500 font-medium">
+                                                    Total: {total}
+                                                </span>
                                             </div>
-                                        );
-                                    })}
-                                </div>
 
-                                {/* Save Button */}
-                                <button
-                                    onClick={saveScores}
-                                    className="mt-1 w-full py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-bold text-base hover:from-green-700 hover:to-blue-700 transition active:scale-95"
-                                >
-                                    💾 Save Scores
-                                </button>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => updateScore(player.id, -1)}
+                                                    className="w-10 h-10 bg-red-500 text-white rounded-lg font-bold text-xl hover:bg-red-600 transition active:scale-95 flex items-center justify-center shadow-sm"
+                                                >
+                                                    −
+                                                </button>
+                                                <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-[14pt] font-bold border-2 ${score !== null
+                                                    ? 'bg-white border-gray-200 text-gray-900 shadow-inner'
+                                                    : 'bg-gray-100 border-dashed border-gray-300 text-gray-400'
+                                                    } ${score !== null ? getScoreColor(score, par).replace('bg-', 'text-').replace('text-', 'border-') : ''}`}>
+                                                    {score || '-'}
+                                                </div>
+                                                <button
+                                                    onClick={() => updateScore(player.id, 1)}
+                                                    className="w-10 h-10 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 transition active:scale-95 flex items-center justify-center shadow-sm"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
-                            {/* Live Scores Header */}
-                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-1 py-2 rounded-t-xl">
-                                <h3 className="text-lg font-bold">Live Scores</h3>
-                            </div>
-
-                            {/* Full Scorecard */}
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-xs">
-                                    <thead>
-                                        <tr className="bg-gray-100 border-b-2 border-gray-300">
-                                            <th className="px-1 py-1 text-left font-bold sticky left-0 bg-gray-100 z-10">Player</th>
-                                            <th className="px-1 py-1 text-center font-bold">Total</th>
-                                            {course.holes.map((hole: any) => (
-                                                <th key={hole.id} className={`px-2 py-2 text-center font-bold min-w-[40px] ${activeHole === hole.hole_number ? 'bg-green-200' : ''}`}>
-                                                    {hole.hole_number}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="px-1 py-1 text-left text-xs text-gray-600 sticky left-0 bg-gray-50 z-10">Par</th>
-                                            <th className="px-1 py-1 text-center text-xs text-gray-600">
-                                                {course.holes.reduce((sum: number, h: any) => sum + h.par, 0)}
-                                            </th>
-                                            {course.holes.map((hole: any) => (
-                                                <th key={hole.id} className={`px-1 py-1 text-center text-xs text-gray-600 ${activeHole === hole.hole_number ? 'bg-green-200' : ''}`}>
-                                                    {hole.par}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {[...selectedPlayers].sort((a, b) => {
-                                            const aLastName = a.name.split(' ').pop() || a.name;
-                                            const bLastName = b.name.split(' ').pop() || b.name;
-                                            return aLastName.localeCompare(bLastName);
-                                        }).map((player) => {
-                                            const total = getTotalScore(player.id);
-                                            const totalPar = course.holes.reduce((sum: number, h: any) => sum + h.par, 0);
-                                            const scoreToPar = total - totalPar;
-
-                                            return (
-                                                <tr key={player.id} className="border-b border-gray-200 hover:bg-blue-50 transition">
-                                                    <td className="px-1 py-1 font-semibold sticky left-0 bg-white z-10 text-xs">
-                                                        {player.name}
-                                                    </td>
-                                                    <td className="px-1 py-1 text-center font-bold text-sm">
-                                                        <span className={scoreToPar === 0 ? 'text-blue-600' : scoreToPar < 0 ? 'text-green-600' : 'text-red-600'}>
-                                                            {total}
-                                                            <span className="text-xs ml-1">
-                                                                ({scoreToPar > 0 ? '+' : ''}{scoreToPar})
-                                                            </span>
-                                                        </span>
-                                                    </td>
-                                                    {course.holes.map((hole: any) => {
-                                                        const strokes = getScore(player.id, hole.hole_number);
-                                                        const par = hole.par;
-                                                        return (
-                                                            <td key={hole.id} className={`px-1 py-1 text-center ${activeHole === hole.hole_number ? 'bg-green-100' : ''}`}>
-                                                                <div className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs ${getScoreColor(strokes, par)}`}>
-                                                                    {strokes || '-'}
-                                                                </div>
-                                                            </td>
-                                                        );
-                                                    })}
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </>
+                            {/* Save Button */}
+                            <button
+                                onClick={saveScores}
+                                className="mt-2 w-full py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-bold text-[14pt] hover:from-green-700 hover:to-blue-700 transition active:scale-98 shadow-md flex items-center justify-center gap-2"
+                            >
+                                <span>💾</span> Save Scores
+                            </button>
+                        </div>
                     )}
+
+                    {/* Live Scores Header */}
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-2 rounded-t-xl mt-3">
+                        <h3 className="text-[14pt] font-bold">Live Scores</h3>
+                    </div>
+
+                    {/* Full Scorecard - Card Layout per Player */}
+                    <div className="bg-white border-t border-gray-200">
+                        <div className="bg-gray-50 px-2 py-1 border-b border-gray-200 text-[12pt] font-bold text-gray-500 uppercase tracking-wider text-center">
+                            Live Score Summary
+                        </div>
+                        <div className="p-2 space-y-4">
+                            {[...selectedPlayers].sort((a, b) => {
+                                const aLastName = a.name.split(' ').pop() || a.name;
+                                const bLastName = b.name.split(' ').pop() || b.name;
+                                return aLastName.localeCompare(bLastName);
+                            }).map((player) => {
+                                // Calculate live totals based ONLY on saved holes
+                                const playerScores = localScores.get(player.id);
+                                let liveGross = 0;
+                                let liveToPar = 0;
+                                let anySaved = false;
+
+                                course.holes.forEach((hole: any) => {
+                                    if (isHoleCompleted(hole.hole_number)) {
+                                        const score = playerScores?.get(hole.hole_number);
+                                        if (score !== undefined) {
+                                            liveGross += score;
+                                            liveToPar += (score - hole.par);
+                                            anySaved = true;
+                                        }
+                                    }
+                                });
+
+                                const toParDisplay = !anySaved ? 'e' : liveToPar === 0 ? 'e' : liveToPar > 0 ? `+${liveToPar}` : liveToPar;
+
+                                return (
+                                    <div key={player.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                                        {/* Player Header - Centered on one line */}
+                                        <div className="bg-blue-600 text-white px-3 py-1.5 flex justify-center items-center gap-4 text-[14pt] font-bold">
+                                            <span>{player.name}</span>
+                                            <span className="opacity-80">Grs: {liveGross}</span>
+                                            <span className="bg-white/20 px-2 rounded">{toParDisplay}</span>
+                                        </div>
+
+                                        {/* Hole Grid - 9 holes per line (2 rows) */}
+                                        <div className="p-1.5 grid grid-cols-9 gap-1 bg-white">
+                                            {course.holes.map((hole: any) => {
+                                                const isSaved = isHoleCompleted(hole.hole_number);
+                                                const strokes = isSaved ? getScore(player.id, hole.hole_number) : null;
+                                                const par = hole.par;
+                                                const isActive = activeHole === hole.hole_number;
+
+                                                return (
+                                                    <div key={hole.id} className={`flex flex-col items-center border rounded py-1 ${isActive ? 'bg-green-100 border-green-300 ring-1 ring-green-200' : 'border-gray-50 bg-gray-50/20'}`}>
+                                                        <span className={`text-[12pt] font-bold ${isActive ? 'text-green-800' : 'text-gray-400'}`}>{hole.hole_number}</span>
+                                                        <div className={`w-9 h-9 flex items-center justify-center rounded text-[12pt] font-bold mt-0.5 ${isSaved ? getScoreColor(strokes, par) : 'bg-transparent text-transparent'}`}>
+                                                            {isSaved ? strokes : ''}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Legend */}
-                <div className="mt-1 bg-white rounded-xl shadow-lg p-1">
-                    <h3 className="text-sm font-bold text-gray-900 mb-1">Score Legend</h3>
-                    <div className="flex flex-wrap gap-1 text-xs">
+                <div className="mt-1 bg-white rounded-xl shadow-lg p-2">
+                    <h3 className="text-[14pt] font-bold text-gray-900 mb-1">Score Legend</h3>
+                    <div className="flex flex-wrap gap-2 text-[12pt]">
                         <div className="flex items-center gap-1">
-                            <div className="w-6 h-6 rounded bg-yellow-400 border border-yellow-600"></div>
+                            <span className="w-3 h-3 bg-yellow-400 rounded-sm"></span>
                             <span>Eagle (-2)</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <div className="w-6 h-6 rounded bg-green-500 border border-green-700"></div>
+                            <span className="w-3 h-3 bg-green-500 rounded-sm"></span>
                             <span>Birdie (-1)</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <div className="w-6 h-6 rounded bg-blue-100 border border-blue-300"></div>
+                            <span className="w-3 h-3 bg-blue-100 rounded-sm border border-blue-200"></span>
                             <span>Par (E)</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <div className="w-6 h-6 rounded bg-orange-100 border border-orange-300"></div>
+                            <span className="w-3 h-3 bg-orange-100 rounded-sm border border-orange-200"></span>
                             <span>Bogey (+1)</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <div className="w-6 h-6 rounded bg-red-100 border border-red-300"></div>
+                            <span className="w-3 h-3 bg-red-100 rounded-sm border border-red-200"></span>
                             <span>Double+ (+2)</span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Player Selection Modal */}
+                {/* Connection Status */}
+                <div className="mt-4 text-center">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[12pt] font-medium bg-green-100 text-green-800">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
+                        Connected to Live Server
+                    </span>
+                </div>
+            </main>
+
             <LivePlayerSelectionModal
+                isOpen={isPlayerModalOpen}
+                onClose={() => setIsPlayerModalOpen(false)}
                 allPlayers={allPlayers}
                 selectedIds={selectedPlayerIds}
                 onSelectionChange={handlePlayerSelectionFromModal}
-                isOpen={isPlayerModalOpen}
-                onClose={() => setIsPlayerModalOpen(false)}
             />
         </div>
     );

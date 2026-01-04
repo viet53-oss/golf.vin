@@ -121,9 +121,26 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* Menu Grid */}
+        {/* Live Score Button - Centered on its own line */}
+        <div className="w-full flex justify-center mb-2 px-1">
+          {menuItems.filter(item => item.name === "Live Score").map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="bg-white rounded-xl shadow-lg p-2 sm:p-4 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-transform duration-200 w-full sm:w-[300px] h-[85px] sm:h-[100px]"
+              >
+                <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${item.color}`} />
+                <span className="text-gray-900 font-bold text-[18pt] whitespace-nowrap">{item.name}</span>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Menu Grid - Remaining Items (3 per line) */}
         <div className="grid grid-cols-3 gap-2 w-full px-1 sm:flex sm:flex-wrap sm:justify-center">
-          {menuItems.map((item) => {
+          {menuItems.filter(item => item.name !== "Live Score").map((item) => {
             const Icon = item.icon;
             return (
               <Link
