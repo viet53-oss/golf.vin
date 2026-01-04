@@ -298,17 +298,17 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
 
                                     return (
                                         <div key={player.id} className="bg-blue-50/50 rounded-lg p-1.5 border border-blue-100 flex items-center justify-between">
-                                            <div className="flex flex-col min-w-0 flex-1">
-                                                <span className="font-bold text-[12pt] text-gray-900 truncate pr-2">{player.name}</span>
-                                                <span className="text-[12pt] text-gray-500 font-medium">
-                                                    Total: {total}
+                                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                <span className="font-bold text-[12pt] text-gray-900 truncate">{player.name}</span>
+                                                <span className="text-[12pt] text-gray-400 font-medium whitespace-nowrap">
+                                                    ({total})
                                                 </span>
                                             </div>
 
-                                            <div className="flex items-center gap-1">
+                                            <div className="flex items-center gap-1.5">
                                                 <button
                                                     onClick={() => updateScore(player.id, -1)}
-                                                    className="w-10 h-10 bg-red-500 text-white rounded-lg font-bold text-xl hover:bg-red-600 transition active:scale-95 flex items-center justify-center shadow-sm"
+                                                    className="w-12 h-12 bg-red-500 text-white rounded-lg font-bold text-[14pt] hover:bg-red-600 transition active:scale-95 flex items-center justify-center shadow-sm"
                                                 >
                                                     −
                                                 </button>
@@ -320,7 +320,7 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
                                                 </div>
                                                 <button
                                                     onClick={() => updateScore(player.id, 1)}
-                                                    className="w-10 h-10 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 transition active:scale-95 flex items-center justify-center shadow-sm"
+                                                    className="w-12 h-12 bg-green-500 text-white rounded-lg font-bold text-[14pt] hover:bg-green-600 transition active:scale-95 flex items-center justify-center shadow-sm"
                                                 >
                                                     +
                                                 </button>
