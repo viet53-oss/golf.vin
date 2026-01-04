@@ -107,7 +107,7 @@ export async function saveLiveHoleScores(
 
         revalidatePath('/live');
         revalidatePath('/scores');
-        revalidatePath('/players');
+        // revalidatePath('/players'); // Don't revalidate players page during live scoring to avoid handicap confusion
 
         return { success: true };
     } catch (error) {

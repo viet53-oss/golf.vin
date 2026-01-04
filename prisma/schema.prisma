@@ -71,6 +71,8 @@ model Round {
   course_id     String
   name          String?       // Optional name for the round (e.g. "Sunday")
   is_tournament Boolean       @default(false)
+  completed     Boolean       @default(false)
+  is_live       Boolean       @default(false)
   created_at    DateTime      @default(now())
   course        Course        @relation(fields: [course_id], references: [id])
   players       RoundPlayer[]

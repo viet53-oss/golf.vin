@@ -93,6 +93,62 @@ export async function createRound(date: string, courseId: string, name?: string,
     return round;
 }
 
+export async function createLiveRound(data: {
+    date: string;
+    name: string;
+    courseName: string;
+    par: number;
+    rating: number;
+    slope: number;
+}) {
+    // 1. Create a new Course
+    const course = await prisma.course.create({
+        data: {
+            name: data.courseName,
+        }
+    });
+
+    // 2. Create 18 holes for this course
+    // We'll distribute the total par across 18 holes
+    const basePar = Math.floor(data.par / 18);
+    const extraPars = data.par % 18;
+
+    for (let i = 1; i <= 18; i++) {
+        await prisma.hole.create({
+            data: {
+                course_id: course.id,
+                hole_number: i,
+                par: i <= extraPars ? basePar + 1 : basePar,
+            }
+        });
+    }
+
+    // 3. Create a default Tee Box
+    await prisma.teeBox.create({
+        data: {
+            course_id: course.id,
+            name: 'Live',
+            rating: data.rating,
+            slope: data.slope,
+        }
+    });
+
+    // 4. Create the Round
+    const round = await prisma.round.create({
+        data: {
+            date: data.date.includes('T') ? data.date : `${data.date}T12:00:00`,
+            course_id: course.id,
+            name: data.name,
+            is_tournament: false,
+            is_live: true,
+        },
+    });
+
+    revalidatePath('/live');
+    revalidatePath('/scores');
+    return round;
+}
+
 export async function updateRound(roundId: string, data: { date: string; name?: string; is_tournament: boolean }) {
     await prisma.round.update({
         where: { id: roundId },

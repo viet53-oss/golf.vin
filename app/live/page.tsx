@@ -20,8 +20,9 @@ export default async function LiveScorePage() {
         }
     });
 
-    // Get all rounds (for selection)
+    // Get all rounds (only live ones)
     const rounds = await prisma.round.findMany({
+        where: { is_live: true },
         orderBy: { date: 'desc' },
         include: {
             course: {

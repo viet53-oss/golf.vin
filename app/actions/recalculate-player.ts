@@ -34,7 +34,7 @@ export async function recalculatePlayerHandicap(playerId: string) {
             | { type: 'v2'; date: string; id: string; differential: number; timestamp: number };
 
         const v3Rounds: HistoryItem[] = player.rounds
-            .filter((r: any) => r.tee_box && (r.adjusted_gross_score || r.gross_score)) // Ensure complete data
+            .filter((r: any) => r.tee_box && (r.adjusted_gross_score || r.gross_score) && r.round.completed === true) // Only completed rounds
             .map((r: any) => ({
                 type: 'v3',
                 date: r.round.date,

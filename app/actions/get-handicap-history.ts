@@ -68,7 +68,11 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
     });
 
     const v3Rounds = await prisma.roundPlayer.findMany({
-        where: { player_id: playerId, gross_score: { gte: 1 } },
+        where: {
+            player_id: playerId,
+            gross_score: { gte: 1 },
+            round: { completed: true } // Only include completed rounds
+        },
         include: { round: true, tee_box: true }
     }) as RoundWithDetails[];
 
