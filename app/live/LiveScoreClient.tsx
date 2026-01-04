@@ -602,14 +602,6 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                         // Match exact name or if the tee box name contains the search term
                                         return tbName === searchName || tbName.includes(searchName) || searchName.includes(tbName);
                                     });
-                                    console.log('getCourseHandicap:', {
-                                        playerIndex,
-                                        teeBoxName,
-                                        searchName,
-                                        availableTeeBoxes: course.tee_boxes?.map((tb: any) => tb.name),
-                                        teeBox: teeBox?.name,
-                                        slope: teeBox?.slope
-                                    });
                                     if (!teeBox) return 0;
                                     return Math.round(playerIndex * (teeBox.slope / 113));
                                 };
@@ -620,7 +612,6 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 // Strokes are allocated based on hole difficulty (1 = hardest, 18 = easiest)
                                 const completedHolesList = course.holes.filter((h: any) => isHoleCompleted(h.hole_number));
                                 let handicapForCompletedHoles = 0;
-                                console.log('DEBUG:', { player: player.name, courseHandicap, holes: completedHolesList.map((h: any) => ({ n: h.hole_number, d: h.difficulty })) });
 
                                 completedHolesList.forEach((hole: any) => {
                                     const holeDifficulty = hole.difficulty || 18; // Default to easiest if no difficulty set
