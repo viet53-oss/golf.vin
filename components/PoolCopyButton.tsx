@@ -28,9 +28,11 @@ export function PoolCopyButton({ date, roundName, isTournament, flights }: PoolC
         `;
 
         flights.forEach(flight => {
+            const playerCount = flight.players?.length || 0;
+            const totalCollected = playerCount * 5;
             html += `
                 <div style="margin-bottom: 25px;">
-                    <h2 style="background: #f1f5f9; padding: 8px; font-size: 18px; border-left: 4px solid #16a34a; margin-bottom: 15px;">${flight.name}</h2>
+                    <h2 style="background: #f1f5f9; padding: 8px; font-size: 18px; border-left: 4px solid #16a34a; margin-bottom: 15px;">${flight.name} (${playerCount} players, $${totalCollected.toFixed(2)} collected)</h2>
             `;
 
             if (!isTournament) {

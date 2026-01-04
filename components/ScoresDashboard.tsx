@@ -190,19 +190,19 @@ export default function ScoresDashboard({
             html += `
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 <thead>
-                    <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
-                        <th style="padding: 8px;">#</th>
-                        <th style="padding: 8px;">Name</th>
+                    <tr style="border-bottom: 2px solid #e2e8f0;">
+                        <th style="padding: 8px; text-align: left;">#</th>
+                        <th style="padding: 8px; text-align: left;">Name</th>
                         ${round.is_tournament ? `
-                        <th style="padding: 8px; text-align: center; color: green;">$</th>
-                        <th style="padding: 8px; text-align: center;">Pts</th>
-                        <th style="padding: 8px; text-align: center; color: blue;">YTD</th>
+                        <th style="padding: 8px; text-align: left;">$</th>
+                        <th style="padding: 8px; text-align: left;">Pts</th>
+                        <th style="padding: 8px; text-align: left;">YTD</th>
                         ` : ''}
-                        <th style="padding: 8px; text-align: center;">Grs</th>
-                        <th style="padding: 8px; text-align: center;">Hcp</th>
-                        <th style="padding: 8px; text-align: center; background: #f8fafc;">Net</th>
-                        <th style="padding: 8px; text-align: center;">New Hcp</th>
-                        <th style="padding: 8px; text-align: center;">New Idx</th>
+                        <th style="padding: 8px; text-align: left;">Grs</th>
+                        <th style="padding: 8px; text-align: left;">Hcp</th>
+                        <th style="padding: 8px; text-align: left; background: #f8fafc;">Net</th>
+                        <th style="padding: 8px; text-align: left;">Hcp</th>
+                        <th style="padding: 8px; text-align: left;">Idx</th>
                     </tr>
                 </thead>
                 <tbody>

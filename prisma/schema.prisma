@@ -156,4 +156,17 @@ model Event {
   @@map("events")
 }
 
+model MoneyEvent {
+  id          String   @id @default(uuid())
+  round_id    String
+  player_id   String
+  hole_number Int
+  event_type  String   // 'birdie', 'eagle', 'skin', etc.
+  amount      Float    // Dollar amount earned/lost
+  created_at  DateTime @default(now())
+
+  @@index([round_id])
+  @@index([player_id])
+  @@map("money_events")
+}
 
