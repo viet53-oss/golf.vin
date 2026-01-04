@@ -81,7 +81,8 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
     const updateScore = (playerId: string, change: number) => {
         setLocalScores(prev => {
             const newScores = new Map(prev);
-            const playerScores = newScores.get(playerId) || new Map<number, number>();
+            const existingScores = newScores.get(playerId);
+            const playerScores = existingScores ? new Map(existingScores) : new Map<number, number>();
 
             // Get current score or default to par for this hole
             const currentHolePar = course.holes.find((h: any) => h.hole_number === activeHole)?.par || 4;
