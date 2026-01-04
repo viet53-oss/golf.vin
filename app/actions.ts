@@ -106,13 +106,33 @@ export async function updateRound(roundId: string, data: { date: string; name?: 
 }
 
 export async function deleteRound(roundId: string) {
-    // Cascade delete round players first (although Prisma relation usually handles this if configured, manual is safer without cascade setup)
+    // 1. Find all round players to delete their scores
+    const roundPlayers = await prisma.roundPlayer.findMany({
+        where: { round_id: roundId },
+        select: { id: true }
+    });
+
+    // 2. Delete all scores for these players
+    if (roundPlayers.length > 0) {
+        await prisma.score.deleteMany({
+            where: {
+                round_player_id: {
+                    in: roundPlayers.map(rp => rp.id)
+                }
+            }
+        });
+    }
+
+    // 3. Delete round players
     await prisma.roundPlayer.deleteMany({
         where: { round_id: roundId },
     });
+
+    // 4. Delete the round itself
     await prisma.round.delete({
         where: { id: roundId },
     });
+
     revalidatePath('/scores');
 }
 
