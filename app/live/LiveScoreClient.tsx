@@ -53,6 +53,7 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
     const [localScores, setLocalScores] = useState<Map<string, Map<number, number>>>(new Map());
     const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
     const [savedHoles, setSavedHoles] = useState<Set<number>>(new Set()); // Track which holes have been saved
+    const [renderTrigger, setRenderTrigger] = useState(0); // Force re-renders
 
     // Get selected players with their data
     const selectedPlayers = allPlayers.filter(p => selectedPlayerIds.includes(p.id));
@@ -83,8 +84,9 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
     // Helper to get score for a specific player and hole
     const getScore = (playerId: string, holeNumber: number): number | null => {
         const playerScores = localScores.get(playerId);
-        // Return null if no score set
-        return playerScores?.get(holeNumber) || null;
+        // Return null if no score set, but return 0 if score is actually 0
+        const score = playerScores?.get(holeNumber);
+        return score !== undefined ? score : null;
     };
 
     // Helper to get total score
@@ -101,6 +103,7 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
 
     // Update score locally
     const updateScore = (playerId: string, change: number) => {
+        console.log('updateScore START:', { playerId, change, activeHole });
         setLocalScores(prev => {
             const newScores = new Map(prev);
             const existingScores = newScores.get(playerId);
@@ -112,14 +115,9 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
 
             let newVal;
             if (currentVal === undefined || currentVal === null) {
-                // If no score set yet
-                if (change < 0) {
-                    // Clicking minus on blank - do nothing, keep it blank
-                    return prev;
-                } else {
-                    // Clicking plus on blank - start at par
-                    newVal = currentHolePar;
-                }
+                // If no score set yet, start at par + change
+                // So clicking + starts at par, clicking - starts at par-1
+                newVal = currentHolePar + change;
             } else {
                 newVal = currentVal + change;
             }
@@ -128,10 +126,17 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
             if (newVal < 1) newVal = 1;
             if (newVal > 15) newVal = 15;
 
+            console.log(`Setting score for hole ${activeHole}: ${currentVal} -> ${newVal}`);
             playerScores.set(activeHole, newVal);
             newScores.set(playerId, playerScores);
+
+            // Verify it was set
+            console.log('Verification:', newScores.get(playerId)?.get(activeHole));
             return newScores;
         });
+        // Force re-render
+        setRenderTrigger(prev => prev + 1);
+        console.log('updateScore END');
     };
 
     // Consolidate initialization and state restoration from selected round
@@ -161,23 +166,17 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                 }
             });
 
-            // Fill in pars for gaps in DB data
-            course.holes.forEach((hole: any) => {
-                if (!playerHoleScores.has(hole.hole_number)) {
-                    playerHoleScores.set(hole.hole_number as number, hole.par as number);
-                }
-            });
+            // DON'T fill in pars for gaps - let them be undefined/null
+            // This allows user input to work properly
 
             newScoresMap.set(rp.player_id, playerHoleScores);
         });
 
-        // Also ensure any players selected via modal but not yet in DB have maps (initialized to par)
+        // Also ensure any players selected via modal but not yet in DB have empty maps
         selectedPlayerIds.forEach(pid => {
             if (!newScoresMap.has(pid)) {
                 const playerHoleScores = new Map<number, number>();
-                course.holes.forEach((hole: any) => {
-                    playerHoleScores.set(hole.hole_number as number, hole.par as number);
-                });
+                // DON'T pre-fill with par - let scores be undefined until user sets them
                 newScoresMap.set(pid, playerHoleScores);
             }
         });
@@ -470,6 +469,8 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                     const par = course.holes.find((h: any) => h.hole_number === activeHole)?.par || 4;
                                     const total = getTotalScore(player.id);
 
+                                    console.log('RENDER:', { playerName: player.name, activeHole, score, scoreType: typeof score });
+
                                     return (
                                         <div key={player.id} className="bg-blue-50/50 rounded-lg p-1.5 border border-blue-100 flex items-center justify-between">
                                             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -487,10 +488,10 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                                     −
                                                 </button>
                                                 <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-[14pt] font-bold border-2 ${score !== null
-                                                    ? 'bg-white border-gray-200 text-gray-900 shadow-inner'
+                                                    ? getScoreColor(score, par) + ' border-gray-300'
                                                     : 'bg-gray-100 border-dashed border-gray-300 text-gray-400'
-                                                    } ${score !== null ? getScoreColor(score, par).replace('bg-', 'text-').replace('text-', 'border-') : ''}`}>
-                                                    {score || '-'}
+                                                    }`}>
+                                                    {score !== null ? score : par}
                                                 </div>
                                                 <button
                                                     onClick={() => updateScore(player.id, 1)}
