@@ -211,7 +211,7 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
         if (diff === -1) return 'bg-green-500 text-white font-bold'; // Birdie
         if (diff === 0) return 'bg-blue-100 text-blue-900'; // Par
         if (diff === 1) return 'bg-orange-100 text-orange-900'; // Bogey
-        return 'bg-red-100 text-red-900'; // Double bogey or worse
+        return 'bg-red-200 text-red-900 font-bold'; // Double bogey or worse
     };
 
     // Save scores to database
@@ -545,13 +545,27 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                     return Math.round(playerIndex * (teeBox.slope / 113));
                                 };
 
-                                // Calculate net scores (gross - handicap for completed holes)
+                                // Calculate net scores (gross - handicap for completed holes using USGA allocation)
                                 const aCourseHcp = getCourseHandicap(aPlayer?.index || 0, aPlayer?.preferred_tee_box || null);
                                 const bCourseHcp = getCourseHandicap(bPlayer?.index || 0, bPlayer?.preferred_tee_box || null);
 
-                                const completedHolesCount = course.holes.filter((h: any) => isHoleCompleted(h.hole_number)).length;
-                                const aHcpForCompleted = completedHolesCount > 0 ? Math.round((aCourseHcp / 18) * completedHolesCount) : 0;
-                                const bHcpForCompleted = completedHolesCount > 0 ? Math.round((bCourseHcp / 18) * completedHolesCount) : 0;
+                                const completedHolesList = course.holes.filter((h: any) => isHoleCompleted(h.hole_number));
+
+                                // Calculate handicap strokes using USGA allocation for player A
+                                let aHcpForCompleted = 0;
+                                completedHolesList.forEach((hole: any) => {
+                                    const holeDifficulty = hole.difficulty || 18;
+                                    if (aCourseHcp >= holeDifficulty) aHcpForCompleted++;
+                                    if (aCourseHcp >= (holeDifficulty + 18)) aHcpForCompleted++;
+                                });
+
+                                // Calculate handicap strokes using USGA allocation for player B
+                                let bHcpForCompleted = 0;
+                                completedHolesList.forEach((hole: any) => {
+                                    const holeDifficulty = hole.difficulty || 18;
+                                    if (bCourseHcp >= holeDifficulty) bHcpForCompleted++;
+                                    if (bCourseHcp >= (holeDifficulty + 18)) bHcpForCompleted++;
+                                });
 
                                 const aNet = aData.liveGross - aHcpForCompleted;
                                 const bNet = bData.liveGross - bHcpForCompleted;
@@ -590,11 +604,22 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
 
                                 const courseHandicap = getCourseHandicap(playerData?.index || 0, playerData?.preferred_tee_box || null);
 
-                                // Calculate handicap strokes for completed holes only
-                                const completedHoles = course.holes.filter((h: any) => isHoleCompleted(h.hole_number)).length;
-                                const handicapForCompletedHoles = completedHoles > 0
-                                    ? Math.round((courseHandicap / 18) * completedHoles)
-                                    : 0;
+                                // Calculate handicap strokes for completed holes using USGA allocation
+                                // Strokes are allocated based on hole difficulty (1 = hardest, 18 = easiest)
+                                const completedHolesList = course.holes.filter((h: any) => isHoleCompleted(h.hole_number));
+                                let handicapForCompletedHoles = 0;
+
+                                completedHolesList.forEach((hole: any) => {
+                                    const holeDifficulty = hole.difficulty || 18; // Default to easiest if no difficulty set
+                                    // Player gets a stroke on this hole if their course handicap >= hole difficulty
+                                    if (courseHandicap >= holeDifficulty) {
+                                        handicapForCompletedHoles++;
+                                    }
+                                    // For handicaps > 18, player gets 2 strokes on holes where handicap >= (difficulty + 18)
+                                    if (courseHandicap >= (holeDifficulty + 18)) {
+                                        handicapForCompletedHoles++;
+                                    }
+                                });
 
                                 const liveNet = liveGross - handicapForCompletedHoles;
 
