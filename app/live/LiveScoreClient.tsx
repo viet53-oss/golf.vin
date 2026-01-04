@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 
 interface LiveScoreClientProps {
     rounds: any[];
-    allPlayers: Array<{ id: string; name: string }>;
+    allPlayers: Array<{ id: string; name: string; index: number; preferred_tee_box: string | null }>;
     courses: any[];
     isAdmin: boolean;
 }
@@ -112,7 +112,14 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
 
             let newVal;
             if (currentVal === undefined || currentVal === null) {
-                newVal = currentHolePar + change; // Start at Par + change
+                // If no score set yet
+                if (change < 0) {
+                    // Clicking minus on blank - do nothing, keep it blank
+                    return prev;
+                } else {
+                    // Clicking plus on blank - start at par
+                    newVal = currentHolePar;
+                }
             } else {
                 newVal = currentVal + change;
             }
@@ -522,10 +529,36 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 const aData = getLiveToParData(a.id);
                                 const bData = getLiveToParData(b.id);
 
-                                // Leaders (lowest toPar) first
+                                // Get player data from allPlayers to access handicap
+                                const aPlayer = allPlayers.find(p => p.id === a.id);
+                                const bPlayer = allPlayers.find(p => p.id === b.id);
+
+                                // Helper function to calculate course handicap
+                                const getCourseHandicap = (playerIndex: number, teeBoxName: string | null) => {
+                                    // Find the tee box for this course
+                                    const teeBox = course.tee_boxes?.find((tb: any) =>
+                                        tb.name.toLowerCase() === (teeBoxName || 'white').toLowerCase()
+                                    );
+                                    if (!teeBox) return 0;
+                                    // Course Handicap = Handicap Index × (Slope Rating ÷ 113)
+                                    return Math.round(playerIndex * (teeBox.slope / 113));
+                                };
+
+                                // Calculate net scores (gross - handicap for completed holes)
+                                const aCourseHcp = getCourseHandicap(aPlayer?.index || 0, aPlayer?.preferred_tee_box || null);
+                                const bCourseHcp = getCourseHandicap(bPlayer?.index || 0, bPlayer?.preferred_tee_box || null);
+
+                                const completedHolesCount = course.holes.filter((h: any) => isHoleCompleted(h.hole_number)).length;
+                                const aHcpForCompleted = completedHolesCount > 0 ? Math.round((aCourseHcp / 18) * completedHolesCount) : 0;
+                                const bHcpForCompleted = completedHolesCount > 0 ? Math.round((bCourseHcp / 18) * completedHolesCount) : 0;
+
+                                const aNet = aData.liveGross - aHcpForCompleted;
+                                const bNet = bData.liveGross - bHcpForCompleted;
+
+                                // Leaders (lowest net) first
                                 if (aData.anySaved && bData.anySaved) {
-                                    if (aData.liveToPar !== bData.liveToPar) {
-                                        return aData.liveToPar - bData.liveToPar;
+                                    if (aNet !== bNet) {
+                                        return aNet - bNet;
                                     }
                                 } else if (aData.anySaved) {
                                     return -1; // a has scores, b doesn't -> a first
@@ -542,13 +575,37 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 const { liveGross, liveToPar, anySaved } = getLiveToParData(player.id);
                                 const toParDisplay = !anySaved ? 'e' : liveToPar === 0 ? 'e' : liveToPar > 0 ? `+${liveToPar}` : liveToPar;
 
+                                // Get player's full data to access handicap
+                                const playerData = allPlayers.find(p => p.id === player.id);
+
+                                // Calculate course handicap using USGA formula
+                                const getCourseHandicap = (playerIndex: number, teeBoxName: string | null) => {
+                                    const teeBox = course.tee_boxes?.find((tb: any) =>
+                                        tb.name.toLowerCase() === (teeBoxName || 'white').toLowerCase()
+                                    );
+                                    if (!teeBox) return 0;
+                                    return Math.round(playerIndex * (teeBox.slope / 113));
+                                };
+
+                                const courseHandicap = getCourseHandicap(playerData?.index || 0, playerData?.preferred_tee_box || null);
+
+                                // Calculate handicap strokes for completed holes only
+                                const completedHoles = course.holes.filter((h: any) => isHoleCompleted(h.hole_number)).length;
+                                const handicapForCompletedHoles = completedHoles > 0
+                                    ? Math.round((courseHandicap / 18) * completedHoles)
+                                    : 0;
+
+                                const liveNet = liveGross - handicapForCompletedHoles;
+
                                 return (
                                     <div key={player.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                                        {/* Player Header - Centered on one line */}
-                                        <div className="bg-blue-600 text-white px-3 py-1.5 flex justify-center items-center gap-4 text-[14pt] font-bold">
-                                            <span>{player.name}</span>
-                                            <span className="opacity-80">Grs: {liveGross}</span>
+                                        {/* Player Header - e before name, then Grs, Hcp, Net */}
+                                        <div className="bg-blue-600 text-white px-3 py-1.5 flex justify-center items-center gap-2 text-[14pt] font-bold">
                                             <span className="bg-white text-red-600 px-2 rounded font-bold">{toParDisplay}</span>
+                                            <span>{player.name}</span>
+                                            <span className="opacity-80">Grs:{liveGross}</span>
+                                            <span className="opacity-80">Hcp:{handicapForCompletedHoles}</span>
+                                            <span className="opacity-80">Net:{liveNet}</span>
                                         </div>
 
                                         {/* Hole Grid - 9 holes per line (2 rows) */}

@@ -54,7 +54,7 @@ export function useRealtimeScores(roundId: string | null) {
                         table: 'scores',
                         filter: `round_player_id=in.(select id from round_players where round_id=eq.${roundId})`
                     },
-                    (payload) => {
+                    (payload: any) => {
                         console.log('Score update received:', payload);
 
                         if (payload.eventType === 'INSERT') {
@@ -72,7 +72,7 @@ export function useRealtimeScores(roundId: string | null) {
                         }
                     }
                 )
-                .subscribe((status) => {
+                .subscribe((status: any) => {
                     console.log('Subscription status:', status);
                     setIsConnected(status === 'SUBSCRIBED');
                     if (status === 'CHANNEL_ERROR') {
@@ -131,7 +131,7 @@ export function useRealtimeMoneyEvents(roundId: string | null) {
                         table: 'money_events',
                         filter: `round_id=eq.${roundId}`
                     },
-                    (payload) => {
+                    (payload: any) => {
                         console.log('Money event update received:', payload);
 
                         if (payload.eventType === 'INSERT') {
@@ -149,7 +149,7 @@ export function useRealtimeMoneyEvents(roundId: string | null) {
                         }
                     }
                 )
-                .subscribe((status) => {
+                .subscribe((status: any) => {
                     console.log('Money events subscription status:', status);
                     setIsConnected(status === 'SUBSCRIBED');
                     if (status === 'CHANNEL_ERROR') {
@@ -209,7 +209,7 @@ export function useRealtimeTable<T = any>(
 
             channel = supabase
                 .channel(channelName)
-                .on('postgres_changes', subscribeConfig, (payload) => {
+                .on('postgres_changes', subscribeConfig, (payload: any) => {
                     console.log(`${tableName} update:`, payload);
 
                     if (payload.eventType === 'INSERT') {
@@ -226,7 +226,7 @@ export function useRealtimeTable<T = any>(
                         );
                     }
                 })
-                .subscribe((status) => {
+                .subscribe((status: any) => {
                     setIsConnected(status === 'SUBSCRIBED');
                     if (status === 'CHANNEL_ERROR') {
                         setError(`Failed to connect to ${tableName} updates`);

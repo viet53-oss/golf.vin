@@ -12,7 +12,12 @@ export default async function LiveScorePage() {
     // Get all players in the club for selection
     const allPlayers = await prisma.player.findMany({
         orderBy: { name: 'asc' },
-        select: { id: true, name: true }
+        select: {
+            id: true,
+            name: true,
+            index: true,
+            preferred_tee_box: true
+        }
     });
 
     // Get all rounds (for selection)
