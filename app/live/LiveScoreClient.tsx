@@ -3,23 +3,45 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
+import { saveLiveHoleScores } from '@/app/actions/update-live-score';
+import { createRound } from '@/app/actions';
+import { useRouter } from 'next/navigation';
 
 interface LiveScoreClientProps {
     rounds: any[];
     allPlayers: Array<{ id: string; name: string }>;
+    courses: any[];
     isAdmin: boolean;
 }
 
-export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveScoreClientProps) {
+export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }: LiveScoreClientProps) {
+    const router = useRouter();
     const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
     const [mounted, setMounted] = useState(false);
+
+    // Get today's date in local ISO format (YYYY-MM-DD)
+    const now = new Date();
+    const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+    // Find if any round exists for today
+    const todaysRound = rounds.find(r => r.date.startsWith(todayStr));
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    // Round selection state
-    const [selectedRoundId, setSelectedRoundId] = useState<string>(rounds[0]?.id || '');
+    // Round selection state - Default to today's round if it exists, else the latest round
+    const [selectedRoundId, setSelectedRoundId] = useState<string>(
+        todaysRound?.id || rounds[0]?.id || ''
+    );
+
+    // Update selectedRoundId if todaysRound is found later (e.g. after mount or update)
+    useEffect(() => {
+        if (todaysRound && selectedRoundId !== todaysRound.id) {
+            setSelectedRoundId(todaysRound.id);
+        }
+    }, [todaysRound?.id]);
+
     const selectedRound = rounds.find(r => r.id === selectedRoundId);
 
     // Safely get course from selected round, handle potential missing data
@@ -105,37 +127,75 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
         });
     };
 
-    // Initialize ALL hole scores to par if not set
+    // Consolidate initialization and state restoration from selected round
     useEffect(() => {
-        if (selectedPlayers.length > 0 && course) {
-            setLocalScores(prev => {
-                const newScores = new Map(prev);
-                let overallChanged = false;
+        if (!course) return;
 
-                selectedPlayers.forEach(player => {
-                    const existingScores = prev.get(player.id);
-                    // Create a new Map to ensure React detects changes
-                    const playerScores = existingScores ? new Map(existingScores) : new Map<number, number>();
-                    let playerChanged = false;
+        // 1. Get existing players from the round
+        const roundPlayersData = selectedRound?.players || [];
+        const existingPlayerIds = roundPlayersData.map((p: any) => p.player_id);
 
-                    // Initialize all 18 holes to par
-                    course.holes.forEach((hole: any) => {
-                        if (!playerScores.has(hole.hole_number)) {
-                            playerScores.set(hole.hole_number, hole.par);
-                            playerChanged = true;
-                        }
-                    });
+        // 2. Build localScores map and savedHoles set from DB data
+        const newScoresMap = new Map<string, Map<number, number>>();
+        const newlySavedHoles = new Set<number>();
 
-                    if (playerChanged) {
-                        newScores.set(player.id, playerScores);
-                        overallChanged = true;
-                    }
-                });
+        // Map hole IDs to numbers for this course for quick lookup
+        const holeIdToNum = new Map(course.holes.map((h: any) => [h.id, h.hole_number]));
 
-                return overallChanged ? newScores : prev;
+        // First, handle players already in the round from DB
+        roundPlayersData.forEach((rp: any) => {
+            const playerHoleScores = new Map<number, number>();
+
+            rp.scores.forEach((s: any) => {
+                const holeNum = holeIdToNum.get(s.hole_id);
+                if (holeNum !== undefined) {
+                    playerHoleScores.set(holeNum as number, s.strokes as number);
+                    newlySavedHoles.add(holeNum as number);
+                }
             });
+
+            // Fill in pars for gaps in DB data
+            course.holes.forEach((hole: any) => {
+                if (!playerHoleScores.has(hole.hole_number)) {
+                    playerHoleScores.set(hole.hole_number as number, hole.par as number);
+                }
+            });
+
+            newScoresMap.set(rp.player_id, playerHoleScores);
+        });
+
+        // Also ensure any players selected via modal but not yet in DB have maps (initialized to par)
+        selectedPlayerIds.forEach(pid => {
+            if (!newScoresMap.has(pid)) {
+                const playerHoleScores = new Map<number, number>();
+                course.holes.forEach((hole: any) => {
+                    playerHoleScores.set(hole.hole_number as number, hole.par as number);
+                });
+                newScoresMap.set(pid, playerHoleScores);
+            }
+        });
+
+        // 3. Update all states
+        setLocalScores(newScoresMap);
+        setSavedHoles(newlySavedHoles);
+
+        // Only auto-initialize player IDs if currently empty (first load)
+        if (selectedPlayerIds.length === 0 && existingPlayerIds.length > 0) {
+            setSelectedPlayerIds(existingPlayerIds);
         }
-    }, [selectedPlayers, course]);
+
+        // Set active hole to first uncompleted one
+        if (newlySavedHoles.size < 18) {
+            for (let i = 1; i <= 18; i++) {
+                if (!newlySavedHoles.has(i)) {
+                    setActiveHole(i);
+                    break;
+                }
+            }
+        } else {
+            setActiveHole(18); // Stay on 18 if all done
+        }
+    }, [selectedRoundId, course, selectedRound]);
 
     // Get score color based on relation to par
     const getScoreColor = (strokes: number | null, par: number) => {
@@ -150,12 +210,36 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
 
     // Save scores to database
     const saveScores = async () => {
+        if (!selectedRoundId) {
+            alert('❌ Please select a round first');
+            return;
+        }
+
+        if (selectedPlayerIds.length === 0) {
+            alert('❌ Please select players first');
+            return;
+        }
+
         try {
-            // TODO: Implement save functionality
-            console.log('Saving round:', { selectedRoundId, selectedPlayerIds, localScores });
+            // Prepare scores for the current hole
+            const scoresToSave = selectedPlayerIds.map(pid => {
+                const score = getScore(pid, activeHole);
+                const currentHolePar = course.holes.find((h: any) => h.hole_number === activeHole)?.par || 4;
+                return {
+                    playerId: pid,
+                    strokes: score || currentHolePar // Default to par if no score set
+                };
+            });
+
+            const result = await saveLiveHoleScores(selectedRoundId, activeHole, scoresToSave);
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
 
             // Mark the current hole as saved (completed)
             setSavedHoles(prev => new Set(prev).add(activeHole));
+            setLastUpdate(new Date());
 
             // Move to next hole if not on hole 18
             if (activeHole < 18) {
@@ -163,7 +247,32 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
             }
         } catch (error) {
             console.error('Failed to save scores:', error);
-            alert('❌ Failed to save scores');
+            alert(`❌ Failed to save scores: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    };
+
+    // Create a new round for today
+    const handleCreateNewRound = async () => {
+        try {
+            // Priority: Currently selected round's course > Most recent round's course > First available course
+            const defaultCourseId = selectedRound?.course_id || rounds[0]?.course_id || courses[0]?.id;
+
+            if (!defaultCourseId) {
+                alert('❌ No course available to create round. Please add a course in Settings first.');
+                return;
+            }
+
+            const isoDate = todayStr + 'T12:00:00';
+            const newRound = await createRound(isoDate, defaultCourseId, "Live Round", false);
+
+            if (newRound) {
+                // We don't need to manually set selectedRoundId here because the router.refresh() 
+                // will update the rounds prop and the useEffect will pick up the today's round.
+                router.refresh();
+            }
+        } catch (error) {
+            console.error('Failed to create round:', error);
+            alert('❌ Failed to create round');
         }
     };
 
@@ -174,11 +283,31 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
 
     if (!course) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Course</h2>
-                    <p className="text-gray-600">Could not load course data for the selected round.</p>
-                </div>
+            <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+                <header className="bg-black text-white px-2 py-3 shadow-md">
+                    <h1 className="text-[14pt] font-bold">Live Scoring</h1>
+                </header>
+                <main className="flex-1 flex items-center justify-center p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full border-t-4 border-blue-600">
+                        <div className="text-4xl mb-4">⛳️</div>
+                        <h2 className="text-[16pt] font-bold text-gray-900 mb-2">No Round Selected</h2>
+                        <p className="text-gray-600 text-[12pt] mb-6">
+                            There are no live rounds for today yet.
+                        </p>
+                        <button
+                            onClick={handleCreateNewRound}
+                            className="w-full py-3 bg-green-600 text-white rounded-lg font-bold text-[14pt] hover:bg-green-700 transition shadow-md active:scale-95"
+                        >
+                            ➕ New Round for Today
+                        </button>
+                        <Link
+                            href="/"
+                            className="block mt-4 text-gray-500 font-medium hover:text-gray-700"
+                        >
+                            Go Back
+                        </Link>
+                    </div>
+                </main>
             </div>
         );
     }
@@ -215,7 +344,17 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
 
                     {/* Round Selection */}
                     <div className="mt-2 bg-gray-50 rounded-lg p-1.5 border border-gray-100">
-                        <label className="block text-[12pt] font-bold text-gray-500 uppercase tracking-wider mb-1">Select Round</label>
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="text-[12pt] font-bold text-gray-500 uppercase tracking-wider">Select Round</label>
+                            {!todaysRound && (
+                                <button
+                                    onClick={handleCreateNewRound}
+                                    className="px-2 py-0.5 bg-green-600 text-white text-[10pt] font-bold rounded hover:bg-green-700 transition shadow-sm flex items-center gap-1"
+                                >
+                                    <span>➕</span> New Round
+                                </button>
+                            )}
+                        </div>
                         <select
                             value={selectedRoundId}
                             onChange={(e) => setSelectedRoundId(e.target.value)}
@@ -223,6 +362,7 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
                         >
                             {rounds.map((round) => (
                                 <option key={round.id} value={round.id}>
+                                    {round.date.startsWith(todayStr) ? '⭐ TODAY: ' : ''}
                                     {new Date(round.date).toLocaleDateString()} - {round.course.name}
                                 </option>
                             ))}

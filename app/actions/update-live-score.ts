@@ -3,104 +3,118 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-export async function updateLiveScore(
-    roundPlayerId: string,
+/**
+ * Saves scores for a specific hole for multiple players in a round.
+ * Creates RoundPlayer records and Score records as needed.
+ * Updates gross/front/back totals for each player.
+ */
+export async function saveLiveHoleScores(
+    roundId: string,
     holeNumber: number,
-    strokes: number
+    playerScores: Array<{ playerId: string; strokes: number }>
 ) {
     try {
-        // Get the round player to find the hole
-        const roundPlayer = await prisma.roundPlayer.findUnique({
-            where: { id: roundPlayerId },
+        // 1. Get the round and course details
+        const round = await prisma.round.findUnique({
+            where: { id: roundId },
             include: {
-                round: {
+                course: {
                     include: {
-                        course: {
-                            include: {
-                                holes: true
-                            }
-                        }
+                        holes: true,
+                        tee_boxes: true
                     }
                 }
             }
         });
 
-        if (!roundPlayer) {
-            return { success: false, error: 'Round player not found' };
-        }
+        if (!round) throw new Error('Round not found');
 
-        // Find the hole
-        const hole = roundPlayer.round.course.holes.find(
-            h => h.hole_number === holeNumber
-        );
+        const hole = round.course.holes.find(h => h.hole_number === holeNumber);
+        if (!hole) throw new Error(`Hole ${holeNumber} not found for this course`);
 
-        if (!hole) {
-            return { success: false, error: 'Hole not found' };
-        }
+        // Default tee for any new players added to the round
+        const defaultTee = round.course.tee_boxes.find(t => t.name === 'White') || round.course.tee_boxes[0];
 
-        // Check if score already exists
-        const existingScore = await prisma.score.findFirst({
-            where: {
-                round_player_id: roundPlayerId,
-                hole_id: hole.id
-            }
-        });
-
-        if (existingScore) {
-            // Update existing score
-            await prisma.score.update({
-                where: { id: existingScore.id },
-                data: { strokes }
+        // 2. Process each player's score
+        for (const ps of playerScores) {
+            // Find or create RoundPlayer
+            let roundPlayer = await prisma.roundPlayer.findFirst({
+                where: {
+                    round_id: roundId,
+                    player_id: ps.playerId
+                }
             });
-        } else {
-            // Create new score
-            await prisma.score.create({
+
+            if (!roundPlayer) {
+                roundPlayer = await prisma.roundPlayer.create({
+                    data: {
+                        round_id: roundId,
+                        player_id: ps.playerId,
+                        tee_box_id: defaultTee?.id,
+                        gross_score: null
+                    }
+                });
+            }
+
+            // Save the hole score
+            const existingScore = await prisma.score.findFirst({
+                where: {
+                    round_player_id: roundPlayer.id,
+                    hole_id: hole.id
+                }
+            });
+
+            if (existingScore) {
+                await prisma.score.update({
+                    where: { id: existingScore.id },
+                    data: { strokes: ps.strokes }
+                });
+            } else {
+                await prisma.score.create({
+                    data: {
+                        round_player_id: roundPlayer.id,
+                        hole_id: hole.id,
+                        strokes: ps.strokes
+                    }
+                });
+            }
+
+            // 3. Recalculate summary totals for this player
+            const allScores = await prisma.score.findMany({
+                where: { round_player_id: roundPlayer.id },
+                include: { hole: { select: { hole_number: true } } }
+            });
+
+            let gross = 0;
+            let front = 0;
+            let back = 0;
+
+            allScores.forEach(s => {
+                gross += s.strokes;
+                if (s.hole.hole_number <= 9) front += s.strokes;
+                else back += s.strokes;
+            });
+
+            await prisma.roundPlayer.update({
+                where: { id: roundPlayer.id },
                 data: {
-                    round_player_id: roundPlayerId,
-                    hole_id: hole.id,
-                    strokes
+                    gross_score: gross,
+                    front_nine: front > 0 ? front : null,
+                    back_nine: back > 0 ? back : null
                 }
             });
         }
 
-        // Revalidate the live page to trigger real-time updates
         revalidatePath('/live');
+        revalidatePath('/scores');
+        revalidatePath('/players');
 
         return { success: true };
     } catch (error) {
-        console.error('Failed to update live score:', error);
-        return { success: false, error: 'Failed to update score' };
-    }
-}
-
-export async function saveBulkLiveScores(
-    scores: Array<{
-        roundPlayerId: string;
-        holeNumber: number;
-        strokes: number;
-    }>
-) {
-    try {
-        // Process all scores
-        const results = await Promise.all(
-            scores.map(score =>
-                updateLiveScore(score.roundPlayerId, score.holeNumber, score.strokes)
-            )
-        );
-
-        // Check if any failed
-        const failed = results.filter(r => !r.success);
-        if (failed.length > 0) {
-            return {
-                success: false,
-                error: `Failed to save ${failed.length} score(s)`
-            };
-        }
-
-        revalidatePath('/live');
-        return { success: true };
-    } catch (error) {
-        console.error('Failed to save bulk scores:', error);
-        return { success: false, error: 'Failed to save scores' };
+        console.error('Failed to save live scores:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to save scores'
+        };
     }
 }

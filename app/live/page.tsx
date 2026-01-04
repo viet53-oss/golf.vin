@@ -25,27 +25,30 @@ export default async function LiveScorePage() {
                         orderBy: { hole_number: 'asc' }
                     }
                 }
+            },
+            players: {
+                include: {
+                    scores: true
+                }
             }
         }
     });
 
-    if (rounds.length === 0) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-                <div className="max-w-4xl mx-auto">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">🔴 Live Scores</h1>
-                    <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-                        <p className="text-gray-600 text-lg">No rounds found. Please create a round first!</p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    // Get all courses (for round creation)
+    const courses = await prisma.course.findMany({
+        orderBy: { name: 'asc' },
+        include: {
+            holes: {
+                orderBy: { hole_number: 'asc' }
+            }
+        }
+    });
 
     return (
         <LiveScoreClient
             rounds={rounds}
             allPlayers={allPlayers}
+            courses={courses}
             isAdmin={isAdmin}
         />
     );
