@@ -381,7 +381,7 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
                                         <div className="bg-blue-600 text-white px-3 py-1.5 flex justify-center items-center gap-4 text-[14pt] font-bold">
                                             <span>{player.name}</span>
                                             <span className="opacity-80">Grs: {liveGross}</span>
-                                            <span className="bg-white/20 px-2 rounded">{toParDisplay}</span>
+                                            <span className="bg-white text-red-600 px-2 rounded font-bold">{toParDisplay}</span>
                                         </div>
 
                                         {/* Hole Grid - 9 holes per line (2 rows) */}
