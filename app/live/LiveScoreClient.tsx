@@ -251,6 +251,32 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
         }
     };
 
+    // Helper to get live relative-to-par score for sorting/display
+    const getLiveToParData = (playerId: string) => {
+        const playerScores = localScores.get(playerId);
+        let liveGross = 0;
+        let liveToPar = 0;
+        let anySaved = false;
+
+        course.holes.forEach((hole: any) => {
+            if (isHoleCompleted(hole.hole_number)) {
+                const score = playerScores?.get(hole.hole_number);
+                if (score !== undefined) {
+                    liveGross += score;
+                    liveToPar += (score - hole.par);
+                    anySaved = true;
+                }
+            }
+        });
+
+        return { liveGross, liveToPar, anySaved };
+    };
+
+    // Helper to verify if hole is completed (saved)
+    const isHoleCompleted = (holeNumber: number) => {
+        return savedHoles.has(holeNumber);
+    };
+
     // Create a new round for today
     const handleCreateNewRound = async () => {
         try {
@@ -274,11 +300,6 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
             console.error('Failed to create round:', error);
             alert('❌ Failed to create round');
         }
-    };
-
-    // Helper to verify if hole is completed (saved)
-    const isHoleCompleted = (holeNumber: number) => {
-        return savedHoles.has(holeNumber);
     };
 
     if (!course) {
@@ -498,27 +519,27 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                         </div>
                         <div className="p-2 space-y-4">
                             {[...selectedPlayers].sort((a, b) => {
+                                const aData = getLiveToParData(a.id);
+                                const bData = getLiveToParData(b.id);
+
+                                // Leaders (lowest toPar) first
+                                if (aData.anySaved && bData.anySaved) {
+                                    if (aData.liveToPar !== bData.liveToPar) {
+                                        return aData.liveToPar - bData.liveToPar;
+                                    }
+                                } else if (aData.anySaved) {
+                                    return -1; // a has scores, b doesn't -> a first
+                                } else if (bData.anySaved) {
+                                    return 1; // b has scores, a doesn't -> b first
+                                }
+
+                                // Secondary sort: Last name
                                 const aLastName = a.name.split(' ').pop() || a.name;
                                 const bLastName = b.name.split(' ').pop() || b.name;
                                 return aLastName.localeCompare(bLastName);
                             }).map((player) => {
                                 // Calculate live totals based ONLY on saved holes
-                                const playerScores = localScores.get(player.id);
-                                let liveGross = 0;
-                                let liveToPar = 0;
-                                let anySaved = false;
-
-                                course.holes.forEach((hole: any) => {
-                                    if (isHoleCompleted(hole.hole_number)) {
-                                        const score = playerScores?.get(hole.hole_number);
-                                        if (score !== undefined) {
-                                            liveGross += score;
-                                            liveToPar += (score - hole.par);
-                                            anySaved = true;
-                                        }
-                                    }
-                                });
-
+                                const { liveGross, liveToPar, anySaved } = getLiveToParData(player.id);
                                 const toParDisplay = !anySaved ? 'e' : liveToPar === 0 ? 'e' : liveToPar > 0 ? `+${liveToPar}` : liveToPar;
 
                                 return (
