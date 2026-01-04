@@ -89,6 +89,7 @@ model RoundPlayer {
   tee_box_par          Int?     // Snapshot of par at time of round
   tee_box_rating       Float?   // Snapshot of course rating at time of round
   tee_box_slope        Int?     // Snapshot of slope rating at time of round
+  course_handicap      Int?     // Course handicap for this round (calculated from index and slope at time of round)
   gross_score          Int?     // Made optional to allow adding players without scores yet
   adjusted_gross_score Int?     // For net double bogey
   front_nine           Int?

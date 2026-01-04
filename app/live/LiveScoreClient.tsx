@@ -593,20 +593,26 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 // Get player's full data to access handicap
                                 const playerData = allPlayers.find(p => p.id === player.id);
 
+                                // Find the round_player record for this player in this round
+                                const roundPlayer = selectedRound?.players?.find((rp: any) => rp.player_id === player.id);
 
-                                // Calculate course handicap using USGA formula
-                                const getCourseHandicap = (playerIndex: number, teeBoxName: string | null) => {
-                                    const searchName = (teeBoxName || 'white').toLowerCase();
-                                    const teeBox = course.tee_boxes?.find((tb: any) => {
-                                        const tbName = tb.name.toLowerCase();
-                                        // Match exact name or if the tee box name contains the search term
-                                        return tbName === searchName || tbName.includes(searchName) || searchName.includes(tbName);
-                                    });
-                                    if (!teeBox) return 0;
-                                    return Math.round(playerIndex * (teeBox.slope / 113));
-                                };
+                                // Use stored course handicap from round_player if available, otherwise calculate it
+                                let courseHandicap = roundPlayer?.course_handicap;
 
-                                const courseHandicap = getCourseHandicap(playerData?.index || 0, playerData?.preferred_tee_box || null);
+                                if (!courseHandicap) {
+                                    // Calculate course handicap using USGA formula as fallback
+                                    const getCourseHandicap = (playerIndex: number, teeBoxName: string | null) => {
+                                        const searchName = (teeBoxName || 'white').toLowerCase();
+                                        const teeBox = course.tee_boxes?.find((tb: any) => {
+                                            const tbName = tb.name.toLowerCase();
+                                            // Match exact name or if the tee box name contains the search term
+                                            return tbName === searchName || tbName.includes(searchName) || searchName.includes(tbName);
+                                        });
+                                        if (!teeBox) return 0;
+                                        return Math.round(playerIndex * (teeBox.slope / 113));
+                                    };
+                                    courseHandicap = getCourseHandicap(playerData?.index || 0, playerData?.preferred_tee_box || null);
+                                }
 
                                 // Calculate handicap strokes for completed holes using USGA allocation
                                 // Strokes are allocated based on hole difficulty (1 = hardest, 18 = easiest)
@@ -633,6 +639,7 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                         <div className="bg-blue-600 text-white px-3 py-1.5 flex justify-center items-center gap-2 text-[14pt] font-bold">
                                             <span className="bg-white text-red-600 px-2 rounded font-bold">{toParDisplay}</span>
                                             <span>{player.name}</span>
+                                            <span className="opacity-60 text-[10pt]">({playerData?.preferred_tee_box || 'White'})</span>
                                             <span className="opacity-80">Grs:{liveGross}</span>
                                             <span className="opacity-80">Hcp:{handicapForCompletedHoles}</span>
                                             <span className="opacity-80">Net:{liveNet}</span>
