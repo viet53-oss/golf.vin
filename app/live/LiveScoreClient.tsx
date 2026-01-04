@@ -593,11 +593,23 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 // Get player's full data to access handicap
                                 const playerData = allPlayers.find(p => p.id === player.id);
 
+
                                 // Calculate course handicap using USGA formula
                                 const getCourseHandicap = (playerIndex: number, teeBoxName: string | null) => {
-                                    const teeBox = course.tee_boxes?.find((tb: any) =>
-                                        tb.name.toLowerCase() === (teeBoxName || 'white').toLowerCase()
-                                    );
+                                    const searchName = (teeBoxName || 'white').toLowerCase();
+                                    const teeBox = course.tee_boxes?.find((tb: any) => {
+                                        const tbName = tb.name.toLowerCase();
+                                        // Match exact name or if the tee box name contains the search term
+                                        return tbName === searchName || tbName.includes(searchName) || searchName.includes(tbName);
+                                    });
+                                    console.log('getCourseHandicap:', {
+                                        playerIndex,
+                                        teeBoxName,
+                                        searchName,
+                                        availableTeeBoxes: course.tee_boxes?.map((tb: any) => tb.name),
+                                        teeBox: teeBox?.name,
+                                        slope: teeBox?.slope
+                                    });
                                     if (!teeBox) return 0;
                                     return Math.round(playerIndex * (teeBox.slope / 113));
                                 };
@@ -608,6 +620,7 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 // Strokes are allocated based on hole difficulty (1 = hardest, 18 = easiest)
                                 const completedHolesList = course.holes.filter((h: any) => isHoleCompleted(h.hole_number));
                                 let handicapForCompletedHoles = 0;
+                                console.log('DEBUG:', { player: player.name, courseHandicap, holes: completedHolesList.map((h: any) => ({ n: h.hole_number, d: h.difficulty })) });
 
                                 completedHolesList.forEach((hole: any) => {
                                     const holeDifficulty = hole.difficulty || 18; // Default to easiest if no difficulty set

@@ -28,7 +28,8 @@ export default async function LiveScorePage() {
                 include: {
                     holes: {
                         orderBy: { hole_number: 'asc' }
-                    }
+                    },
+                    tee_boxes: true
                 }
             },
             players: {
