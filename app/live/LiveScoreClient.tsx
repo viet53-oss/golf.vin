@@ -12,6 +12,11 @@ interface LiveScoreClientProps {
 
 export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveScoreClientProps) {
     const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Round selection state
     const [selectedRoundId, setSelectedRoundId] = useState<string>(rounds[0]?.id || '');
@@ -224,7 +229,7 @@ export default function LiveScoreClient({ rounds, allPlayers, isAdmin }: LiveSco
                     </div>
 
                     <div className="mt-2 flex items-center gap-1 text-[12pt] text-gray-500 font-medium">
-                        <span>Updated: {lastUpdate.toLocaleTimeString()}</span>
+                        <span>Updated: {mounted ? lastUpdate.toLocaleTimeString() : '...'}</span>
                         <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                         <span>{selectedPlayers.length} players</span>
                     </div>
