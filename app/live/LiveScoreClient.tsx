@@ -401,6 +401,20 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                         <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                         <span>{selectedPlayers.length} players</span>
                     </div>
+
+                    {/* Course Tee Box Stats - Visual Reference */}
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                        {course.tee_boxes?.filter((tb: any) => ['white', 'gold'].includes(tb.name.toLowerCase())).map((tb: any) => (
+                            <div key={tb.id} className={`p-2 rounded-lg border flex flex-col items-center ${tb.name.toLowerCase() === 'white' ? 'bg-gray-100 border-gray-300' : 'bg-yellow-50 border-yellow-200'}`}>
+                                <span className={`text-[10pt] font-bold uppercase ${tb.name.toLowerCase() === 'white' ? 'text-gray-600' : 'text-yellow-700'}`}>{tb.name} Tees</span>
+                                <div className="flex gap-2 text-[11pt] font-semibold text-gray-700">
+                                    <span>P:{tb.par || course.holes.reduce((sum: number, h: any) => sum + h.par, 0)}</span>
+                                    <span>R:{tb.rating}</span>
+                                    <span>S:{tb.slope}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* My Group - Interactive */}
@@ -432,8 +446,16 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                         <div className="p-1">
                             {/* Hole Selector - 6 per line for mobile */}
                             <div className="mb-2">
-                                <div className="flex justify-between items-end mb-1 px-1">
-                                    <h3 className="text-[12pt] font-bold text-gray-700">Active Hole:</h3>
+                                <div className="flex justify-between items-center mb-1 px-1">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-[12pt] font-bold text-gray-700">Hole {activeHole}</h3>
+                                        <div className="bg-gray-700 text-white text-[10pt] px-2 py-0.5 rounded font-bold uppercase flex gap-1.5 items-center">
+                                            <span>Par {course.holes.find((h: any) => h.hole_number === activeHole)?.par}</span>
+                                            <span className="w-0.5 h-3 bg-white/30"></span>
+                                            <span>Hardness {course.holes.find((h: any) => h.hole_number === activeHole)?.difficulty || 18}</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10pt] text-gray-500 font-bold uppercase tracking-widest">Active</span>
                                 </div>
                                 <div className="grid grid-cols-6 gap-1 p-1 bg-gray-50 rounded-lg border border-gray-100">
                                     {course.holes.map((hole: any) => (
@@ -596,23 +618,24 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 // Find the round_player record for this player in this round
                                 const roundPlayer = selectedRound?.players?.find((rp: any) => rp.player_id === player.id);
 
-                                // Use stored course handicap from round_player if available, otherwise calculate it
-                                let courseHandicap = roundPlayer?.course_handicap;
+                                // Calculate course handicap using USGA formula: (Index * Slope / 113) + (Rating - Par)
+                                const getCourseHandicap = (playerIndex: number, teeBoxName: string | null) => {
+                                    const searchName = (teeBoxName || 'white').toLowerCase();
+                                    const teeBox = course.tee_boxes?.find((tb: any) => {
+                                        const tbName = tb.name.toLowerCase();
+                                        return tbName === searchName || tbName.includes(searchName) || searchName.includes(tbName);
+                                    });
+                                    if (!teeBox) return 0;
 
-                                if (!courseHandicap) {
-                                    // Calculate course handicap using USGA formula as fallback
-                                    const getCourseHandicap = (playerIndex: number, teeBoxName: string | null) => {
-                                        const searchName = (teeBoxName || 'white').toLowerCase();
-                                        const teeBox = course.tee_boxes?.find((tb: any) => {
-                                            const tbName = tb.name.toLowerCase();
-                                            // Match exact name or if the tee box name contains the search term
-                                            return tbName === searchName || tbName.includes(searchName) || searchName.includes(tbName);
-                                        });
-                                        if (!teeBox) return 0;
-                                        return Math.round(playerIndex * (teeBox.slope / 113));
-                                    };
-                                    courseHandicap = getCourseHandicap(playerData?.index || 0, playerData?.preferred_tee_box || null);
-                                }
+                                    const slope = teeBox.slope || 113;
+                                    const rating = teeBox.rating || 0;
+                                    const par = course.holes.reduce((sum: number, h: any) => sum + h.par, 0);
+
+                                    return Math.round((playerIndex * (slope / 113)) + (rating - par));
+                                };
+
+                                // Use stored course handicap from round_player if available, otherwise calculate it
+                                const courseHandicap = roundPlayer?.course_handicap ?? getCourseHandicap(playerData?.index || 0, playerData?.preferred_tee_box || null);
 
                                 // Calculate handicap strokes for completed holes using USGA allocation
                                 // Strokes are allocated based on hole difficulty (1 = hardest, 18 = easiest)
@@ -632,17 +655,31 @@ export default function LiveScoreClient({ rounds, allPlayers, courses, isAdmin }
                                 });
 
                                 const liveNet = liveGross - handicapForCompletedHoles;
+                                const displayTeeName = roundPlayer?.tee_box_name || playerData?.preferred_tee_box || 'White';
 
                                 return (
                                     <div key={player.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                                         {/* Player Header - e before name, then Grs, Hcp, Net */}
                                         <div className="bg-blue-600 text-white px-3 py-1.5 flex justify-center items-center gap-2 text-[14pt] font-bold">
-                                            <span className="bg-white text-red-600 px-2 rounded font-bold">{toParDisplay}</span>
-                                            <span>{player.name}</span>
-                                            <span className="opacity-60 text-[10pt]">({playerData?.preferred_tee_box || 'White'})</span>
-                                            <span className="opacity-80">Grs:{liveGross}</span>
-                                            <span className="opacity-80">Hcp:{handicapForCompletedHoles}</span>
-                                            <span className="opacity-80">Net:{liveNet}</span>
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                <span className="bg-white text-red-600 px-2 rounded font-bold min-w-[2.5rem] text-center">{toParDisplay}</span>
+                                                <span className="truncate">{player.name}</span>
+                                                <span className="opacity-60 text-[10pt] font-normal hidden sm:inline">({displayTeeName})</span>
+                                            </div>
+                                            <div className="flex items-center gap-4 shrink-0">
+                                                <div className="flex flex-col items-center leading-none">
+                                                    <span className="text-[10pt] opacity-70 font-normal uppercase">Grs</span>
+                                                    <span>{liveGross}</span>
+                                                </div>
+                                                <div className="flex flex-col items-center leading-none">
+                                                    <span className="text-[10pt] opacity-70 font-normal uppercase">Hcp</span>
+                                                    <span>{handicapForCompletedHoles}<span className="text-[10pt] opacity-60 font-normal">/{courseHandicap}</span></span>
+                                                </div>
+                                                <div className="flex flex-col items-center leading-none bg-blue-700/50 px-2 py-0.5 rounded">
+                                                    <span className="text-[10pt] opacity-70 font-normal uppercase">Net</span>
+                                                    <span>{liveNet}</span>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {/* Hole Grid - 9 holes per line (2 rows) */}
