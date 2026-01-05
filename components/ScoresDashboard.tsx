@@ -344,7 +344,7 @@ export default function ScoresDashboard({
                                             href={`/pool?roundId=${round.id}`}
                                             className="px-1 py-1.5 sm:py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
                                         >
-                                            $5
+                                            $5 Pool
                                         </Link>
                                     )}
                                     {isAdmin && (
