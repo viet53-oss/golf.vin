@@ -463,60 +463,64 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                     {/* Save Hole Button */}
                     {selectedPlayers.length > 0 && (
-                        <button
-                            onClick={() => {
-                                if (!liveRoundId) return;
+                        <div className="flex justify-center">
+                            <button
+                                onClick={() => {
+                                    if (!liveRoundId) return;
 
-                                const updates: { playerId: string; strokes: number }[] = [];
-                                const newScores = new Map(scores); // Use current render state
+                                    const updates: { playerId: string; strokes: number }[] = [];
+                                    const newScores = new Map(scores); // Use current render state
 
-                                selectedPlayers.forEach(p => {
-                                    const playerScores = new Map(newScores.get(p.id) || []);
-                                    // If no score exists for this hole, default to Par
-                                    if (!playerScores.has(activeHole)) {
-                                        playerScores.set(activeHole, activeHolePar);
-                                        updates.push({ playerId: p.id, strokes: activeHolePar });
-                                    }
-                                    newScores.set(p.id, playerScores);
-                                });
-
-                                if (updates.length > 0) {
-                                    // Update UI
-                                    setScores(newScores);
-                                    // Save to Server
-                                    saveLiveScore({
-                                        liveRoundId,
-                                        holeNumber: activeHole,
-                                        playerScores: updates
+                                    selectedPlayers.forEach(p => {
+                                        const playerScores = new Map(newScores.get(p.id) || []);
+                                        // If no score exists for this hole, default to Par
+                                        if (!playerScores.has(activeHole)) {
+                                            playerScores.set(activeHole, activeHolePar);
+                                            updates.push({ playerId: p.id, strokes: activeHolePar });
+                                        }
+                                        newScores.set(p.id, playerScores);
                                     });
-                                }
 
-                                if (activeHole < 18) {
-                                    setActiveHole(activeHole + 1);
-                                } else {
-                                    // Refresh page after saving the last hole
+                                    if (updates.length > 0) {
+                                        // Update UI
+                                        setScores(newScores);
+                                        // Save to Server
+                                        saveLiveScore({
+                                            liveRoundId,
+                                            holeNumber: activeHole,
+                                            playerScores: updates
+                                        });
+                                    }
+
+                                    if (activeHole < 18) {
+                                        setActiveHole(activeHole + 1);
+                                    } else {
+                                        // Refresh page after saving the last hole
+                                        setTimeout(() => window.location.reload(), 500);
+                                    }
+
+                                    // Refresh to update summary section
                                     setTimeout(() => window.location.reload(), 500);
-                                }
-
-                                // Refresh to update summary section
-                                setTimeout(() => window.location.reload(), 500);
-                            }}
-                            className="w-full mt-4 bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2"
-                        >
-                            Save Hole {activeHole}
-                        </button>
+                                }}
+                                className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 mt-2"
+                            >
+                                Save Hole {activeHole}
+                            </button>
+                        </div>
                     )}
                 </div>
 
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
                     <div className="mt-1">
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
-                        >
-                            Refresh: Live score summary
-                        </button>
+                        <div className="flex justify-center">
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
+                            >
+                                Refresh Summary
+                            </button>
+                        </div>
                         <div className="space-y-1">
                             {summaryPlayers
                                 .map(player => {
@@ -691,18 +695,19 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Save Round Button - Admin Only */}
                 {isAdmin && liveRoundId && selectedPlayers.length > 0 && (
-                    <button
-                        onClick={async () => {
-                            if (confirm('Save this round? This will finalize all scores. This data is isolated and will NOT affect handicaps or main scores.')) {
-                                alert('Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
-                                // Optionally redirect or refresh
-                                window.location.reload();
-                            }
-                        }}
-                        className="w-full mt-1 mb-1 bg-blue-600 hover:bg-blue-700 text-white font-bold px-1 py-2 rounded-full shadow-lg transition-colors text-[14pt]"
-                    >
-                        💾 Save Round (Isolated - No Handicap Impact)
-                    </button>
+                    <div className="flex justify-center py-2">
+                        <button
+                            onClick={async () => {
+                                if (confirm('Save this round? This will finalize all scores. This data is isolated and will NOT affect handicaps or main scores.')) {
+                                    alert('Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
+                                    window.location.reload();
+                                }
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-1 py-2 rounded-full shadow-lg transition-colors text-[14pt]"
+                        >
+                            💾 Save Round
+                        </button>
+                    </div>
                 )}
             </main>
         </div>
