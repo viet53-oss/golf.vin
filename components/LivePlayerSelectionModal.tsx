@@ -55,7 +55,7 @@ export function LivePlayerSelectionModal({
 
                 {/* Header */}
                 <div className="px-4 py-5 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-600 to-purple-600">
-                    <h2 className="text-xl font-bold text-white tracking-tight">Select Players in My Group</h2>
+                    <h2 className="text-[22pt] font-bold text-white tracking-tight">Select Players in My Group</h2>
                     <button
                         onClick={onClose}
                         className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors"
@@ -78,15 +78,15 @@ export function LivePlayerSelectionModal({
                                         : 'border-gray-100 bg-white hover:border-gray-200'
                                         }`}
                                 >
-                                    <div className={`w-7 h-7 rounded flex items-center justify-center border-2 transition-colors ${isSelected
+                                    <div className={`w-9 h-9 shrink-0 rounded flex items-center justify-center border-2 transition-colors ${isSelected
                                         ? 'bg-blue-600 border-blue-600'
                                         : 'bg-white border-gray-300'
                                         }`}>
                                         {isSelected && (
-                                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                                         )}
                                     </div>
-                                    <span className={`text-base font-bold ${isSelected ? 'text-blue-800' : 'text-gray-700'}`}>
+                                    <span className={`text-[22pt] font-bold ${isSelected ? 'text-blue-800' : 'text-gray-700'}`}>
                                         {player.name}
                                     </span>
                                 </button>
@@ -99,15 +99,15 @@ export function LivePlayerSelectionModal({
                 <div className="px-4 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2.5 rounded-xl text-base font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+                        className="px-6 py-2.5 rounded-xl text-[22pt] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleConfirm}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 rounded-xl text-base font-bold shadow-lg transition-all active:scale-95"
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 rounded-xl text-[22pt] font-bold shadow-lg transition-all active:scale-95"
                     >
-                        Confirm Selection ({localSelectedIds.length})
+                        Confirm ({localSelectedIds.length})
                     </button>
                 </div>
             </div>
