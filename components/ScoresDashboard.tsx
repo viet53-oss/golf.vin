@@ -351,9 +351,9 @@ export default function ScoresDashboard({
                                             return (
                                                 <button
                                                     onClick={() => setSelectedPoolRoundId(round.id)}
-                                                    className={`px-1 py-1.5 sm:py-2 rounded-full text-[14pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap ${hasPool
-                                                        ? "bg-black text-white hover:bg-gray-800"
-                                                        : "bg-gray-500 text-white hover:bg-gray-600"
+                                                    className={`px-1 py-1.5 sm:py-2 rounded-full text-[14pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap border-2 ${hasPool
+                                                        ? "bg-black text-white border-black hover:bg-gray-800"
+                                                        : "bg-white text-black border-black hover:bg-gray-50"
                                                         }`}
                                                 >
                                                     $5 Pool
