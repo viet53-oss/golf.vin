@@ -353,7 +353,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         </div>
                         <button
                             onClick={() => setIsPlayerModalOpen(true)}
-                            className="bg-black text-white text-[14pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm"
+                            className="bg-black text-white text-[14pt] font-bold px-1 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm"
                         >
                             Select players
                         </button>
@@ -385,15 +385,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             key={hole.hole_number}
                                             onClick={() => setActiveHole(hole.hole_number)}
                                             className={`
-                                                h-12 rounded-lg flex items-center justify-center font-bold text-[14pt] transition-all whitespace-nowrap
+                                                flex items-center justify-center font-bold text-[14pt] px-1 py-2 rounded-full transition-all whitespace-nowrap
                                                 ${btnClass}
                                             `}
                                         >
-                                            <div className="flex items-baseline justify-center font-bold px-1">
-                                                <span className="text-[20pt]">{hole.hole_number}</span>
-                                                <span className="text-[18pt] mx-0">/</span>
-                                                <span className="text-[18pt]">{hole.par}</span>
-                                            </div>
+                                            {hole.hole_number}/{hole.par}
                                         </button>
                                     );
                                 })}
@@ -441,7 +437,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         <div className="flex items-center gap-4">
                                             <button
                                                 onClick={() => updateScore(player.id, false)}
-                                                className="w-14 h-14 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[30pt]"
+                                                className="w-10 h-10 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
                                             >
                                                 -
                                             </button>
@@ -450,7 +446,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             </div>
                                             <button
                                                 onClick={() => updateScore(player.id, true)}
-                                                className="w-14 h-14 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[30pt]"
+                                                className="w-10 h-10 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
                                             >
                                                 +
                                             </button>
@@ -505,7 +501,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 // Refresh to update summary section
                                 setTimeout(() => window.location.reload(), 500);
                             }}
-                            className="w-full mt-4 bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer"
+                            className="w-full mt-4 bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2"
                         >
                             Save Hole {activeHole}
                         </button>
@@ -517,7 +513,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     <div className="mt-1">
                         <button
                             onClick={() => window.location.reload()}
-                            className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-1 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
+                            className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
                         >
                             Refresh: Live score summary
                         </button>
@@ -703,7 +699,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 window.location.reload();
                             }
                         }}
-                        className="w-full mt-1 mb-1 bg-blue-600 hover:bg-blue-700 text-white font-bold px-1 py-1 rounded-full shadow-lg transition-colors text-[16pt] uppercase tracking-wider"
+                        className="w-full mt-1 mb-1 bg-blue-600 hover:bg-blue-700 text-white font-bold px-1 py-2 rounded-full shadow-lg transition-colors text-[14pt]"
                     >
                         💾 Save Round (Isolated - No Handicap Impact)
                     </button>
