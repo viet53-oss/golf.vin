@@ -30,7 +30,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             {/* Header */}
             <div className="max-w-5xl mx-auto mb-8 flex items-center justify-end">
                 <Link href="/settings" className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-1 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    Back to Courses
+                    Home
                 </Link>
             </div>
 

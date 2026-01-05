@@ -93,7 +93,7 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
                             </button>
                         )}
                         <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">
-                            Back
+                            Home
                         </Link>
                     </div>
                 </div>
