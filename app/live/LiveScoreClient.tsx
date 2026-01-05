@@ -367,32 +367,25 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-3">
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
-                                                <div className="font-bold text-gray-900 text-[14pt]">{player.name}</div>
-                                                <div className={`font-bold rounded w-8 h-8 flex items-center justify-center text-[14pt] bg-white shadow-sm border border-gray-200 ${toParClass}`}>
+                                                <div className="font-bold text-gray-900 text-[18pt]">{player.name}</div>
+                                                <div className={`font-bold rounded w-10 h-10 flex items-center justify-center text-[18pt] bg-white shadow-sm border border-gray-200 ${toParClass}`}>
                                                     {toParStr}
                                                 </div>
                                             </div>
-                                            <div className="text-gray-500 text-[12pt] flex gap-2 font-medium">
-                                                <span>Idx: {player.index}</span>
-                                                <span>•</span>
-                                                <span>CH: {courseHcp}</span>
-                                                <span>•</span>
-                                                <span>Tot: {totalScore}</span>
-                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-4">
                                             <button
                                                 onClick={() => updateScore(player.id, false)}
-                                                className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-[14pt] hover:bg-red-600 active:scale-95 transition-transform"
+                                                className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[22pt]"
                                             >
                                                 -
                                             </button>
-                                            <div className="w-12 text-center font-bold text-[14pt] text-gray-800">
-                                                {score || activeHolePar}
+                                            <div className="w-12 text-center font-bold text-[22pt] text-gray-800">
+                                                {score || <span className="text-gray-800">{activeHolePar}</span>}
                                             </div>
                                             <button
                                                 onClick={() => updateScore(player.id, true)}
-                                                className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-[14pt] hover:bg-green-600 active:scale-95 transition-transform"
+                                                className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[22pt]"
                                             >
                                                 +
                                             </button>
