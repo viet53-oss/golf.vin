@@ -296,15 +296,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     <div className="flex justify-between items-center mb-4 px-1 border-b border-gray-100 pb-2">
                         <div className="flex items-baseline gap-2">
                             <h3 className="text-[14pt] font-bold text-gray-900">Group Players</h3>
-                            <span className="text-[14pt] text-gray-500 font-medium">
-                                - Hole {activeHole} (Par {activeHolePar})
-                            </span>
                         </div>
                         <button
                             onClick={() => setIsPlayerModalOpen(true)}
                             className="bg-black text-white text-[14pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm"
                         >
-                            {selectedPlayers.length === 0 ? '+ Add Players' : 'Edit Players'}
+                            Select players
                         </button>
                     </div>
 
