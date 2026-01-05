@@ -353,7 +353,7 @@ export default function ScoresDashboard({
                                                     onClick={() => setSelectedPoolRoundId(round.id)}
                                                     className={`px-1 py-1.5 sm:py-2 rounded-full text-[14pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap ${hasPool
                                                         ? "bg-black text-white hover:bg-gray-800"
-                                                        : "bg-gray-200 text-white hover:bg-gray-300"
+                                                        : "bg-gray-500 text-white hover:bg-gray-600"
                                                         }`}
                                                 >
                                                     $5 Pool
