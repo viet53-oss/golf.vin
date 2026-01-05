@@ -26,71 +26,33 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     }
 
     // 2. Resolve Today's Date (Chicago)
-});
-// YYYY-MM-DD
-const y = formatter.formatToParts(new Date()).find(p => p.type === 'year')?.value;
-const m = formatter.formatToParts(new Date()).find(p => p.type === 'month')?.value;
-const d = formatter.formatToParts(new Date()).find(p => p.type === 'day')?.value;
-const todayStr = `${y}-${m}-${d}`;
+    const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago' });
+    // YYYY-MM-DD
+    const y = formatter.formatToParts(new Date()).find(p => p.type === 'year')?.value;
+    const m = formatter.formatToParts(new Date()).find(p => p.type === 'month')?.value;
+    const d = formatter.formatToParts(new Date()).find(p => p.type === 'day')?.value;
+    const todayStr = `${y}-${m}-${d}`;
 
-let activeRound = null;
+    let activeRound = null;
 
-// 3. Priority A: Load from URL
-if (roundIdFromUrl) {
-    activeRound = await prisma.liveRound.findUnique({
-        where: { id: roundIdFromUrl },
-        include: {
-            players: {
-                include: {
-                    player: true,
-                    scores: { include: { hole: true } }
-                }
-            }
-        }
-    });
-    if (activeRound) console.log('LOG-4: Loaded URL round:', activeRound.name);
-}
-
-// 4. Priority B: Load/Create Today's Round
-if (!activeRound) {
-    activeRound = await prisma.liveRound.findFirst({
-        where: { date: todayStr },
-        include: {
-            players: {
-                include: {
-                    player: true,
-                    scores: { include: { hole: true } }
-                }
-            }
-        }
-    });
-
-    if (activeRound) {
-        // Found existing
-    } else if (defaultCourse) {
-        try {
-            activeRound = await prisma.liveRound.create({
-                data: {
-                    name: `Live Round - ${todayStr}`,
-                    date: todayStr,
-                    course_id: defaultCourse.id,
-                    par: 68,
-                    rating: 63.8,
-                    slope: 100
-                } as any,
-                include: {
-                    players: {
-                        include: {
-                            player: true,
-                            scores: { include: { hole: true } }
-                        }
+    // 3. Priority A: Load from URL
+    if (roundIdFromUrl) {
+        activeRound = await prisma.liveRound.findUnique({
+            where: { id: roundIdFromUrl },
+            include: {
+                players: {
+                    include: {
+                        player: true,
+                        scores: { include: { hole: true } }
                     }
                 }
-            });
+            }
         });
-    } catch (err: any) {
-        console.error('Error creating daily round:', err);
-        // Race condition check
+        if (activeRound) console.log('LOG-4: Loaded URL round:', activeRound.name);
+    }
+
+    // 4. Priority B: Load/Create Today's Round
+    if (!activeRound) {
         activeRound = await prisma.liveRound.findFirst({
             where: { date: todayStr },
             include: {
@@ -102,47 +64,84 @@ if (!activeRound) {
                 }
             }
         });
-    }
-}
-}
 
-// 5. Final Fallback
-if (!activeRound) {
-    console.log('LOG-11: Still no round. Falling back to latest in DB.');
-    activeRound = await prisma.liveRound.findFirst({
-        orderBy: { created_at: 'desc' },
-        include: {
-            players: {
-                include: {
-                    player: true,
-                    scores: { include: { hole: true } }
-                }
+        if (activeRound) {
+            // Found existing
+        } else if (defaultCourse) {
+            try {
+                activeRound = await prisma.liveRound.create({
+                    data: {
+                        name: `Live Round - ${todayStr}`,
+                        date: todayStr,
+                        course_id: defaultCourse.id,
+                        par: 68,
+                        rating: 63.8,
+                        slope: 100
+                    } as any,
+                    include: {
+                        players: {
+                            include: {
+                                player: true,
+                                scores: { include: { hole: true } }
+                            }
+                        }
+                    }
+                });
+            } catch (err: any) {
+                console.error('Error creating daily round:', err);
+                // Race condition check
+                activeRound = await prisma.liveRound.findFirst({
+                    where: { date: todayStr },
+                    include: {
+                        players: {
+                            include: {
+                                player: true,
+                                scores: { include: { hole: true } }
+                            }
+                        }
+                    }
+                });
             }
         }
+    }
+
+    // 5. Final Fallback
+    if (!activeRound) {
+        console.log('LOG-11: Still no round. Falling back to latest in DB.');
+        activeRound = await prisma.liveRound.findFirst({
+            orderBy: { created_at: 'desc' },
+            include: {
+                players: {
+                    include: {
+                        player: true,
+                        scores: { include: { hole: true } }
+                    }
+                }
+            }
+        });
+        if (activeRound) console.log('LOG-12: Fallback to:', activeRound.name, activeRound.date);
+    }
+
+    // 6. Redirect to ensure ID is in URL
+    if (!roundIdFromUrl && activeRound) {
+        return redirect(`/live?roundId=${activeRound.id}`);
+    }
+
+    // 7. Get rounds for list
+    const allLiveRounds = await prisma.liveRound.findMany({
+        orderBy: { created_at: 'desc' },
+        select: { id: true, name: true, date: true, created_at: true }
     });
-    if (activeRound) console.log('LOG-12: Fallback to:', activeRound.name, activeRound.date);
-}
 
-// 6. Redirect to ensure ID is in URL
-if (!roundIdFromUrl && activeRound) {
-    return redirect(`/live?roundId=${activeRound.id}`);
-}
-
-// 7. Get rounds for list
-const allLiveRounds = await prisma.liveRound.findMany({
-    orderBy: { created_at: 'desc' },
-    select: { id: true, name: true, date: true, created_at: true }
-});
-
-return (
-    <LiveScoreClient
-        allPlayers={await prisma.player.findMany({
-            orderBy: { name: 'asc' },
-            select: { id: true, name: true, index: true, preferred_tee_box: true }
-        })}
-        defaultCourse={defaultCourse}
-        initialRound={activeRound}
-        allLiveRounds={allLiveRounds}
-    />
-);
+    return (
+        <LiveScoreClient
+            allPlayers={await prisma.player.findMany({
+                orderBy: { name: 'asc' },
+                select: { id: true, name: true, index: true, preferred_tee_box: true }
+            })}
+            defaultCourse={defaultCourse}
+            initialRound={activeRound}
+            allLiveRounds={allLiveRounds}
+        />
+    );
 }
