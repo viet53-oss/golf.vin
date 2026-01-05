@@ -48,18 +48,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Initialize State from Server Data
     const [liveRoundId, setLiveRoundId] = useState<string | null>(initialRound?.id || null);
 
-    const [selectedPlayers, setSelectedPlayers] = useState<Player[]>(() => {
-        // Fallback to all players in round for initial/server render
-        if (initialRound?.players) {
-            return initialRound.players.map((p: any) => ({
-                id: p.player.id,
-                name: p.player.name,
-                index: p.player.index,
-                preferred_tee_box: p.player.preferred_tee_box
-            }));
-        }
-        return [];
-    });
+    // Start with empty selection - each device manages its own group
+    const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
 
     const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
     const [roundModalMode, setRoundModalMode] = useState<'new' | 'edit'>('new');
@@ -74,7 +64,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             if (currentId && savedRoundId && savedRoundId !== currentId) {
                 localStorage.removeItem('live_scoring_my_group');
                 localStorage.setItem('live_scoring_last_round_id', currentId);
-                return; // Start fresh
+                setSelectedPlayers([]); // Clear selection for new round
+                return;
             }
 
             if (currentId) {
@@ -84,23 +75,19 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             const saved = localStorage.getItem('live_scoring_my_group');
             if (saved) {
                 const savedIds = JSON.parse(saved);
-                // Reconstruct player objects from available data
-                const sourcePlayers = initialRound?.players
-                    ? initialRound.players.map((p: any) => ({
-                        id: p.player.id,
-                        name: p.player.name,
-                        index: p.player.index,
-                        preferred_tee_box: p.player.preferred_tee_box
-                    }))
-                    : allPlayers;
-
-                const restored = sourcePlayers.filter((p: Player) => savedIds.includes(p.id));
+                // Use allPlayers to reconstruct - don't rely on server round data
+                const restored = allPlayers.filter((p: Player) => savedIds.includes(p.id));
                 if (restored.length > 0) {
                     setSelectedPlayers(restored);
+                } else {
+                    setSelectedPlayers([]); // Clear if no valid players found
                 }
+            } else {
+                setSelectedPlayers([]); // No saved data, start empty
             }
         } catch (e) {
             console.error("Failed to load saved players", e);
+            setSelectedPlayers([]); // On error, start empty
         }
     }, [initialRound, allPlayers]);
 
