@@ -294,8 +294,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
-            <header className="bg-white shadow-sm sticky top-0 z-50">
-                <div className="w-full p-1 m-1 flex justify-between items-center">
+            <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-1">
+                <div className="w-full flex justify-between items-center">
                     <h1 className="text-[16pt] font-bold text-green-700 tracking-tight">Live Scoring</h1>
                     <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">
                         Back
@@ -303,10 +303,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 </div>
             </header>
 
-            <main className="w-full p-1 m-1 space-y-1">
+            <main className="w-full px-1 m-0 space-y-1">
                 {/* Round Selector - Admin Only */}
                 {isAdmin && allLiveRounds.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg p-1 m-1 border-4 border-gray-300">
+                    <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                         <label className="block text-[14pt] font-bold text-gray-900 mb-2">Select Round:</label>
                         <select
                             value={liveRoundId || ''}
@@ -328,7 +328,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 )}
 
                 {/* Course Info Card */}
-                <div className="bg-white rounded-xl shadow-lg p-1 m-1 border-4 border-gray-300">
+                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                     <h2 className="text-[14pt] font-bold text-gray-900">{defaultCourse?.name || 'Loading...'}</h2>
                     <div className="flex gap-4 text-[14pt] text-gray-500 mt-1">
                         <span>Date: {new Date().toLocaleDateString()}</span>
@@ -348,7 +348,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 />
 
                 {/* Scoring Section */}
-                <div className="bg-white rounded-xl shadow-lg p-1 m-1 border-4 border-gray-300">
+                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                     <div className="flex justify-between items-center mb-1 px-1 border-b border-gray-100 pb-1">
                         <div className="flex items-baseline gap-2">
                             <h3 className="text-[14pt] font-bold text-gray-900">Group Players</h3>
@@ -375,7 +375,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     const isActive = activeHole === hole.hole_number;
 
                                     // Determine styling
-                                    let btnClass = "bg-gray-100 text-gray-600 hover:bg-gray-200"; // Default
+                                    let btnClass = "bg-gray-500 text-white hover:bg-gray-600"; // Default
                                     if (isActive) {
                                         btnClass = "bg-green-600 text-white shadow-md scale-105 z-10";
                                     } else if (isSaved) {
@@ -512,7 +512,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
-                    <div className="mt-1">
+                    <div className="mt-4">
                         <button
                             onClick={() => window.location.reload()}
                             className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
@@ -567,7 +567,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     }
 
                                     return (
-                                        <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden m-1 border-4 border-gray-300">
+                                        <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden my-1 border-4 border-gray-300">
                                             {/* Player Header */}
                                             <div className="bg-[#1d4ed8] p-1 text-white">
                                                 <div className="flex justify-between items-center">
