@@ -450,7 +450,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     });
                                 }
 
-                                if (activeHole < 18) setActiveHole(activeHole + 1);
+                                if (activeHole < 18) {
+                                    setActiveHole(activeHole + 1);
+                                } else {
+                                    // Refresh page after saving the last hole
+                                    setTimeout(() => window.location.reload(), 500);
+                                }
+
+                                // Refresh to update summary section
+                                setTimeout(() => window.location.reload(), 500);
                             }}
                             className="w-full mt-4 bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer"
                         >
@@ -530,15 +538,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
                                                             </div>
                                                         </div>
-                                                        <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
-                                                            {toParStr}
-                                                        </div>
                                                     </div>
 
                                                     <div className="flex gap-4 text-center">
                                                         <div>
                                                             <div className="text-[14pt] opacity-80 font-bold tracking-wider">GRS</div>
-                                                            <div className="text-[14pt] font-bold leading-none">{p.totalGross}</div>
+                                                            <div className="flex items-center justify-center gap-1">
+                                                                <div className="text-[14pt] font-bold leading-none">{p.totalGross}</div>
+                                                                <div className={`font-bold rounded px-1 h-6 flex items-center justify-center text-[12pt] min-w-[2rem] bg-white ${toParClass}`}>
+                                                                    {toParStr}
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div>
                                                             <div className="text-[14pt] opacity-80 font-bold tracking-wider">HCP</div>
