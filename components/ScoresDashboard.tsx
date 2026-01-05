@@ -67,6 +67,7 @@ type RoundWithPlayers = {
         points: number;
         payout: number;
         ytdPoints: number;
+        in_pool: boolean;
         scores: any[];
     }>;
 };
@@ -248,10 +249,10 @@ export default function ScoresDashboard({
                         <td style="padding: 8px; text-align: center; font-weight: bold;">${courseHandicap}</td>
                         <td style="padding: 8px; text-align: center; background: #f8fafc; font-weight: bold; color: #2563eb; font-size: 1.1em;">${net ?? '-'}</td>
                          <td style="padding: 8px; text-align: center; font-weight: bold;">
-                             <span style="color: ${courseHandicapAfter > courseHandicap ? 'red' : courseHandicapAfter < courseHandicap ? 'green' : 'black'}">${courseHandicapAfter}</span>
+                             <span style="color: ${courseHandicapAfter > courseHandicap ? 'green' : courseHandicapAfter < courseHandicap ? 'red' : 'black'}">${courseHandicapAfter}</span>
                          </td>
                         <td style="padding: 8px; text-align: center; font-weight: bold;">
-                             <span style="color: ${(idxAfter ?? idxBefore) > idxBefore ? 'red' : (idxAfter ?? idxBefore) < idxBefore ? 'green' : 'black'}">${(idxAfter ?? idxBefore).toFixed(1)}</span>
+                             <span style="color: ${(idxAfter ?? idxBefore) > idxBefore ? 'green' : (idxAfter ?? idxBefore) < idxBefore ? 'red' : 'black'}">${(idxAfter ?? idxBefore).toFixed(1)}</span>
                         </td>
                     </tr>
                  `;
@@ -337,7 +338,15 @@ export default function ScoresDashboard({
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 items-center">
+                                    {round.players.some(p => p.in_pool) && (
+                                        <Link
+                                            href={`/pool?roundId=${round.id}`}
+                                            className="px-1 py-1.5 sm:py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
+                                        >
+                                            $5
+                                        </Link>
+                                    )}
                                     {isAdmin && (
                                         <>
                                             <button
@@ -445,9 +454,9 @@ export default function ScoresDashboard({
                                                     );
 
                                                     const hasIndexChanged = idxAfter !== null && Math.abs(idxAfter - idxBefore) > 0.05;
-                                                    const hcpColor = courseHandicapAfter > courseHandicap ? "text-red-600" : courseHandicapAfter < courseHandicap ? "text-green-600" : "text-black";
+                                                    const hcpColor = courseHandicapAfter > courseHandicap ? "text-green-600" : courseHandicapAfter < courseHandicap ? "text-red-600" : "text-black";
                                                     const idxDiff = (idxAfter ?? idxBefore) - idxBefore;
-                                                    const idxColor = idxDiff > 0.05 ? "text-red-600" : idxDiff < -0.05 ? "text-green-600" : "text-black";
+                                                    const idxColor = idxDiff > 0.05 ? "text-green-600" : idxDiff < -0.05 ? "text-red-600" : "text-black";
 
                                                     const gross = rp.gross_score;
                                                     const net = gross !== null ? gross - courseHandicap : null;

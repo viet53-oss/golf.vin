@@ -123,12 +123,12 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                     <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: center;">
                         <span style="color: #94a3b8; font-size: 12px;">${chBefore} &rarr;</span>
                         <br>
-                        <b style="color: ${chAfter > chBefore ? '#dc2626' : '#16a34a'}; text-decoration: underline;">${chAfter}</b>
+                        <b style="color: ${chAfter > chBefore ? '#16a34a' : '#dc2626'}; text-decoration: underline;">${chAfter}</b>
                     </td>
                     <td style="padding: 8px; text-align: center;">
                         <span style="color: #94a3b8; font-size: 12px;">${item.indexBefore.toFixed(1)} &rarr;</span>
                         <br>
-                        <b style="color: ${item.indexAfter > item.indexBefore ? '#dc2626' : '#16a34a'};">${item.indexAfter.toFixed(1)}</b>
+                        <b style="color: ${item.indexAfter > item.indexBefore ? '#16a34a' : '#dc2626'};">${item.indexAfter.toFixed(1)}</b>
                     </td>
                 </tr>
             `;
@@ -303,7 +303,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                                 {(() => {
                                                     const hcpBefore = calculateCourseHandicap(item.indexBefore, item.slope || 113, item.rating || 72, item.par || 72);
                                                     const hcpAfter = calculateCourseHandicap(item.indexAfter, item.slope || 113, item.rating || 72, item.par || 72);
-                                                    const colorClass = hcpAfter === hcpBefore ? 'text-gray-900' : hcpAfter > hcpBefore ? 'text-red-600' : 'text-green-600';
+                                                    const colorClass = hcpAfter === hcpBefore ? 'text-gray-900' : hcpAfter > hcpBefore ? 'text-green-600' : 'text-red-600';
                                                     return (
                                                         <>
                                                             {hcpBefore}
@@ -324,7 +324,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                                                 <span className="text-gray-400">{item.indexBefore.toFixed(1)}</span>
                                                 <span className="text-gray-300">→</span>
                                                 <span className={`font-bold ${item.indexAfter === item.indexBefore ? 'text-gray-900' :
-                                                    item.indexAfter > item.indexBefore ? 'text-red-600' : 'text-green-600'
+                                                    item.indexAfter > item.indexBefore ? 'text-green-600' : 'text-red-600'
                                                     }`}>{item.indexAfter.toFixed(1)}</span>
 
                                                 {item.isLowHi && (
