@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore } from '@/app/actions/create-live-round';
@@ -187,6 +187,47 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         });
     };
 
+    // Local Storage Persistence for My Group
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('live_scoring_my_group');
+            if (saved && allPlayers.length > 0) {
+                try {
+                    const savedIds = JSON.parse(saved);
+                    const restore = allPlayers.filter(p => savedIds.includes(p.id));
+                    if (restore.length > 0) setSelectedPlayers(restore);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        }
+    }, [allPlayers]);
+
+    useEffect(() => {
+        if (selectedPlayers.length > 0) {
+            localStorage.setItem('live_scoring_my_group', JSON.stringify(selectedPlayers.map(p => p.id)));
+        }
+    }, [selectedPlayers]);
+
+    // Calculate Summary Players (Union of Server State and Local Selection)
+    // Create map from initialRound if available
+    const summaryPlayersMap = new Map<string, Player>();
+    if (initialRound?.players) {
+        initialRound.players.forEach((p: any) => {
+            summaryPlayersMap.set(p.player.id, {
+                id: p.player.id,
+                name: p.player.name,
+                index: p.player.index,
+                preferred_tee_box: p.player.preferred_tee_box
+            });
+        });
+    }
+    // Add any locally selected players
+    selectedPlayers.forEach(p => {
+        if (!summaryPlayersMap.has(p.id)) summaryPlayersMap.set(p.id, p);
+    });
+    const summaryPlayers = Array.from(summaryPlayersMap.values());
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
@@ -224,7 +265,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                     <div className="flex justify-between items-center mb-4 px-1 border-b border-gray-100 pb-2">
                         <div className="flex items-baseline gap-2">
-                            <h3 className="text-[14pt] font-bold text-gray-900">Scoring</h3>
+                            <h3 className="text-[14pt] font-bold text-gray-900">Group Players</h3>
                             <span className="text-[14pt] text-gray-500 font-medium">
                                 - Hole {activeHole} (Par {activeHolePar})
                             </span>
@@ -388,11 +429,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 </div>
 
                 {/* Live Scores Summary */}
-                {selectedPlayers.length > 0 && (
+                {summaryPlayers.length > 0 && (
                     <div className="mt-8">
                         <h2 className="text-center font-bold text-gray-500 uppercase tracking-widest py-2 mb-2 text-[14pt]">Live Score Summary</h2>
                         <div className="space-y-4">
-                            {selectedPlayers
+                            {summaryPlayers
                                 .map(player => {
                                     const playerScores = scores.get(player.id);
                                     let totalGross = 0;
@@ -447,14 +488,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         <div className="bg-white text-[#1d4ed8] font-bold rounded w-8 h-8 flex items-center justify-center text-[14pt]">
                                                             {i + 1}
                                                         </div>
-                                                        <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
-                                                            {toParStr}
-                                                        </div>
                                                         <div>
                                                             <div className="font-bold text-[14pt] leading-tight flex items-baseline gap-1">
                                                                 {p.name}
-                                                                {p.preferred_tee_box && <span className="text-[14pt] font-normal opacity-80">({p.preferred_tee_box})</span>}
                                                             </div>
+                                                        </div>
+                                                        <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
+                                                            {toParStr}
                                                         </div>
                                                     </div>
 
