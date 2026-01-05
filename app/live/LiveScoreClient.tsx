@@ -132,6 +132,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
     const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
 
+    // Helper to split name into first and last
+    const splitName = (fullName: string) => {
+        const parts = fullName.trim().split(' ');
+        if (parts.length === 1) return { first: parts[0], last: '' };
+        const last = parts[parts.length - 1];
+        const first = parts.slice(0, -1).join(' ');
+        return { first, last };
+    };
+
     const getScore = (playerId: string, holeNumber: number): number | null => {
         return scores.get(playerId)?.get(holeNumber) ?? null;
     };
@@ -379,8 +388,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 return (
                                     <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-3">
                                         <div className="flex flex-col">
-                                            <div className="flex items-center gap-2">
-                                                <div className="font-bold text-gray-900 text-[18pt]">{player.name}</div>
+                                            <div className="flex flex-col items-start">
+                                                <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
@@ -515,8 +525,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             {i + 1}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold text-[14pt] leading-tight flex items-baseline gap-1">
-                                                                {p.name}
+                                                            <div className="flex flex-col">
+                                                                <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
+                                                                <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
                                                             </div>
                                                         </div>
                                                         <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
