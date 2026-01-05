@@ -606,9 +606,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             </div>
 
                                             {/* Score Grid */}
-                                            <div className="p-1">
+                                            <div className="mx-1 mb-2 border border-black rounded shadow-sm overflow-hidden">
                                                 {/* Row 1: Holes 1-9 */}
-                                                <div className="grid grid-cols-9 border-b border-gray-100">
+                                                <div className="grid grid-cols-9 border-b border-black">
                                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
                                                         const score = getScore(p.id, num);
                                                         const isActive = activeHole === num;
@@ -629,7 +629,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                                         return (
                                                             <div key={num} className={`
-                                                            flex flex-col items-center justify-center p-1 h-16 border-r border-gray-100 last:border-r-0 relative bg-white
+                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
                                                             ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
                                                         `}>
                                                                 <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
@@ -662,7 +662,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                                         return (
                                                             <div key={num} className={`
-                                                            flex flex-col items-center justify-center p-1 h-16 border-r border-gray-100 last:border-r-0 relative bg-white
+                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
                                                             ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
                                                         `}>
                                                                 <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
