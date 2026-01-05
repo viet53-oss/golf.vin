@@ -345,14 +345,22 @@ export default function ScoresDashboard({
                                     )}
                                 </div>
                                 <div className="flex gap-2 items-center">
-                                    {round.players.some(p => p.in_pool) && (
-                                        <button
-                                            onClick={() => setSelectedPoolRoundId(round.id)}
-                                            className="px-1 py-1.5 sm:py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
-                                        >
-                                            $5 Pool
-                                        </button>
-                                    )}
+                                    {
+                                        (() => {
+                                            const hasPool = round.players.some(p => p.in_pool);
+                                            return (
+                                                <button
+                                                    onClick={() => setSelectedPoolRoundId(round.id)}
+                                                    className={`px-1 py-1.5 sm:py-2 rounded-full text-[14pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap ${hasPool
+                                                        ? "bg-black text-white hover:bg-gray-800"
+                                                        : "bg-gray-200 text-white hover:bg-gray-300"
+                                                        }`}
+                                                >
+                                                    $5 Pool
+                                                </button>
+                                            );
+                                        })()
+                                    }
                                     {isAdmin && (
                                         <>
                                             <button
