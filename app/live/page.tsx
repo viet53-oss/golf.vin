@@ -142,6 +142,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
             })}
             defaultCourse={defaultCourse}
             initialRound={activeRound}
+            todayStr={todayStr}
             allLiveRounds={allLiveRounds}
         />
     );

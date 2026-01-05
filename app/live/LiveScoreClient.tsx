@@ -36,6 +36,7 @@ interface LiveScoreClientProps {
     allPlayers: Player[];
     defaultCourse: Course | null;
     initialRound?: any;
+    todayStr: string; // Pass from server to avoid hydration mismatch
     allLiveRounds: Array<{
         id: string;
         name: string;
@@ -44,7 +45,7 @@ interface LiveScoreClientProps {
     }>;
 }
 
-export default function LiveScoreClient({ allPlayers, defaultCourse, initialRound, allLiveRounds }: LiveScoreClientProps) {
+export default function LiveScoreClient({ allPlayers, defaultCourse, initialRound, todayStr, allLiveRounds }: LiveScoreClientProps) {
     // Initialize State from Server Data
     const [liveRoundId, setLiveRoundId] = useState<string | null>(initialRound?.id || null);
 
@@ -143,13 +144,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return () => window.removeEventListener('admin-change', checkAdmin);
     }, []);
 
-    const todayStr = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'America/Chicago',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    }).format(new Date());
-
+    // Use todayStr from server to avoid hydration mismatch
     const roundDateStr = initialRound?.date || todayStr;
     const isLocked = todayStr > roundDateStr;
     const canUpdate = isAdmin || !isLocked;
