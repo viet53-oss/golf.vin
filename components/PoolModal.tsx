@@ -4,6 +4,7 @@ import PoolResults from './PoolResults';
 import { getPoolResults } from '@/app/actions/get-pool-results';
 import { PoolManagementButton } from './PoolManagementButton';
 import { PoolCopyButton } from './PoolCopyButton';
+import { PoolDateSelector } from './PoolDateSelector';
 import Cookies from 'js-cookie';
 
 interface PoolModalProps {
@@ -12,11 +13,12 @@ interface PoolModalProps {
     onClose: () => void;
 }
 
-export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
+export function PoolModal({ roundId: initialRoundId, isOpen, onClose }: PoolModalProps) {
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [currentRoundId, setCurrentRoundId] = useState(initialRoundId);
 
     useEffect(() => {
         const checkAdmin = () => {
@@ -29,15 +31,22 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
     }, []);
 
     useEffect(() => {
-        if (isOpen && roundId) {
+        if (isOpen && currentRoundId) {
             setIsLoading(true);
             setError(null);
-            fetchData();
+            fetchData(currentRoundId);
         }
-    }, [isOpen, roundId]);
+    }, [isOpen, currentRoundId]);
 
-    const fetchData = async () => {
-        const result = await getPoolResults(roundId);
+    // Update internal state if prop changes while closed or initially
+    useEffect(() => {
+        if (!isOpen) {
+            setCurrentRoundId(initialRoundId);
+        }
+    }, [initialRoundId, isOpen]);
+
+    const fetchData = async (id: string) => {
+        const result = await getPoolResults(id);
         if (result.success && result.data) {
             // Reconstruct the winningsMap from the array
             const winningsMap = new Map<string, number>(result.data.winningsArray);
@@ -86,7 +95,7 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
                         <h3 className="text-[16pt] font-bold text-gray-900">Oops! Something went wrong</h3>
                         <p className="text-[14pt] text-gray-500 max-w-md">{error}</p>
                         <button
-                            onClick={fetchData}
+                            onClick={() => fetchData(currentRoundId)}
                             className="bg-black text-white px-6 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-colors"
                         >
                             Try Again
@@ -95,8 +104,13 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
                 ) : (
                     <main className="px-1 py-4 max-w-5xl mx-auto w-full">
                         {/* Admin Action Bar (Replicating Page Style) */}
-                        {isAdmin && (
-                            <div className="bg-white border border-gray-200 rounded-xl p-1 flex items-center justify-end gap-1 mb-4 shadow-sm">
+                        <div className="bg-white border border-gray-200 rounded-xl p-1 flex items-center justify-between gap-1 mb-4 shadow-sm">
+                            <PoolDateSelector
+                                allRounds={data.allRounds}
+                                currentRoundId={currentRoundId}
+                                onSelect={(id) => setCurrentRoundId(id)}
+                            />
+                            {isAdmin && (
                                 <div className="flex gap-1 shrink-0">
                                     <PoolCopyButton
                                         date={data.round.date}
@@ -108,8 +122,8 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
                                         <Mail className="w-5 h-5" />
                                     </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                         {/* Main Results Dashboard Card */}
                         <div className="border border-gray-300 rounded-2xl overflow-hidden shadow-xl bg-white mb-10">

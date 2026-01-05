@@ -34,6 +34,20 @@ export async function getPoolResults(roundId: string) {
         `;
         const poolStatusMap = new Map(poolStatusRaw.map((p: any) => [p.player_id, Boolean(p.in_pool)]));
 
+        // Fetch all round dates for selector (matching app/pool/page.tsx logic)
+        const allRounds = await prisma.round.findMany({
+            orderBy: { date: 'desc' },
+            select: {
+                date: true,
+                id: true,
+                is_tournament: true,
+                name: true,
+                _count: {
+                    select: { players: true }
+                }
+            }
+        });
+
         const playersRaw = round.players as any[];
         const allPoolParticipants = playersRaw.filter((rp: any) => {
             const rawStatus = poolStatusMap.get(rp.player_id);
@@ -238,7 +252,8 @@ export async function getPoolResults(roundId: string) {
                 },
                 flights,
                 processedFlights,
-                winningsArray
+                winningsArray,
+                allRounds
             }
         };
 

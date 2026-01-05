@@ -13,19 +13,25 @@ interface RoundOption {
 
 export function PoolDateSelector({
     allRounds,
-    currentRoundId
+    currentRoundId,
+    onSelect
 }: {
-    allRounds: any[], // using any to bypass strict type check for now or match the interface
-    currentRoundId: string
+    allRounds: any[],
+    currentRoundId: string,
+    onSelect?: (id: string) => void
 }) {
     const router = useRouter();
 
     return (
         <select
             className="flex-1 mx-1 bg-white border border-gray-300 rounded-lg px-1 sm:px-1 py-2 sm:py-2.5 text-[14pt] font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 appearance-none min-w-0 cursor-pointer hover:bg-gray-50 transition-colors"
-            defaultValue={currentRoundId}
+            value={currentRoundId}
             onChange={(e) => {
-                router.push(`/pool?roundId=${e.target.value}`);
+                if (onSelect) {
+                    onSelect(e.target.value);
+                } else {
+                    router.push(`/pool?roundId=${e.target.value}`);
+                }
             }}
         >
             {allRounds.map(r => {
