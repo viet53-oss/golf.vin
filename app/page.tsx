@@ -8,12 +8,6 @@ const Trophy = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const Banknote = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" />
-  </svg>
-);
-
 const Users = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><circle cx="18" cy="4" r="3" />
@@ -58,7 +52,6 @@ export default async function Home() {
   const menuItems = [
     { name: "Live Score", icon: Activity, href: "/live", color: "text-red-500" },
     { name: "Scores", icon: Trophy, href: "/scores", color: "text-amber-500" },
-    { name: "$5 Pool", icon: Banknote, href: "/pool", color: "text-green-500" },
     { name: "Players", icon: Users, href: "/players", color: "text-blue-500" },
     { name: "Schedule", icon: Calendar, href: "/schedule", color: "text-purple-500" },
 
