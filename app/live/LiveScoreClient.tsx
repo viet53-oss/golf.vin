@@ -455,7 +455,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
                     <div className="mt-8">
-                        <h2 className="text-center font-bold text-gray-500 uppercase tracking-widest py-2 mb-2 text-[14pt]">Live Score Summary</h2>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer mb-2"
+                        >
+                            Refresh: Live score summary
+                        </button>
                         <div className="space-y-4">
                             {summaryPlayers
                                 .map(player => {
