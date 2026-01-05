@@ -57,11 +57,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
                     <p><span className="font-bold underline">Hole #18:</span> Ball past farthest edge of cart path and canal right side of cart path. – Penalty, one stroke, and distance.</p>
                 </div>
             </section>
-        </div>
-    );
 
-    const roundRules = (
-        <div className="space-y-10">
             <section>
                 <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">Course Information</h3>
                 <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm space-y-4">
@@ -318,6 +314,53 @@ export default function FAQClient({ players }: { players: Player[] }) {
                 </div>
             </section>
 
+            {/* White Tee Course Handicap Chart */}
+            <section className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex justify-between items-end">
+                    <div>
+                        <h4 className="font-black text-gray-900 text-[14pt] uppercase">White Tee Chart</h4>
+                        <p className="text-[11pt] text-gray-500 font-bold">Rating 63.8 / Slope 100 / Par 68</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10pt] font-bold uppercase tracking-wider">Course HCP</span>
+                    </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div className="overflow-y-auto max-h-[300px]">
+                        <table className="w-full text-[13pt] text-center font-medium">
+                            <thead className="bg-gray-900 text-white sticky top-0 z-10">
+                                <tr>
+                                    <th className="py-2 px-2 w-1/3">HCP</th>
+                                    <th className="py-2 px-2 w-2/3 border-l border-gray-700">Index Range</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 text-gray-700">
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-3</td><td className="py-1.5 border-l border-gray-100">0.8 — 1.9</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-2</td><td className="py-1.5 border-l border-gray-100">2.0 — 3.0</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-1</td><td className="py-1.5 border-l border-gray-100">3.1 — 4.1</td></tr>
+                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">0</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">4.2 — 5.3</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">1</td><td className="py-1.5 border-l border-gray-100">5.4 — 6.4</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">2</td><td className="py-1.5 border-l border-gray-100">6.5 — 7.5</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">3</td><td className="py-1.5 border-l border-gray-100">7.6 — 8.7</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">4</td><td className="py-1.5 border-l border-gray-100">8.8 — 9.8</td></tr>
+                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">5</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">9.9 — 10.9</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">6</td><td className="py-1.5 border-l border-gray-100">11.0 — 12.0</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">7</td><td className="py-1.5 border-l border-gray-100">12.1 — 13.2</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">8</td><td className="py-1.5 border-l border-gray-100">13.3 — 14.3</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">9</td><td className="py-1.5 border-l border-gray-100">14.4 — 15.4</td></tr>
+                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">10</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">15.5 — 16.6</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">11</td><td className="py-1.5 border-l border-gray-100">16.7 — 17.7</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">12</td><td className="py-1.5 border-l border-gray-100">17.8 — 18.8</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">13</td><td className="py-1.5 border-l border-gray-100">18.9 — 20.0</td></tr>
+                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">14</td><td className="py-1.5 border-l border-gray-100">20.1 — 21.1</td></tr>
+                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">15</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">21.2 — 22.2</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             {/* Stroke Allocation */}
             <section>
                 <div className="bg-amber-50 rounded-xl p-5 border border-amber-200 mb-6">
@@ -435,53 +478,6 @@ export default function FAQClient({ players }: { players: Player[] }) {
                         </tbody>
                     </table>
                     <p className="p-3 text-center text-[14pt] font-black italic bg-gray-900 text-white shadow-inner underline decoration-green-500 underline-offset-4">Index = Average of Best Differentials × 0.96</p>
-                </div>
-            </section>
-
-            {/* White Tee Course Handicap Chart */}
-            <section className="space-y-4 pt-4 border-t border-gray-100">
-                <div className="flex justify-between items-end">
-                    <div>
-                        <h4 className="font-black text-gray-900 text-[14pt] uppercase">White Tee Chart</h4>
-                        <p className="text-[11pt] text-gray-500 font-bold">Rating 63.8 / Slope 100 / Par 68</p>
-                    </div>
-                    <div className="text-right">
-                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10pt] font-bold uppercase tracking-wider">Course HCP</span>
-                    </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <div className="overflow-y-auto max-h-[300px]">
-                        <table className="w-full text-[13pt] text-center font-medium">
-                            <thead className="bg-gray-900 text-white sticky top-0 z-10">
-                                <tr>
-                                    <th className="py-2 px-2 w-1/3">HCP</th>
-                                    <th className="py-2 px-2 w-2/3 border-l border-gray-700">Index Range</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 text-gray-700">
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-3</td><td className="py-1.5 border-l border-gray-100">0.8 — 1.9</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-2</td><td className="py-1.5 border-l border-gray-100">2.0 — 3.0</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-1</td><td className="py-1.5 border-l border-gray-100">3.1 — 4.1</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">0</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">4.2 — 5.3</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">1</td><td className="py-1.5 border-l border-gray-100">5.4 — 6.4</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">2</td><td className="py-1.5 border-l border-gray-100">6.5 — 7.5</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">3</td><td className="py-1.5 border-l border-gray-100">7.6 — 8.7</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">4</td><td className="py-1.5 border-l border-gray-100">8.8 — 9.8</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">5</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">9.9 — 10.9</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">6</td><td className="py-1.5 border-l border-gray-100">11.0 — 12.0</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">7</td><td className="py-1.5 border-l border-gray-100">12.1 — 13.2</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">8</td><td className="py-1.5 border-l border-gray-100">13.3 — 14.3</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">9</td><td className="py-1.5 border-l border-gray-100">14.4 — 15.4</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">10</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">15.5 — 16.6</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">11</td><td className="py-1.5 border-l border-gray-100">16.7 — 17.7</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">12</td><td className="py-1.5 border-l border-gray-100">17.8 — 18.8</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">13</td><td className="py-1.5 border-l border-gray-100">18.9 — 20.0</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">14</td><td className="py-1.5 border-l border-gray-100">20.1 — 21.1</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">15</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">21.2 — 22.2</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </section>
 
@@ -757,7 +753,6 @@ export default function FAQClient({ players }: { players: Player[] }) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 px-1">
                     <button onClick={() => openModal('Club Rules', clubRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Club Rules</button>
-                    <button onClick={() => openModal('Round Rules', roundRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-green-600">Round Rules</button>
                     <button onClick={() => openModal('Handicap Rules', handicapRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Handicap Rules</button>
                     <Link href="#" className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-center text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 flex items-center justify-center border-b-2 border-gray-700">Download Member App</Link>
                 </div>
