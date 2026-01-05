@@ -95,13 +95,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return initialMap;
     });
 
-    // Persist selection to Local Storage
-    useEffect(() => {
-        if (typeof window !== 'undefined' && selectedPlayers.length > 0) {
-            const ids = selectedPlayers.map(p => p.id);
-            localStorage.setItem('live_scoring_my_group', JSON.stringify(ids));
-        }
-    }, [selectedPlayers]);
+
 
     const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
     const [activeHole, setActiveHole] = useState(() => {
@@ -236,24 +230,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         });
     };
 
-    // Local Storage Persistence for My Group
+    // Standardize Persistence logic: 
+    // 1. Initial Load (via useState initializer at top)
+    // 2. Auto-save on change
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('live_scoring_my_group');
-            if (saved && allPlayers.length > 0) {
-                try {
-                    const savedIds = JSON.parse(saved);
-                    const restore = allPlayers.filter(p => savedIds.includes(p.id));
-                    if (restore.length > 0) setSelectedPlayers(restore);
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-        }
-    }, [allPlayers]);
-
-    useEffect(() => {
-        if (selectedPlayers.length > 0) {
+        if (typeof window !== 'undefined' && selectedPlayers.length > 0) {
             localStorage.setItem('live_scoring_my_group', JSON.stringify(selectedPlayers.map(p => p.id)));
         }
     }, [selectedPlayers]);
