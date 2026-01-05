@@ -100,18 +100,18 @@ export async function saveLiveHoleScores(
                 const playerTeeBoxName = roundPlayer.tee_box_name || player?.preferred_tee_box || 'White';
 
                 // Try to find by ID first, then name
-                let teeBox = round.course.tee_boxes.find(t => t.id === roundPlayer.tee_box_id);
+                let teeBox = round.course.tee_boxes.find(t => t.id === roundPlayer!.tee_box_id);
                 if (!teeBox) {
                     teeBox = round.course.tee_boxes.find(t => t.name.toLowerCase() === playerTeeBoxName.toLowerCase()) ||
                         round.course.tee_boxes.find(t => t.name === 'White') ||
                         round.course.tee_boxes[0];
                 }
 
-                const handicapIndex = roundPlayer.index_at_time || player?.index || 0;
+                const handicapIndex = roundPlayer!.index_at_time || player?.index || 0;
                 const courseHandicap = Math.round(handicapIndex * (teeBox.slope / 113));
 
                 await prisma.roundPlayer.update({
-                    where: { id: roundPlayer.id },
+                    where: { id: roundPlayer!.id },
                     data: {
                         tee_box_id: teeBox.id,
                         tee_box_name: teeBox.name,
@@ -123,7 +123,7 @@ export async function saveLiveHoleScores(
                 });
 
                 // Update local object to reflect changes for score calculation steps below if needed
-                roundPlayer.course_handicap = courseHandicap;
+                roundPlayer!.course_handicap = courseHandicap;
             }
 
 
