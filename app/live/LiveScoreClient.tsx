@@ -293,7 +293,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50">
-                <div className="w-full px-1 py-3 flex justify-between items-center">
+                <div className="w-full p-1 m-1 flex justify-between items-center">
                     <h1 className="text-[16pt] font-bold text-green-700 tracking-tight">Live Scoring</h1>
                     <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">
                         Back
@@ -301,10 +301,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 </div>
             </header>
 
-            <main className="w-full px-1 py-1 space-y-4">
+            <main className="w-full p-1 m-1 space-y-1">
                 {/* Round Selector - Admin Only */}
                 {isAdmin && allLiveRounds.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg p-3 border-4 border-gray-300">
+                    <div className="bg-white rounded-xl shadow-lg p-1 m-1 border-4 border-gray-300">
                         <label className="block text-[14pt] font-bold text-gray-900 mb-2">Select Round:</label>
                         <select
                             value={liveRoundId || ''}
@@ -326,7 +326,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 )}
 
                 {/* Course Info Card */}
-                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
+                <div className="bg-white rounded-xl shadow-lg p-1 m-1 border-4 border-gray-300">
                     <h2 className="text-[14pt] font-bold text-gray-900">{defaultCourse?.name || 'Loading...'}</h2>
                     <div className="flex gap-4 text-[14pt] text-gray-500 mt-1">
                         <span>Date: {new Date().toLocaleDateString()}</span>
@@ -346,8 +346,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 />
 
                 {/* Scoring Section */}
-                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                    <div className="flex justify-between items-center mb-4 px-1 border-b border-gray-100 pb-2">
+                <div className="bg-white rounded-xl shadow-lg p-1 m-1 border-4 border-gray-300">
+                    <div className="flex justify-between items-center mb-1 px-1 border-b border-gray-100 pb-1">
                         <div className="flex items-baseline gap-2">
                             <h3 className="text-[14pt] font-bold text-gray-900">Group Players</h3>
                         </div>
@@ -361,8 +361,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                     {/* Hole Selection Grid */}
                     {selectedPlayers.length > 0 && (
-                        <div className="mb-6">
-                            <div className="grid grid-cols-6 gap-2">
+                        <div className="mb-1">
+                            <div className="grid grid-cols-6 gap-1">
                                 {defaultCourse?.holes.map(hole => {
                                     // Check if this hole has been saved (has scores)
                                     const isSaved = selectedPlayers.some(p => {
@@ -403,7 +403,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                     {/* Player Scoring Rows */}
                     {selectedPlayers.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-1">
                             {selectedPlayers.map(player => {
                                 const score = getScore(player.id, activeHole);
                                 // Calculate Totals for To Par
@@ -431,7 +431,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 const courseHcp = getCourseHandicap(player);
 
                                 return (
-                                    <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-3">
+                                    <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
                                         <div className="flex flex-col">
                                             <div className="flex flex-col items-start">
                                                 <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
@@ -514,14 +514,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
-                    <div className="mt-8">
+                    <div className="mt-1">
                         <button
                             onClick={() => window.location.reload()}
-                            className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer mb-2"
+                            className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-1 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
                         >
                             Refresh: Live score summary
                         </button>
-                        <div className="space-y-4">
+                        <div className="space-y-1">
                             {summaryPlayers
                                 .map(player => {
                                     const playerScores = scores.get(player.id);
@@ -569,9 +569,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     }
 
                                     return (
-                                        <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden mb-4 border-4 border-gray-300">
+                                        <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden m-1 border-4 border-gray-300">
                                             {/* Player Header */}
-                                            <div className="bg-[#1d4ed8] p-3 text-white">
+                                            <div className="bg-[#1d4ed8] p-1 text-white">
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex items-center gap-3">
                                                         <div className="bg-white text-[#1d4ed8] font-bold rounded w-8 h-8 flex items-center justify-center text-[14pt]">
@@ -606,7 +606,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             </div>
 
                                             {/* Score Grid */}
-                                            <div className="mx-1 mb-2 border border-black rounded shadow-sm overflow-hidden">
+                                            <div className="m-1 border border-black rounded shadow-sm overflow-hidden">
                                                 {/* Row 1: Holes 1-9 */}
                                                 <div className="grid grid-cols-9 border-b border-black">
                                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
@@ -683,8 +683,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Score Legend */}
                 {selectedPlayers.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg p-3 mt-4 flex flex-wrap gap-4 items-center justify-center text-[14pt]">
-                        <div className="font-bold text-gray-700 mr-2 text-[14pt]">Score Legend</div>
+                    <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[14pt]">
+                        <div className="font-bold text-gray-700 mr-1 text-[14pt]">Score Legend</div>
                         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
                         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
                         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-50 border border-gray-200"></div>Par (E)</div>
@@ -703,7 +703,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 window.location.reload();
                             }
                         }}
-                        className="w-full mt-6 mb-8 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-4 rounded-full shadow-lg transition-colors text-[16pt] uppercase tracking-wider"
+                        className="w-full mt-1 mb-1 bg-blue-600 hover:bg-blue-700 text-white font-bold px-1 py-1 rounded-full shadow-lg transition-colors text-[16pt] uppercase tracking-wider"
                     >
                         💾 Save Round (Isolated - No Handicap Impact)
                     </button>
