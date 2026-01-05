@@ -94,10 +94,10 @@ export async function saveLiveHoleScores(
                         gross_score: null
                     }
                 });
-            } else if (roundPlayer.course_handicap === null) {
+            } else if (roundPlayer!.course_handicap === null) {
                 // Backfill snapshot data for existing records if missing
                 const player = await prisma.player.findUnique({ where: { id: ps.playerId } });
-                const playerTeeBoxName = roundPlayer.tee_box_name || player?.preferred_tee_box || 'White';
+                const playerTeeBoxName = roundPlayer!.tee_box_name || player?.preferred_tee_box || 'White';
 
                 // Try to find by ID first, then name
                 let teeBox = round.course.tee_boxes.find(t => t.id === roundPlayer!.tee_box_id);
