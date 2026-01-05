@@ -363,7 +363,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             </div>
                         </div>
                         <div className="flex flex-col gap-2 shrink-0">
-                            {canUpdate && (
+                            {isAdmin && (
                                 <>
                                     <button
                                         onClick={() => {
@@ -374,33 +374,37 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     >
                                         New
                                     </button>
-                                    <button
-                                        onClick={() => {
-                                            setRoundModalMode('edit');
-                                            setIsRoundModalOpen(true);
-                                        }}
-                                        className="bg-white text-black border-2 border-black text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-50 transition-all shadow-md active:scale-95"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={async () => {
-                                            if (!liveRoundId) return;
-                                            if (confirm('Are you sure you want to delete this round? This cannot be undone.')) {
-                                                try {
-                                                    await deleteLiveRound(liveRoundId);
-                                                    window.location.href = '/live';
-                                                } catch (err) {
-                                                    console.error('Failed to delete round:', err);
-                                                    alert('Failed to delete round.');
-                                                }
-                                            }
-                                        }}
-                                        className="bg-red-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
-                                    >
-                                        Delete
-                                    </button>
                                 </>
+                            )}
+                            {canUpdate && (
+                                <button
+                                    onClick={() => {
+                                        setRoundModalMode('edit');
+                                        setIsRoundModalOpen(true);
+                                    }}
+                                    className="bg-white text-black border-2 border-black text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-50 transition-all shadow-md active:scale-95"
+                                >
+                                    Edit
+                                </button>
+                            )}
+                            {isAdmin && (
+                                <button
+                                    onClick={async () => {
+                                        if (!liveRoundId) return;
+                                        if (confirm('Are you sure you want to delete this round? This cannot be undone.')) {
+                                            try {
+                                                await deleteLiveRound(liveRoundId);
+                                                window.location.href = '/live';
+                                            } catch (err) {
+                                                console.error('Failed to delete round:', err);
+                                                alert('Failed to delete round.');
+                                            }
+                                        }
+                                    }}
+                                    className="bg-red-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                >
+                                    Delete
+                                </button>
                             )}
                         </div>
                     </div>
