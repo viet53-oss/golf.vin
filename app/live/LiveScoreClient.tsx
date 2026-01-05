@@ -324,7 +324,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 ${btnClass}
                                             `}
                                         >
-                                            {hole.hole_number} Par:{hole.par}
+                                            <span className="text-[14pt] font-bold">
+                                                {hole.hole_number}: {hole.par}
+                                            </span>
                                         </button>
                                     );
                                 })}
@@ -365,12 +367,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-3">
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
+                                                <div className="font-bold text-gray-900 text-[14pt]">{player.name}</div>
                                                 <div className={`font-bold rounded w-8 h-8 flex items-center justify-center text-[14pt] bg-white shadow-sm border border-gray-200 ${toParClass}`}>
                                                     {toParStr}
                                                 </div>
-                                                <div className="font-bold text-gray-900 text-[14pt]">{player.name}</div>
                                             </div>
-                                            <div className="text-gray-500 text-[12pt] flex gap-2 font-medium ml-10">
+                                            <div className="text-gray-500 text-[12pt] flex gap-2 font-medium">
                                                 <span>Idx: {player.index}</span>
                                                 <span>•</span>
                                                 <span>CH: {courseHcp}</span>
