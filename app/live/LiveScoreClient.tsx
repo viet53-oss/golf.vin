@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
+import { LiveRoundModal } from '@/components/LiveRoundModal';
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore } from '@/app/actions/create-live-round';
 
 interface Player {
@@ -59,6 +60,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
         return [];
     });
+
+    const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
+    const [roundModalMode, setRoundModalMode] = useState<'new' | 'edit'>('new');
 
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
@@ -185,9 +189,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         const teeBox = getPlayerTee(player);
         if (!teeBox) return 0;
 
-        const rating = teeBox.rating;
-        const slope = teeBox.slope;
-        const coursePar = defaultCourse?.holes.reduce((sum, h) => sum + h.par, 0) || 72;
+        const rating = initialRound?.rating ?? teeBox.rating;
+        const slope = initialRound?.slope ?? teeBox.slope;
+        const coursePar = initialRound?.par ?? (defaultCourse?.holes.reduce((sum, h) => sum + h.par, 0) || 72);
 
         const ch = (player.index * slope / 113) + (rating - coursePar);
         return Math.round(ch);
@@ -203,8 +207,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             if (!defaultCourse) return;
             const res = await createLiveRound({
                 name: `Live Round ${new Date().toLocaleDateString()}`,
-                date: new Date().toISOString(),
-                courseId: defaultCourse.id
+                date: new Date().toISOString().split('T')[0],
+                courseId: defaultCourse.id,
+                par: 68,
+                rating: 63.8,
+                slope: 100
             });
             if (res.success && res.liveRoundId) {
                 currentLiveRoundId = res.liveRoundId;
@@ -328,15 +335,48 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 )}
 
                 {/* Course Info Card */}
-                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                    <h2 className="text-[14pt] font-bold text-gray-900">{defaultCourse?.name || 'Loading...'}</h2>
-                    <div className="flex gap-4 text-[14pt] text-gray-500 mt-1">
-                        <span>Date: {new Date().toLocaleDateString()}</span>
-                        <span>Par: {defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
-                        <span>Rating: {defaultCourse?.tee_boxes[0]?.rating}</span>
-                        <span>Slope: {defaultCourse?.tee_boxes[0]?.slope}</span>
+                <div className="bg-white rounded-xl shadow-lg p-3 border-4 border-gray-300">
+                    <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                            <h2 className="text-[16pt] font-bold text-gray-900">{initialRound?.name || defaultCourse?.name || 'Loading...'}</h2>
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[14pt] text-gray-500 mt-1">
+                                <span>Date: {initialRound?.date || new Date().toLocaleDateString()}</span>
+                                <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
+                                <span>Rating: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
+                                <span>Slope: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
+                            </div>
+                        </div>
+                        {isAdmin && (
+                            <div className="flex flex-col gap-2 shrink-0">
+                                <button
+                                    onClick={() => {
+                                        setRoundModalMode('new');
+                                        setIsRoundModalOpen(true);
+                                    }}
+                                    className="bg-black text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
+                                >
+                                    New
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setRoundModalMode('edit');
+                                        setIsRoundModalOpen(true);
+                                    }}
+                                    className="bg-white text-black border-2 border-black text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-50 transition-all shadow-md active:scale-95"
+                                >
+                                    Edit
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
+
+                <LiveRoundModal
+                    isOpen={isRoundModalOpen}
+                    onClose={() => setIsRoundModalOpen(false)}
+                    courseId={defaultCourse?.id}
+                    existingRound={roundModalMode === 'edit' ? initialRound : null}
+                />
 
                 {/* Player Selection Modal */}
                 <LivePlayerSelectionModal

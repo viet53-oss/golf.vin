@@ -191,6 +191,12 @@ model LiveRound {
   date        String   // YYYY-MM-DD
   course_id   String
   course      Course   @relation(fields: [course_id], references: [id])
+  
+  // Custom course data for this round
+  par         Int      @default(72)
+  rating      Float    @default(72.0)
+  slope       Int      @default(113)
+  
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   

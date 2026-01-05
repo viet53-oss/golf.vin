@@ -10,13 +10,19 @@ export async function createLiveRound(data: {
     name: string;
     date: string;
     courseId: string;
+    par?: number;
+    rating?: number;
+    slope?: number;
 }) {
     try {
         const liveRound = await prisma.liveRound.create({
             data: {
                 name: data.name,
                 date: data.date,
-                course_id: data.courseId
+                course_id: data.courseId,
+                par: data.par ?? 72,
+                rating: data.rating ?? 72.0,
+                slope: data.slope ?? 113
             }
         });
 
@@ -27,6 +33,58 @@ export async function createLiveRound(data: {
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Failed to create live round'
+        };
+    }
+}
+
+/**
+ * Updates an existing live round metadata
+ */
+export async function updateLiveRound(data: {
+    id: string;
+    name: string;
+    date: string;
+    par: number;
+    rating: number;
+    slope: number;
+}) {
+    try {
+        const liveRound = await prisma.liveRound.update({
+            where: { id: data.id },
+            data: {
+                name: data.name,
+                date: data.date,
+                par: data.par,
+                rating: data.rating,
+                slope: data.slope
+            },
+            include: {
+                players: true
+            }
+        });
+
+        // Update all players in this round to match the new course data for accurate handicap/net calculation
+        // They keep their own handicap indexes, but recalculate course handicap based on new slope/rating/par
+        for (const player of liveRound.players) {
+            const courseHandicap = Math.round((player.index_at_time * (data.slope / 113)) + (data.rating - data.par));
+            await prisma.liveRoundPlayer.update({
+                where: { id: player.id },
+                data: {
+                    tee_box_rating: data.rating,
+                    tee_box_slope: data.slope,
+                    tee_box_par: data.par,
+                    course_handicap: courseHandicap
+                }
+            });
+        }
+
+        revalidatePath('/live');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to update live round:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to update live round'
         };
     }
 }
@@ -62,7 +120,6 @@ export async function addPlayerToLiveRound(data: {
 
         // Calculate course handicap
         const handicapIndex = player.index || 0;
-        const courseHandicap = Math.round(handicapIndex * (teeBox.slope / 113));
         const par = teeBox.course.holes.reduce((sum, h) => sum + h.par, 0);
 
         // Create live round player
@@ -76,7 +133,7 @@ export async function addPlayerToLiveRound(data: {
                 tee_box_slope: Math.round(teeBox.slope),
                 tee_box_par: par,
                 index_at_time: handicapIndex,
-                course_handicap: courseHandicap
+                course_handicap: Math.round((handicapIndex * (teeBox.slope / 113)) + (teeBox.rating - par))
             }
         });
 
