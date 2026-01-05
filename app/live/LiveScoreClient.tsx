@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore } from '@/app/actions/create-live-round';
 
@@ -286,8 +287,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             </header>
 
             <main className="w-full px-1 py-1 space-y-4">
-                {/* Round Selector */}
-                {allLiveRounds.length > 0 && (
+                {/* Round Selector - Admin Only */}
+                {isAdmin && allLiveRounds.length > 0 && (
                     <div className="bg-white rounded-xl shadow-lg p-3 border-4 border-gray-300">
                         <label className="block text-[14pt] font-bold text-gray-900 mb-2">Select Round:</label>
                         <select
@@ -679,8 +680,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     </div>
                 )}
 
-                {/* Save Round Button */}
-                {liveRoundId && selectedPlayers.length > 0 && (
+                {/* Save Round Button - Admin Only */}
+                {isAdmin && liveRoundId && selectedPlayers.length > 0 && (
                     <button
                         onClick={async () => {
                             if (confirm('Save this round? This will finalize all scores. This data is isolated and will NOT affect handicaps or main scores.')) {
