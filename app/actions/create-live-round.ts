@@ -20,9 +20,9 @@ export async function createLiveRound(data: {
                 name: data.name,
                 date: data.date,
                 course_id: data.courseId,
-                // par: data.par ?? 72,       // DISABLED until server restart
-                // rating: data.rating ?? 72.0, // DISABLED until server restart
-                // slope: data.slope ?? 113   // DISABLED until server restart
+                par: data.par ?? 72,
+                rating: data.rating ?? 72.0,
+                slope: data.slope ?? 113
             } as any
         });
 
@@ -54,9 +54,9 @@ export async function updateLiveRound(data: {
             data: {
                 name: data.name,
                 date: data.date,
-                // par: data.par,      // DISABLED until server restart
-                // rating: data.rating,// DISABLED until server restart
-                // slope: data.slope   // DISABLED until server restart
+                par: data.par,
+                rating: data.rating,
+                slope: data.slope
             } as any,
             include: {
                 players: true
