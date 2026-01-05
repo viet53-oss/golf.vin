@@ -326,7 +326,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         >
                                             <div className="flex items-baseline justify-center font-bold px-1">
                                                 <span className="text-[20pt]">{hole.hole_number}</span>
-                                                <span className="text-[18pt] mx-1">-</span>
+                                                <span className="text-[18pt] mx-0">/</span>
                                                 <span className="text-[18pt]">{hole.par}</span>
                                             </div>
                                         </button>
