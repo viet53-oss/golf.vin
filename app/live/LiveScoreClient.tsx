@@ -34,9 +34,15 @@ interface LiveScoreClientProps {
     allPlayers: Player[];
     defaultCourse: Course | null;
     initialRound?: any;
+    allLiveRounds: Array<{
+        id: string;
+        name: string;
+        date: string;
+        created_at: Date;
+    }>;
 }
 
-export default function LiveScoreClient({ allPlayers, defaultCourse, initialRound }: LiveScoreClientProps) {
+export default function LiveScoreClient({ allPlayers, defaultCourse, initialRound, allLiveRounds }: LiveScoreClientProps) {
     // Initialize State from Server Data
     const [liveRoundId, setLiveRoundId] = useState<string | null>(initialRound?.id || null);
 
@@ -280,6 +286,29 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             </header>
 
             <main className="w-full px-1 py-1 space-y-4">
+                {/* Round Selector */}
+                {allLiveRounds.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg p-3 border-4 border-gray-300">
+                        <label className="block text-[14pt] font-bold text-gray-900 mb-2">Select Round:</label>
+                        <select
+                            value={liveRoundId || ''}
+                            onChange={(e) => {
+                                if (e.target.value) {
+                                    window.location.href = `/live?roundId=${e.target.value}`;
+                                }
+                            }}
+                            className="w-full px-4 py-2 text-[14pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        >
+                            <option value="">-- Select a Round --</option>
+                            {allLiveRounds.map(round => (
+                                <option key={round.id} value={round.id}>
+                                    {round.name} - {new Date(round.date).toLocaleDateString()}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 {/* Course Info Card */}
                 <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                     <h2 className="text-[14pt] font-bold text-gray-900">{defaultCourse?.name || 'Loading...'}</h2>
@@ -648,6 +677,22 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-200"></div>Bogey (+1)</div>
                         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-200"></div>Double+ (+2)</div>
                     </div>
+                )}
+
+                {/* Save Round Button */}
+                {liveRoundId && selectedPlayers.length > 0 && (
+                    <button
+                        onClick={async () => {
+                            if (confirm('Save this round? This will finalize all scores. This data is isolated and will NOT affect handicaps or main scores.')) {
+                                alert('Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
+                                // Optionally redirect or refresh
+                                window.location.reload();
+                            }
+                        }}
+                        className="w-full mt-6 mb-8 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-4 rounded-full shadow-lg transition-colors text-[16pt] uppercase tracking-wider"
+                    >
+                        💾 Save Round (Isolated - No Handicap Impact)
+                    </button>
                 )}
             </main>
         </div>

@@ -215,3 +215,29 @@ export async function deleteLiveRound(liveRoundId: string) {
         };
     }
 }
+
+/**
+ * Gets all live rounds for selection dropdown
+ */
+export async function getAllLiveRounds() {
+    try {
+        const rounds = await prisma.liveRound.findMany({
+            orderBy: { created_at: 'desc' },
+            select: {
+                id: true,
+                name: true,
+                date: true,
+                created_at: true
+            }
+        });
+
+        return { success: true, rounds };
+    } catch (error) {
+        console.error('Failed to get live rounds:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to get rounds',
+            rounds: []
+        };
+    }
+}
