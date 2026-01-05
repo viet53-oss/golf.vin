@@ -292,6 +292,32 @@ export default function FAQClient({ players }: { players: Player[] }) {
                 <p className="text-[14pt] text-green-600 font-bold italic mt-1">All mechanisms are 2025 USGA/WHS compliant</p>
             </header>
 
+            {/* 2024 Update Section */}
+            <section className="bg-white border-2 border-green-500 rounded-2xl p-6 shadow-xl mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-green-500 text-white p-2 rounded-lg font-black text-[12pt]">NEW</div>
+                    <h4 className="text-[16pt] font-black text-gray-900 uppercase">The 2024 "Playing to Par" Update</h4>
+                </div>
+                <div className="space-y-4 text-[14pt] leading-relaxed">
+                    <p className="font-bold text-gray-800 italic underline decoration-green-500 underline-offset-4 decoration-2">Why the change?</p>
+                    <p className="text-gray-600">
+                        In January 2024, the USGA added a critical piece to the formula to make it more <strong>"equitable"</strong> when comparing players across different tee boxes.
+                    </p>
+                    <div className="bg-gray-100 p-4 rounded-xl border-l-4 border-green-500 font-mono text-[14pt] font-bold text-center">
+                        Course HCP = (Index × Slope / 113) + (Rating - Par)
+                    </div>
+                    <p className="text-gray-600">
+                        <strong>Before 2024:</strong> A scratch golfer (0 index) playing a difficult course (Rating 75, Par 72) had a handicap of 0. They had to shoot a 75 to "play to their handicap."
+                    </p>
+                    <p className="text-gray-600">
+                        <strong>Now:</strong> With the <strong>(Rating - Par)</strong> adjustment, that same golfer gets 3 extra strokes (75 - 72 = 3). Their target score is now <strong>72 (Net Par)</strong>. This makes it much easier to compare players chasing the same "Net Par" goal.
+                    </p>
+                    <p className="text-gray-500 font-black italic pt-2">
+                        * Note: This "2024 version" is the current gold standard and remains the official system through 2026-2027.
+                    </p>
+                </div>
+            </section>
+
             {/* Stroke Allocation */}
             <section>
                 <div className="bg-amber-50 rounded-xl p-5 border border-amber-200 mb-6">

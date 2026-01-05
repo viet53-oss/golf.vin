@@ -51,42 +51,57 @@ export function LiveRoundModal({
     if (!isOpen) return null;
 
     const handleSave = async () => {
+        const parVal = isNaN(par) ? (existingRound?.par || 68) : par;
+        const ratingVal = isNaN(rating) ? (existingRound?.rating || 63.8) : rating;
+        const slopeVal = isNaN(slope) ? (existingRound?.slope || 100) : slope;
+
         setIsSaving(true);
         try {
             if (existingRound) {
                 const result = await updateLiveRound({
                     id: existingRound.id,
-                    name,
-                    date,
-                    par,
-                    rating,
-                    slope
+                    name: name || 'Live Round',
+                    date: date || today,
+                    par: parVal,
+                    rating: ratingVal,
+                    slope: slopeVal
                 });
+
                 if (result.success) {
                     onClose();
+                    // Hard redirect to clear out all old scoring data and refresh with new course metadata
+                    window.location.href = `/live?roundId=${existingRound.id}&r=${Date.now()}`;
                 } else {
-                    alert(result.error);
+                    alert('Save Failed: ' + result.error);
+                    setIsSaving(false);
                 }
-            } else if (courseId) {
+            } else {
+                if (!courseId) {
+                    alert('Error: No Course ID selected. Please refresh.');
+                    setIsSaving(false);
+                    return;
+                }
                 const result = await createLiveRound({
-                    name,
-                    date,
+                    name: name || 'Live Round',
+                    date: date || today,
                     courseId,
-                    par,
-                    rating,
-                    slope
+                    par: parVal,
+                    rating: ratingVal,
+                    slope: slopeVal
                 });
-                if (result.success) {
-                    window.location.href = `/live?roundId=${result.liveRoundId}`;
+
+                if (result.success && result.liveRoundId) {
                     onClose();
+                    // Move to the new round
+                    window.location.href = `/live?roundId=${result.liveRoundId}`;
                 } else {
-                    alert(result.error);
+                    alert('Creation Failed: ' + (result.error || 'Server Error'));
+                    setIsSaving(false);
                 }
             }
         } catch (e) {
-            console.error(e);
-            alert('An error occurred');
-        } finally {
+            console.error('CRASH:', e);
+            alert('A critical error occurred. Please refresh.');
             setIsSaving(false);
         }
     };
@@ -169,19 +184,9 @@ export function LiveRoundModal({
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="bg-black text-white px-8 py-2 rounded-full text-[14pt] font-bold shadow-lg hover:bg-gray-800 disabled:opacity-50 flex items-center gap-2"
+                        className="bg-black text-white px-8 py-2 rounded-full text-[14pt] font-bold shadow-lg hover:bg-gray-800 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                     >
-                        {isSaving ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Saving...
-                            </>
-                        ) : (
-                            'Save Round'
-                        )}
+                        {isSaving ? 'Saving...' : 'Save Round'}
                     </button>
                 </div>
             </div>

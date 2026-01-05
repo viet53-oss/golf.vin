@@ -67,6 +67,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
         try {
+            const savedRoundId = localStorage.getItem('live_scoring_last_round_id');
+            const currentId = initialRound?.id;
+
+            // If we are on a different round than before, clear the old group selection
+            if (currentId && savedRoundId && savedRoundId !== currentId) {
+                localStorage.removeItem('live_scoring_my_group');
+                localStorage.setItem('live_scoring_last_round_id', currentId);
+                return; // Start fresh
+            }
+
+            if (currentId) {
+                localStorage.setItem('live_scoring_last_round_id', currentId);
+            }
+
             const saved = localStorage.getItem('live_scoring_my_group');
             if (saved) {
                 const savedIds = JSON.parse(saved);
@@ -142,6 +156,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return () => window.removeEventListener('admin-change', checkAdmin);
     }, []);
 
+    const todayStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Chicago',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(new Date());
+
+    const roundDateStr = initialRound?.date || todayStr;
+    const isLocked = todayStr > roundDateStr;
+    const canUpdate = isAdmin || !isLocked;
+
     // Auto-select next available hole for the specific group
     useEffect(() => {
         if (selectedPlayers.length === 0) return;
@@ -201,25 +226,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         const newSelectedPlayers = allPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
         setSelectedPlayers(newSelectedPlayers);
 
-        // 1. Ensure Live Round Exists
+        // 1. Ensure Live Round Exists (Fallback if server creation failed)
         let currentLiveRoundId = liveRoundId;
         if (!currentLiveRoundId) {
-            if (!defaultCourse) return;
-            const res = await createLiveRound({
-                name: `Live Round ${new Date().toLocaleDateString()}`,
-                date: new Date().toISOString().split('T')[0],
-                courseId: defaultCourse.id,
-                par: 68,
-                rating: 63.8,
-                slope: 100
-            });
-            if (res.success && res.liveRoundId) {
-                currentLiveRoundId = res.liveRoundId;
-                setLiveRoundId(currentLiveRoundId);
-            } else {
-                console.error("Failed to create live round");
-                return;
-            }
+            alert("No active live round found. Please refresh the page.");
+            return;
         }
 
         // 2. Add New Players to DB
@@ -311,8 +322,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             </header>
 
             <main className="w-full px-1 m-0 space-y-1">
-                {/* Round Selector - Admin Only */}
-                {isAdmin && allLiveRounds.length > 0 && (
+                {/* Round Selector - All Users */}
+                {allLiveRounds.length > 0 && (
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                         <label className="block text-[14pt] font-bold text-gray-900 mb-2">Select Round:</label>
                         <select
@@ -338,7 +349,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 <div className="bg-white rounded-xl shadow-lg p-3 border-4 border-gray-300">
                     <div className="flex justify-between items-start">
                         <div className="flex-1">
-                            <h2 className="text-[16pt] font-bold text-gray-900">{initialRound?.name || defaultCourse?.name || 'Loading...'}</h2>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-[16pt] font-bold text-gray-900">{initialRound?.name || defaultCourse?.name || 'Loading...'}</h2>
+                                {isLocked && (
+                                    <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
+                                )}
+                            </div>
                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-[14pt] text-gray-500 mt-1">
                                 <span>Date: {initialRound?.date || new Date().toLocaleDateString()}</span>
                                 <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
@@ -346,28 +362,30 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 <span>Slope: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
                             </div>
                         </div>
-                        {isAdmin && (
-                            <div className="flex flex-col gap-2 shrink-0">
-                                <button
-                                    onClick={() => {
-                                        setRoundModalMode('new');
-                                        setIsRoundModalOpen(true);
-                                    }}
-                                    className="bg-black text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
-                                >
-                                    New
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setRoundModalMode('edit');
-                                        setIsRoundModalOpen(true);
-                                    }}
-                                    className="bg-white text-black border-2 border-black text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-50 transition-all shadow-md active:scale-95"
-                                >
-                                    Edit
-                                </button>
-                            </div>
-                        )}
+                        <div className="flex flex-col gap-2 shrink-0">
+                            {canUpdate && (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            setRoundModalMode('new');
+                                            setIsRoundModalOpen(true);
+                                        }}
+                                        className="bg-black text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
+                                    >
+                                        New
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setRoundModalMode('edit');
+                                            setIsRoundModalOpen(true);
+                                        }}
+                                        className="bg-white text-black border-2 border-black text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-50 transition-all shadow-md active:scale-95"
+                                    >
+                                        Edit
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -389,16 +407,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Scoring Section */}
                 <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                    <div className="flex justify-between items-center mb-1 px-1 border-b border-gray-100 pb-1">
-                        <div className="flex items-baseline gap-2">
-                            <h3 className="text-[14pt] font-bold text-gray-900">Group Players</h3>
-                        </div>
-                        <button
-                            onClick={() => setIsPlayerModalOpen(true)}
-                            className="bg-black text-white text-[14pt] font-bold px-1 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm"
-                        >
-                            Select players
-                        </button>
+                    {/* Section Header: Group Players */}
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <h2 className="text-[18pt] font-bold text-gray-900">Group Players</h2>
+                        {canUpdate && (
+                            <button
+                                onClick={() => setIsPlayerModalOpen(true)}
+                                className="bg-black text-white rounded-full px-1 py-1 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
+                            >
+                                Select players
+                            </button>
+                        )}
                     </div>
 
                     {/* Hole Selection Grid */}
@@ -477,21 +496,25 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <button
-                                                onClick={() => updateScore(player.id, false)}
-                                                className="w-10 h-10 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
-                                            >
-                                                -
-                                            </button>
+                                            {canUpdate && (
+                                                <button
+                                                    onClick={() => updateScore(player.id, false)}
+                                                    className="w-10 h-10 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
+                                                >
+                                                    -
+                                                </button>
+                                            )}
                                             <div className="w-16 text-center font-bold text-[30pt] text-gray-800">
                                                 {score || <span className="text-gray-800">{activeHolePar}</span>}
                                             </div>
-                                            <button
-                                                onClick={() => updateScore(player.id, true)}
-                                                className="w-10 h-10 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
-                                            >
-                                                +
-                                            </button>
+                                            {canUpdate && (
+                                                <button
+                                                    onClick={() => updateScore(player.id, true)}
+                                                    className="w-10 h-10 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
+                                                >
+                                                    +
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -504,7 +527,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     )}
 
                     {/* Save Hole Button */}
-                    {selectedPlayers.length > 0 && (
+                    {selectedPlayers.length > 0 && canUpdate && (
                         <button
                             onClick={() => {
                                 if (!liveRoundId) return;

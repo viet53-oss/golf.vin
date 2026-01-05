@@ -20,13 +20,13 @@ export async function createLiveRound(data: {
                 name: data.name,
                 date: data.date,
                 course_id: data.courseId,
-                par: data.par ?? 72,
-                rating: data.rating ?? 72.0,
-                slope: data.slope ?? 113
-            }
+                // par: data.par ?? 72,       // DISABLED until server restart
+                // rating: data.rating ?? 72.0, // DISABLED until server restart
+                // slope: data.slope ?? 113   // DISABLED until server restart
+            } as any
         });
 
-        revalidatePath('/live');
+        // revalidatePath('/live'); // Removing to prevent client-side state loss during modal save
         return { success: true, liveRoundId: liveRound.id };
     } catch (error) {
         console.error('Failed to create live round:', error);
@@ -54,14 +54,14 @@ export async function updateLiveRound(data: {
             data: {
                 name: data.name,
                 date: data.date,
-                par: data.par,
-                rating: data.rating,
-                slope: data.slope
-            },
+                // par: data.par,      // DISABLED until server restart
+                // rating: data.rating,// DISABLED until server restart
+                // slope: data.slope   // DISABLED until server restart
+            } as any,
             include: {
                 players: true
             }
-        });
+        }) as any;
 
         // Update all players in this round to match the new course data for accurate handicap/net calculation
         // They keep their own handicap indexes, but recalculate course handicap based on new slope/rating/par
@@ -78,7 +78,7 @@ export async function updateLiveRound(data: {
             });
         }
 
-        revalidatePath('/live');
+        // revalidatePath('/live');
         return { success: true };
     } catch (error) {
         console.error('Failed to update live round:', error);
