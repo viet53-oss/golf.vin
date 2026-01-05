@@ -26,12 +26,13 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     }
 
     // 2. Resolve Today's Date (Chicago)
-    const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago' });
-    // YYYY-MM-DD
-    const y = formatter.formatToParts(new Date()).find(p => p.type === 'year')?.value;
-    const m = formatter.formatToParts(new Date()).find(p => p.type === 'month')?.value;
-    const d = formatter.formatToParts(new Date()).find(p => p.type === 'day')?.value;
-    const todayStr = `${y}-${m}-${d}`;
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Chicago',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+    const todayStr = formatter.format(new Date()); // Returns YYYY-MM-DD
 
     let activeRound = null;
 
