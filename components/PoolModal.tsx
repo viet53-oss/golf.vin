@@ -1,9 +1,10 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Mail } from 'lucide-react';
 import PoolResults from './PoolResults';
 import { getPoolResults } from '@/app/actions/get-pool-results';
+import { PoolManagementButton } from './PoolManagementButton';
+import { PoolCopyButton } from './PoolCopyButton';
+import Cookies from 'js-cookie';
 
 interface PoolModalProps {
     roundId: string;
@@ -15,6 +16,17 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
     const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const checkAdmin = () => {
+            const adminCookie = Cookies.get('admin_session');
+            setIsAdmin(adminCookie === 'true');
+        };
+        checkAdmin();
+        window.addEventListener('admin-change', checkAdmin);
+        return () => window.removeEventListener('admin-change', checkAdmin);
+    }, []);
 
     useEffect(() => {
         if (isOpen && roundId) {
@@ -60,7 +72,7 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
             </header>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto bg-gray-50">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
                         <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
@@ -81,16 +93,46 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
                         </button>
                     </div>
                 ) : (
-                    <div className="max-w-5xl mx-auto">
-                        <PoolResults
-                            allPoolParticipants={data.allPoolParticipants}
-                            poolActivePlayers={data.poolActivePlayers}
-                            round={data.round}
-                            flights={data.flights}
-                            processedFlights={data.processedFlights}
-                            winningsMap={data.winningsMap}
-                        />
-                    </div>
+                    <main className="px-1 py-4 max-w-5xl mx-auto w-full">
+                        {/* Admin Action Bar (Replicating Page Style) */}
+                        {isAdmin && (
+                            <div className="bg-white border border-gray-200 rounded-xl p-1 flex items-center justify-end gap-1 mb-4 shadow-sm">
+                                <div className="flex gap-1 shrink-0">
+                                    <PoolCopyButton
+                                        date={data.round.date}
+                                        roundName={data.round.name}
+                                        isTournament={data.round.is_tournament}
+                                        flights={data.processedFlights}
+                                    />
+                                    <button className="p-2.5 bg-black rounded-lg hover:bg-gray-800 transition-colors shadow-sm text-white cursor-pointer">
+                                        <Mail className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Main Results Dashboard Card */}
+                        <div className="border border-gray-300 rounded-2xl overflow-hidden shadow-xl bg-white mb-10">
+                            {/* Participants Header */}
+                            <div className="bg-[#f3f4fa] border-b border-gray-300 px-1 py-4 flex justify-between items-center">
+                                <h2 className="text-[14pt] font-bold text-gray-700">Pool Participants</h2>
+                                <PoolManagementButton
+                                    roundId={data.round.id}
+                                    allPlayers={data.round.players.map((p: any) => ({ id: p.player_id, name: p.player.name }))}
+                                    currentParticipantIds={data.allPoolParticipants.map((p: any) => p.player_id)}
+                                />
+                            </div>
+
+                            <PoolResults
+                                allPoolParticipants={data.allPoolParticipants}
+                                poolActivePlayers={data.poolActivePlayers}
+                                round={data.round}
+                                flights={data.flights}
+                                processedFlights={data.processedFlights}
+                                winningsMap={data.winningsMap}
+                            />
+                        </div>
+                    </main>
                 )}
             </div>
         </div>
