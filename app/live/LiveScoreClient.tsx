@@ -325,7 +325,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             `}
                                         >
                                             <span className="text-[14pt] font-bold">
-                                                {hole.hole_number}: {hole.par}
+                                                {hole.hole_number} / {hole.par}
                                             </span>
                                         </button>
                                     );
