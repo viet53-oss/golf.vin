@@ -541,8 +541,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     </div>
 
                                                     <div className="flex gap-4 text-center">
-                                                        <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
-                                                            {toParStr}
+                                                        <div>
+                                                            <div className="text-[14pt] opacity-80 font-bold tracking-wider invisible">-</div>
+                                                            <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
+                                                                {toParStr}
+                                                            </div>
                                                         </div>
                                                         <div>
                                                             <div className="text-[14pt] opacity-80 font-bold tracking-wider">GRS</div>
