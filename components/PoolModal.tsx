@@ -53,7 +53,7 @@ export function PoolModal({ roundId, isOpen, onClose }: PoolModalProps) {
                 </div>
                 <button
                     onClick={onClose}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-black"
+                    className="p-1 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-md"
                 >
                     <X className="w-8 h-8" />
                 </button>
