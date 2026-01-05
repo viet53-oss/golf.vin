@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
-import { createLiveRound, addPlayerToLiveRound, saveLiveScore } from '@/app/actions/create-live-round';
+import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound } from '@/app/actions/create-live-round';
 
 interface Player {
     id: string;
@@ -382,6 +382,23 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         className="bg-white text-black border-2 border-black text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-gray-50 transition-all shadow-md active:scale-95"
                                     >
                                         Edit
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (!liveRoundId) return;
+                                            if (confirm('Are you sure you want to delete this round? This cannot be undone.')) {
+                                                try {
+                                                    await deleteLiveRound(liveRoundId);
+                                                    window.location.href = '/live';
+                                                } catch (err) {
+                                                    console.error('Failed to delete round:', err);
+                                                    alert('Failed to delete round.');
+                                                }
+                                            }
+                                        }}
+                                        className="bg-red-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                    >
+                                        Delete
                                     </button>
                                 </>
                             )}
