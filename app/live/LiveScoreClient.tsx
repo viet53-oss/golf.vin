@@ -48,31 +48,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [liveRoundId, setLiveRoundId] = useState<string | null>(initialRound?.id || null);
 
     const [selectedPlayers, setSelectedPlayers] = useState<Player[]>(() => {
-        // Try to load from Local Storage first
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('live_scoring_my_group');
-                if (saved) {
-                    const savedIds = JSON.parse(saved);
-                    // Reconstruct player objects from available data
-                    const sourcePlayers = initialRound?.players
-                        ? initialRound.players.map((p: any) => ({
-                            id: p.player.id,
-                            name: p.player.name,
-                            index: p.player.index,
-                            preferred_tee_box: p.player.preferred_tee_box
-                        }))
-                        : allPlayers;
-
-                    const restored = sourcePlayers.filter((p: Player) => savedIds.includes(p.id));
-                    if (restored.length > 0) return restored;
-                }
-            } catch (e) {
-                console.error("Failed to load saved players", e);
-            }
-        }
-
-        // Fallback to all players in round
+        // Fallback to all players in round for initial/server render
         if (initialRound?.players) {
             return initialRound.players.map((p: any) => ({
                 id: p.player.id,
@@ -83,6 +59,32 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
         return [];
     });
+
+    // Load saved group from localStorage after mount to avoid hydration mismatch
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem('live_scoring_my_group');
+            if (saved) {
+                const savedIds = JSON.parse(saved);
+                // Reconstruct player objects from available data
+                const sourcePlayers = initialRound?.players
+                    ? initialRound.players.map((p: any) => ({
+                        id: p.player.id,
+                        name: p.player.name,
+                        index: p.player.index,
+                        preferred_tee_box: p.player.preferred_tee_box
+                    }))
+                    : allPlayers;
+
+                const restored = sourcePlayers.filter((p: Player) => savedIds.includes(p.id));
+                if (restored.length > 0) {
+                    setSelectedPlayers(restored);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to load saved players", e);
+        }
+    }, [initialRound, allPlayers]);
 
     const [scores, setScores] = useState<Map<string, Map<number, number>>>(() => {
         const initialMap = new Map();
