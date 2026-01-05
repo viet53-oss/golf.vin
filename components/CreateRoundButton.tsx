@@ -9,15 +9,8 @@ export default function CreateRoundButton() {
     const [isPending, startTransition] = useTransition();
 
     const handleClick = () => {
-        startTransition(async () => {
-            try {
-                const newRoundId = await createDraftRound();
-                router.push(`/scores/${newRoundId}/edit`);
-            } catch (error) {
-                console.error('Failed to create round:', error);
-                alert('Failed to create new round. Ensure courses exist.');
-            }
-        });
+        // Just navigate to the new page - do not create a DB record yet
+        router.push('/scores/new');
     };
 
     return (

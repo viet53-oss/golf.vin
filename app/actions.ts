@@ -35,14 +35,13 @@ export async function postScore(formData: FormData) {
     const differential = calculateScoreDifferential(grossScore, teeBox.rating, teeBox.slope, 0);
 
     // 1. Find or Create Round
-    // We try to find a NON-TOURNAMENT round on this date at this course
-    // If one exists, we add the player to it. If not, we create one.
-    // This allows "Post Score" to group players together implicitly.
+    // We try to find a NON-TOURNAMENT, NON-LIVE round on this date at this course
     let round = await prisma.round.findFirst({
         where: {
             date: date,
             course_id: courseId,
             is_tournament: false,
+            is_live: false
         },
     });
 
@@ -52,8 +51,18 @@ export async function postScore(formData: FormData) {
                 date: date,
                 course_id: courseId,
                 is_tournament: false,
+                is_live: false,
+                completed: true // Posted scores are always complete
             },
         });
+    } else {
+        // Ensure it is marked completed if it wasn't
+        if (!round.completed) {
+            await prisma.round.update({
+                where: { id: round.id },
+                data: { completed: true }
+            });
+        }
     }
 
     // 2. Add the Player's Score
@@ -73,7 +82,7 @@ export async function postScore(formData: FormData) {
     });
 
     // Automatically recalculate handicap for this player
-    await recalculatePlayerHandicap(playerId);
+    // await recalculatePlayerHandicap(playerId);
 
     revalidatePath('/players');
     revalidatePath('/scores');
@@ -162,34 +171,46 @@ export async function updateRound(roundId: string, data: { date: string; name?: 
 }
 
 export async function deleteRound(roundId: string) {
-    // 1. Find all round players to delete their scores
-    const roundPlayers = await prisma.roundPlayer.findMany({
-        where: { round_id: roundId },
-        select: { id: true }
-    });
-
-    // 2. Delete all scores for these players
-    if (roundPlayers.length > 0) {
-        await prisma.score.deleteMany({
-            where: {
-                round_player_id: {
-                    in: roundPlayers.map(rp => rp.id)
-                }
-            }
+    try {
+        // 1. Delete associated MoneyEvents
+        await prisma.moneyEvent.deleteMany({
+            where: { round_id: roundId }
         });
+
+        // 2. Find all round players to delete their scores
+        const roundPlayers = await prisma.roundPlayer.findMany({
+            where: { round_id: roundId },
+            select: { id: true }
+        });
+
+        // 3. Delete all scores for these players
+        if (roundPlayers.length > 0) {
+            // Delete scores first
+            await prisma.score.deleteMany({
+                where: {
+                    round_player_id: {
+                        in: roundPlayers.map(rp => rp.id)
+                    }
+                }
+            });
+        }
+
+        // 4. Delete round players
+        await prisma.roundPlayer.deleteMany({
+            where: { round_id: roundId },
+        });
+
+        // 5. Delete the round itself
+        await prisma.round.delete({
+            where: { id: roundId },
+        });
+
+        revalidatePath('/scores');
+        revalidatePath('/live');
+    } catch (error) {
+        console.error("Error deleting round:", error);
+        throw error;
     }
-
-    // 3. Delete round players
-    await prisma.roundPlayer.deleteMany({
-        where: { round_id: roundId },
-    });
-
-    // 4. Delete the round itself
-    await prisma.round.delete({
-        where: { id: roundId },
-    });
-
-    revalidatePath('/scores');
 }
 
 export async function addPlayersToRound(roundId: string, playerIds: string[]) {
@@ -381,7 +402,7 @@ export async function updatePlayerScore(
         select: { player_id: true }
     });
     if (playerInfo) {
-        await recalculatePlayerHandicap(playerInfo.player_id);
+        // await recalculatePlayerHandicap(playerInfo.player_id);
     }
 
     revalidatePath('/scores');
@@ -451,6 +472,46 @@ export async function deleteEvent(id: string) {
         where: { id },
     });
     revalidatePath('/schedule');
+}
+
+export async function createRoundWithPlayers(
+    data: { date: string; name: string; is_tournament: boolean },
+    playerIds: string[]
+) {
+    // 1. Get a default course (needed for DB constraint)
+    const defaultCourse = await prisma.course.findFirst({
+        include: { tee_boxes: true }
+    });
+    if (!defaultCourse) {
+        throw new Error('No courses found.');
+    }
+
+    // 2. Create the round
+    const round = await prisma.round.create({
+        data: {
+            date: data.date, // Expecting full ISO string or YYYY-MM-DD
+            course_id: defaultCourse.id,
+            name: data.name,
+            is_tournament: data.is_tournament,
+        },
+    });
+
+    // 3. Add players if any
+    if (playerIds.length > 0) {
+        const defaultTee = defaultCourse.tee_boxes.find(t => t.name === 'White') || defaultCourse.tee_boxes[0];
+
+        await prisma.roundPlayer.createMany({
+            data: playerIds.map(pid => ({
+                round_id: round.id,
+                player_id: pid,
+                gross_score: null,
+                tee_box_id: defaultTee?.id
+            })),
+        });
+    }
+
+    revalidatePath('/scores');
+    return round.id;
 }
 
 

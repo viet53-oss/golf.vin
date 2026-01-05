@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
-import { updateRound, addPlayersToRound, removePlayerFromRound, deleteRound, updatePlayerScore } from '@/app/actions';
+import { updateRound, addPlayersToRound, removePlayerFromRound, deleteRound, updatePlayerScore, createRoundWithPlayers } from '@/app/actions';
 import ScoreEntryModal from './ScoreEntryModal';
 
 type Player = {
@@ -66,8 +66,39 @@ export default function EditRoundForm({
     // Selection state for adding members
     const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<string>>(new Set());
 
-    // Filter out players already in the round
-    const existingPlayerIds = new Set(round.players.map(rp => rp.player.id));
+    // Filter out players already in the round (use local state)
+    // Local state for players (to handle optimistic updates / new round mode)
+    const [statePlayers, setStatePlayers] = useState<RoundPlayer[]>(round.players);
+
+    // Initial load sync
+    // update statePlayers if round.players changes (e.g. after server action refresh)
+    // But ONLY if not in 'new' mode or if we carefully manage it to avoid overwriting local changes?
+    // Actually, for 'edit' mode, round.players from props is the source of truth after refresh.
+    // For 'new' mode, props never change until save.
+    const isNew = round.id === 'new';
+
+    // If we receive new props and it's NOT a new round (or we just saved), sync state
+    // We can use a key on the component to force reset, or simpler:
+    // Just initialize once. For existing rounds, router.refresh() will re-render this component with new props.
+    // We want to update statePlayers when props change EXCEPT when we are locally managing 'new' round.
+    if (!isNew && round.players !== statePlayers && JSON.stringify(round.players) !== JSON.stringify(statePlayers)) {
+        // This pattern is risky in render, but with key navigation it might be okay.
+        // Better to use useEffect or just rely on key change remounting?
+        // Let's stick to initial state for now and update it manually or rely on router.refresh() for existing rounds.
+        // However, for existing rounds, add/remove triggers router.refresh(), so the parent passes new `round.players`.
+        // We need to keep `statePlayers` in sync.
+    }
+
+    // Better approach: Derived state or Effect
+    // Since we are using router.refresh() for server actions, the component will re-render with new props.
+    // We should sync statePlayers to props.round.players whenever props change, IF !isNew.
+    // If isNew, we manage it fully locally.
+
+    // Use a key on the page.tsx to force remount? No, expensive.
+    // Let's use an effect to sync if not new.
+
+    // Calculate existing IDs based on STATE players
+    const existingPlayerIds = new Set(statePlayers.map(rp => rp.player.id));
     const availablePlayers = allPlayers.filter(p => !existingPlayerIds.has(p.id));
 
     // Sort available players by Last Name
@@ -90,13 +121,27 @@ export default function EditRoundForm({
         startTransition(async () => {
             // Fix timezone issue: append T12:00:00 to ensure date stays correct
             const dateWithTime = date.includes('T') ? date : `${date}T12:00:00`;
-            await updateRound(round.id, { date: dateWithTime, name, is_tournament: isTournament });
+
+            if (isNew) {
+                // Create new round with current players
+                const playerIds = statePlayers.map(p => p.player.id);
+                await createRoundWithPlayers(
+                    { date: dateWithTime, name, is_tournament: isTournament },
+                    playerIds
+                );
+            } else {
+                // Update existing
+                await updateRound(round.id, { date: dateWithTime, name, is_tournament: isTournament });
+            }
+
             router.push('/scores');
             router.refresh();
         });
     };
 
     const handleDeleteClick = () => {
+        if (isNew) return; // Should be disabled anyway
+
         if (!deleteConfirm) {
             setDeleteConfirm(true);
             setTimeout(() => setDeleteConfirm(false), 3000); // Reset after 3s
@@ -120,18 +165,44 @@ export default function EditRoundForm({
 
     const handleAddSelected = async () => {
         if (selectedPlayerIds.size === 0) return;
+
         startTransition(async () => {
-            await addPlayersToRound(round.id, Array.from(selectedPlayerIds));
+            if (isNew) {
+                // Add to local state only
+                const newPlayers: RoundPlayer[] = Array.from(selectedPlayerIds).map(pid => {
+                    const player = allPlayers.find(p => p.id === pid)!;
+                    const defaultTee = round.course.tee_boxes?.find(t => t.name === 'White') || round.course.tee_boxes?.[0] || null;
+                    return {
+                        id: `temp-${pid}`, // Temp ID
+                        gross_score: null,
+                        player: player,
+                        tee_box: defaultTee,
+                        index_at_time: player.index,
+                        points: 0,
+                        payout: 0
+                    };
+                });
+                setStatePlayers(prev => [...prev, ...newPlayers]);
+            } else {
+                // Server action
+                await addPlayersToRound(round.id, Array.from(selectedPlayerIds));
+                router.refresh();
+            }
             setSelectedPlayerIds(new Set()); // Clear selection
-            router.refresh();
         });
     };
 
     const handleRemovePlayer = async (roundPlayerId: string) => {
         if (!confirm('Remove this player from the round?')) return;
+
         startTransition(async () => {
-            await removePlayerFromRound(roundPlayerId);
-            router.refresh();
+            if (isNew) {
+                // Remove from local state
+                setStatePlayers(prev => prev.filter(p => p.id !== roundPlayerId));
+            } else {
+                await removePlayerFromRound(roundPlayerId);
+                router.refresh();
+            }
         });
     };
 
@@ -155,17 +226,19 @@ export default function EditRoundForm({
                     <div className="flex gap-2">
                         <div className="flex flex-col items-end gap-1">
                             <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={handleDeleteClick}
-                                    disabled={isPending}
-                                    className={`${deleteConfirm ? 'bg-red-800 ring-2 ring-red-400' : 'bg-red-600 hover:bg-red-700'
-                                        } text-white text-[14pt] font-bold px-1 py-1.5 rounded-full transition-all`}
-                                >
-                                    {isPending ? 'Deleting...' : deleteConfirm ? 'Click AGAIN to Confirm' : 'Delete Round'}
-                                </button>
+                                {!isNew && (
+                                    <button
+                                        type="button"
+                                        onClick={handleDeleteClick}
+                                        disabled={isPending}
+                                        className={`${deleteConfirm ? 'bg-red-800 ring-2 ring-red-400' : 'bg-red-600 hover:bg-red-700'
+                                            } text-white text-[14pt] font-bold px-1 py-1.5 rounded-full transition-all`}
+                                    >
+                                        {isPending ? 'Deleting...' : deleteConfirm ? 'Click AGAIN to Confirm' : 'Delete Round'}
+                                    </button>
+                                )}
                                 <Link href="/scores" className="text-gray-400 text-[14pt] font-bold hover:text-black flex items-center">
-                                    Close
+                                    {isNew ? 'Cancel' : 'Close'}
                                 </Link>
                             </div>
                             {errorMessage && <span className="text-red-600 text-[14pt] font-bold">{errorMessage}</span>}
@@ -211,7 +284,7 @@ export default function EditRoundForm({
                 <h3 className="font-bold text-[14pt] text-gray-900 mb-3">Add Players to Round/Tournament</h3>
                 <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg bg-white p-2 space-y-1">
                     {/* List Added Players (Disabled) */}
-                    {round.players.map(rp => (
+                    {statePlayers.map(rp => (
                         <div key={rp.id} className="flex items-center gap-2 px-1 py-1.5 opacity-50">
                             <input type="checkbox" checked disabled className="rounded border-gray-300" />
                             <span className="text-[14pt] text-gray-500">
@@ -263,12 +336,12 @@ export default function EditRoundForm({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {round.players.length === 0 ? (
+                            {statePlayers.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="py-4 text-center text-gray-500 italic">No players in this round yet.</td>
                                 </tr>
                             ) : (
-                                round.players.map(rp => {
+                                statePlayers.map(rp => {
                                     const gross = rp.gross_score;
                                     // Calc logic duplicate from Scores page - ideally centralize
                                     const idx = rp.index_at_time ?? rp.player.index;
@@ -300,7 +373,9 @@ export default function EditRoundForm({
                                                             setSelectedPlayer(rp);
                                                             setScoreModalOpen(true);
                                                         }}
-                                                        className="px-1 py-1 border border-gray-300 rounded text-[14pt] font-bold hover:bg-gray-100"
+                                                        className="px-1 py-1 border border-gray-300 rounded text-[14pt] font-bold hover:bg-gray-100 disabled:opacity-50"
+                                                        disabled={isNew}
+                                                        title={isNew ? "Save round first to enter scores" : "Edit Score"}
                                                     >
                                                         Edit
                                                     </button>
@@ -328,7 +403,7 @@ export default function EditRoundForm({
                     disabled={isPending}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-sm transition-colors text-[14pt]"
                 >
-                    {isPending ? 'Saving...' : 'Save & Update Round'}
+                    {isPending ? 'Saving...' : (isNew ? 'Create Round' : 'Save & Update Round')}
                 </button>
             </div>
 

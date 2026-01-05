@@ -1,15 +1,21 @@
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
 import LiveScoreClient from './LiveScoreClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export default async function LiveScorePage() {
-    const cookieStore = await cookies();
-    const isAdmin = cookieStore.get('admin_session')?.value === 'true';
+    // Get default course (City Park North)
+    const defaultCourse = await prisma.course.findFirst({
+        where: { name: 'City Park North' },
+        include: {
+            tee_boxes: true,
+            holes: { orderBy: { hole_number: 'asc' } }
+        }
+    });
 
-    // Get all players in the club for selection
+    // Get all players with tee preference
     const allPlayers = await prisma.player.findMany({
         orderBy: { name: 'asc' },
         select: {
@@ -20,43 +26,22 @@ export default async function LiveScorePage() {
         }
     });
 
-    // Get all rounds (only live ones)
-    const rounds = await prisma.round.findMany({
-        where: { is_live: true },
-        orderBy: { date: 'desc' },
+    // Get active live round (latest created)
+    const activeRound = await prisma.liveRound.findFirst({
+        orderBy: { created_at: 'desc' },
         include: {
-            course: {
-                include: {
-                    holes: {
-                        orderBy: { hole_number: 'asc' }
-                    },
-                    tee_boxes: true
-                }
-            },
             players: {
                 include: {
-                    scores: true
+                    player: true,
+                    scores: {
+                        include: {
+                            hole: true
+                        }
+                    }
                 }
             }
         }
     });
 
-    // Get all courses (for round creation)
-    const courses = await prisma.course.findMany({
-        orderBy: { name: 'asc' },
-        include: {
-            holes: {
-                orderBy: { hole_number: 'asc' }
-            }
-        }
-    });
-
-    return (
-        <LiveScoreClient
-            rounds={rounds}
-            allPlayers={allPlayers}
-            courses={courses}
-            isAdmin={isAdmin}
-        />
-    );
+    return <LiveScoreClient allPlayers={allPlayers} defaultCourse={defaultCourse} initialRound={activeRound} />;
 }

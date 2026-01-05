@@ -54,3 +54,34 @@ export async function updateCourse(
     revalidatePath(`/settings/course/${courseId}/edit`);
     redirect(`/settings/course/${courseId}`);
 }
+
+export async function deleteCourse(courseId: string) {
+    // 1. Check for rounds
+    const roundsCount = await prisma.round.count({
+        where: { course_id: courseId }
+    });
+
+    const liveRoundsCount = await prisma.liveRound.count({
+        where: { course_id: courseId }
+    });
+
+    if (roundsCount > 0 || liveRoundsCount > 0) {
+        return { success: false, error: `Cannot delete course with ${roundsCount} rounds and ${liveRoundsCount} live rounds associated.` };
+    }
+
+    try {
+        // 2. Delete dependencies first (Holes, TeeBoxes)
+        // Prisma cascade might handle this, but being explicit is safe
+        await prisma.hole.deleteMany({ where: { course_id: courseId } });
+        await prisma.teeBox.deleteMany({ where: { course_id: courseId } });
+
+        // 3. Delete Course
+        await prisma.course.delete({ where: { id: courseId } });
+
+        revalidatePath('/settings');
+        return { success: true };
+    } catch (e) {
+        console.error('Failed to delete course:', e);
+        return { success: false, error: 'Failed to delete course' };
+    }
+}

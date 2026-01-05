@@ -8,6 +8,10 @@ import { calculateHandicap, HandicapInput } from '@/lib/handicap';
  * This is more efficient than recalculating all players
  */
 export async function recalculatePlayerHandicap(playerId: string) {
+    // DEBUG: Stop execution to prove if this is being called
+    console.error("!!! RECALCULATE TRIGGERED !!!");
+    // throw new Error("DEBUG: Recalculate Player Handicap was TRIGGERED! Please tell the developer.");
+
     try {
         // Fetch player with all rounds
         const player = await prisma.player.findUnique({
@@ -33,8 +37,23 @@ export async function recalculatePlayerHandicap(playerId: string) {
             | { type: 'v3'; date: string; id: string; score: number; rating: number; slope: number; timestamp: number }
             | { type: 'v2'; date: string; id: string; differential: number; timestamp: number };
 
-        const v3Rounds: HistoryItem[] = player.rounds
-            .filter((r: any) => r.tee_box && (r.adjusted_gross_score || r.gross_score) && r.round.completed === true) // Only completed rounds
+        const v3RoundsRaw = player.rounds;
+        console.log(`[Recalc] Player ${player.name} has ${v3RoundsRaw.length} raw rounds.`);
+
+        const v3Rounds: HistoryItem[] = v3RoundsRaw
+            .filter((r: any) => {
+                const isComplete = r.round.completed === true;
+                const isNotLive = r.round.is_live !== true;  // Exclude live rounds (include false and null)
+                const score = r.adjusted_gross_score || r.gross_score;
+                const isHighEnough = score > 60;
+
+                if (!isComplete) console.log(`[Recalc] Skipping round ${r.round.date} (Incomplete)`);
+                else if (!isNotLive) console.log(`[Recalc] Skipping round ${r.round.date} (Live round)`);
+                else if (!isHighEnough) console.log(`[Recalc] Skipping round ${r.round.date} (Score too low: ${score})`);
+                else console.log(`[Recalc] INCLUDING round ${r.round.date} (Score: ${score})`);
+
+                return r.tee_box && score && isComplete && isNotLive && isHighEnough;
+            })
             .map((r: any) => ({
                 type: 'v3',
                 date: r.round.date,

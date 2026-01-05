@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Player {
     id: string;
@@ -21,6 +21,13 @@ export function LivePlayerSelectionModal({
     onClose: () => void;
 }) {
     const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedIds);
+
+    // Sync local state with prop when modal opens or prop updates
+    useEffect(() => {
+        if (isOpen) {
+            setLocalSelectedIds(selectedIds);
+        }
+    }, [isOpen, selectedIds]);
 
     if (!isOpen) return null;
 

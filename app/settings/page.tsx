@@ -7,6 +7,7 @@ import MetaTagEditor from './MetaTagEditor';
 import AppLogicButton from './AppLogicButton';
 import { prisma } from '@/lib/prisma';
 import ManualScoreForm from './ManualScoreForm';
+import DeleteCourseButton from '@/components/DeleteCourseButton';
 
 // Native SVG components for settings/page.tsx
 const SettingsIcon = ({ className }: { className?: string }) => (
@@ -70,7 +71,10 @@ export default async function SettingsPage() {
     const courses = await prisma.course.findMany({
         include: {
             tee_boxes: true,
-            holes: true
+            holes: true,
+            _count: {
+                select: { rounds: true, live_rounds: true }
+            }
         },
         orderBy: { name: 'asc' }
     });
@@ -145,19 +149,32 @@ export default async function SettingsPage() {
                         <h2 className="font-bold text-gray-900 text-[14pt]">Courses</h2>
                     </div>
                     <div className="p-3 space-y-4">
-                        {courses.map((course: any) => (
-                            <div key={course.id} className="border border-gray-200 rounded-lg p-3 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-                                <h3 className="font-bold text-[14pt]">{course.name}</h3>
-                                <div className="flex items-center gap-2 w-full md:w-auto">
-                                    <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] text-center hover:bg-gray-800 transition-colors active:scale-95">
-                                        View
-                                    </Link>
-                                    <Link href={`/settings/course/${course.id}/edit`} className="bg-white border border-gray-200 text-gray-700 px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
-                                        Edit
-                                    </Link>
+                        {courses.map((course: any) => {
+                            const canDelete = course._count.rounds === 0 && course._count.live_rounds === 0;
+                            return (
+                                <div key={course.id} className="border border-gray-200 rounded-lg p-3 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+                                    <div>
+                                        <h3 className="font-bold text-[14pt]">{course.name}</h3>
+                                        {!canDelete && (
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {course._count.rounds} Rounds • {course._count.live_rounds} Live
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2 w-full md:w-auto">
+                                        <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none bg-black text-white px-3 py-2 rounded-lg font-bold text-[14pt] text-center hover:bg-gray-800 transition-colors active:scale-95">
+                                            View
+                                        </Link>
+                                        <Link href={`/settings/course/${course.id}/edit`} className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-lg font-bold text-[14pt] hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
+                                            Edit
+                                        </Link>
+                                        {canDelete && (
+                                            <DeleteCourseButton courseId={course.id} canDelete={true} />
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {courses.length === 0 && (
                             <div className="text-center py-8 text-gray-500 text-[14pt]">No courses found.</div>
                         )}

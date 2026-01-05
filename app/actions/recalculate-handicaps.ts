@@ -8,43 +8,44 @@ export async function recalculateAllHandicaps() {
     try {
         console.log('🚀 Starting Full Handicap Recalculation...');
 
-        // 0. Fix Tee Box Assignments First
-        console.log('🔧 Fixing tee box assignments...');
+        // 0. Fix Round Completion Status & Tee Box Assignments
+        console.log('🔧 Fixing round completion status & tee box assignments...');
 
-        // Get all tee boxes
-        const teeBoxes = await prisma.teeBox.findMany({
-            where: { course: { name: 'City Park North' } }
+        // Auto-complete non-live rounds that are marked incomplete (Fix for older data/posted scores)
+        await prisma.round.updateMany({
+            where: {
+                is_live: false,
+                completed: false
+            },
+            data: { completed: true }
         });
 
-        const teeBoxMap = new Map(teeBoxes.map(tb => [tb.name.toLowerCase(), tb.id]));
+        // B. SAFETY: Un-complete any round with suspiciously low scores (likely partial live rounds marked complete)
+        // A score < 25 is practically impossible for 9/18 holes. This catches "1 hole scored" partials.
 
-        // Fix rounds where tee box doesn't match player's preference
-        const allPlayers = await prisma.player.findMany({
-            where: { preferred_tee_box: { not: null } },
-            include: {
-                rounds: {
-                    include: { tee_box: true }
+        // We need to find RoundPlayers that are linked to COMPLETED, NON-LIVE rounds but have partial scores
+        const partialRoundPlayers = await prisma.roundPlayer.findMany({
+            where: {
+                gross_score: { lt: 60, not: null }, // Catch partial rounds (Score < 60 is suspicious for amateur 18 holes)
+                round: {
+                    completed: true,
+                    is_live: { not: true }  // ⚠️ CRITICAL: Exclude live rounds from this check (includes null)
                 }
-            }
+            },
+            select: { round_id: true }
         });
 
-        let teeBoxFixCount = 0;
-        for (const player of allPlayers) {
-            const preferredTeeId = teeBoxMap.get(player.preferred_tee_box!.toLowerCase());
-            if (!preferredTeeId) continue;
-
-            for (const round of player.rounds) {
-                if (round.tee_box_id !== preferredTeeId) {
-                    await prisma.roundPlayer.update({
-                        where: { id: round.id },
-                        data: { tee_box_id: preferredTeeId }
-                    });
-                    teeBoxFixCount++;
-                }
-            }
+        if (partialRoundPlayers.length > 0) {
+            console.log(`⚠️ Found ${partialRoundPlayers.length} partial rounds marked complete. Fixing...`);
+            const uniqueRoundIds = [...new Set(partialRoundPlayers.map(r => r.round_id))];
+            await prisma.round.updateMany({
+                where: { id: { in: uniqueRoundIds } },
+                data: { completed: false }
+            });
+            console.log(`✅ Reset ${uniqueRoundIds.length} rounds to Incomplete.`);
         }
 
-        console.log(`✅ Fixed ${teeBoxFixCount} tee box assignments`);
+        console.log('✅ Integrity checks passed.');
 
         // 1. Fetch all players
         const players = await prisma.player.findMany({
@@ -66,7 +67,7 @@ export async function recalculateAllHandicaps() {
                     | { type: 'v2'; date: string; id: string; differential: number; timestamp: number };
 
                 const v3Rounds: HistoryItem[] = player.rounds
-                    .filter((r: any) => r.tee_box && r.round.completed === true) // Only include completed rounds
+                    .filter((r: any) => r.tee_box && r.round.completed === true && r.round.is_live !== true) // ⚠️ CRITICAL: Only completed, NON-LIVE rounds (includes null)
                     .map((r: any) => ({
                         type: 'v3',
                         date: r.round.date,
