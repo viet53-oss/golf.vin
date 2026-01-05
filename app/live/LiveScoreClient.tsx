@@ -540,7 +540,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         </div>
                                                     </div>
 
-                                                    <div className="flex gap-4 items-center">
+                                                    <div className="flex gap-4 items-end">
                                                         <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
                                                             {toParStr}
                                                         </div>
