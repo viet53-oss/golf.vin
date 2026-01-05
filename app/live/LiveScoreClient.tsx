@@ -120,6 +120,21 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
         return 1;
     });
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // Check admin status
+    useEffect(() => {
+        const checkAdmin = () => {
+            const adminCookie = Cookies.get('admin_session');
+            setIsAdmin(adminCookie === 'true');
+        };
+
+        checkAdmin();
+
+        // Listen for admin status changes
+        window.addEventListener('admin-change', checkAdmin);
+        return () => window.removeEventListener('admin-change', checkAdmin);
+    }, []);
 
     // Auto-select next available hole for the specific group
     useEffect(() => {
