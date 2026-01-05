@@ -375,11 +375,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     const isActive = activeHole === hole.hole_number;
 
                                     // Determine styling
-                                    let btnClass = "bg-gray-600 text-white hover:bg-gray-700"; // Default (Dark Gray)
+                                    let btnClass = "bg-white text-black border border-gray-200 hover:bg-gray-50"; // Default (Blank on White)
                                     if (isActive) {
-                                        btnClass = "bg-green-600 text-white shadow-md scale-105 z-10";
+                                        btnClass = "bg-[#059669] text-white shadow-md scale-105 z-10";
                                     } else if (isSaved) {
-                                        btnClass = "bg-gray-800 text-white border-2 border-gray-700 shadow-sm";
+                                        btnClass = "bg-gray-400 text-white border border-gray-400 shadow-sm";
                                     }
 
                                     return (
