@@ -541,14 +541,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     </div>
 
                                                     <div className="flex gap-4 text-center">
+                                                        <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
+                                                            {toParStr}
+                                                        </div>
                                                         <div>
                                                             <div className="text-[14pt] opacity-80 font-bold tracking-wider">GRS</div>
-                                                            <div className="flex items-center justify-center gap-1">
-                                                                <div className="text-[14pt] font-bold leading-none">{p.totalGross}</div>
-                                                                <div className={`font-bold rounded px-1 h-6 flex items-center justify-center text-[12pt] min-w-[2rem] bg-white ${toParClass}`}>
-                                                                    {toParStr}
-                                                                </div>
-                                                            </div>
+                                                            <div className="text-[14pt] font-bold leading-none">{p.totalGross}</div>
                                                         </div>
                                                         <div>
                                                             <div className="text-[14pt] opacity-80 font-bold tracking-wider">HCP</div>
