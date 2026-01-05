@@ -12,6 +12,11 @@ const ScorecardModal = dynamic(() => import('./ScorecardModal').then(mod => ({ d
     loading: () => null
 });
 
+const PoolModal = dynamic(() => import('./PoolModal').then(mod => mod.PoolModal), {
+    ssr: false,
+    loading: () => null
+});
+
 // Custom SVG Icons to bypass Lucide/Turbopack HMR bug
 const TrophyIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -85,6 +90,7 @@ export default function ScoresDashboard({
     // Modal State
     const [selectedScorecard, setSelectedScorecard] = useState<any>(null);
     const [isLoadingScorecard, setIsLoadingScorecard] = useState<string | null>(null); // Stores ID of loading scorecard
+    const [selectedPoolRoundId, setSelectedPoolRoundId] = useState<string | null>(null);
 
     const visibleRounds = rounds.slice(0, visibleCount);
     const hasMore = visibleCount < rounds.length;
@@ -340,12 +346,12 @@ export default function ScoresDashboard({
                                 </div>
                                 <div className="flex gap-2 items-center">
                                     {round.players.some(p => p.in_pool) && (
-                                        <Link
-                                            href={`/pool?roundId=${round.id}`}
+                                        <button
+                                            onClick={() => setSelectedPoolRoundId(round.id)}
                                             className="px-1 py-1.5 sm:py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
                                         >
                                             $5 Pool
-                                        </Link>
+                                        </button>
                                     )}
                                     {isAdmin && (
                                         <>
@@ -573,8 +579,14 @@ export default function ScoresDashboard({
                     />
                 )
             }
+            {/* Pool Modal */}
+            {selectedPoolRoundId && (
+                <PoolModal
+                    roundId={selectedPoolRoundId}
+                    isOpen={!!selectedPoolRoundId}
+                    onClose={() => setSelectedPoolRoundId(null)}
+                />
+            )}
         </div >
     );
 }
-
-
