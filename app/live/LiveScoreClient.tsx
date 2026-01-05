@@ -373,16 +373,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         <div className="flex items-center gap-4">
                                             <button
                                                 onClick={() => updateScore(player.id, false)}
-                                                className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[22pt]"
+                                                className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[25pt]"
                                             >
                                                 -
                                             </button>
-                                            <div className="w-12 text-center font-bold text-[22pt] text-gray-800">
+                                            <div className="w-12 text-center font-bold text-[25pt] text-gray-800">
                                                 {score || <span className="text-gray-800">{activeHolePar}</span>}
                                             </div>
                                             <button
                                                 onClick={() => updateScore(player.id, true)}
-                                                className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[22pt]"
+                                                className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[25pt]"
                                             >
                                                 +
                                             </button>
