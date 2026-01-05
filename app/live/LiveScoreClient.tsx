@@ -629,12 +629,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                                         return (
                                                             <div key={num} className={`
-                                                            flex flex-col items-center justify-center p-1 h-14 border-r border-gray-100 last:border-r-0 relative
-                                                            ${bgClass}
+                                                            flex flex-col items-center justify-center p-1 h-14 border-r border-gray-100 last:border-r-0 relative bg-white
                                                             ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
                                                         `}>
                                                                 <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                                <div className={`text-[14pt] font-bold ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                                     {score || '-'}
                                                                 </div>
                                                             </div>
@@ -663,12 +662,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                                         return (
                                                             <div key={num} className={`
-                                                            flex flex-col items-center justify-center p-1 h-14 border-r border-gray-100 last:border-r-0 relative
-                                                            ${bgClass}
+                                                            flex flex-col items-center justify-center p-1 h-14 border-r border-gray-100 last:border-r-0 relative bg-white
                                                             ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
                                                         `}>
                                                                 <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                                <div className={`text-[14pt] font-bold ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                                     {score || '-'}
                                                                 </div>
                                                             </div>
