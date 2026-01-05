@@ -402,6 +402,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     onClose={() => setIsPlayerModalOpen(false)}
                     allPlayers={allPlayers}
                     selectedIds={selectedPlayers.map(p => p.id)}
+                    playersInRound={initialRound?.players?.map((p: any) => p.player.id) || []}
                     onSelectionChange={handleAddPlayers}
                 />
 
@@ -461,64 +462,70 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     {/* Player Scoring Rows */}
                     {selectedPlayers.length > 0 ? (
                         <div className="space-y-1">
-                            {selectedPlayers.map(player => {
-                                const score = getScore(player.id, activeHole);
-                                // Calculate Totals for To Par
-                                const pScores = scores.get(player.id);
-                                let totalScore = 0;
-                                let totalScoredPar = 0;
-                                if (pScores) {
-                                    pScores.forEach((strokes, hNum) => {
-                                        totalScore += strokes;
-                                        const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
-                                        totalScoredPar += hPar;
-                                    });
-                                }
-                                const diff = totalScore - totalScoredPar;
-                                let toParStr = "E";
-                                let toParClass = "text-green-600";
-                                if (diff > 0) {
-                                    toParStr = `+${diff}`;
-                                    toParClass = "text-gray-900";
-                                } else if (diff < 0) {
-                                    toParStr = `${diff}`;
-                                    toParClass = "text-red-600";
-                                }
+                            {[...selectedPlayers]
+                                .sort((a, b) => {
+                                    const firstA = splitName(a.name).first.toLowerCase();
+                                    const firstB = splitName(b.name).first.toLowerCase();
+                                    return firstA.localeCompare(firstB);
+                                })
+                                .map(player => {
+                                    const score = getScore(player.id, activeHole);
+                                    // Calculate Totals for To Par
+                                    const pScores = scores.get(player.id);
+                                    let totalScore = 0;
+                                    let totalScoredPar = 0;
+                                    if (pScores) {
+                                        pScores.forEach((strokes, hNum) => {
+                                            totalScore += strokes;
+                                            const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
+                                            totalScoredPar += hPar;
+                                        });
+                                    }
+                                    const diff = totalScore - totalScoredPar;
+                                    let toParStr = "E";
+                                    let toParClass = "text-green-600";
+                                    if (diff > 0) {
+                                        toParStr = `+${diff}`;
+                                        toParClass = "text-gray-900";
+                                    } else if (diff < 0) {
+                                        toParStr = `${diff}`;
+                                        toParClass = "text-red-600";
+                                    }
 
-                                const courseHcp = getCourseHandicap(player);
+                                    const courseHcp = getCourseHandicap(player);
 
-                                return (
-                                    <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
-                                        <div className="flex flex-col">
-                                            <div className="flex flex-col items-start">
-                                                <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
-                                                <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
+                                    return (
+                                        <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
+                                            <div className="flex flex-col">
+                                                <div className="flex flex-col items-start">
+                                                    <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                    <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                {canUpdate && (
+                                                    <button
+                                                        onClick={() => updateScore(player.id, false)}
+                                                        className="w-10 h-10 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
+                                                    >
+                                                        -
+                                                    </button>
+                                                )}
+                                                <div className="w-16 text-center font-bold text-[30pt] text-gray-800">
+                                                    {score || <span className="text-gray-800">{activeHolePar}</span>}
+                                                </div>
+                                                {canUpdate && (
+                                                    <button
+                                                        onClick={() => updateScore(player.id, true)}
+                                                        className="w-10 h-10 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
+                                                    >
+                                                        +
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            {canUpdate && (
-                                                <button
-                                                    onClick={() => updateScore(player.id, false)}
-                                                    className="w-10 h-10 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
-                                                >
-                                                    -
-                                                </button>
-                                            )}
-                                            <div className="w-16 text-center font-bold text-[30pt] text-gray-800">
-                                                {score || <span className="text-gray-800">{activeHolePar}</span>}
-                                            </div>
-                                            {canUpdate && (
-                                                <button
-                                                    onClick={() => updateScore(player.id, true)}
-                                                    className="w-10 h-10 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[14pt]"
-                                                >
-                                                    +
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
                         </div>
                     ) : (
                         <div className="text-center py-8 text-gray-400">
