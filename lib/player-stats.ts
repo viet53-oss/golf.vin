@@ -52,33 +52,34 @@ export function calculatePlayerStats(
     par: number
 ): PlayerStats {
     const idxBefore = rp.index_at_time ?? rp.player?.index ?? 0;
-    
-    // Override with preferred tee box if available
-    let preferredTee = null;
-    if (rp.player?.preferred_tee_box && course.tee_boxes) {
-        preferredTee = course.tee_boxes.find((tb) =>
+
+    // Use assigned tee box first, fall back to player's preferred tee if missing
+    let activeTee = rp.tee_box;
+
+    if (!activeTee && rp.player?.preferred_tee_box && course.tee_boxes) {
+        activeTee = course.tee_boxes.find((tb) =>
             tb.name.toLowerCase() === rp.player.preferred_tee_box!.toLowerCase()
-        );
+        ) || null;
     }
-    
-    const slope = preferredTee?.slope ?? rp.tee_box?.slope ?? 113;
-    const rating = preferredTee?.rating ?? rp.tee_box?.rating ?? par;
+
+    const slope = activeTee?.slope ?? 113;
+    const rating = activeTee?.rating ?? par;
     const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
     const netTotal = (rp.gross_score ?? 999) - courseHandicap;
-    
+
     // Calculate Gross Hole Scores for Tie Breaker (sorted by difficulty)
     const scores = rp.scores || [];
     const grossHoleScores = scores.map((s) => {
         const h = s.hole;
         const diff = h?.difficulty || 18;
-        
+
         return {
             holeNumber: h?.hole_number || 0,
             difficulty: diff,
             grossScore: s.strokes
         };
     }).sort((a, b) => a.difficulty - b.difficulty);
-    
+
     return { courseHandicap, netTotal, slope, rating, grossHoleScores };
 }
 
@@ -95,9 +96,9 @@ export function calculateCourseHandicapAfter(
     if (typeof indexAfter !== 'number') {
         return Math.round((indexBefore * (slope / 113)) + (rating - par));
     }
-    
+
     const calculated = Math.round((indexAfter * (slope / 113)) + (rating - par));
-    return isNaN(calculated) 
+    return isNaN(calculated)
         ? Math.round((indexBefore * (slope / 113)) + (rating - par))
         : calculated;
 }
@@ -113,24 +114,24 @@ export function comparePlayers(
 ): number {
     const statsA = calculatePlayerStats(a, course, par);
     const statsB = calculatePlayerStats(b, course, par);
-    
+
     // 1. Primary: Net Score
     if (statsA.netTotal !== statsB.netTotal) {
         return statsA.netTotal - statsB.netTotal;
     }
-    
+
     // 2. Tie Breaker: Hardest Holes by Gross Score (1, 2, 3...)
     const aHoles = statsA.grossHoleScores;
     const bHoles = statsB.grossHoleScores;
-    
+
     if (aHoles.length === 0 || bHoles.length === 0) return 0;
-    
+
     // Find first difference in hole score (sorted by difficulty)
     for (let i = 0; i < Math.min(aHoles.length, bHoles.length); i++) {
         if (aHoles[i].grossScore !== bHoles[i].grossScore) {
             return aHoles[i].grossScore - bHoles[i].grossScore;
         }
     }
-    
+
     return 0;
 }
