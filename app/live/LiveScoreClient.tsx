@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
-import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, syncLiveRoundPlayers } from '@/app/actions/create-live-round';
+import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound } from '@/app/actions/create-live-round';
 
 interface Player {
     id: string;
@@ -472,25 +472,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     Select Course
                                 </button>
                             )}
-                            {isAdmin && liveRoundId && (
-                                <button
-                                    onClick={async () => {
-                                        if (confirm('Reassign all players to their preferred tee boxes and recalculate handicaps?')) {
-                                            const res = await syncLiveRoundPlayers(liveRoundId);
-                                            if (res.success) {
-                                                alert('Sync complete!');
-                                                router.refresh();
-                                            } else {
-                                                alert('Sync failed: ' + res.error);
-                                            }
-                                        }
-                                    }}
-                                    className="bg-orange-600 text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-orange-700 active:scale-95 transition-all outline-none"
-                                    title="Sync Players to Preferred Tees"
-                                >
-                                    Sync Tees
-                                </button>
-                            )}
+
                             {isAdmin && (
                                 <button
                                     onClick={async () => {

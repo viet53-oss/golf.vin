@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import RecalculateButton from './RecalculateButton';
 import FixLowIndexButton from './FixLowIndexButton';
+import SyncTeesButton from './SyncTeesButton';
 import BackupManager from './BackupManager';
 import MetaTagEditor from './MetaTagEditor';
 import AppLogicButton from './AppLogicButton';
@@ -121,6 +122,13 @@ export default async function SettingsPage() {
                                 If all handicaps are showing as 0, click this button to reset the low handicap indexes.
                             </p>
                             <FixLowIndexButton />
+                        </div>
+                        <div className="pt-2 border-t border-gray-200">
+                            <p className="text-[14pt] text-blue-600 font-bold mb-2">🔄 Tee Box Correction</p>
+                            <p className="text-[14pt] text-gray-500 mb-3">
+                                If you changed course tee definitions, use this to re-align all historical rounds to each player's preferred tee (White, Gold, etc.).
+                            </p>
+                            <SyncTeesButton />
                         </div>
                     </div>
                 </div>
