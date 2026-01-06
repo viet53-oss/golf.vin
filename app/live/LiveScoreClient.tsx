@@ -425,8 +425,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
                                 )}
                             </div>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[14pt] text-gray-500 mt-1">
-                                <span>Date: {initialRound?.date || new Date().toLocaleDateString()}</span>
+                            <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
+                                <span>{initialRound?.date || new Date().toLocaleDateString()}</span>
                                 <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
                                 <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
                                 <span>S: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
