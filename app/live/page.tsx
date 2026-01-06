@@ -12,7 +12,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
 
     // 1. Get default course
     let defaultCourse = await prisma.course.findFirst({
-        where: { name: 'City Park North' },
+        where: { name: { contains: 'City Park North', mode: 'insensitive' } },
         include: {
             tee_boxes: true,
             holes: { orderBy: { hole_number: 'asc' } }

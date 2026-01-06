@@ -298,3 +298,68 @@ export async function getAllLiveRounds() {
         };
     }
 }
+/**
+ * Syncs all players in a live round to their preferred tee boxes based on the current course data
+ */
+export async function syncLiveRoundPlayers(liveRoundId: string) {
+    try {
+        const liveRound = await prisma.liveRound.findUnique({
+            where: { id: liveRoundId },
+            include: {
+                course: {
+                    include: {
+                        tee_boxes: true,
+                        holes: true
+                    }
+                },
+                players: {
+                    include: {
+                        player: true
+                    }
+                }
+            }
+        });
+
+        if (!liveRound) throw new Error("Live round not found");
+
+        const coursePar = liveRound.course.holes.reduce((sum, h) => sum + h.par, 0);
+
+        for (const lrPlayer of liveRound.players) {
+            const preferredTee = lrPlayer.player.preferred_tee_box;
+            if (!preferredTee) continue;
+
+            const tees = liveRound.course.tee_boxes;
+            // 1. Exact match
+            let match = tees.find(t => t.name.toLowerCase() === preferredTee.toLowerCase());
+
+            // 2. Partial match fallback
+            if (!match) {
+                match = tees.find(t => t.name.toLowerCase().includes(preferredTee.toLowerCase()));
+            }
+
+            if (match) {
+                const handicapIndex = lrPlayer.player.index || 0;
+                const courseHandicap = Math.round((handicapIndex * (match.slope / 113)) + (match.rating - coursePar));
+
+                await prisma.liveRoundPlayer.update({
+                    where: { id: lrPlayer.id },
+                    data: {
+                        tee_box_id: match.id,
+                        tee_box_name: match.name,
+                        tee_box_rating: match.rating,
+                        tee_box_slope: Math.round(match.slope),
+                        tee_box_par: coursePar,
+                        index_at_time: handicapIndex,
+                        course_handicap: courseHandicap
+                    }
+                });
+            }
+        }
+
+        revalidatePath('/live');
+        return { success: true };
+    } catch (e) {
+        console.error("Sync failed:", e);
+        return { success: false, error: e instanceof Error ? e.message : String(e) };
+    }
+}

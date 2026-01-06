@@ -6,13 +6,17 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
-import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound } from '@/app/actions/create-live-round';
+import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, syncLiveRoundPlayers } from '@/app/actions/create-live-round';
 
 interface Player {
     id: string;
     name: string;
     index: number;
     preferred_tee_box: string | null;
+    liveRoundData?: {
+        tee_box_name: string | null;
+        course_hcp: number | null;
+    } | null;
 }
 
 interface Hole {
@@ -220,6 +224,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     };
 
     const getCourseHandicap = (player: Player): number => {
+        // Prefer server-side snapshot if available
+        if (player.liveRoundData?.course_hcp !== undefined && player.liveRoundData.course_hcp !== null) {
+            return player.liveRoundData.course_hcp;
+        }
+
         const teeBox = getPlayerTee(player);
         if (!teeBox) return 0;
 
@@ -308,7 +317,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 id: p.player.id,
                 name: p.player.name,
                 index: p.player.index,
-                preferred_tee_box: p.player.preferred_tee_box
+                preferred_tee_box: p.player.preferred_tee_box,
+                liveRoundData: {
+                    tee_box_name: p.tee_box_name,
+                    course_hcp: p.course_handicap
+                }
             });
         });
     }
@@ -457,6 +470,25 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     className="bg-black text-white text-[14pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
                                 >
                                     Select Course
+                                </button>
+                            )}
+                            {isAdmin && liveRoundId && (
+                                <button
+                                    onClick={async () => {
+                                        if (confirm('Reassign all players to their preferred tee boxes and recalculate handicaps?')) {
+                                            const res = await syncLiveRoundPlayers(liveRoundId);
+                                            if (res.success) {
+                                                alert('Sync complete!');
+                                                router.refresh();
+                                            } else {
+                                                alert('Sync failed: ' + res.error);
+                                            }
+                                        }
+                                    }}
+                                    className="bg-orange-600 text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-orange-700 active:scale-95 transition-all outline-none"
+                                    title="Sync Players to Preferred Tees"
+                                >
+                                    Sync Tees
                                 </button>
                             )}
                             {isAdmin && (
