@@ -510,191 +510,193 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 />
 
                 {/* Scoring Section */}
-                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 my-1">
-                    {/* Section Header: Group Players */}
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <h2 className="text-[16pt] font-bold text-gray-900">Group Players</h2>
-                        {canUpdate && !hideSettings && (
-                            <button
-                                onClick={() => setIsPlayerModalOpen(true)}
-                                className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
-                            >
-                                Select Players
-                            </button>
-                        )}
-                    </div>
+                {(selectedPlayers.length > 0 || (canUpdate && !hideSettings)) && (
+                    <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 my-1">
+                        {/* Section Header: Group Players */}
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                            <h2 className="text-[16pt] font-bold text-gray-900">Group Players</h2>
+                            {canUpdate && !hideSettings && (
+                                <button
+                                    onClick={() => setIsPlayerModalOpen(true)}
+                                    className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
+                                >
+                                    Select Players
+                                </button>
+                            )}
+                        </div>
 
-                    {/* Hole Selection Grid */}
-                    {selectedPlayers.length > 0 && (
-                        <div className="mb-1">
-                            <div className="grid grid-cols-6 gap-1">
-                                {defaultCourse?.holes.map(hole => {
-                                    // Check if this hole has been saved (has scores)
-                                    const isSaved = selectedPlayers.some(p => {
-                                        const pScores = scores.get(p.id);
-                                        return pScores && pScores.has(hole.hole_number);
-                                    });
+                        {/* Hole Selection Grid */}
+                        {selectedPlayers.length > 0 && (
+                            <div className="mb-1">
+                                <div className="grid grid-cols-6 gap-1">
+                                    {defaultCourse?.holes.map(hole => {
+                                        // Check if this hole has been saved (has scores)
+                                        const isSaved = selectedPlayers.some(p => {
+                                            const pScores = scores.get(p.id);
+                                            return pScores && pScores.has(hole.hole_number);
+                                        });
 
-                                    const isActive = activeHole === hole.hole_number;
+                                        const isActive = activeHole === hole.hole_number;
 
-                                    // Determine styling
-                                    let btnClass = "bg-white text-black border border-gray-200 hover:bg-gray-50"; // Default (Blank on White)
-                                    if (isActive) {
-                                        btnClass = "bg-[#059669] text-white shadow-md scale-105 z-10";
-                                    } else if (isSaved) {
-                                        btnClass = "bg-gray-400 text-white border border-gray-400 shadow-sm";
-                                    }
+                                        // Determine styling
+                                        let btnClass = "bg-white text-black border border-gray-200 hover:bg-gray-50"; // Default (Blank on White)
+                                        if (isActive) {
+                                            btnClass = "bg-[#059669] text-white shadow-md scale-105 z-10";
+                                        } else if (isSaved) {
+                                            btnClass = "bg-gray-400 text-white border border-gray-400 shadow-sm";
+                                        }
 
-                                    return (
-                                        <button
-                                            key={hole.hole_number}
-                                            onClick={() => setActiveHole(hole.hole_number)}
-                                            className={`
+                                        return (
+                                            <button
+                                                key={hole.hole_number}
+                                                onClick={() => setActiveHole(hole.hole_number)}
+                                                className={`
                                                 flex items-center justify-center font-bold text-[14pt] px-1 py-2 rounded-full transition-all whitespace-nowrap
                                                 ${btnClass}
                                             `}
-                                        >
-                                            {hole.hole_number}/{hole.par}
-                                        </button>
-                                    );
-                                })}
+                                            >
+                                                {hole.hole_number}/{hole.par}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Player Scoring Rows */}
-                    {selectedPlayers.length > 0 ? (
-                        <div className="space-y-1">
-                            {[...selectedPlayers]
-                                .sort((a, b) => {
-                                    const firstA = splitName(a.name).first.toLowerCase();
-                                    const firstB = splitName(b.name).first.toLowerCase();
-                                    return firstA.localeCompare(firstB);
-                                })
-                                .map(player => {
-                                    const score = getScore(player.id, activeHole);
-                                    // Calculate Totals for To Par
-                                    const pScores = scores.get(player.id);
-                                    let totalScore = 0;
-                                    let totalScoredPar = 0;
-                                    if (pScores) {
-                                        pScores.forEach((strokes, hNum) => {
-                                            totalScore += strokes;
-                                            const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
-                                            totalScoredPar += hPar;
-                                        });
-                                    }
-                                    const diff = totalScore - totalScoredPar;
-                                    let toParStr = "E";
-                                    let toParClass = "text-green-600";
-                                    if (diff > 0) {
-                                        toParStr = `+${diff}`;
-                                        toParClass = "text-gray-900";
-                                    } else if (diff < 0) {
-                                        toParStr = `${diff}`;
-                                        toParClass = "text-red-600";
-                                    }
+                        {/* Player Scoring Rows */}
+                        {selectedPlayers.length > 0 ? (
+                            <div className="space-y-1">
+                                {[...selectedPlayers]
+                                    .sort((a, b) => {
+                                        const firstA = splitName(a.name).first.toLowerCase();
+                                        const firstB = splitName(b.name).first.toLowerCase();
+                                        return firstA.localeCompare(firstB);
+                                    })
+                                    .map(player => {
+                                        const score = getScore(player.id, activeHole);
+                                        // Calculate Totals for To Par
+                                        const pScores = scores.get(player.id);
+                                        let totalScore = 0;
+                                        let totalScoredPar = 0;
+                                        if (pScores) {
+                                            pScores.forEach((strokes, hNum) => {
+                                                totalScore += strokes;
+                                                const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
+                                                totalScoredPar += hPar;
+                                            });
+                                        }
+                                        const diff = totalScore - totalScoredPar;
+                                        let toParStr = "E";
+                                        let toParClass = "text-green-600";
+                                        if (diff > 0) {
+                                            toParStr = `+${diff}`;
+                                            toParClass = "text-gray-900";
+                                        } else if (diff < 0) {
+                                            toParStr = `${diff}`;
+                                            toParClass = "text-red-600";
+                                        }
 
-                                    const courseHcp = getCourseHandicap(player);
+                                        const courseHcp = getCourseHandicap(player);
 
-                                    return (
-                                        <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex flex-col items-start">
-                                                        <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
-                                                        <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
+                                        return (
+                                            <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex flex-col items-start">
+                                                            <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                            <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
+                                                        </div>
+                                                        {pScores && pScores.size >= 18 && (
+                                                            <span className="text-[20pt]" title="Finished">🏁</span>
+                                                        )}
                                                     </div>
-                                                    {pScores && pScores.size >= 18 && (
-                                                        <span className="text-[20pt]" title="Finished">🏁</span>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    {canUpdate && (
+                                                        <button
+                                                            onClick={() => updateScore(player.id, false)}
+                                                            className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[17pt]"
+                                                        >
+                                                            -
+                                                        </button>
+                                                    )}
+                                                    <div className="w-16 text-center font-bold text-[33pt] text-gray-800">
+                                                        {score || <span className="text-gray-800">{activeHolePar}</span>}
+                                                    </div>
+                                                    {canUpdate && (
+                                                        <button
+                                                            onClick={() => updateScore(player.id, true)}
+                                                            className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[17pt]"
+                                                        >
+                                                            +
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                {canUpdate && (
-                                                    <button
-                                                        onClick={() => updateScore(player.id, false)}
-                                                        className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[17pt]"
-                                                    >
-                                                        -
-                                                    </button>
-                                                )}
-                                                <div className="w-16 text-center font-bold text-[33pt] text-gray-800">
-                                                    {score || <span className="text-gray-800">{activeHolePar}</span>}
-                                                </div>
-                                                {canUpdate && (
-                                                    <button
-                                                        onClick={() => updateScore(player.id, true)}
-                                                        className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[17pt]"
-                                                    >
-                                                        +
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                        </div>
-                    ) : null}
+                                        );
+                                    })}
+                            </div>
+                        ) : null}
 
-                    {/* Save Hole Button */}
-                    {selectedPlayers.length > 0 && canUpdate && (
-                        <button
-                            onClick={() => {
-                                if (!liveRoundId) return;
+                        {/* Save Hole Button */}
+                        {selectedPlayers.length > 0 && canUpdate && (
+                            <button
+                                onClick={() => {
+                                    if (!liveRoundId) return;
 
-                                const updates: { playerId: string; strokes: number }[] = [];
-                                const newScores = new Map(scores); // Use current render state
+                                    const updates: { playerId: string; strokes: number }[] = [];
+                                    const newScores = new Map(scores); // Use current render state
 
-                                selectedPlayers.forEach(p => {
-                                    const playerScores = new Map(newScores.get(p.id) || []);
-                                    // If no score exists for this hole, default to Par
-                                    if (!playerScores.has(activeHole)) {
-                                        playerScores.set(activeHole, activeHolePar);
-                                        updates.push({ playerId: p.id, strokes: activeHolePar });
-                                    }
-                                    newScores.set(p.id, playerScores);
-                                });
-
-                                if (updates.length > 0) {
-                                    // Update UI
-                                    setScores(newScores);
-                                    // Save to Server
-                                    saveLiveScore({
-                                        liveRoundId,
-                                        holeNumber: activeHole,
-                                        playerScores: updates
-                                    });
-                                }
-
-                                if (activeHole < 18) {
-                                    setActiveHole(activeHole + 1);
-                                } else {
-                                    // After 18th hole, find the first hole that has missing scores
-                                    let nextHole = 1;
-                                    for (let h = 1; h <= 18; h++) {
-                                        const isHoleIncomplete = selectedPlayers.some(p => {
-                                            const pScores = newScores.get(p.id);
-                                            return !pScores || !pScores.has(h);
-                                        });
-
-                                        if (isHoleIncomplete) {
-                                            nextHole = h;
-                                            break;
+                                    selectedPlayers.forEach(p => {
+                                        const playerScores = new Map(newScores.get(p.id) || []);
+                                        // If no score exists for this hole, default to Par
+                                        if (!playerScores.has(activeHole)) {
+                                            playerScores.set(activeHole, activeHolePar);
+                                            updates.push({ playerId: p.id, strokes: activeHolePar });
                                         }
-                                    }
-                                    setActiveHole(nextHole);
-                                }
+                                        newScores.set(p.id, playerScores);
+                                    });
 
-                                // Silent refresh to keep server data in sync without flashing the page
-                                router.refresh();
-                            }}
-                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 mt-2"
-                        >
-                            Save Hole {activeHole}
-                        </button>
-                    )}
-                </div>
+                                    if (updates.length > 0) {
+                                        // Update UI
+                                        setScores(newScores);
+                                        // Save to Server
+                                        saveLiveScore({
+                                            liveRoundId,
+                                            holeNumber: activeHole,
+                                            playerScores: updates
+                                        });
+                                    }
+
+                                    if (activeHole < 18) {
+                                        setActiveHole(activeHole + 1);
+                                    } else {
+                                        // After 18th hole, find the first hole that has missing scores
+                                        let nextHole = 1;
+                                        for (let h = 1; h <= 18; h++) {
+                                            const isHoleIncomplete = selectedPlayers.some(p => {
+                                                const pScores = newScores.get(p.id);
+                                                return !pScores || !pScores.has(h);
+                                            });
+
+                                            if (isHoleIncomplete) {
+                                                nextHole = h;
+                                                break;
+                                            }
+                                        }
+                                        setActiveHole(nextHole);
+                                    }
+
+                                    // Silent refresh to keep server data in sync without flashing the page
+                                    router.refresh();
+                                }}
+                                className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 mt-2"
+                            >
+                                Save Hole {activeHole}
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
