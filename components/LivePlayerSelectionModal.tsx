@@ -71,6 +71,7 @@ export function LivePlayerSelectionModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {sortedPlayers.map(player => {
                             const isSelected = localSelectedIds.includes(player.id);
+                            const isInRound = playersInRound.includes(player.id);
 
                             return (
                                 <button
@@ -90,10 +91,17 @@ export function LivePlayerSelectionModal({
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <span className={`text-[18pt] font-bold ${isSelected ? 'text-blue-800' : 'text-gray-700'
-                                            }`}>
-                                            {player.name}
-                                        </span>
+                                        <div className="flex items-center justify-between">
+                                            <span className={`text-[18pt] font-bold ${isSelected ? 'text-blue-800' : 'text-gray-700'
+                                                }`}>
+                                                {player.name}
+                                            </span>
+                                            {isInRound && !isSelected && (
+                                                <span className="text-[10pt] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                                    Active
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </button>
                             );
