@@ -21,7 +21,7 @@ export default function SyncTeesButton() {
         try {
             const result = await syncAllRoundsToPreferredTees();
             if (result.success) {
-                setStatus(`Success! Updated ${result.count} entries. Recommendation: Recalculate Handicaps next.`);
+                setStatus(result.message || `Success! Updated ${result.count} entries.`);
                 setTimeout(() => setStatus(null), 10000);
                 router.refresh();
             } else {

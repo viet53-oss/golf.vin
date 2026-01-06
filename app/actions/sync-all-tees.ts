@@ -6,20 +6,24 @@ import { revalidatePath } from 'next/cache';
 export async function syncAllRoundsToPreferredTees() {
     try {
         console.log('🔄 Syncing all rounds to preferred tees...');
+        const log: string[] = [];
 
-        // 1. Fetch all players with preferred tees
+        // 1. Fetch all players
         const players = await prisma.player.findMany({
-            where: { NOT: { preferred_tee_box: null } },
-            select: { id: true, preferred_tee_box: true }
+            select: { id: true, name: true, preferred_tee_box: true }
         });
 
         let updatedCount = 0;
+        let skippedCount = 0;
 
         for (const player of players) {
-            if (!player.preferred_tee_box) continue;
+            const pref = player.preferred_tee_box?.trim();
+            if (!pref) {
+                skippedCount++;
+                continue;
+            }
 
-            // 2. Find all RoundPlayer records for this player
-            // We need the course info too
+            // 2. Main Rounds
             const roundPlayers = await prisma.roundPlayer.findMany({
                 where: { player_id: player.id },
                 include: {
@@ -34,32 +38,30 @@ export async function syncAllRoundsToPreferredTees() {
             });
 
             for (const rp of roundPlayers) {
-                const course = rp.round.course;
-                const tees = course.tee_boxes;
-
-                // Look for matching tee in this course
-                let match = tees.find(t => t.name.toLowerCase() === player.preferred_tee_box?.toLowerCase());
+                const tees = rp.round.course.tee_boxes;
+                let match = tees.find(t => t.name.toLowerCase() === pref.toLowerCase());
                 if (!match) {
-                    match = tees.find(t => t.name.toLowerCase().includes(player.preferred_tee_box!.toLowerCase()));
+                    match = tees.find(t => t.name.toLowerCase().includes(pref.toLowerCase()));
                 }
 
                 if (match) {
-                    // Update main round player record
-                    await prisma.roundPlayer.update({
-                        where: { id: rp.id },
-                        data: {
-                            tee_box_id: match.id,
-                            tee_box_name: match.name,
-                            tee_box_rating: match.rating,
-                            tee_box_slope: match.slope
-                            // Par is usually course par, handled during recalculation or display
-                        }
-                    });
-                    updatedCount++;
+                    // Force update if ID is mismatch OR if cached rating/slope info is different
+                    if (rp.tee_box_id !== match.id || rp.tee_box_name !== match.name || rp.tee_box_rating !== match.rating) {
+                        await prisma.roundPlayer.update({
+                            where: { id: rp.id },
+                            data: {
+                                tee_box_id: match.id,
+                                tee_box_name: match.name,
+                                tee_box_rating: match.rating,
+                                tee_box_slope: match.slope
+                            }
+                        });
+                        updatedCount++;
+                    }
                 }
             }
 
-            // 3. Find all LiveRoundPlayer records for this player
+            // 3. Live Rounds
             const liveRoundPlayers = await prisma.liveRoundPlayer.findMany({
                 where: { player_id: player.id },
                 include: {
@@ -74,41 +76,43 @@ export async function syncAllRoundsToPreferredTees() {
             });
 
             for (const lrp of liveRoundPlayers) {
-                const course = lrp.live_round.course;
-                const tees = course.tee_boxes;
-
-                let match = tees.find(t => t.name.toLowerCase() === player.preferred_tee_box?.toLowerCase());
+                const tees = lrp.live_round.course.tee_boxes;
+                let match = tees.find(t => t.name.toLowerCase() === pref.toLowerCase());
                 if (!match) {
-                    match = tees.find(t => t.name.toLowerCase().includes(player.preferred_tee_box!.toLowerCase()));
+                    match = tees.find(t => t.name.toLowerCase().includes(pref.toLowerCase()));
                 }
 
                 if (match) {
-                    const coursePar = course.holes.reduce((sum, h) => sum + h.par, 0);
+                    const coursePar = lrp.live_round.course.holes.reduce((sum, h) => sum + h.par, 0);
                     const handicapIndex = lrp.index_at_time || 0;
                     const courseHandicap = Math.round((handicapIndex * (match.slope / 113)) + (match.rating - coursePar));
 
-                    await prisma.liveRoundPlayer.update({
-                        where: { id: lrp.id },
-                        data: {
-                            tee_box_id: match.id,
-                            tee_box_name: match.name,
-                            tee_box_rating: match.rating,
-                            tee_box_slope: match.slope,
-                            tee_box_par: coursePar,
-                            course_handicap: courseHandicap
-                        }
-                    });
+                    // Only update if something changed
+                    if (lrp.tee_box_id !== match.id || lrp.course_handicap !== courseHandicap || lrp.tee_box_name !== match.name) {
+                        await prisma.liveRoundPlayer.update({
+                            where: { id: lrp.id },
+                            data: {
+                                tee_box_id: match.id,
+                                tee_box_name: match.name,
+                                tee_box_rating: match.rating,
+                                tee_box_slope: match.slope,
+                                tee_box_par: coursePar,
+                                course_handicap: courseHandicap
+                            }
+                        });
+                        updatedCount++;
+                    }
                 }
             }
         }
 
-        console.log(`✅ Sync Complete. Updated ${updatedCount} round assignments.`);
-
         revalidatePath('/scores');
         revalidatePath('/live');
-        revalidatePath('/players');
-
-        return { success: true, count: updatedCount };
+        return {
+            success: true,
+            count: updatedCount,
+            message: `Sync complete! Reassigned ${updatedCount} round entries to matching tees. ${skippedCount} players had no preferred tee set.`
+        };
     } catch (error) {
         console.error('Sync failed:', error);
         return { success: false, error: error instanceof Error ? error.message : String(error) };
