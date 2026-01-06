@@ -428,8 +428,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             <div className="flex flex-wrap gap-x-4 gap-y-1 text-[14pt] text-gray-500 mt-1">
                                 <span>Date: {initialRound?.date || new Date().toLocaleDateString()}</span>
                                 <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
-                                <span>Rating: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
-                                <span>Slope: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
+                                <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
+                                <span>S: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
                             </div>
                         </div>
                         <div className="flex flex-col gap-2 shrink-0">
