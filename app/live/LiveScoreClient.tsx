@@ -317,6 +317,43 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     });
     const summaryPlayers = Array.from(summaryPlayersMap.values());
 
+    // Calculate Leaderboard Data
+    const rankedPlayers = summaryPlayers.map(player => {
+        const playerScores = scores.get(player.id);
+        let totalGross = 0;
+        let strokesReceivedSoFar = 0;
+        let parTotal = 0;
+        let thru = 0;
+        const courseHcp = getCourseHandicap(player);
+
+        if (playerScores) {
+            playerScores.forEach((strokes, holeNum) => {
+                totalGross += strokes;
+                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                const holePar = hole?.par || 4;
+                const difficulty = hole?.difficulty || holeNum;
+
+                let holeStrokes = 0;
+                if (courseHcp > 0) {
+                    const base = Math.floor(courseHcp / 18);
+                    const remainder = courseHcp % 18;
+                    holeStrokes = base + (difficulty <= remainder ? 1 : 0);
+                }
+                strokesReceivedSoFar += holeStrokes;
+
+                parTotal += holePar;
+                thru++;
+            });
+        }
+
+        const totalNet = totalGross - strokesReceivedSoFar;
+        const toPar = totalGross - parTotal;
+
+        return { ...player, totalGross, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal };
+    }).sort((a, b) => a.totalNet - b.totalNet);
+
+    const allPlayersFinished = rankedPlayers.length > 0 && rankedPlayers.every(p => p.thru >= 18);
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
@@ -645,166 +682,143 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             Refresh Summary
                         </button>
                         <div className="space-y-1">
-                            {summaryPlayers
-                                .map(player => {
-                                    const playerScores = scores.get(player.id);
-                                    let totalGross = 0;
-                                    let strokesReceivedSoFar = 0;
-                                    let parTotal = 0;
-                                    let thru = 0;
-                                    const courseHcp = getCourseHandicap(player);
+                            {rankedPlayers.map((p, i) => {
+                                let toParStr = "E";
+                                let toParClass = "text-green-600";
+                                if (p.toPar > 0) {
+                                    toParStr = `+${p.toPar}`;
+                                    toParClass = "text-gray-900";
+                                } else if (p.toPar < 0) {
+                                    toParStr = `${p.toPar}`;
+                                    toParClass = "text-red-600";
+                                }
 
-                                    if (playerScores) {
-                                        playerScores.forEach((strokes, holeNum) => {
-                                            totalGross += strokes;
-                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                            const holePar = hole?.par || 4;
-                                            const difficulty = hole?.difficulty || holeNum;
-
-                                            let holeStrokes = 0;
-                                            if (courseHcp > 0) {
-                                                const base = Math.floor(courseHcp / 18);
-                                                const remainder = courseHcp % 18;
-                                                holeStrokes = base + (difficulty <= remainder ? 1 : 0);
-                                            }
-                                            strokesReceivedSoFar += holeStrokes;
-
-                                            parTotal += holePar;
-                                            thru++;
-                                        });
+                                let medalIcon = null;
+                                if (p.thru >= 18) {
+                                    if (allPlayersFinished) {
+                                        if (i === 0) medalIcon = "🥇";
+                                        else if (i === 1) medalIcon = "🥈";
+                                        else if (i === 2) medalIcon = "🥉";
+                                        else medalIcon = "🏁";
+                                    } else {
+                                        medalIcon = "🏁";
                                     }
+                                }
 
-                                    const totalNet = totalGross - strokesReceivedSoFar;
-                                    const toPar = totalGross - parTotal;
-
-                                    return { ...player, totalGross, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal };
-                                })
-                                .sort((a, b) => a.totalNet - b.totalNet)
-                                .map((p, i) => {
-                                    let toParStr = "E";
-                                    let toParClass = "text-green-600";
-                                    if (p.toPar > 0) {
-                                        toParStr = `+${p.toPar}`;
-                                        toParClass = "text-gray-900";
-                                    } else if (p.toPar < 0) {
-                                        toParStr = `${p.toPar}`;
-                                        toParClass = "text-red-600";
-                                    }
-
-                                    return (
-                                        <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden my-1 border-4 border-gray-300">
-                                            {/* Player Header */}
-                                            <div className="bg-[#1d4ed8] p-1 text-white">
-                                                <div className="flex justify-between items-center">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="bg-white text-[#1d4ed8] font-bold rounded w-8 h-8 flex items-center justify-center text-[14pt]">
-                                                            {i + 1}
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="flex flex-col">
-                                                                    <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
-                                                                    <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
-                                                                </div>
-                                                                {p.thru >= 18 && (
-                                                                    <span className="text-[16pt]" title="Finished">🏁</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
+                                return (
+                                    <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden my-1 border-4 border-gray-300">
+                                        {/* Player Header */}
+                                        <div className="bg-[#1d4ed8] p-1 text-white">
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-white text-[#1d4ed8] font-bold rounded w-8 h-8 flex items-center justify-center text-[14pt]">
+                                                        {i + 1}
                                                     </div>
-
-                                                    <div className="flex gap-4 items-center">
-                                                        <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
-                                                            {toParStr}
-                                                        </div>
-                                                        <div className="text-center">
-                                                            <div className="text-[14pt] opacity-80 font-bold tracking-wider">GRS</div>
-                                                            <div className="text-[14pt] font-bold leading-none">{p.totalGross}</div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-[14pt] opacity-80 font-bold tracking-wider">HCP</div>
-                                                            <div className="text-[14pt] font-bold leading-none">{p.strokesReceivedSoFar}/{p.courseHcp}</div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-[14pt] opacity-80 font-bold tracking-wider">NET</div>
-                                                            <div className="text-[14pt] font-bold leading-none">{p.totalNet}</div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex flex-col">
+                                                                <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
+                                                                <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
+                                                            </div>
+                                                            {medalIcon && (
+                                                                <span className="text-[16pt]" title="Finished">{medalIcon}</span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            {/* Score Grid */}
-                                            <div className="m-1 border border-black rounded shadow-sm overflow-hidden">
-                                                {/* Row 1: Holes 1-9 */}
-                                                <div className="grid grid-cols-9 border-b border-black">
-                                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
-                                                        const score = getScore(p.id, num);
-                                                        const isActive = activeHole === num;
-                                                        const hole = defaultCourse?.holes.find(h => h.hole_number === num);
-                                                        const holePar = hole?.par || 4;
-
-                                                        let bgClass = "bg-white";
-                                                        if (score !== null) {
-                                                            const diff = score - holePar;
-                                                            if (diff <= -2) bgClass = "bg-yellow-300";
-                                                            else if (diff === -1) bgClass = "bg-green-300";
-                                                            else if (diff === 0) bgClass = "bg-blue-50";
-                                                            else if (diff === 1) bgClass = "bg-orange-200";
-                                                            else if (diff >= 2) bgClass = "bg-red-200";
-                                                        } else if (isActive) {
-                                                            bgClass = "bg-green-50";
-                                                        }
-
-                                                        return (
-                                                            <div key={num} className={`
-                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
-                                                            ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
-                                                        `}>
-                                                                <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                                <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
-                                                                    {score || '-'}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                                {/* Row 2: Holes 10-18 */}
-                                                <div className="grid grid-cols-9">
-                                                    {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
-                                                        const score = getScore(p.id, num);
-                                                        const isActive = activeHole === num;
-                                                        const hole = defaultCourse?.holes.find(h => h.hole_number === num);
-                                                        const holePar = hole?.par || 4;
-
-                                                        let bgClass = "bg-white";
-                                                        if (score !== null) {
-                                                            const diff = score - holePar;
-                                                            if (diff <= -2) bgClass = "bg-yellow-300";
-                                                            else if (diff === -1) bgClass = "bg-green-300";
-                                                            else if (diff === 0) bgClass = "bg-blue-50";
-                                                            else if (diff === 1) bgClass = "bg-orange-200";
-                                                            else if (diff >= 2) bgClass = "bg-red-200";
-                                                        } else if (isActive) {
-                                                            bgClass = "bg-green-50";
-                                                        }
-
-                                                        return (
-                                                            <div key={num} className={`
-                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
-                                                            ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
-                                                        `}>
-                                                                <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                                <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
-                                                                    {score || '-'}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                <div className="flex gap-4 items-center">
+                                                    <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
+                                                        {toParStr}
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-[14pt] opacity-80 font-bold tracking-wider">GRS</div>
+                                                        <div className="text-[14pt] font-bold leading-none">{p.totalGross}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[14pt] opacity-80 font-bold tracking-wider">HCP</div>
+                                                        <div className="text-[14pt] font-bold leading-none">{p.strokesReceivedSoFar}/{p.courseHcp}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[14pt] opacity-80 font-bold tracking-wider">NET</div>
+                                                        <div className="text-[14pt] font-bold leading-none">{p.totalNet}</div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    );
-                                })}
+
+                                        {/* Score Grid */}
+                                        <div className="m-1 border border-black rounded shadow-sm overflow-hidden">
+                                            {/* Row 1: Holes 1-9 */}
+                                            <div className="grid grid-cols-9 border-b border-black">
+                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
+                                                    const score = getScore(p.id, num);
+                                                    const isActive = activeHole === num;
+                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                    const holePar = hole?.par || 4;
+
+                                                    let bgClass = "bg-white";
+                                                    if (score !== null) {
+                                                        const diff = score - holePar;
+                                                        if (diff <= -2) bgClass = "bg-yellow-300";
+                                                        else if (diff === -1) bgClass = "bg-green-300";
+                                                        else if (diff === 0) bgClass = "bg-blue-50";
+                                                        else if (diff === 1) bgClass = "bg-orange-200";
+                                                        else if (diff >= 2) bgClass = "bg-red-200";
+                                                    } else if (isActive) {
+                                                        bgClass = "bg-green-50";
+                                                    }
+
+                                                    return (
+                                                        <div key={num} className={`
+                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
+                                                            ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
+                                                        `}>
+                                                            <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
+                                                            <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                {score || '-'}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                            {/* Row 2: Holes 10-18 */}
+                                            <div className="grid grid-cols-9">
+                                                {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
+                                                    const score = getScore(p.id, num);
+                                                    const isActive = activeHole === num;
+                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                    const holePar = hole?.par || 4;
+
+                                                    let bgClass = "bg-white";
+                                                    if (score !== null) {
+                                                        const diff = score - holePar;
+                                                        if (diff <= -2) bgClass = "bg-yellow-300";
+                                                        else if (diff === -1) bgClass = "bg-green-300";
+                                                        else if (diff === 0) bgClass = "bg-blue-50";
+                                                        else if (diff === 1) bgClass = "bg-orange-200";
+                                                        else if (diff >= 2) bgClass = "bg-red-200";
+                                                    } else if (isActive) {
+                                                        bgClass = "bg-green-50";
+                                                    }
+
+                                                    return (
+                                                        <div key={num} className={`
+                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
+                                                            ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
+                                                        `}>
+                                                            <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
+                                                            <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                {score || '-'}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
