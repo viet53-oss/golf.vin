@@ -1,17 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface GuestPlayerModalProps {
     isOpen: boolean;
     onClose: () => void;
     onAdd: (guest: { name: string; index: number; courseHandicap: number }) => void;
+    roundData?: {
+        rating: number;
+        slope: number;
+        par: number;
+    } | null;
 }
 
-export function GuestPlayerModal({ isOpen, onClose, onAdd }: GuestPlayerModalProps) {
+export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPlayerModalProps) {
     const [name, setName] = useState('');
     const [index, setIndex] = useState('0');
     const [courseHandicap, setCourseHandicap] = useState('0');
+
+    // Auto-calculate course handicap when index changes
+    useEffect(() => {
+        if (roundData && index) {
+            const indexNum = parseFloat(index) || 0;
+            const { rating, slope, par } = roundData;
+
+            // Course Handicap formula: (Index × Slope / 113) + (Rating - Par)
+            const calculatedHandicap = Math.round((indexNum * slope / 113) + (rating - par));
+            setCourseHandicap(calculatedHandicap.toString());
+        }
+    }, [index, roundData]);
 
     if (!isOpen) return null;
 
@@ -62,22 +79,27 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd }: GuestPlayerModalPro
                             step="0.1"
                             value={index}
                             onChange={(e) => setIndex(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="0.0"
                         />
                     </div>
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Course Handicap
+                            Course Handicap {roundData && <span className="text-xs text-gray-500">(Auto-calculated)</span>}
                         </label>
                         <input
                             type="number"
                             value={courseHandicap}
                             onChange={(e) => setCourseHandicap(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="0"
                         />
+                        {roundData && (
+                            <p className="text-xs text-gray-500 mt-1">
+                                Based on Rating: {roundData.rating}, Slope: {roundData.slope}, Par: {roundData.par}
+                            </p>
+                        )}
                     </div>
                 </div>
 

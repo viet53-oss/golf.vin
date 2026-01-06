@@ -560,6 +560,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     isOpen={isGuestModalOpen}
                     onClose={() => setIsGuestModalOpen(false)}
                     onAdd={handleAddGuest}
+                    roundData={initialRound ? {
+                        rating: initialRound.rating,
+                        slope: initialRound.slope,
+                        par: initialRound.par
+                    } : null}
                 />
 
                 {/* Scoring Section */}
