@@ -31,9 +31,9 @@ export async function updateCourse(
 
     // 3. Update Tee Boxes
     // Handle updates and creation. Deletion is tricky in this simplified view, usually separate action.
-    // For now, we only update existing or create new if passed without ID.
+    // For now, we only update existing or create new if passed without ID or with temp ID.
     for (const tee of data.tees) {
-        if (tee.id) {
+        if (tee.id && !tee.id.startsWith('temp-')) {
             await prisma.teeBox.update({
                 where: { id: tee.id },
                 data: { name: tee.name, rating: tee.rating, slope: tee.slope }
@@ -50,9 +50,9 @@ export async function updateCourse(
         }
     }
 
-    revalidatePath(`/settings/course/${courseId}`);
+    revalidatePath('/settings');
     revalidatePath(`/settings/course/${courseId}/edit`);
-    redirect(`/settings/course/${courseId}`);
+    redirect('/settings');
 }
 
 export async function deleteCourse(courseId: string) {

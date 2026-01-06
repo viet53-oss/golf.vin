@@ -61,7 +61,7 @@ export default function MetaTagEditor() {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="w-full flex justify-center items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 px-1 rounded-full text-[14pt] transition-colors active:scale-95"
+                className="w-full flex justify-center items-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
             >
                 <PenTool className="w-4 h-4" />
                 Edit Meta Tags

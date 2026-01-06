@@ -101,52 +101,44 @@ export default async function SettingsPage() {
                 </div>
             </header>
 
-            <main className="px-1 space-y-6">
+            <main className="m-1 space-y-6">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    {/* USGA Handicap System */}
-                    <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
-                        <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-                            <ShieldIcon className="w-5 h-5 text-blue-600" />
-                            <h2 className="font-bold text-blue-900 text-[14pt]">USGA Handicap System</h2>
-                        </div>
-                        <div className="p-3 space-y-4">
-                            <p className="text-[14pt] text-gray-500">
-                                Recalculate player handicaps using WHS rules. This will scan all rounds and update the Handicap Index for all players.
+                {/* USGA Handicap System */}
+                {/* USGA Handicap System */}
+                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                    <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                        <ShieldIcon className="w-5 h-5 text-blue-600" />
+                        <h2 className="font-bold text-blue-900 text-[14pt]">USGA Handicap System</h2>
+                    </div>
+                    <div className="p-3 space-y-4">
+                        <p className="text-[14pt] text-gray-500">
+                            Recalculate player handicaps using WHS rules. This will scan all rounds and update the Handicap Index for all players.
+                        </p>
+                        <RecalculateButton />
+                        <div className="pt-2 border-t border-gray-200">
+                            <p className="text-[14pt] text-orange-600 font-bold mb-2">⚠️ Emergency Fix</p>
+                            <p className="text-[14pt] text-gray-500 mb-3">
+                                If all handicaps are showing as 0, click this button to reset the low handicap indexes.
                             </p>
-                            <RecalculateButton />
-                            <div className="pt-2 border-t border-gray-200">
-                                <p className="text-[14pt] text-orange-600 font-bold mb-2">⚠️ Emergency Fix</p>
-                                <p className="text-[14pt] text-gray-500 mb-3">
-                                    If all handicaps are showing as 0, click this button to reset the low handicap indexes.
-                                </p>
-                                <FixLowIndexButton />
-                            </div>
+                            <FixLowIndexButton />
                         </div>
                     </div>
-
-                    {/* Site Configuration */}
-                    <div className="bg-white rounded-xl shadow-sm border border-purple-100 overflow-hidden">
-                        <div className="p-3 bg-purple-50 border-b border-purple-100 flex items-center gap-2">
-                            <GlobeIcon className="w-5 h-5 text-purple-600" />
-                            <h2 className="font-bold text-purple-900 text-[14pt]">Site Configuration</h2>
-                        </div>
-                        <div className="p-3 space-y-4">
-                            <p className="text-[14pt] text-gray-500">
-                                Manage global SEO settings and meta tags. Update the site title, description, and keywords.
-                            </p>
-                            <MetaTagEditor />
-                        </div>
-                    </div>
-
                 </div>
 
                 {/* Courses */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
-                        <MapPinIcon className="w-5 h-5 text-gray-700" />
-                        <h2 className="font-bold text-gray-900 text-[14pt]">Courses</h2>
+                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                    <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <MapPinIcon className="w-5 h-5 text-gray-700" />
+                            <h2 className="font-bold text-gray-900 text-[14pt]">Courses</h2>
+                        </div>
+                        <Link href="/settings/course/new" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 12h14" />
+                                <path d="M12 5v14" />
+                            </svg>
+                            Add Course
+                        </Link>
                     </div>
                     <div className="p-3 space-y-4">
                         {courses.map((course: any) => {
@@ -162,10 +154,7 @@ export default async function SettingsPage() {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 w-full md:w-auto">
-                                        <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none bg-black text-white px-3 py-2 rounded-lg font-bold text-[14pt] text-center hover:bg-gray-800 transition-colors active:scale-95">
-                                            View
-                                        </Link>
-                                        <Link href={`/settings/course/${course.id}/edit`} className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-lg font-bold text-[14pt] hover:bg-gray-50 transition-colors shadow-sm active:scale-95">
+                                        <Link href={`/settings/course/${course.id}/edit`} className="flex-1 md:flex-none px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors text-center">
                                             Edit
                                         </Link>
                                         {canDelete && (
@@ -182,7 +171,7 @@ export default async function SettingsPage() {
                 </div>
 
                 {/* App Logic & Rules */}
-                <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
                     <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
                             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
@@ -198,7 +187,7 @@ export default async function SettingsPage() {
                 </div>
 
                 {/* Backup & Restore */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
                     <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
                         <DatabaseIcon className="w-5 h-5 text-gray-700" />
                         <h2 className="font-bold text-gray-900 text-[14pt]">Data Backup & Restore</h2>
@@ -212,7 +201,7 @@ export default async function SettingsPage() {
                 </div>
 
                 {/* Manual Score Entry */}
-                <div className="bg-white rounded-xl shadow-sm border border-green-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
                     <div className="p-3 bg-green-50 border-b border-green-100 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -227,6 +216,20 @@ export default async function SettingsPage() {
                             Add a past score for a player. This is useful for importing historical rounds or scores from other courses.
                         </p>
                         <ManualScoreForm players={players} course={courses[0]} coursePar={coursePar} />
+                    </div>
+                </div>
+
+                {/* Site Configuration */}
+                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                    <div className="p-3 bg-purple-50 border-b border-purple-100 flex items-center gap-2">
+                        <GlobeIcon className="w-5 h-5 text-purple-600" />
+                        <h2 className="font-bold text-purple-900 text-[14pt]">Site Configuration</h2>
+                    </div>
+                    <div className="p-3 space-y-4">
+                        <p className="text-[14pt] text-gray-500">
+                            Manage global SEO settings and meta tags. Update the site title, description, and keywords.
+                        </p>
+                        <MetaTagEditor />
                     </div>
                 </div>
 

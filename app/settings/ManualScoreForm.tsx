@@ -77,23 +77,6 @@ export default function ManualScoreForm({ players, course, coursePar }: ManualSc
                     />
                 </div>
 
-                {/* Gross Score */}
-                <div>
-                    <label htmlFor="grossScore" className="block text-[14pt] font-bold text-gray-700 mb-2">
-                        Gross Score <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="number"
-                        id="grossScore"
-                        name="grossScore"
-                        required
-                        min="50"
-                        max="150"
-                        placeholder="e.g., 85"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:outline-none focus:ring-2 focus:ring-green-500"
-                        disabled={isSubmitting}
-                    />
-                </div>
 
                 {/* Adjusted Gross Score */}
                 <div>
@@ -146,13 +129,15 @@ export default function ManualScoreForm({ players, course, coursePar }: ManualSc
             </div>
 
             {/* Submit Button */}
-            <button
-                type="submit"
-                className="w-full md:w-auto px-6 py-3 bg-green-600 text-white rounded-lg text-[14pt] font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isSubmitting}
-            >
-                {isSubmitting ? 'Adding Score...' : 'Add Manual Score'}
-            </button>
+            <div className="flex justify-end">
+                <button
+                    type="submit"
+                    className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'Adding Score...' : 'Add Manual Score'}
+                </button>
+            </div>
         </form>
     );
 }

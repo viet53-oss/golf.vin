@@ -45,7 +45,7 @@ export default function RecalculateButton() {
             <button
                 onClick={handleRecalculate}
                 disabled={isPending}
-                className="w-full flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 px-1 rounded-full text-[14pt] transition-colors shadow-sm active:scale-95"
+                className="w-full flex justify-center items-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
                 <RefreshCw className={`w-4 h-4 ${isPending ? 'animate-spin' : ''}`} />
                 {isPending ? 'Recalculating...' : 'Recalculate All Handicaps'}
