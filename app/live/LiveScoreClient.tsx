@@ -510,12 +510,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 />
 
                 {/* Scoring Section */}
-                {(selectedPlayers.length > 0 || (canUpdate && !hideSettings)) && (
+                {(selectedPlayers.length > 0 || canUpdate) && (
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 my-1">
                         {/* Section Header: Group Players */}
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                             <h2 className="text-[16pt] font-bold text-gray-900">Group Players</h2>
-                            {canUpdate && !hideSettings && (
+                            {canUpdate && (!hideSettings || selectedPlayers.length === 0) && (
                                 <button
                                     onClick={() => setIsPlayerModalOpen(true)}
                                     className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
