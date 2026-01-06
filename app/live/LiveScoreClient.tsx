@@ -622,7 +622,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     onClose={() => setIsPlayerModalOpen(false)}
                     allPlayers={allPlayers}
                     selectedIds={selectedPlayers.map(p => p.id)}
-                    playersInRound={initialRound?.players?.map((p: any) => p.player.id) || []}
+                    playersInRound={initialRound?.players?.map((p: any) => p.is_guest ? p.id : p.player.id) || []}
                     onSelectionChange={handleAddPlayers}
                 />
 
