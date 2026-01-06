@@ -535,9 +535,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     return (
                                         <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
                                             <div className="flex flex-col">
-                                                <div className="flex flex-col items-start">
-                                                    <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
-                                                    <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex flex-col items-start">
+                                                        <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                        <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
+                                                    </div>
+                                                    {pScores && pScores.size >= 18 && (
+                                                        <span className="text-[20pt]" title="Finished">🏁</span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-4">
@@ -696,9 +701,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             {i + 1}
                                                         </div>
                                                         <div>
-                                                            <div className="flex flex-col">
-                                                                <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
-                                                                <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="flex flex-col">
+                                                                    <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
+                                                                    <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
+                                                                </div>
+                                                                {p.thru >= 18 && (
+                                                                    <span className="text-[16pt]" title="Finished">🏁</span>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
