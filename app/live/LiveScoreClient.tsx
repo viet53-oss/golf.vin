@@ -376,7 +376,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         if (confirm('Are you sure you want to delete this round? This cannot be undone.')) {
                                             try {
                                                 await deleteLiveRound(liveRoundId);
-                                                window.location.href = '/live';
+                                                window.location.href = '/';
                                             } catch (err) {
                                                 console.error('Failed to delete round:', err);
                                                 alert('Failed to delete round.');
