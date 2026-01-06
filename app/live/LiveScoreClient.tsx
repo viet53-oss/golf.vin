@@ -365,7 +365,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
         // 2. Add New Players to DB
         for (const player of newSelectedPlayers) {
-            const alreadyExistsInInitialRound = initialRound?.players?.some((p: any) => p.player.id === player.id);
+            const alreadyExistsInInitialRound = initialRound?.players?.some((p: any) => p.player?.id === player.id);
             const alreadyExistsInCurrentState = scores.has(player.id);
 
             if (!alreadyExistsInInitialRound && !alreadyExistsInCurrentState) {
