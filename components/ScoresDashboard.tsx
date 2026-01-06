@@ -84,7 +84,7 @@ export default function ScoresDashboard({
     rounds: RoundWithPlayers[];
     isAdmin: boolean;
 }) {
-    const [visibleCount, setVisibleCount] = useState(3); // Show 3 rounds by default
+    const [visibleCount, setVisibleCount] = useState(5); // Show 5 rounds by default
     const [expandedRounds, setExpandedRounds] = useState<Set<string>>(new Set());
 
     // Modal State
@@ -96,7 +96,7 @@ export default function ScoresDashboard({
     const hasMore = visibleCount < rounds.length;
 
     const loadMore = () => {
-        setVisibleCount(prev => prev + 3);
+        setVisibleCount(prev => prev + 5);
     };
 
     const toggleRound = (roundId: string) => {
