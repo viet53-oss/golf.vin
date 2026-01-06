@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Save, Loader2, ArrowLeft } from 'lucide-react';
@@ -19,6 +19,12 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
     const [name, setName] = useState(initialCourse.name);
     const [tees, setTees] = useState(initialCourse.tee_boxes);
     const [holes, setHoles] = useState(initialCourse.holes); // Should be sorted 1-18
+    const [coursePar, setCoursePar] = useState(initialCourse.holes.reduce((sum, h) => sum + (h.par || 0), 0));
+
+    useEffect(() => {
+        const total = holes.reduce((sum, h) => sum + (h.par || 0), 0);
+        setCoursePar(total);
+    }, [holes]);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
@@ -124,9 +130,9 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                     <label className="block font-bold text-gray-700 mb-1">Par</label>
                                     <input
                                         type="number"
-                                        value={holes.reduce((sum, h) => sum + (h.par || 0), 0)}
-                                        disabled
-                                        className="w-full p-2 border border-gray-300 bg-gray-100 rounded font-bold text-center text-gray-500"
+                                        value={coursePar === 0 ? '' : coursePar}
+                                        onChange={(e) => setCoursePar(parseInt(e.target.value) || 0)}
+                                        className="w-full p-2 border border-gray-300 rounded font-bold text-center"
                                     />
                                 </div>
                             </div>
@@ -152,9 +158,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                             <label className="font-bold text-gray-500">Rating</label>
                                             <input
                                                 type="number" step="0.1"
-                                                value={tee.rating}
+                                                value={tee.rating === 0 ? '' : tee.rating}
                                                 onChange={(e) => handleTeeChange(idx, 'rating', e.target.value)}
-
                                                 className="w-full p-2 border border-gray-300 rounded"
                                             />
                                         </div>
@@ -162,9 +167,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                             <label className="font-bold text-gray-500">Slope</label>
                                             <input
                                                 type="number"
-                                                value={tee.slope}
+                                                value={tee.slope === 0 ? '' : tee.slope}
                                                 onChange={(e) => handleTeeChange(idx, 'slope', e.target.value)}
-
                                                 className="w-full p-2 border border-gray-300 rounded"
                                             />
                                         </div>
@@ -197,9 +201,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                     <input
                                                         type="number"
                                                         className="w-10 text-center border border-gray-300 rounded p-1"
-                                                        value={h.par}
+                                                        value={h.par === 0 ? '' : h.par}
                                                         onChange={(e) => handleHoleChange(i, 'par', e.target.value)}
-
                                                     />
                                                 </td>
                                             ))}
@@ -211,9 +214,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                     <input
                                                         type="number"
                                                         className="w-10 text-center border border-gray-300 rounded p-1 text-gray-600"
-                                                        value={h.difficulty ?? ''}
+                                                        value={h.difficulty === 0 || h.difficulty === null ? '' : h.difficulty}
                                                         onChange={(e) => handleHoleChange(i, 'difficulty', e.target.value)}
-
                                                     />
                                                 </td>
                                             ))}
@@ -242,9 +244,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                     <input
                                                         type="number"
                                                         className="w-10 text-center border border-gray-300 rounded p-1"
-                                                        value={h.par}
+                                                        value={h.par === 0 ? '' : h.par}
                                                         onChange={(e) => handleHoleChange(frontNine.length + i, 'par', e.target.value)}
-
                                                     />
                                                 </td>
                                             ))}
@@ -256,9 +257,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                     <input
                                                         type="number"
                                                         className="w-10 text-center border border-gray-300 rounded p-1 text-gray-600"
-                                                        value={h.difficulty ?? ''}
+                                                        value={h.difficulty === 0 || h.difficulty === null ? '' : h.difficulty}
                                                         onChange={(e) => handleHoleChange(frontNine.length + i, 'difficulty', e.target.value)}
-
                                                     />
                                                 </td>
                                             ))}

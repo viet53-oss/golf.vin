@@ -9,7 +9,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     const course = await prisma.course.findUnique({
         where: { id },
         include: {
-            tee_boxes: { orderBy: { name: 'desc' } },
+            tee_boxes: { orderBy: { rating: 'desc' } },
             holes: { orderBy: { hole_number: 'asc' } }
         }
     });

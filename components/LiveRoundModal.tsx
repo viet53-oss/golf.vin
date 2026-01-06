@@ -14,14 +14,17 @@ interface LiveRoundModalProps {
         par: number;
         rating: number;
         slope: number;
+        course_id?: string;
     } | null;
+    allCourses?: any[]; // Using any[] for simplicity or define full type
 }
 
 export function LiveRoundModal({
     isOpen,
     onClose,
     courseId,
-    existingRound
+    existingRound,
+    allCourses = []
 }: LiveRoundModalProps) {
     const today = new Date().toISOString().split('T')[0];
 
@@ -30,6 +33,7 @@ export function LiveRoundModal({
     const [par, setPar] = useState(68);
     const [rating, setRating] = useState(63.8);
     const [slope, setSlope] = useState(100);
+    const [selectedCourseId, setSelectedCourseId] = useState(courseId || '');
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
@@ -45,8 +49,9 @@ export function LiveRoundModal({
             setPar(68);
             setRating(63.8);
             setSlope(100);
+            setSelectedCourseId(courseId || '');
         }
-    }, [existingRound, isOpen, today]);
+    }, [existingRound, isOpen, today, courseId]);
 
     if (!isOpen) return null;
 
@@ -76,15 +81,16 @@ export function LiveRoundModal({
                     setIsSaving(false);
                 }
             } else {
-                if (!courseId) {
-                    alert('Error: No Course ID selected. Please refresh.');
+                const cId = selectedCourseId || courseId;
+                if (!cId) {
+                    alert('Error: No Course ID selected.');
                     setIsSaving(false);
                     return;
                 }
                 const result = await createLiveRound({
                     name: name || 'Live Round',
                     date: date || today,
-                    courseId,
+                    courseId: cId,
                     par: parVal,
                     rating: ratingVal,
                     slope: slopeVal
@@ -130,16 +136,68 @@ export function LiveRoundModal({
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-black outline-none"
                         />
                     </div>
+
+                    {/* Course Selection */}
                     <div>
-                        <label className="block text-[12pt] font-bold text-gray-700 mb-1">Course Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-black outline-none"
-                            placeholder="e.g. City Park North"
-                        />
+                        <label className="block text-[12pt] font-bold text-gray-700 mb-1">Course</label>
+                        <select
+                            value={selectedCourseId}
+                            onChange={(e) => {
+                                const newId = e.target.value;
+                                setSelectedCourseId(newId);
+                                const c = allCourses.find(fc => fc.id === newId);
+                                if (c) {
+                                    setName(c.name);
+                                    // Default to first tee box
+                                    if (c.tee_boxes.length > 0) {
+                                        const defaultTee = c.tee_boxes[0];
+                                        // Calculate par from holes
+                                        const cPar = c.holes.reduce((sum: number, h: any) => sum + h.par, 0);
+                                        setPar(cPar || 72);
+                                        setRating(defaultTee.rating);
+                                        setSlope(defaultTee.slope);
+                                    }
+                                }
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-black outline-none bg-white"
+                        >
+                            <option value="">-- Select Course --</option>
+                            {allCourses?.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
                     </div>
+
+                    {/* Tee Box Selection (Helper for auto-filling) */}
+                    <div>
+                        <label className="block text-[12pt] font-bold text-gray-700 mb-1">Select Tee Box (Auto-fill)</label>
+                        <select
+                            onChange={(e) => {
+                                const tId = e.target.value;
+                                const c = allCourses.find(fc => fc.id === selectedCourseId);
+                                if (c) {
+                                    const tee = c.tee_boxes.find((t: any) => t.id === tId);
+                                    if (tee) {
+                                        setRating(tee.rating);
+                                        setSlope(tee.slope);
+                                        // Par typically implies Course Par, but if we want to be safe, recalculate
+                                        const cPar = c.holes.reduce((sum: number, h: any) => sum + h.par, 0);
+                                        setPar(cPar || 72);
+                                    }
+                                }
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-black outline-none bg-white"
+                            defaultValue=""
+                        >
+                            <option value="" disabled>-- Select Tee Box --</option>
+                            {allCourses.find(c => c.id === selectedCourseId)?.tee_boxes.map((t: any) => (
+                                <option key={t.id} value={t.id}>
+                                    {t.name} (R: {t.rating} / S: {t.slope})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="grid grid-cols-3 gap-4">
                         <div>
                             <label className="block text-[12pt] font-bold text-gray-700 mb-1">Par</label>

@@ -25,6 +25,15 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         });
     }
 
+    // 1b. Get ALL courses for selection
+    const allCourses = await prisma.course.findMany({
+        include: {
+            tee_boxes: true,
+            holes: { orderBy: { hole_number: 'asc' } }
+        },
+        orderBy: { name: 'asc' }
+    });
+
     // 2. Resolve Today's Date (Chicago)
     const formatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Chicago',
@@ -147,6 +156,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
                 select: { id: true, name: true, index: true, preferred_tee_box: true }
             })}
             defaultCourse={defaultCourse}
+            allCourses={allCourses}
             initialRound={activeRound}
             todayStr={todayStr}
             allLiveRounds={allLiveRounds}
