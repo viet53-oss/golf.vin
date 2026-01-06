@@ -411,16 +411,31 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const summaryPlayersMap = new Map<string, Player>();
     if (initialRound?.players) {
         initialRound.players.forEach((p: any) => {
-            summaryPlayersMap.set(p.player.id, {
-                id: p.player.id,
-                name: p.player.name,
-                index: p.player.index,
-                preferred_tee_box: p.player.preferred_tee_box,
-                liveRoundData: {
-                    tee_box_name: p.tee_box_name,
-                    course_hcp: p.course_handicap
-                }
-            });
+            if (p.is_guest) {
+                // Handle guest players
+                summaryPlayersMap.set(p.id, {
+                    id: p.id,
+                    name: p.guest_name || 'Guest',
+                    index: p.index_at_time,
+                    preferred_tee_box: null,
+                    liveRoundData: {
+                        tee_box_name: p.tee_box_name,
+                        course_hcp: p.course_handicap
+                    }
+                });
+            } else {
+                // Handle regular players
+                summaryPlayersMap.set(p.player.id, {
+                    id: p.player.id,
+                    name: p.player.name,
+                    index: p.player.index,
+                    preferred_tee_box: p.player.preferred_tee_box,
+                    liveRoundData: {
+                        tee_box_name: p.tee_box_name,
+                        course_hcp: p.course_handicap
+                    }
+                });
+            }
         });
     }
     // Add any locally selected players
