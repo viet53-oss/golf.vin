@@ -167,8 +167,6 @@ export async function addGuestToLiveRound(data: {
                 live_round_id: data.liveRoundId,
                 is_guest: true,
                 guest_name: data.guestName,
-                player_id: null,
-                tee_box_id: null,
                 tee_box_name: 'Guest',
                 tee_box_rating: data.rating,
                 tee_box_slope: data.slope,
