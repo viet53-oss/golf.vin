@@ -285,7 +285,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
     };
 
-    const handleUpdateGuest = (guestId: string, guestData: { name: string; index: number; courseHandicap: number }) => {
+    const handleUpdateGuest = async (guestId: string, guestData: { name: string; index: number; courseHandicap: number }) => {
         // Update the guest in guestPlayers
         const updatedGuests = guestPlayers.map(g =>
             g.id === guestId ? {
