@@ -34,6 +34,10 @@ export function LivePlayerSelectionModal({
     if (!isOpen) return null;
 
     const togglePlayer = (id: string) => {
+        // Don't allow toggling if player is already in round (added by another phone)
+        if (playersInRound.includes(id) && !selectedIds.includes(id)) {
+            return;
+        }
         setLocalSelectedIds(prev =>
             prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
         );
@@ -72,36 +76,40 @@ export function LivePlayerSelectionModal({
                         {sortedPlayers.map(player => {
                             const isSelected = localSelectedIds.includes(player.id);
                             const isInRound = playersInRound.includes(player.id);
+                            const isDisabled = isInRound && !selectedIds.includes(player.id);
 
                             return (
                                 <button
                                     key={player.id}
                                     onClick={() => togglePlayer(player.id)}
-                                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${isSelected
-                                        ? 'border-blue-500 bg-blue-50 shadow-sm cursor-pointer'
-                                        : 'border-gray-100 bg-white hover:border-gray-200 cursor-pointer'
+                                    disabled={isDisabled}
+                                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${isDisabled
+                                        ? 'border-gray-200 bg-gray-100 opacity-50 cursor-not-allowed'
+                                        : isSelected
+                                            ? 'border-blue-500 bg-blue-50 shadow-sm cursor-pointer'
+                                            : 'border-gray-100 bg-white hover:border-gray-200 cursor-pointer'
                                         }`}
                                 >
-                                    <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center border-2 transition-colors ${isSelected
-                                        ? 'bg-blue-600 border-blue-600'
-                                        : 'bg-white border-gray-300'
+                                    <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center border-2 transition-colors ${isDisabled
+                                        ? 'bg-gray-200 border-gray-300'
+                                        : isSelected
+                                            ? 'bg-blue-600 border-blue-600'
+                                            : 'bg-white border-gray-300'
                                         }`}>
-                                        {isSelected && (
+                                        {isSelected && !isDisabled && (
                                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                                         )}
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between">
-                                            <span className={`text-[18pt] font-bold ${isSelected ? 'text-blue-800' : 'text-gray-700'
+                                            <span className={`text-[18pt] font-bold ${isDisabled ? 'text-gray-400' : isSelected ? 'text-blue-800' : 'text-gray-700'
                                                 }`}>
                                                 {player.name}
                                             </span>
-                                            {isInRound && !isSelected && (
-                                                <span className="text-[10pt] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                                                    Active
-                                                </span>
-                                            )}
                                         </div>
+                                        {isDisabled && (
+                                            <div className="text-[12pt] text-gray-500 italic mt-1">Already selected by another phone</div>
+                                        )}
                                     </div>
                                 </button>
                             );
