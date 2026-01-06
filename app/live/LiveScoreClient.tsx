@@ -14,6 +14,7 @@ interface Player {
     name: string;
     index: number;
     preferred_tee_box: string | null;
+    isGuest?: boolean;
     liveRoundData?: {
         tee_box_name: string | null;
         course_hcp: number | null;
@@ -96,6 +97,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             name: p.guest_name || 'Guest',
                             index: p.index_at_time,
                             preferred_tee_box: null,
+                            isGuest: true,
                             liveRoundData: {
                                 tee_box_name: p.tee_box_name,
                                 course_hcp: p.course_handicap
@@ -292,8 +294,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             par: initialRound.par
         });
 
-        if (result.success) {
+        if (result.success && result.guestPlayerId) {
             console.log('Guest added successfully, refreshing page');
+
+            // Add to local storage so it appears in "My Group" after refresh
+            const saved = localStorage.getItem('live_scoring_my_group');
+            let currentIds: string[] = saved ? JSON.parse(saved) : [];
+            if (!currentIds.includes(result.guestPlayerId)) {
+                currentIds.push(result.guestPlayerId);
+                localStorage.setItem('live_scoring_my_group', JSON.stringify(currentIds));
+            }
+
             // Refresh the page to load the new guest
             router.refresh();
         } else {
@@ -340,7 +351,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
     const handleAddPlayers = async (newSelectedPlayerIds: string[]) => {
         const newSelectedPlayers = allPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
-        setSelectedPlayers(newSelectedPlayers);
+        const selectedGuests = guestPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
+        const combinedSelection = [...newSelectedPlayers, ...selectedGuests];
+
+        setSelectedPlayers(combinedSelection);
 
         // 1. Ensure Live Round Exists (Fallback if server creation failed)
         let currentLiveRoundId = liveRoundId;
@@ -418,6 +432,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     name: p.guest_name || 'Guest',
                     index: p.index_at_time,
                     preferred_tee_box: null,
+                    isGuest: true,
                     liveRoundData: {
                         tee_box_name: p.tee_box_name,
                         course_hcp: p.course_handicap
@@ -765,7 +780,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         <div className="flex items-center gap-1">
                                                             <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
                                                             {showFlagNextToName && <span className="text-[16pt]">🏁</span>}
-                                                            {player.id.startsWith('guest-') && canUpdate && (
+                                                            {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
                                                                 <button
                                                                     onClick={() => {
                                                                         setEditingGuest({
