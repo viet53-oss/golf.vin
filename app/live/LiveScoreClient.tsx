@@ -699,12 +699,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
                     <div className="mt-4">
-                        <button
-                            onClick={() => router.refresh()}
-                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
-                        >
-                            Refresh Summary
-                        </button>
+
                         <div className="space-y-1">
                             {rankedPlayers.map((p, i) => {
                                 let toParStr = "E";
