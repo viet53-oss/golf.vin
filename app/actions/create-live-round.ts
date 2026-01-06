@@ -269,11 +269,14 @@ export async function saveLiveScore(data: {
 
         // Save scores for each player
         for (const ps of data.playerScores) {
-            // Find the live round player
+            // Find the live round player (could be by player_id OR direct LiveRoundPlayer id for guests)
             const liveRoundPlayer = await prisma.liveRoundPlayer.findFirst({
                 where: {
                     live_round_id: data.liveRoundId,
-                    player_id: ps.playerId
+                    OR: [
+                        { player_id: ps.playerId },
+                        { id: ps.playerId }
+                    ]
                 }
             });
 
