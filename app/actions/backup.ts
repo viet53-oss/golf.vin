@@ -95,11 +95,23 @@ export async function restoreBackupData(jsonString: string) {
                 for (const course of courses) {
                     // We must separate the relation data
                     const { tee_boxes, holes, ...courseData } = course;
+
+                    // Prisma nested create does not accept the foreign key (course_id) as it's implied
+                    const cleanTeeBoxes = tee_boxes?.map((t: any) => {
+                        const { course_id, ...rest } = t;
+                        return rest;
+                    });
+
+                    const cleanHoles = holes?.map((h: any) => {
+                        const { course_id, ...rest } = h;
+                        return rest;
+                    });
+
                     await tx.course.create({
                         data: {
                             ...courseData,
-                            tee_boxes: { create: tee_boxes },
-                            holes: { create: holes }
+                            tee_boxes: { create: cleanTeeBoxes },
+                            holes: { create: cleanHoles }
                         }
                     });
                 }
@@ -161,7 +173,7 @@ export async function restoreBackupData(jsonString: string) {
         return { success: true };
     } catch (error) {
         console.error('Restore failed:', error);
-        return { success: false, error: 'Failed to restore data. Check format.' };
+        return { success: false, error: `Failed to restore: ${error instanceof Error ? error.message : String(error)}` };
     }
 }
 
