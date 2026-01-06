@@ -123,12 +123,18 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         if (activeRound) console.log('LOG-12: Fallback to:', activeRound.name, activeRound.date);
     }
 
-    // 6. Redirect to ensure ID is in URL
+    // 6. If still no round exists, redirect to home
+    if (!activeRound) {
+        console.log('LOG-13: No rounds exist. Redirecting to home.');
+        return redirect('/');
+    }
+
+    // 7. Redirect to ensure ID is in URL
     if (!roundIdFromUrl && activeRound) {
         return redirect(`/live?roundId=${activeRound.id}`);
     }
 
-    // 7. Get rounds for list
+    // 8. Get rounds for list
     const allLiveRounds = await prisma.liveRound.findMany({
         orderBy: { created_at: 'desc' },
         select: { id: true, name: true, date: true, created_at: true }
