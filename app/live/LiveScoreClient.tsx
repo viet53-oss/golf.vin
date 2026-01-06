@@ -320,6 +320,29 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         setEditingGuest(null);
     };
 
+    const handleDeleteGuest = (guestId: string) => {
+        // Remove from guest players
+        const updatedGuests = guestPlayers.filter(g => g.id !== guestId);
+        setGuestPlayers(updatedGuests);
+
+        // Remove from selected players
+        const updatedSelected = selectedPlayers.filter(p => p.id !== guestId);
+        setSelectedPlayers(updatedSelected);
+
+        // Remove scores for this guest
+        const updatedScores = new Map(scores);
+        updatedScores.delete(guestId);
+        setScores(updatedScores);
+
+        // Update localStorage
+        localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
+        const updatedIds = updatedSelected.map(p => p.id);
+        localStorage.setItem('live_scoring_my_group', JSON.stringify(updatedIds));
+
+        // Close modal and reset editing state
+        setEditingGuest(null);
+    };
+
 
     const handleAddPlayers = async (newSelectedPlayerIds: string[]) => {
         const newSelectedPlayers = allPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
@@ -602,6 +625,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     }}
                     onAdd={handleAddGuest}
                     onUpdate={handleUpdateGuest}
+                    onDelete={handleDeleteGuest}
                     editingGuest={editingGuest}
                     roundData={initialRound ? {
                         rating: initialRound.rating,

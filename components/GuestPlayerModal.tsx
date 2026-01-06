@@ -7,6 +7,7 @@ interface GuestPlayerModalProps {
     onClose: () => void;
     onAdd: (guest: { name: string; index: number; courseHandicap: number }) => void;
     onUpdate?: (guestId: string, guest: { name: string; index: number; courseHandicap: number }) => void;
+    onDelete?: (guestId: string) => void;
     roundData?: {
         rating: number;
         slope: number;
@@ -20,7 +21,7 @@ interface GuestPlayerModalProps {
     } | null;
 }
 
-export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, roundData, editingGuest }: GuestPlayerModalProps) {
+export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, roundData, editingGuest }: GuestPlayerModalProps) {
     const [name, setName] = useState('');
     const [index, setIndex] = useState('0');
     const [courseHandicap, setCourseHandicap] = useState('0');
@@ -132,6 +133,21 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, roundData, 
                 </div>
 
                 <div className="flex gap-3 mt-6">
+                    {editingGuest && (
+                        <button
+                            onClick={() => {
+                                if (confirm('Are you sure you want to delete this guest player?')) {
+                                    if (onDelete && editingGuest) {
+                                        onDelete(editingGuest.id);
+                                    }
+                                    onClose();
+                                }
+                            }}
+                            className="px-4 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all"
+                        >
+                            Delete
+                        </button>
+                    )}
                     <button
                         onClick={onClose}
                         className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-bold hover:bg-gray-300 transition-all"
