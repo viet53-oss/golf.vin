@@ -7,7 +7,7 @@ type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0
 
 export async function getBackupData() {
     try {
-        const [players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events] = await Promise.all([
+        const [players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events, liveRounds, liveRoundPlayers, liveScores, moneyEvents] = await Promise.all([
             prisma.player.findMany(),
             prisma.course.findMany({ include: { tee_boxes: true, holes: true } }),
             prisma.round.findMany(),
@@ -15,7 +15,11 @@ export async function getBackupData() {
             prisma.handicapRound.findMany(),
             prisma.score.findMany(),
             prisma.photo.findMany(),
-            prisma.event.findMany()
+            prisma.event.findMany(),
+            prisma.liveRound.findMany(),
+            prisma.liveRoundPlayer.findMany(),
+            prisma.liveScore.findMany(),
+            prisma.moneyEvent.findMany()
         ]);
 
         const backup = {
@@ -29,7 +33,11 @@ export async function getBackupData() {
                 handicapRounds,
                 scores,
                 photos,
-                events
+                events,
+                liveRounds,
+                liveRoundPlayers,
+                liveScores,
+                moneyEvents
             }
         };
 
@@ -46,7 +54,7 @@ export async function restoreBackupData(jsonString: string) {
 
         if (!backup.data) throw new Error('Invalid backup format');
 
-        const { players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events } = backup.data;
+        const { players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events, liveRounds, liveRoundPlayers, liveScores, moneyEvents } = backup.data;
 
         // Transactional Restore: Wipe and Replace strategy for consistency
         // Note: In a real prod app, we might check for existing IDs or use upsert. 
@@ -60,6 +68,10 @@ export async function restoreBackupData(jsonString: string) {
 
         await prisma.$transaction(async (tx: TransactionClient) => {
             // 1. Clean existing data (Dependents first)
+            await tx.liveScore.deleteMany();
+            await tx.liveRoundPlayer.deleteMany();
+            await tx.liveRound.deleteMany();
+            await tx.moneyEvent.deleteMany();
             await tx.score.deleteMany();
             await tx.roundPlayer.deleteMany();
             await tx.handicapRound.deleteMany();
@@ -121,6 +133,26 @@ export async function restoreBackupData(jsonString: string) {
             // 9. Restore Events - Optional for v1 backups
             if (events?.length) {
                 await tx.event.createMany({ data: events });
+            }
+
+            // 10. Restore Live Rounds
+            if (liveRounds?.length) {
+                await tx.liveRound.createMany({ data: liveRounds });
+            }
+
+            // 11. Restore Live Round Players
+            if (liveRoundPlayers?.length) {
+                await tx.liveRoundPlayer.createMany({ data: liveRoundPlayers });
+            }
+
+            // 12. Restore Live Scores
+            if (liveScores?.length) {
+                await tx.liveScore.createMany({ data: liveScores });
+            }
+
+            // 13. Restore Money Events
+            if (moneyEvents?.length) {
+                await tx.moneyEvent.createMany({ data: moneyEvents });
             }
         });
 

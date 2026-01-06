@@ -41,13 +41,13 @@ const ImageIcon = ({ className }: { className?: string }) => (
 import { getBackupData, restoreBackupData, backupPhotosToLocal } from '../actions/backup';
 
 export default function BackupManager() {
-    const [isLoading, setIsLoading] = useState(false);
+    const [loadingAction, setLoadingAction] = useState<string | null>(null);
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDownload = async () => {
-        setIsLoading(true);
+        setLoadingAction('download');
         setStatus('idle');
         try {
             const result = await getBackupData();
@@ -71,7 +71,7 @@ export default function BackupManager() {
             setStatus('error');
             setMessage('An unexpected error occurred');
         } finally {
-            setIsLoading(false);
+            setLoadingAction(null);
         }
     };
 
@@ -85,7 +85,7 @@ export default function BackupManager() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setIsLoading(true);
+        setLoadingAction('restore');
         setStatus('idle');
         setMessage('Restoring data...');
 
@@ -104,13 +104,13 @@ export default function BackupManager() {
             setStatus('error');
             setMessage('Failed to read backup file');
         } finally {
-            setIsLoading(false);
+            setLoadingAction(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
     const handlePhotoBackup = async () => {
-        setIsLoading(true);
+        setLoadingAction('photos');
         setStatus('idle');
         setMessage('Backing up photos to server storage...');
         try {
@@ -126,7 +126,7 @@ export default function BackupManager() {
             setStatus('error');
             setMessage('An unexpected error occurred during photo backup');
         } finally {
-            setIsLoading(false);
+            setLoadingAction(null);
         }
     };
 
@@ -135,19 +135,19 @@ export default function BackupManager() {
             <div className="flex gap-4">
                 <button
                     onClick={handleDownload}
-                    disabled={isLoading}
+                    disabled={!!loadingAction}
                     className="flex-1 flex items-center justify-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    {loadingAction === 'download' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     Download Backup
                 </button>
 
                 <button
                     onClick={handleRestoreClick}
-                    disabled={isLoading}
+                    disabled={!!loadingAction}
                     className="flex-1 flex items-center justify-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {loadingAction === 'restore' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                     Restore from Backup
                 </button>
                 <input
@@ -174,10 +174,10 @@ export default function BackupManager() {
 
             <button
                 onClick={handlePhotoBackup}
-                disabled={isLoading}
+                disabled={!!loadingAction}
                 className="w-full flex items-center justify-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
-                {isLoading && message.includes('photos') ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                {loadingAction === 'photos' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                 Backup All Photos to Local Directory
             </button>
         </div>
