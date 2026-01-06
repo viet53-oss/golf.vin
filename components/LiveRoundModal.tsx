@@ -44,7 +44,17 @@ export function LiveRoundModal({
             setPar(existingRound.par);
             setRating(existingRound.rating);
             setSlope(existingRound.slope);
-            setSelectedCourseId(existingRound.course_id || '');
+            const cId = existingRound.course_id || '';
+            setSelectedCourseId(cId);
+
+            // Attempt to pre-select matching tee box or default to White
+            const c = allCourses.find(fc => fc.id === cId);
+            if (c) {
+                const match = c.tee_boxes.find((t: any) => t.rating === existingRound.rating && t.slope === existingRound.slope);
+                const whiteTee = c.tee_boxes.find((t: any) => t.name.toLowerCase().includes('white'));
+                const bestTee = match || whiteTee || c.tee_boxes[0];
+                if (bestTee) setSelectedTeeId(bestTee.id);
+            }
         } else if (isOpen) {
             // New Round defaults: City Park North & White Tee
             const cpNorth = allCourses.find(c => c.name.toLowerCase().includes('city park north'));
