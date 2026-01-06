@@ -114,6 +114,30 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
 
 
+
+    // Sync local scores with server data when it updates (e.g. after refresh)
+    useEffect(() => {
+        if (initialRound?.players) {
+            setScores(prev => {
+                const next = new Map(prev);
+                initialRound.players.forEach((p: any) => {
+                    // Reconstruct server scores for this player
+                    const serverPlayerScores = new Map<number, number>();
+                    if (p.scores) {
+                        p.scores.forEach((s: any) => {
+                            if (s.hole?.hole_number) {
+                                serverPlayerScores.set(s.hole.hole_number, s.strokes);
+                            }
+                        });
+                    }
+                    // Update local map with server data
+                    next.set(p.player.id, serverPlayerScores);
+                });
+                return next;
+            });
+        }
+    }, [initialRound]);
+
     const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
     const [activeHole, setActiveHole] = useState(() => {
         if (!initialRound?.players || initialRound.players.length === 0) return 1;
