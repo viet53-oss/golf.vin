@@ -615,7 +615,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         const courseHcp = getCourseHandicap(player);
 
                                         const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
-                                        let groupMedal = null;
+                                        let groupMedal: string | number | null = null;
                                         if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
                                             if (allActiveFinished) {
                                                 if (playerRankIndex === 0) groupMedal = "🏆";
@@ -629,15 +629,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
-                                                <div className="flex flex-col">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="flex flex-col items-start">
-                                                            <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
-                                                            <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
-                                                        </div>
-                                                        {groupMedal && (
-                                                            <span className="text-[20pt]" title="Finished">{groupMedal}</span>
-                                                        )}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-black text-white font-bold rounded w-8 h-8 flex items-center justify-center text-[12pt] shrink-0">
+                                                        {groupMedal || (playerRankIndex !== -1 ? playerRankIndex + 1 : '-')}
+                                                    </div>
+                                                    <div className="flex flex-col items-start leading-tight">
+                                                        <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                        <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-4">
@@ -767,19 +765,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         <div className="bg-[#1d4ed8] p-1 text-white">
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="bg-white text-[#1d4ed8] font-bold rounded w-8 h-8 flex items-center justify-center text-[14pt]">
-                                                        {i + 1}
+                                                    <div className="bg-white text-[#1d4ed8] font-bold rounded w-10 h-10 flex items-center justify-center text-[16pt] border-2 border-white/20">
+                                                        {medalIcon || (i + 1)}
                                                     </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="flex flex-col">
-                                                                <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
-                                                                <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
-                                                            </div>
-                                                            {medalIcon && (
-                                                                <span className="text-[16pt]" title="Finished">{medalIcon}</span>
-                                                            )}
-                                                        </div>
+                                                    <div className="flex flex-col">
+                                                        <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
+                                                        <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
                                                     </div>
                                                 </div>
 
