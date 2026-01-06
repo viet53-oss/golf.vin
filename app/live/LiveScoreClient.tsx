@@ -615,15 +615,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         const courseHcp = getCourseHandicap(player);
 
                                         const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
-                                        let groupMedal: string | number | null = null;
+                                        let displayRank: React.ReactNode = playerRankIndex !== -1 ? playerRankIndex + 1 : '-';
+                                        let showFlagNextToName = false;
+
                                         if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
                                             if (allActiveFinished) {
-                                                if (playerRankIndex === 0) groupMedal = "🏆";
-                                                else if (playerRankIndex === 1) groupMedal = "🥈";
-                                                else if (playerRankIndex === 2) groupMedal = "🥉";
-                                                else groupMedal = "🏁";
+                                                if (playerRankIndex === 0) displayRank = "🏆";
+                                                else if (playerRankIndex === 1) displayRank = "🥈";
+                                                else if (playerRankIndex === 2) displayRank = "🥉";
+                                                else showFlagNextToName = true;
                                             } else {
-                                                groupMedal = "🏁";
+                                                showFlagNextToName = true;
                                             }
                                         }
 
@@ -631,10 +633,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
                                                 <div className="flex items-center gap-3">
                                                     <div className="bg-black text-white font-bold rounded w-8 h-8 flex items-center justify-center text-[12pt] shrink-0">
-                                                        {groupMedal || (playerRankIndex !== -1 ? playerRankIndex + 1 : '-')}
+                                                        {displayRank}
                                                     </div>
                                                     <div className="flex flex-col items-start leading-tight">
-                                                        <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                        <div className="flex items-center gap-1">
+                                                            <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                            {showFlagNextToName && <span className="text-[16pt]">🏁</span>}
+                                                        </div>
                                                         <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
                                                     </div>
                                                 </div>
@@ -747,15 +752,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     toParClass = "text-red-600";
                                 }
 
-                                let medalIcon = null;
+                                let displayRankInSummary: React.ReactNode = i + 1;
+                                let showFlagInSummary = false;
+
                                 if (p.thru >= 18) {
                                     if (allActiveFinished) {
-                                        if (i === 0) medalIcon = "🏆";
-                                        else if (i === 1) medalIcon = "🥈";
-                                        else if (i === 2) medalIcon = "🥉";
-                                        else medalIcon = "🏁";
+                                        if (i === 0) displayRankInSummary = "🏆";
+                                        else if (i === 1) displayRankInSummary = "🥈";
+                                        else if (i === 2) displayRankInSummary = "🥉";
+                                        else showFlagInSummary = true;
                                     } else {
-                                        medalIcon = "🏁";
+                                        showFlagInSummary = true;
                                     }
                                 }
 
@@ -766,10 +773,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center gap-3">
                                                     <div className="bg-white text-[#1d4ed8] font-bold rounded w-10 h-10 flex items-center justify-center text-[16pt] border-2 border-white/20">
-                                                        {medalIcon || (i + 1)}
+                                                        {displayRankInSummary}
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
+                                                        <div className="flex items-center gap-1">
+                                                            <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
+                                                            {showFlagInSummary && <span className="text-[16pt]">🏁</span>}
+                                                        </div>
                                                         <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
                                                     </div>
                                                 </div>
