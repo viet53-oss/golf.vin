@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
+import { GuestPlayerModal } from '@/components/GuestPlayerModal';
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound } from '@/app/actions/create-live-round';
 
 interface Player {
@@ -61,6 +62,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
     const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
     const [roundModalMode, setRoundModalMode] = useState<'new' | 'edit'>('new');
+    const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
+    const [guestPlayers, setGuestPlayers] = useState<Player[]>([]);
 
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
@@ -71,8 +74,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             // If we are on a different round than before, clear the old group selection
             if (currentId && savedRoundId && savedRoundId !== currentId) {
                 localStorage.removeItem('live_scoring_my_group');
+                localStorage.removeItem('live_scoring_guest_players');
                 localStorage.setItem('live_scoring_last_round_id', currentId);
                 setSelectedPlayers([]); // Clear selection for new round
+                setGuestPlayers([]); // Clear guest players
                 return;
             }
 
@@ -80,11 +85,21 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 localStorage.setItem('live_scoring_last_round_id', currentId);
             }
 
+            // Restore guest players
+            const savedGuests = localStorage.getItem('live_scoring_guest_players');
+            let restoredGuests: Player[] = [];
+            if (savedGuests) {
+                restoredGuests = JSON.parse(savedGuests);
+                setGuestPlayers(restoredGuests);
+            }
+
+            // Restore selected players (both regular and guests)
             const saved = localStorage.getItem('live_scoring_my_group');
             if (saved) {
                 const savedIds = JSON.parse(saved);
-                // Use allPlayers to reconstruct - don't rely on server round data
-                const restored = allPlayers.filter((p: Player) => savedIds.includes(p.id));
+                // Combine allPlayers with guest players for restoration
+                const allAvailablePlayers = [...allPlayers, ...restoredGuests];
+                const restored = allAvailablePlayers.filter((p: Player) => savedIds.includes(p.id));
                 if (restored.length > 0) {
                     setSelectedPlayers(restored);
                 } else {
@@ -96,6 +111,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         } catch (e) {
             console.error("Failed to load saved players", e);
             setSelectedPlayers([]); // On error, start empty
+            setGuestPlayers([]); // On error, clear guests
         }
     }, [initialRound, allPlayers]);
 
@@ -238,6 +254,33 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
         const ch = (player.index * slope / 113) + (rating - coursePar);
         return Math.round(ch);
+    };
+
+    const handleAddGuest = (guest: { name: string; index: number; courseHandicap: number }) => {
+        // Create a temporary guest player object
+        const guestPlayer: Player = {
+            id: `guest-${Date.now()}`,
+            name: guest.name,
+            index: guest.index,
+            preferred_tee_box: null,
+            liveRoundData: {
+                tee_box_name: null,
+                course_hcp: guest.courseHandicap
+            }
+        };
+
+        // Add to guest players list
+        const updatedGuests = [...guestPlayers, guestPlayer];
+        setGuestPlayers(updatedGuests);
+
+        // Add to selected players
+        const updatedSelected = [...selectedPlayers, guestPlayer];
+        setSelectedPlayers(updatedSelected);
+
+        // Save to localStorage
+        const updatedIds = updatedSelected.map(p => p.id);
+        localStorage.setItem('live_scoring_my_group', JSON.stringify(updatedIds));
+        localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
     };
 
     const handleAddPlayers = async (newSelectedPlayerIds: string[]) => {
@@ -513,6 +556,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     onSelectionChange={handleAddPlayers}
                 />
 
+                <GuestPlayerModal
+                    isOpen={isGuestModalOpen}
+                    onClose={() => setIsGuestModalOpen(false)}
+                    onAdd={handleAddGuest}
+                />
+
                 {/* Scoring Section */}
                 {(selectedPlayers.length > 0 || (canUpdate && !hideSettings)) && (
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 my-1">
@@ -520,12 +569,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
                             <h2 className="text-[16pt] font-bold text-gray-900">Group Players</h2>
                             {canUpdate && !hideSettings && (
-                                <button
-                                    onClick={() => setIsPlayerModalOpen(true)}
-                                    className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
-                                >
-                                    Select Players
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setIsPlayerModalOpen(true)}
+                                        className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
+                                    >
+                                        Select Players
+                                    </button>
+                                    <button
+                                        onClick={() => setIsGuestModalOpen(true)}
+                                        className="bg-blue-600 text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all"
+                                    >
+                                        Add Guest
+                                    </button>
+                                </div>
                             )}
                         </div>
 
