@@ -43,8 +43,13 @@ export async function completeLiveRound(liveRoundId: string) {
             }
         });
 
-        // 3. Copy all players and their scores
+        // 3. Copy all players and their scores (excluding guests)
         for (const livePlayer of liveRound.players) {
+            // Skip guest players as they don't have a permanent profile history
+            if (livePlayer.is_guest || !livePlayer.player_id) {
+                continue;
+            }
+
             // Create RoundPlayer
             const roundPlayer = await prisma.roundPlayer.create({
                 data: {
