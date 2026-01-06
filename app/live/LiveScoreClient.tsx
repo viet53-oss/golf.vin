@@ -304,8 +304,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             </header>
 
             <main className="w-full px-1 m-0 space-y-1">
-                {/* Round Selector - All Users */}
-                {allLiveRounds.length > 0 && (
+                {/* Round Selector - Admin Only */}
+                {isAdmin && allLiveRounds.length > 0 && (
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                         <label className="block text-[14pt] font-bold text-gray-900 mb-2">Select Round:</label>
                         <select
@@ -372,15 +372,24 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             {isAdmin && (
                                 <button
                                     onClick={async () => {
-                                        if (!liveRoundId) return;
-                                        if (confirm('Are you sure you want to delete this round? This cannot be undone.')) {
-                                            try {
-                                                await deleteLiveRound(liveRoundId);
-                                                window.location.href = '/';
-                                            } catch (err) {
-                                                console.error('Failed to delete round:', err);
-                                                alert('Failed to delete round.');
-                                            }
+                                        console.log('Delete button clicked');
+                                        console.log('liveRoundId:', liveRoundId);
+                                        console.log('isAdmin:', isAdmin);
+
+                                        if (!liveRoundId) {
+                                            console.log('No liveRoundId, returning');
+                                            return;
+                                        }
+
+                                        console.log('Deleting round...');
+                                        try {
+                                            console.log('Calling deleteLiveRound...');
+                                            await deleteLiveRound(liveRoundId);
+                                            console.log('Delete successful, redirecting to home');
+                                            window.location.href = '/';
+                                        } catch (err) {
+                                            console.error('Failed to delete round:', err);
+                                            alert('Failed to delete round.');
                                         }
                                     }}
                                     className="bg-red-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
