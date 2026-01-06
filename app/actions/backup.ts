@@ -166,7 +166,7 @@ export async function restoreBackupData(jsonString: string) {
             if (moneyEvents?.length) {
                 await tx.moneyEvent.createMany({ data: moneyEvents });
             }
-        });
+        }, { timeout: 60000 });
 
         revalidatePath('/');
         console.log('✅ Restore completed successfully');
