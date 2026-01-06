@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Save, Loader2, ArrowLeft } from 'lucide-react';
 import { updateCourse } from '@/app/actions/update-course';
+import { createCourse } from '@/app/actions/create-course';
 
 // Types matching Prisma include
 type CourseData = {
@@ -14,7 +15,7 @@ type CourseData = {
     holes: { id: string; hole_number: number; par: number; difficulty: number | null }[];
 };
 
-export default function EditCourseClient({ initialCourse }: { initialCourse: CourseData }) {
+export default function EditCourseClient({ initialCourse, isNew = false }: { initialCourse: CourseData, isNew?: boolean }) {
     const [name, setName] = useState(initialCourse.name);
     const [tees, setTees] = useState(initialCourse.tee_boxes);
     const [holes, setHoles] = useState(initialCourse.holes); // Should be sorted 1-18
@@ -44,13 +45,23 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
     const handleSubmit = () => {
 
         startTransition(async () => {
-            await updateCourse(initialCourse.id, {
-                name,
-                tees,
-                holes
-            });
+            if (isNew) {
+                await createCourse({
+                    name,
+                    tees,
+                    holes
+                });
+            } else {
+                await updateCourse(initialCourse.id, {
+                    name,
+                    tees,
+                    holes
+                });
+            }
         });
     };
+
+
 
     // Split holes for UI
     const frontNine = holes.filter((h: any) => h.hole_number <= 9);
@@ -71,7 +82,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
             <div className="fixed inset-0 z-[200] flex flex-col bg-white animate-in fade-in">
                 {/* Header */}
                 <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0">
-                    <h1 className="text-[16pt] font-black text-gray-900 tracking-tight">Edit Course</h1>
+                    <h1 className="text-[16pt] font-black text-gray-900 tracking-tight">{isNew ? 'Add Course' : 'Edit Course'}</h1>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={handleSubmit}
@@ -93,20 +104,31 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto px-1 py-6 bg-slate-50">
+                <form className="flex-1 overflow-y-auto px-1 py-6 bg-slate-50" onSubmit={(e) => e.preventDefault()}>
                     <div className="m-1 space-y-6">
 
                         {/* 1. Global Course Settings */}
                         <div className="bg-white rounded-xl shadow-sm border-2 border-black p-6">
                             <h2 className="font-bold mb-4">Course Details</h2>
-                            <div>
-                                <label className="block font-bold text-gray-700 mb-1">Course Name</label>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full max-w-md p-2 border border-gray-300 rounded font-bold"
-                                />
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="block font-bold text-gray-700 mb-1">Course Name</label>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded font-bold"
+                                    />
+                                </div>
+                                <div className="w-24">
+                                    <label className="block font-bold text-gray-700 mb-1">Par</label>
+                                    <input
+                                        type="number"
+                                        value={holes.reduce((sum, h) => sum + (h.par || 0), 0)}
+                                        disabled
+                                        className="w-full p-2 border border-gray-300 bg-gray-100 rounded font-bold text-center text-gray-500"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -122,6 +144,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                                 type="text"
                                                 value={tee.name}
                                                 onChange={(e) => handleTeeChange(idx, 'name', e.target.value)}
+
                                                 className="w-full p-2 border border-gray-300 rounded"
                                             />
                                         </div>
@@ -131,6 +154,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                                 type="number" step="0.1"
                                                 value={tee.rating}
                                                 onChange={(e) => handleTeeChange(idx, 'rating', e.target.value)}
+
                                                 className="w-full p-2 border border-gray-300 rounded"
                                             />
                                         </div>
@@ -140,6 +164,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                                 type="number"
                                                 value={tee.slope}
                                                 onChange={(e) => handleTeeChange(idx, 'slope', e.target.value)}
+
                                                 className="w-full p-2 border border-gray-300 rounded"
                                             />
                                         </div>
@@ -174,6 +199,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                                         className="w-10 text-center border border-gray-300 rounded p-1"
                                                         value={h.par}
                                                         onChange={(e) => handleHoleChange(i, 'par', e.target.value)}
+
                                                     />
                                                 </td>
                                             ))}
@@ -187,6 +213,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                                         className="w-10 text-center border border-gray-300 rounded p-1 text-gray-600"
                                                         value={h.difficulty ?? ''}
                                                         onChange={(e) => handleHoleChange(i, 'difficulty', e.target.value)}
+
                                                     />
                                                 </td>
                                             ))}
@@ -217,6 +244,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                                         className="w-10 text-center border border-gray-300 rounded p-1"
                                                         value={h.par}
                                                         onChange={(e) => handleHoleChange(frontNine.length + i, 'par', e.target.value)}
+
                                                     />
                                                 </td>
                                             ))}
@@ -230,6 +258,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                                                         className="w-10 text-center border border-gray-300 rounded p-1 text-gray-600"
                                                         value={h.difficulty ?? ''}
                                                         onChange={(e) => handleHoleChange(frontNine.length + i, 'difficulty', e.target.value)}
+
                                                     />
                                                 </td>
                                             ))}
@@ -241,7 +270,7 @@ export default function EditCourseClient({ initialCourse }: { initialCourse: Cou
                         </div>
 
                     </div>
-                </div>
+                </form>
             </div>
         </>
     );

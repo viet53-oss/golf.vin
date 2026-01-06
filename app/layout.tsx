@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import AppHeader from "@/components/AppHeader";
+import GlobalEnterNavigation from "@/components/GlobalEnterNavigation";
 
 export default function RootLayout({
   children,
@@ -31,6 +32,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AppHeader />
+        <GlobalEnterNavigation />
         {children}
       </body>
     </html>
