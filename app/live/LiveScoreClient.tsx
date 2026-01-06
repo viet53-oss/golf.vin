@@ -286,72 +286,37 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     };
 
     const handleUpdateGuest = async (guestId: string, guestData: { name: string; index: number; courseHandicap: number }) => {
-        // Update the guest in guestPlayers
-        const updatedGuests = guestPlayers.map(g =>
-            g.id === guestId ? {
-                ...g,
-                name: guestData.name,
-                index: guestData.index,
-                liveRoundData: {
-                    tee_box_name: null,
-                    course_hcp: guestData.courseHandicap
-                }
-            } : g
-        );
-        setGuestPlayers(updatedGuests);
+        console.log('Updating guest in database:', guestId, guestData);
 
-        // Update in selectedPlayers
-        const updatedSelected = selectedPlayers.map(p =>
-            p.id === guestId ? {
-                ...p,
-                name: guestData.name,
-                index: guestData.index,
-                liveRoundData: {
-                    tee_box_name: null,
-                    course_hcp: guestData.courseHandicap
-                }
-            } : p
-        );
-        setSelectedPlayers(updatedSelected);
+        const result = await updateGuestInLiveRound({
+            guestPlayerId: guestId,
+            guestName: guestData.name,
+            index: guestData.index,
+            courseHandicap: guestData.courseHandicap
+        });
 
-        // Save to localStorage
-        localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
-
-        // Close modal and reset editing state
-        setEditingGuest(null);
+        if (result.success) {
+            console.log('Guest updated successfully, refreshing page');
+            setEditingGuest(null);
+            router.refresh();
+        } else {
+            alert('Failed to update guest: ' + result.error);
+        }
     };
 
-    const handleDeleteGuest = (guestId: string) => {
-        console.log('handleDeleteGuest called with ID:', guestId);
-        console.log('Current guestPlayers:', guestPlayers);
-        console.log('Current selectedPlayers:', selectedPlayers);
+    const handleDeleteGuest = async (guestId: string) => {
+        console.log('Deleting guest from database:', guestId);
 
-        // Remove from guest players
-        const updatedGuests = guestPlayers.filter(g => g.id !== guestId);
-        setGuestPlayers(updatedGuests);
-        console.log('Updated guestPlayers:', updatedGuests);
+        const result = await deleteGuestFromLiveRound(guestId);
 
-        // Remove from selected players
-        const updatedSelected = selectedPlayers.filter(p => p.id !== guestId);
-        setSelectedPlayers(updatedSelected);
-        console.log('Updated selectedPlayers:', updatedSelected);
-
-        // Remove scores for this guest
-        const updatedScores = new Map(scores);
-        updatedScores.delete(guestId);
-        setScores(updatedScores);
-        console.log('Scores deleted for guest');
-
-        // Update localStorage
-        localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
-        const updatedIds = updatedSelected.map(p => p.id);
-        localStorage.setItem('live_scoring_my_group', JSON.stringify(updatedIds));
-        console.log('localStorage updated');
-
-        // Close modal and reset editing state
-        setIsGuestModalOpen(false);
-        setEditingGuest(null);
-        console.log('Modal closed and editing state reset');
+        if (result.success) {
+            console.log('Guest deleted successfully, refreshing page');
+            setIsGuestModalOpen(false);
+            setEditingGuest(null);
+            router.refresh();
+        } else {
+            alert('Failed to delete guest: ' + result.error);
+        }
     };
 
 
