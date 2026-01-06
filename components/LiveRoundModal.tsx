@@ -28,12 +28,13 @@ export function LiveRoundModal({
 }: LiveRoundModalProps) {
     const today = new Date().toISOString().split('T')[0];
 
-    const [name, setName] = useState('City Park North');
+    const [name, setName] = useState('');
     const [date, setDate] = useState(today);
     const [par, setPar] = useState(68);
     const [rating, setRating] = useState(63.8);
     const [slope, setSlope] = useState(100);
-    const [selectedCourseId, setSelectedCourseId] = useState(courseId || '');
+    const [selectedCourseId, setSelectedCourseId] = useState('');
+    const [selectedTeeId, setSelectedTeeId] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
@@ -43,15 +44,37 @@ export function LiveRoundModal({
             setPar(existingRound.par);
             setRating(existingRound.rating);
             setSlope(existingRound.slope);
-        } else {
-            setName('City Park North');
-            setDate(today);
-            setPar(68);
-            setRating(63.8);
-            setSlope(100);
-            setSelectedCourseId(courseId || '');
+            setSelectedCourseId(existingRound.course_id || '');
+        } else if (isOpen) {
+            // New Round defaults: City Park North & White Tee
+            const cpNorth = allCourses.find(c => c.name.toLowerCase().includes('city park north'));
+            const initialCourse = cpNorth || allCourses.find(c => c.id === courseId) || allCourses[0];
+
+            if (initialCourse) {
+                setSelectedCourseId(initialCourse.id);
+                setName(initialCourse.name);
+                setDate(today);
+
+                // Find White tee or first available
+                const whiteTee = initialCourse.tee_boxes.find((t: any) => t.name.toLowerCase().includes('white'));
+                const initialTee = whiteTee || initialCourse.tee_boxes[0];
+
+                if (initialTee) {
+                    setSelectedTeeId(initialTee.id);
+                    setRating(initialTee.rating);
+                    setSlope(initialTee.slope);
+                }
+
+                // Calculate par
+                if (initialCourse.holes?.length) {
+                    const calcPar = initialCourse.holes.reduce((sum: number, h: any) => sum + h.par, 0);
+                    setPar(calcPar);
+                } else {
+                    setPar(68);
+                }
+            }
         }
-    }, [existingRound, isOpen, today, courseId]);
+    }, [existingRound, isOpen, today, courseId, allCourses]);
 
     if (!isOpen) return null;
 
@@ -145,23 +168,29 @@ export function LiveRoundModal({
                             onChange={(e) => {
                                 const newId = e.target.value;
                                 setSelectedCourseId(newId);
+                                setSelectedTeeId(''); // Reset tee on course change
                                 const c = allCourses.find(fc => fc.id === newId);
                                 if (c) {
                                     setName(c.name);
-                                    // Default to first tee box
-                                    if (c.tee_boxes.length > 0) {
-                                        const defaultTee = c.tee_boxes[0];
-                                        // Calculate par from holes
+                                    // Default to first tee box or White if available
+                                    const whiteTee = c.tee_boxes.find((t: any) => t.name.toLowerCase().includes('white'));
+                                    const devTee = whiteTee || c.tee_boxes[0];
+
+                                    if (devTee) {
+                                        setSelectedTeeId(devTee.id);
+                                        setRating(devTee.rating);
+                                        setSlope(devTee.slope);
+                                    }
+
+                                    if (c.holes?.length) {
                                         const cPar = c.holes.reduce((sum: number, h: any) => sum + h.par, 0);
-                                        setPar(cPar || 72);
-                                        setRating(defaultTee.rating);
-                                        setSlope(defaultTee.slope);
+                                        setPar(cPar);
                                     }
                                 }
                             }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-black outline-none bg-white"
                         >
-                            <option value="">-- Select Course --</option>
+                            <option value="" disabled>-- Select Course --</option>
                             {allCourses?.map(c => (
                                 <option key={c.id} value={c.id}>{c.name}</option>
                             ))}
@@ -172,22 +201,22 @@ export function LiveRoundModal({
                     <div>
                         <label className="block text-[12pt] font-bold text-gray-700 mb-1">Select Tee Box (Auto-fill)</label>
                         <select
+                            value={selectedTeeId}
                             onChange={(e) => {
                                 const tId = e.target.value;
+                                setSelectedTeeId(tId);
                                 const c = allCourses.find(fc => fc.id === selectedCourseId);
                                 if (c) {
                                     const tee = c.tee_boxes.find((t: any) => t.id === tId);
                                     if (tee) {
                                         setRating(tee.rating);
                                         setSlope(tee.slope);
-                                        // Par typically implies Course Par, but if we want to be safe, recalculate
                                         const cPar = c.holes.reduce((sum: number, h: any) => sum + h.par, 0);
-                                        setPar(cPar || 72);
+                                        setPar(cPar || par);
                                     }
                                 }
                             }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-black outline-none bg-white"
-                            defaultValue=""
                         >
                             <option value="" disabled>-- Select Tee Box --</option>
                             {allCourses.find(c => c.id === selectedCourseId)?.tee_boxes.map((t: any) => (
