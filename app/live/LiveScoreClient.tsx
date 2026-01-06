@@ -378,6 +378,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     });
 
     const allPlayersFinished = rankedPlayers.length > 0 && rankedPlayers.every(p => p.thru >= 18);
+    const allPlayersFinishedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => scores.get(p.id)?.get(3));
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -420,7 +421,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     <div className="flex justify-between items-start">
                         <div className="flex-1">
                             <div className="flex items-center gap-2">
-                                <h2 className="text-[16pt] font-bold text-gray-900">{initialRound?.name || defaultCourse?.name || 'Loading...'}</h2>
+                                <h2 className="text-[16pt] font-bold text-gray-900">{defaultCourse?.name || 'Round'}</h2>
                                 {isLocked && (
                                     <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
                                 )}
@@ -446,7 +447,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     </button>
                                 </>
                             )}
-                            {canUpdate && (
+                            {canUpdate && !allPlayersFinishedHole3 && (
                                 <button
                                     onClick={() => {
                                         setRoundModalMode('edit');
@@ -512,7 +513,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     {/* Section Header: Group Players */}
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                         <h2 className="text-[16pt] font-bold text-gray-900">Group Players</h2>
-                        {canUpdate && (
+                        {canUpdate && !allPlayersFinishedHole3 && (
                             <button
                                 onClick={() => setIsPlayerModalOpen(true)}
                                 className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
