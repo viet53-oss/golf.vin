@@ -25,6 +25,7 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
     const [name, setName] = useState('');
     const [index, setIndex] = useState('0');
     const [courseHandicap, setCourseHandicap] = useState('0');
+    const [manuallyEditedHandicap, setManuallyEditedHandicap] = useState(false);
 
     // Load editing guest data when modal opens
     useEffect(() => {
@@ -32,16 +33,18 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
             setName(editingGuest.name);
             setIndex(editingGuest.index.toString());
             setCourseHandicap(editingGuest.courseHandicap.toString());
+            setManuallyEditedHandicap(false);
         } else {
             setName('');
             setIndex('0');
             setCourseHandicap('0');
+            setManuallyEditedHandicap(false);
         }
     }, [editingGuest, isOpen]);
 
     // Auto-calculate course handicap when index changes (only if not manually edited)
     useEffect(() => {
-        if (roundData && index && !editingGuest) {
+        if (roundData && index && !editingGuest && !manuallyEditedHandicap) {
             const indexNum = parseFloat(index) || 0;
             const { rating, slope, par } = roundData;
 
@@ -49,7 +52,7 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
             const calculatedHandicap = Math.round((indexNum * slope / 113) + (rating - par));
             setCourseHandicap(calculatedHandicap.toString());
         }
-    }, [index, roundData, editingGuest]);
+    }, [index, roundData, editingGuest, manuallyEditedHandicap]);
 
     if (!isOpen) return null;
 
@@ -115,12 +118,15 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Course Handicap {roundData && !editingGuest && <span className="text-xs text-gray-500">(Auto-calculated)</span>}
+                            Course Handicap {roundData && !editingGuest && !manuallyEditedHandicap && <span className="text-xs text-gray-500">(Auto-calculated)</span>}
                         </label>
                         <input
                             type="number"
                             value={courseHandicap}
-                            onChange={(e) => setCourseHandicap(e.target.value)}
+                            onChange={(e) => {
+                                setCourseHandicap(e.target.value);
+                                setManuallyEditedHandicap(true);
+                            }}
                             className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="0"
                         />
