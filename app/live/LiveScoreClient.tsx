@@ -390,9 +390,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return 0;
     });
 
+    const activePlayers = rankedPlayers.filter(p => p.thru > 0);
+    const allActiveFinished = activePlayers.length > 0 && activePlayers.every(p => p.thru >= 18);
     const allPlayersFinished = rankedPlayers.length > 0 && rankedPlayers.every(p => p.thru >= 18);
     const allPlayersFinishedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => scores.get(p.id)?.has(3));
-    const hideSettings = allPlayersFinished || allPlayersFinishedHole3 || activeHole > 3;
+    const hideSettings = allActiveFinished || allPlayersFinishedHole3 || activeHole > 3;
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -736,7 +738,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 let medalIcon = null;
                                 if (p.thru >= 18) {
-                                    if (allPlayersFinished) {
+                                    if (allActiveFinished) {
                                         if (i === 0) medalIcon = "🥇";
                                         else if (i === 1) medalIcon = "🥈";
                                         else if (i === 2) medalIcon = "🥉";
