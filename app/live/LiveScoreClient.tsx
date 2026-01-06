@@ -64,6 +64,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [roundModalMode, setRoundModalMode] = useState<'new' | 'edit'>('new');
     const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
     const [guestPlayers, setGuestPlayers] = useState<Player[]>([]);
+    const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; index: number; courseHandicap: number } | null>(null);
 
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
@@ -282,6 +283,43 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         localStorage.setItem('live_scoring_my_group', JSON.stringify(updatedIds));
         localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
     };
+
+    const handleUpdateGuest = (guestId: string, guestData: { name: string; index: number; courseHandicap: number }) => {
+        // Update the guest in guestPlayers
+        const updatedGuests = guestPlayers.map(g =>
+            g.id === guestId ? {
+                ...g,
+                name: guestData.name,
+                index: guestData.index,
+                liveRoundData: {
+                    tee_box_name: null,
+                    course_hcp: guestData.courseHandicap
+                }
+            } : g
+        );
+        setGuestPlayers(updatedGuests);
+
+        // Update in selectedPlayers
+        const updatedSelected = selectedPlayers.map(p =>
+            p.id === guestId ? {
+                ...p,
+                name: guestData.name,
+                index: guestData.index,
+                liveRoundData: {
+                    tee_box_name: null,
+                    course_hcp: guestData.courseHandicap
+                }
+            } : p
+        );
+        setSelectedPlayers(updatedSelected);
+
+        // Save to localStorage
+        localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
+
+        // Close modal and reset editing state
+        setEditingGuest(null);
+    };
+
 
     const handleAddPlayers = async (newSelectedPlayerIds: string[]) => {
         const newSelectedPlayers = allPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
@@ -558,8 +596,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 <GuestPlayerModal
                     isOpen={isGuestModalOpen}
-                    onClose={() => setIsGuestModalOpen(false)}
+                    onClose={() => {
+                        setIsGuestModalOpen(false);
+                        setEditingGuest(null);
+                    }}
                     onAdd={handleAddGuest}
+                    onUpdate={handleUpdateGuest}
+                    editingGuest={editingGuest}
                     roundData={initialRound ? {
                         rating: initialRound.rating,
                         slope: initialRound.slope,
@@ -689,6 +732,22 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         <div className="flex items-center gap-1">
                                                             <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
                                                             {showFlagNextToName && <span className="text-[16pt]">🏁</span>}
+                                                            {player.id.startsWith('guest-') && canUpdate && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setEditingGuest({
+                                                                            id: player.id,
+                                                                            name: player.name,
+                                                                            index: player.index,
+                                                                            courseHandicap: player.liveRoundData?.course_hcp || 0
+                                                                        });
+                                                                        setIsGuestModalOpen(true);
+                                                                    }}
+                                                                    className="ml-1 text-blue-600 hover:text-blue-800 text-[12pt] font-semibold"
+                                                                >
+                                                                    ✏️
+                                                                </button>
+                                                            )}
                                                         </div>
                                                         <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
                                                     </div>

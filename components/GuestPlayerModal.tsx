@@ -6,21 +6,41 @@ interface GuestPlayerModalProps {
     isOpen: boolean;
     onClose: () => void;
     onAdd: (guest: { name: string; index: number; courseHandicap: number }) => void;
+    onUpdate?: (guestId: string, guest: { name: string; index: number; courseHandicap: number }) => void;
     roundData?: {
         rating: number;
         slope: number;
         par: number;
     } | null;
+    editingGuest?: {
+        id: string;
+        name: string;
+        index: number;
+        courseHandicap: number;
+    } | null;
 }
 
-export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPlayerModalProps) {
+export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, roundData, editingGuest }: GuestPlayerModalProps) {
     const [name, setName] = useState('');
     const [index, setIndex] = useState('0');
     const [courseHandicap, setCourseHandicap] = useState('0');
 
-    // Auto-calculate course handicap when index changes
+    // Load editing guest data when modal opens
     useEffect(() => {
-        if (roundData && index) {
+        if (editingGuest) {
+            setName(editingGuest.name);
+            setIndex(editingGuest.index.toString());
+            setCourseHandicap(editingGuest.courseHandicap.toString());
+        } else {
+            setName('');
+            setIndex('0');
+            setCourseHandicap('0');
+        }
+    }, [editingGuest, isOpen]);
+
+    // Auto-calculate course handicap when index changes (only if not manually edited)
+    useEffect(() => {
+        if (roundData && index && !editingGuest) {
             const indexNum = parseFloat(index) || 0;
             const { rating, slope, par } = roundData;
 
@@ -28,7 +48,7 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPla
             const calculatedHandicap = Math.round((indexNum * slope / 113) + (rating - par));
             setCourseHandicap(calculatedHandicap.toString());
         }
-    }, [index, roundData]);
+    }, [index, roundData, editingGuest]);
 
     if (!isOpen) return null;
 
@@ -38,11 +58,17 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPla
             return;
         }
 
-        onAdd({
+        const guestData = {
             name: name.trim(),
             index: parseFloat(index) || 0,
             courseHandicap: parseInt(courseHandicap) || 0
-        });
+        };
+
+        if (editingGuest && onUpdate) {
+            onUpdate(editingGuest.id, guestData);
+        } else {
+            onAdd(guestData);
+        }
 
         // Reset form
         setName('');
@@ -54,7 +80,9 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPla
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-                <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Guest Player</h2>
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">
+                    {editingGuest ? 'Edit Guest Player' : 'Add Guest Player'}
+                </h2>
 
                 <div className="space-y-4">
                     <div>
@@ -86,7 +114,7 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPla
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Course Handicap {roundData && <span className="text-xs text-gray-500">(Auto-calculated)</span>}
+                            Course Handicap {roundData && !editingGuest && <span className="text-xs text-gray-500">(Auto-calculated)</span>}
                         </label>
                         <input
                             type="number"
@@ -95,7 +123,7 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPla
                             className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             placeholder="0"
                         />
-                        {roundData && (
+                        {roundData && !editingGuest && (
                             <p className="text-xs text-gray-500 mt-1">
                                 Based on Rating: {roundData.rating}, Slope: {roundData.slope}, Par: {roundData.par}
                             </p>
@@ -114,7 +142,7 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, roundData }: GuestPla
                         onClick={handleSubmit}
                         className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all"
                     >
-                        Add Guest
+                        {editingGuest ? 'Update Guest' : 'Add Guest'}
                     </button>
                 </div>
             </div>
