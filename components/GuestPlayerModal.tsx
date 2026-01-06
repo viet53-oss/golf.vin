@@ -142,9 +142,14 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
                     {editingGuest && (
                         <button
                             onClick={() => {
+                                console.log('Delete button clicked', editingGuest);
                                 if (confirm('Are you sure you want to delete this guest player?')) {
+                                    console.log('Delete confirmed, calling onDelete with ID:', editingGuest.id);
                                     if (onDelete && editingGuest) {
                                         onDelete(editingGuest.id);
+                                        console.log('onDelete called');
+                                    } else {
+                                        console.log('onDelete is missing or editingGuest is null', { onDelete, editingGuest });
                                     }
                                 }
                             }}

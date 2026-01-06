@@ -321,28 +321,38 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     };
 
     const handleDeleteGuest = (guestId: string) => {
+        console.log('handleDeleteGuest called with ID:', guestId);
+        console.log('Current guestPlayers:', guestPlayers);
+        console.log('Current selectedPlayers:', selectedPlayers);
+
         // Remove from guest players
         const updatedGuests = guestPlayers.filter(g => g.id !== guestId);
         setGuestPlayers(updatedGuests);
+        console.log('Updated guestPlayers:', updatedGuests);
 
         // Remove from selected players
         const updatedSelected = selectedPlayers.filter(p => p.id !== guestId);
         setSelectedPlayers(updatedSelected);
+        console.log('Updated selectedPlayers:', updatedSelected);
 
         // Remove scores for this guest
         const updatedScores = new Map(scores);
         updatedScores.delete(guestId);
         setScores(updatedScores);
+        console.log('Scores deleted for guest');
 
         // Update localStorage
         localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
         const updatedIds = updatedSelected.map(p => p.id);
         localStorage.setItem('live_scoring_my_group', JSON.stringify(updatedIds));
+        console.log('localStorage updated');
 
         // Close modal and reset editing state
         setIsGuestModalOpen(false);
         setEditingGuest(null);
+        console.log('Modal closed and editing state reset');
     };
+
 
 
 
