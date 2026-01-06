@@ -86,20 +86,32 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 localStorage.setItem('live_scoring_last_round_id', currentId);
             }
 
-            // Restore guest players
-            const savedGuests = localStorage.getItem('live_scoring_guest_players');
-            let restoredGuests: Player[] = [];
-            if (savedGuests) {
-                restoredGuests = JSON.parse(savedGuests);
-                setGuestPlayers(restoredGuests);
+            // Load guest players from database
+            const guestsFromDb: Player[] = [];
+            if (initialRound?.players) {
+                initialRound.players.forEach((p: any) => {
+                    if (p.is_guest) {
+                        guestsFromDb.push({
+                            id: p.id, // Use LiveRoundPlayer ID
+                            name: p.guest_name || 'Guest',
+                            index: p.index_at_time,
+                            preferred_tee_box: null,
+                            liveRoundData: {
+                                tee_box_name: p.tee_box_name,
+                                course_hcp: p.course_handicap
+                            }
+                        });
+                    }
+                });
             }
+            setGuestPlayers(guestsFromDb);
 
-            // Restore selected players (both regular and guests)
+            // Restore selected players (both regular and guests from database)
             const saved = localStorage.getItem('live_scoring_my_group');
             if (saved) {
                 const savedIds = JSON.parse(saved);
-                // Combine allPlayers with guest players for restoration
-                const allAvailablePlayers = [...allPlayers, ...restoredGuests];
+                // Combine allPlayers with guest players from database
+                const allAvailablePlayers = [...allPlayers, ...guestsFromDb];
                 const restored = allAvailablePlayers.filter((p: Player) => savedIds.includes(p.id));
                 if (restored.length > 0) {
                     setSelectedPlayers(restored);
@@ -128,7 +140,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         }
                     });
                 }
-                initialMap.set(p.player.id, playerScores);
+                // Use LiveRoundPlayer ID for guests, player.id for regular players
+                const playerId = p.is_guest ? p.id : p.player.id;
+                initialMap.set(playerId, playerScores);
             });
         }
         return initialMap;
@@ -153,7 +167,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         });
                     }
                     // Update local map with server data
-                    next.set(p.player.id, serverPlayerScores);
+                    // Use LiveRoundPlayer ID for guests, player.id for regular players
+                    const playerId = p.is_guest ? p.id : p.player.id;
+                    next.set(playerId, serverPlayerScores);
                 });
                 return next;
             });
