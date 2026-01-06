@@ -614,6 +614,19 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                         const courseHcp = getCourseHandicap(player);
 
+                                        const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
+                                        let groupMedal = null;
+                                        if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
+                                            if (allActiveFinished) {
+                                                if (playerRankIndex === 0) groupMedal = "🏆";
+                                                else if (playerRankIndex === 1) groupMedal = "🥈";
+                                                else if (playerRankIndex === 2) groupMedal = "🥉";
+                                                else groupMedal = "🏁";
+                                            } else {
+                                                groupMedal = "🏁";
+                                            }
+                                        }
+
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
                                                 <div className="flex flex-col">
@@ -622,8 +635,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
                                                             <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
                                                         </div>
-                                                        {pScores && pScores.size >= 18 && (
-                                                            <span className="text-[20pt]" title="Finished">🏁</span>
+                                                        {groupMedal && (
+                                                            <span className="text-[20pt]" title="Finished">{groupMedal}</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -739,7 +752,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 let medalIcon = null;
                                 if (p.thru >= 18) {
                                     if (allActiveFinished) {
-                                        if (i === 0) medalIcon = "🥇";
+                                        if (i === 0) medalIcon = "🏆";
                                         else if (i === 1) medalIcon = "🥈";
                                         else if (i === 2) medalIcon = "🥉";
                                         else medalIcon = "🏁";

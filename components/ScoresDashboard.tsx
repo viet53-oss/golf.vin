@@ -479,7 +479,9 @@ export default function ScoresDashboard({
 
                                                     return (
                                                         <tr key={rp.id} className="hover:bg-slate-50/50 transition-colors group">
-                                                            <td className="px-1 sm:px-1 py-3 text-center text-black font-bold text-[14pt]">{pIdx + 1}</td>
+                                                            <td className="px-1 sm:px-1 py-3 text-center text-black font-bold text-[14pt]">
+                                                                {pIdx === 0 ? "🏆" : pIdx === 1 ? "🥈" : pIdx === 2 ? "🥉" : pIdx + 1}
+                                                            </td>
                                                             <td className="px-1 py-3">
                                                                 <button
                                                                     onClick={() => handlePlayerClick(rp.id)}
