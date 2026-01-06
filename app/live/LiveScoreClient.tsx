@@ -340,8 +340,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         localStorage.setItem('live_scoring_my_group', JSON.stringify(updatedIds));
 
         // Close modal and reset editing state
+        setIsGuestModalOpen(false);
         setEditingGuest(null);
     };
+
 
 
     const handleAddPlayers = async (newSelectedPlayerIds: string[]) => {

@@ -140,7 +140,6 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
                                     if (onDelete && editingGuest) {
                                         onDelete(editingGuest.id);
                                     }
-                                    onClose();
                                 }
                             }}
                             className="px-4 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all"
