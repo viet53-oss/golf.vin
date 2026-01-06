@@ -326,12 +326,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         let thru = 0;
         const courseHcp = getCourseHandicap(player);
 
+        const grossHoleScores: { difficulty: number; grossScore: number }[] = [];
+
         if (playerScores) {
             playerScores.forEach((strokes, holeNum) => {
                 totalGross += strokes;
                 const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
                 const holePar = hole?.par || 4;
                 const difficulty = hole?.difficulty || holeNum;
+
+                // Collect for tie breaker
+                grossHoleScores.push({
+                    difficulty,
+                    grossScore: strokes
+                });
 
                 let holeStrokes = 0;
                 if (courseHcp > 0) {
@@ -346,11 +354,27 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             });
         }
 
+        // Sort gross scores by difficulty (1 is hardest) for tie-breaker
+        grossHoleScores.sort((a, b) => a.difficulty - b.difficulty);
+
         const totalNet = totalGross - strokesReceivedSoFar;
         const toPar = totalGross - parTotal;
 
-        return { ...player, totalGross, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal };
-    }).sort((a, b) => a.totalNet - b.totalNet);
+        return { ...player, totalGross, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal, grossHoleScores };
+    }).sort((a, b) => {
+        // Primary Sort: Total Net (Ascending)
+        if (a.totalNet !== b.totalNet) return a.totalNet - b.totalNet;
+
+        // Tie Breaker: Compare Gross Score on hardest holes (Difficulty 1, 2, 3...)
+        const len = Math.min(a.grossHoleScores.length, b.grossHoleScores.length);
+        for (let i = 0; i < len; i++) {
+            if (a.grossHoleScores[i].grossScore !== b.grossHoleScores[i].grossScore) {
+                return a.grossHoleScores[i].grossScore - b.grossHoleScores[i].grossScore;
+            }
+        }
+
+        return 0;
+    });
 
     const allPlayersFinished = rankedPlayers.length > 0 && rankedPlayers.every(p => p.thru >= 18);
 
