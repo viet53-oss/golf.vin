@@ -603,6 +603,21 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 if (activeHole < 18) {
                                     setActiveHole(activeHole + 1);
+                                } else {
+                                    // After 18th hole, find the first hole that has missing scores
+                                    let nextHole = 1;
+                                    for (let h = 1; h <= 18; h++) {
+                                        const isHoleIncomplete = selectedPlayers.some(p => {
+                                            const pScores = newScores.get(p.id);
+                                            return !pScores || !pScores.has(h);
+                                        });
+
+                                        if (isHoleIncomplete) {
+                                            nextHole = h;
+                                            break;
+                                        }
+                                    }
+                                    setActiveHole(nextHole);
                                 }
 
                                 // Silent refresh to keep server data in sync without flashing the page
