@@ -149,6 +149,97 @@ export async function addPlayerToLiveRound(data: {
 }
 
 /**
+ * Adds a guest player to a live round
+ */
+export async function addGuestToLiveRound(data: {
+    liveRoundId: string;
+    guestName: string;
+    index: number;
+    courseHandicap: number;
+    rating: number;
+    slope: number;
+    par: number;
+}) {
+    try {
+        // Create guest player in live round
+        const guestPlayer = await prisma.liveRoundPlayer.create({
+            data: {
+                live_round_id: data.liveRoundId,
+                is_guest: true,
+                guest_name: data.guestName,
+                player_id: null,
+                tee_box_id: null,
+                tee_box_name: 'Guest',
+                tee_box_rating: data.rating,
+                tee_box_slope: data.slope,
+                tee_box_par: data.par,
+                index_at_time: data.index,
+                course_handicap: data.courseHandicap
+            }
+        });
+
+        revalidatePath('/live');
+        return { success: true, guestPlayerId: guestPlayer.id };
+    } catch (error) {
+        console.error('Failed to add guest to live round:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to add guest'
+        };
+    }
+}
+
+/**
+ * Updates a guest player in a live round
+ */
+export async function updateGuestInLiveRound(data: {
+    guestPlayerId: string;
+    guestName: string;
+    index: number;
+    courseHandicap: number;
+}) {
+    try {
+        await prisma.liveRoundPlayer.update({
+            where: { id: data.guestPlayerId },
+            data: {
+                guest_name: data.guestName,
+                index_at_time: data.index,
+                course_handicap: data.courseHandicap
+            }
+        });
+
+        revalidatePath('/live');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to update guest:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to update guest'
+        };
+    }
+}
+
+/**
+ * Deletes a guest player from a live round
+ */
+export async function deleteGuestFromLiveRound(guestPlayerId: string) {
+    try {
+        await prisma.liveRoundPlayer.delete({
+            where: { id: guestPlayerId }
+        });
+
+        revalidatePath('/live');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to delete guest:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to delete guest'
+        };
+    }
+}
+
+/**
  * Saves a score for a specific hole in a live round
  */
 export async function saveLiveScore(data: {

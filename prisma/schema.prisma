@@ -211,10 +211,14 @@ model LiveRoundPlayer {
   id                String     @id @default(uuid())
   live_round_id     String
   live_round        LiveRound  @relation(fields: [live_round_id], references: [id], onDelete: Cascade)
-  player_id         String
-  player            Player     @relation(fields: [player_id], references: [id])
-  tee_box_id        String
-  tee_box           TeeBox     @relation(fields: [tee_box_id], references: [id])
+  player_id         String?
+  player            Player?    @relation(fields: [player_id], references: [id])
+  tee_box_id        String?
+  tee_box           TeeBox?    @relation(fields: [tee_box_id], references: [id])
+  
+  // Guest player fields
+  is_guest          Boolean    @default(false)
+  guest_name        String?
   
   // Snapshot data at time of round creation
   tee_box_name      String
@@ -235,6 +239,7 @@ model LiveRoundPlayer {
   @@index([player_id])
   @@map("live_round_players")
 }
+
 
 model LiveScore {
   id                  String          @id @default(uuid())

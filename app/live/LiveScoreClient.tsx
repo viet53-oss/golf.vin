@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
 import { GuestPlayerModal } from '@/components/GuestPlayerModal';
-import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound } from '@/app/actions/create-live-round';
+import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound } from '@/app/actions/create-live-round';
 
 interface Player {
     id: string;
@@ -257,31 +257,32 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return Math.round(ch);
     };
 
-    const handleAddGuest = (guest: { name: string; index: number; courseHandicap: number }) => {
-        // Create a temporary guest player object
-        const guestPlayer: Player = {
-            id: `guest-${Date.now()}`,
-            name: guest.name,
+    const handleAddGuest = async (guest: { name: string; index: number; courseHandicap: number }) => {
+        if (!liveRoundId || !initialRound) {
+            alert('No active live round found');
+            return;
+        }
+
+        console.log('Adding guest to database:', guest);
+
+        // Add guest to database
+        const result = await addGuestToLiveRound({
+            liveRoundId,
+            guestName: guest.name,
             index: guest.index,
-            preferred_tee_box: null,
-            liveRoundData: {
-                tee_box_name: null,
-                course_hcp: guest.courseHandicap
-            }
-        };
+            courseHandicap: guest.courseHandicap,
+            rating: initialRound.rating,
+            slope: initialRound.slope,
+            par: initialRound.par
+        });
 
-        // Add to guest players list
-        const updatedGuests = [...guestPlayers, guestPlayer];
-        setGuestPlayers(updatedGuests);
-
-        // Add to selected players
-        const updatedSelected = [...selectedPlayers, guestPlayer];
-        setSelectedPlayers(updatedSelected);
-
-        // Save to localStorage
-        const updatedIds = updatedSelected.map(p => p.id);
-        localStorage.setItem('live_scoring_my_group', JSON.stringify(updatedIds));
-        localStorage.setItem('live_scoring_guest_players', JSON.stringify(updatedGuests));
+        if (result.success) {
+            console.log('Guest added successfully, refreshing page');
+            // Refresh the page to load the new guest
+            router.refresh();
+        } else {
+            alert('Failed to add guest: ' + result.error);
+        }
     };
 
     const handleUpdateGuest = (guestId: string, guestData: { name: string; index: number; courseHandicap: number }) => {
