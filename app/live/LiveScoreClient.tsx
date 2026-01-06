@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
@@ -46,6 +47,7 @@ interface LiveScoreClientProps {
 }
 
 export default function LiveScoreClient({ allPlayers, defaultCourse, initialRound, todayStr, allLiveRounds }: LiveScoreClientProps) {
+    const router = useRouter();
     // Initialize State from Server Data
     const [liveRoundId, setLiveRoundId] = useState<string | null>(initialRound?.id || null);
 
@@ -577,13 +579,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 if (activeHole < 18) {
                                     setActiveHole(activeHole + 1);
-                                } else {
-                                    // Refresh page after saving the last hole
-                                    setTimeout(() => window.location.reload(), 500);
                                 }
 
-                                // Refresh to update summary section
-                                setTimeout(() => window.location.reload(), 500);
+                                // Silent refresh to keep server data in sync without flashing the page
+                                router.refresh();
                             }}
                             className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 mt-2"
                         >
@@ -596,7 +595,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {summaryPlayers.length > 0 && (
                     <div className="mt-4">
                         <button
-                            onClick={() => window.location.reload()}
+                            onClick={() => router.refresh()}
                             className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 h-auto cursor-pointer mb-1"
                         >
                             Refresh Summary
