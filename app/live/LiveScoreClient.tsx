@@ -945,7 +945,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         // Silent refresh to keep server data in sync without flashing the page
                                         router.refresh();
                                     }}
-                                    className={`w-1/2 ${hasUnsavedChanges ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800'} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
+                                    className={`w-1/2 ${(() => {
+                                        // Check if this hole has been scored for all selected players
+                                        const isHoleScored = selectedPlayers.every(p => {
+                                            const playerScores = scores.get(p.id);
+                                            return playerScores && playerScores.has(activeHole);
+                                        });
+                                        // Blue if: has unsaved changes OR hole is not yet scored
+                                        // Black if: hole is scored AND no unsaved changes
+                                        return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
+                                    })()} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
                                 >
                                     Save Hole {activeHole}
                                 </button>
