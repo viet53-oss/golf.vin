@@ -71,6 +71,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; index: number; courseHandicap: number } | null>(null);
     const [isAddToClubModalOpen, setIsAddToClubModalOpen] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    // Track pending (unsaved) scores for the current hole only
+    const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
 
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
@@ -203,6 +205,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Reset unsaved changes when hole changes
     useEffect(() => {
         setHasUnsavedChanges(false);
+        setPendingScores(new Map()); // Clear pending scores when changing holes
     }, [activeHole]);
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -253,6 +256,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     };
 
     const getScore = (playerId: string, holeNumber: number): number | null => {
+        // For the active hole, show pending score if it exists
+        if (holeNumber === activeHole && pendingScores.has(playerId)) {
+            return pendingScores.get(playerId) ?? null;
+        }
+        // Otherwise show saved score
         return scores.get(playerId)?.get(holeNumber) ?? null;
     };
 
@@ -415,22 +423,21 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             return;
         }
 
-        // Calculate next score based on current state closure
-        const currentScore = scores.get(playerId)?.get(activeHole) || activeHolePar;
+        // Get current score from pending if exists, otherwise from saved scores
+        const savedScore = scores.get(playerId)?.get(activeHole);
+        const currentScore = pendingScores.get(playerId) ?? savedScore ?? activeHolePar;
 
         let nextScore = increment ? currentScore + 1 : currentScore - 1;
         if (nextScore < 1) nextScore = 1;
 
-        // Update Local State with the new value
-        setScores(prev => {
-            const newScores = new Map(prev);
-            const playerScores = new Map(newScores.get(playerId) || []);
-            playerScores.set(activeHole, nextScore);
-            newScores.set(playerId, playerScores);
-            return newScores;
+        // Update pending scores only (don't update main scores state)
+        setPendingScores(prev => {
+            const newPending = new Map(prev);
+            newPending.set(playerId, nextScore);
+            return newPending;
         });
 
-        // Mark as unsaved - don't auto-save anymore
+        // Mark as unsaved
         setHasUnsavedChanges(true);
     };
 
@@ -868,22 +875,26 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         if (!liveRoundId) return;
 
                                         const updates: { playerId: string; strokes: number }[] = [];
-                                        const newScores = new Map(scores); // Use current render state
+                                        const newScores = new Map(scores);
 
                                         selectedPlayers.forEach(p => {
                                             const playerScores = new Map(newScores.get(p.id) || []);
-                                            const currentScore = playerScores.get(activeHole);
 
-                                            // If no score exists for this hole, default to Par
-                                            if (!playerScores.has(activeHole)) {
-                                                playerScores.set(activeHole, activeHolePar);
-                                                updates.push({ playerId: p.id, strokes: activeHolePar });
-                                            } else {
-                                                // Always save current score when button is clicked
-                                                updates.push({ playerId: p.id, strokes: currentScore! });
-                                            }
+                                            // Use pending score if it exists, otherwise use saved score or par
+                                            const pendingScore = pendingScores.get(p.id);
+                                            const savedScore = playerScores.get(activeHole);
+                                            const finalScore = pendingScore ?? savedScore ?? activeHolePar;
+
+                                            // Update the score in the map
+                                            playerScores.set(activeHole, finalScore);
                                             newScores.set(p.id, playerScores);
+
+                                            // Add to updates for server
+                                            updates.push({ playerId: p.id, strokes: finalScore });
                                         });
+
+                                        // Update main scores state with pending changes
+                                        setScores(newScores);
 
                                         // Save all scores to server
                                         if (updates.length > 0) {
@@ -894,7 +905,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             });
                                         }
 
-                                        // Reset unsaved changes flag
+                                        // Clear pending scores and reset unsaved flag
+                                        setPendingScores(new Map());
                                         setHasUnsavedChanges(false);
 
                                         if (activeHole < 18) {
