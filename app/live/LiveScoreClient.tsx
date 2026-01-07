@@ -715,13 +715,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         onClick={() => setIsPlayerModalOpen(true)}
                                         className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
                                     >
-                                        Select Players
+                                        Players
                                     </button>
                                     <button
                                         onClick={() => setIsGuestModalOpen(true)}
                                         className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
                                     >
-                                        Add Guest
+                                        Guest
                                     </button>
                                 </div>
                             )}
