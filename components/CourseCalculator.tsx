@@ -43,17 +43,14 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
     }, [index, par, rating, slope]);
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden w-full m-1 mt-8">
-            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden w-full m-1 mt-3">
+            <div className="py-3 px-1 border-b border-gray-100 bg-gray-50/50">
                 <h3 className="text-[14pt] font-bold text-center text-gray-900">Quick Course Calculator</h3>
-                <div className="mt-2 text-center text-[14pt] text-gray-500">
-                    <p className="font-medium">Other Course Handicap Calculator:</p>
-                    <p>Calculate your course handicap for a new course</p>
-                </div>
+
             </div>
 
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-5">
+            <div className="py-3 px-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-3">
                     <div>
                         <label className="block text-[14pt] font-bold text-gray-700 mb-1.5">Select Member</label>
                         <select
@@ -116,7 +113,7 @@ export default function CourseCalculator({ players }: { players: Player[] }) {
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center space-y-4 bg-gray-50 rounded-2xl border border-gray-100 p-6 self-start md:mt-10">
+                <div className="flex flex-col items-center justify-center space-y-4 bg-gray-50 rounded-2xl border border-gray-100 py-3 px-1 self-start md:mt-3">
                     <span className="text-[14pt] font-bold text-gray-500 uppercase tracking-widest">Course HCP</span>
                     <div className="text-6xl font-black text-green-700">
                         {courseHcp !== null ? courseHcp : '--'}

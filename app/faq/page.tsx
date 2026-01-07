@@ -14,7 +14,7 @@ export default async function FAQPage() {
     });
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans pb-20">
+        <div className="min-h-screen bg-slate-50 font-sans pb-3">
             <FAQClient players={players} />
         </div>
     );

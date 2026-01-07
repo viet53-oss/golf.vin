@@ -23,10 +23,10 @@ export default function FAQClient({ players }: { players: Player[] }) {
     };
 
     const clubRules = (
-        <div className="space-y-8">
+        <div className="space-y-3">
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">1. General - Local Club Rules</h3>
-                <div className="space-y-4 text-[14pt] leading-relaxed">
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">1. General - Local Club Rules</h3>
+                <div className="space-y-3 text-[14pt] leading-relaxed">
                     <div className="space-y-1"><p className="font-bold text-gray-800 underline">1. Tees</p><p>Club Members will play ALL tournaments from the White Tees. Over 70 play the Gold, unless started the year from White.</p></div>
                     <div className="space-y-1"><p className="font-bold text-gray-800 underline">2. Putting</p><p>Sink ALL putts. No pickups on green.</p></div>
                     <div className="space-y-1"><p className="font-bold text-gray-800 underline">3. Out of Bounds</p><p>All roads, and fences - penalty one stroke and distance.</p></div>
@@ -47,7 +47,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">2. Hole Exceptions</h3>
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">2. Hole Exceptions</h3>
                 <div className="space-y-3 text-[14pt] italic">
                     <p><span className="font-bold underline">Hole #3:</span> Ball past to right of white stakes play as out of bounds. Penalty, one stroke and distance.</p>
                     <p><span className="font-bold underline">Hole #7:</span> Ball in or over water to left, play as lateral water hazard. May drop on right side of cart path. Penalty one stroke.</p>
@@ -59,30 +59,30 @@ export default function FAQClient({ players }: { players: Player[] }) {
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">Course Information</h3>
-                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm space-y-4">
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">Course Information</h3>
+                <div className="bg-white border border-gray-100 rounded-xl py-3 px-1 shadow-sm space-y-3">
                     <p className="font-bold text-gray-800 text-[14pt]">City Park North, New Orleans</p>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-50 p-4 rounded-xl text-center border border-gray-100">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-gray-50 py-3 px-1 rounded-xl text-center border border-gray-100">
                             <p className="text-[14pt] uppercase font-black text-gray-400 mb-1">Par</p>
                             <p className="text-[14pt] font-black">68</p>
                             <p className="text-[14pt] text-gray-400 font-bold">(All Tees)</p>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-xl text-center border border-gray-100">
+                        <div className="bg-gray-50 py-3 px-1 rounded-xl text-center border border-gray-100">
                             <p className="text-[14pt] uppercase font-black text-gray-400 mb-1">Tee Times</p>
                             <p className="text-[14pt] font-black text-green-600">Saturdays</p>
                             <p className="text-[14pt] text-gray-400 font-bold">at Sunrise</p>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-3 pt-2">
-                        <div className="flex justify-between items-center bg-white border border-gray-100 p-3 rounded-lg">
+                    <div className="grid grid-cols-1 gap-3 pt-3">
+                        <div className="flex justify-between items-center bg-white border border-gray-100 py-3 px-1 rounded-lg">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 bg-white border border-gray-300 rounded-full"></div>
                                 <span className="font-bold text-[14pt]">White Tees</span>
                             </div>
                             <span className="text-[14pt] font-bold text-gray-500">63.8 Rating / 100 Slope</span>
                         </div>
-                        <div className="flex justify-between items-center bg-white border border-gray-100 p-3 rounded-lg">
+                        <div className="flex justify-between items-center bg-white border border-gray-100 py-3 px-1 rounded-lg">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                                 <span className="font-bold text-[14pt]">Gold Tees</span>
@@ -94,29 +94,29 @@ export default function FAQClient({ players }: { players: Player[] }) {
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">Tie Breaker Rules (Net Scores)</h3>
-                <div className="space-y-6">
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">Tie Breaker Rules (Net Scores)</h3>
+                <div className="space-y-3">
                     <p className="text-[14pt] text-gray-600 italic">When two or more players tie for a position, ties are broken using hole-by-hole comparison starting from the hardest handicap holes:</p>
 
-                    <div className="space-y-4">
-                        <div className="bg-slate-50 border-l-4 border-slate-900 p-4 rounded-xl shadow-sm">
+                    <div className="space-y-3">
+                        <div className="bg-slate-50 border-l-4 border-slate-900 py-3 px-1 rounded-xl shadow-sm">
                             <p className="font-black text-gray-900 text-[14pt] mb-1 uppercase tracking-tight">Tournament Placement & Pool Total Category</p>
                             <p className="text-[14pt] text-gray-600 leading-relaxed mb-2">Compare net scores starting from the <span className="font-bold underline text-black">hardest handicap hole across all 18 holes</span> and work backwards through each hole (by hardness rank) until a lower score is found.</p>
                             <p className="text-[14pt] text-gray-500 italic">Example: Compare hole #1 (hardest), then #2, then #3, etc. until the tie is broken.</p>
                         </div>
-                        <div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm">
+                        <div className="bg-emerald-50 border-l-4 border-emerald-500 py-3 px-1 rounded-xl shadow-sm">
                             <p className="font-black text-emerald-900 text-[14pt] mb-1 uppercase tracking-tight">Pool Front 9 Category</p>
                             <p className="text-[14pt] text-emerald-700 leading-relaxed mb-2">Compare net scores starting from the <span className="font-bold underline text-emerald-900">hardest handicap hole on the front nine only</span> (holes 1-9) and work backwards through front nine holes until a lower score is found.</p>
                             <p className="text-[14pt] text-emerald-600 italic">Example: If hole #9 is the hardest on front 9, compare #9 first, then the next hardest front 9 hole, etc.</p>
                         </div>
-                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-xl shadow-sm">
+                        <div className="bg-blue-50 border-l-4 border-blue-500 py-3 px-1 rounded-xl shadow-sm">
                             <p className="font-black text-blue-900 text-[14pt] mb-1 uppercase tracking-tight">Pool Back 9 Category</p>
                             <p className="text-[14pt] text-blue-700 leading-relaxed mb-2">Compare net scores starting from the <span className="font-bold underline text-blue-900">hardest handicap hole on the back nine only</span> (holes 10-18) and work backwards through back nine holes until a lower score is found.</p>
                             <p className="text-[14pt] text-blue-600 italic">Example: If hole #11 is the hardest on back 9, compare #11 first, then the next hardest back 9 hole, etc.</p>
                         </div>
                     </div>
 
-                    <div className="bg-gray-100 p-4 rounded-xl text-[14pt] space-y-2">
+                    <div className="bg-gray-100 py-3 px-1 rounded-xl text-[14pt] space-y-2">
                         <p className="font-black uppercase tracking-widest text-gray-400">Important Notes:</p>
                         <ul className="list-disc pl-1 space-y-1 font-bold text-gray-700">
                             <li>Net Score = Gross score minus handicap stroke(s) received on that hole</li>
@@ -128,9 +128,9 @@ export default function FAQClient({ players }: { players: Player[] }) {
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">Tournament Payouts</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-black text-white p-5 rounded-2xl shadow-xl relative overflow-hidden">
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">Tournament Payouts</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="bg-black text-white py-3 px-1 rounded-2xl shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-2 opacity-10"><span className="text-[14pt]">⛳</span></div>
                         <p className="text-[14pt] font-black uppercase text-gray-500 mb-3 tracking-widest text-center">One Round ($150 Total)</p>
                         <div className="space-y-1 font-black text-[14pt]">
@@ -140,7 +140,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
                         </div>
                         <p className="text-[8px] text-gray-500 mt-3 text-center italic">* Payouts per flight ($75 per flight)</p>
                     </div>
-                    <div className="bg-black text-white p-5 rounded-2xl shadow-xl relative overflow-hidden">
+                    <div className="bg-black text-white py-3 px-1 rounded-2xl shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-2 opacity-10"><span className="text-[14pt]">🏆</span></div>
                         <p className="text-[14pt] font-black uppercase text-gray-500 mb-3 tracking-widest text-center">Multi Round ($180 Total)</p>
                         <div className="space-y-1 font-black text-[14pt]">
@@ -155,9 +155,9 @@ export default function FAQClient({ players }: { players: Player[] }) {
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">Tournament Point System</h3>
-                <div className="bg-gray-900 text-white rounded-2xl p-6 shadow-xl space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">Tournament Point System</h3>
+                <div className="bg-gray-900 text-white rounded-2xl py-3 px-1 shadow-xl space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
                         <div className="text-center border-r border-gray-800 pr-1">
                             <p className="text-[14pt] font-black text-gray-500 uppercase mb-1">Base Entry</p>
                             <p className="text-[14pt] font-black text-white">20</p>
@@ -169,22 +169,22 @@ export default function FAQClient({ players }: { players: Player[] }) {
                             <div className="flex justify-between py-1"><span>3rd Place Bonus</span> <span className="text-green-400">+30</span></div>
                         </div>
                     </div>
-                    <div className="bg-zinc-800 p-3 rounded-lg text-center">
+                    <div className="bg-zinc-800 py-3 px-1 rounded-lg text-center">
                         <p className="text-[14pt] text-gray-400 italic">Example: A 1st place finisher receives <span className="text-white font-bold underline">100 points total</span></p>
                     </div>
                 </div>
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">$5 Pool Payout Details</h3>
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">$5 Pool Payout Details</h3>
                 <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-md">
-                    <div className="bg-green-600 p-3 text-center">
+                    <div className="bg-green-600 py-3 px-1 text-center">
                         <p className="text-[14pt] font-black text-green-100 uppercase tracking-widest">Weekly Side Competition</p>
                         <p className="text-[14pt] font-black text-white">$5 ENTRY PER PLAYER</p>
                     </div>
-                    <div className="p-5 space-y-6">
+                    <div className="py-3 px-1 space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div className="bg-gray-50 py-3 px-1 rounded-lg border border-gray-100">
                                 <p className="text-[14pt] font-black text-gray-400 uppercase mb-1">FRONT 9 (40%)</p>
                                 <div className="space-y-1 text-[14pt] font-bold">
                                     <div className="flex justify-between"><span>1st Place</span> <span className="text-green-600">50%</span></div>
@@ -192,7 +192,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
                                     <div className="flex justify-between text-gray-400"><span>3rd Place</span> <span>20%</span></div>
                                 </div>
                             </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div className="bg-gray-50 py-3 px-1 rounded-lg border border-gray-100">
                                 <p className="text-[14pt] font-black text-gray-400 uppercase mb-1">BACK 9 (40%)</p>
                                 <div className="space-y-1 text-[14pt] font-bold">
                                     <div className="flex justify-between"><span>1st Place</span> <span className="text-green-600">50%</span></div>
@@ -200,7 +200,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
                                     <div className="flex justify-between text-gray-400"><span>3rd Place</span> <span>20%</span></div>
                                 </div>
                             </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div className="bg-gray-50 py-3 px-1 rounded-lg border border-gray-100">
                                 <p className="text-[14pt] font-black text-gray-400 uppercase mb-1">TOTAL (20%)</p>
                                 <div className="space-y-1 text-[14pt] font-bold">
                                     <div className="flex justify-between"><span>1st Place</span> <span className="text-green-600">50%</span></div>
@@ -210,9 +210,9 @@ export default function FAQClient({ players }: { players: Player[] }) {
                             </div>
                         </div>
 
-                        <div className="bg-zinc-900 text-white rounded-xl p-4">
+                        <div className="bg-zinc-900 text-white rounded-xl py-3 px-1">
                             <p className="text-[14pt] font-black text-zinc-500 uppercase mb-2 tracking-widest">Payout Example (for 20 Players / $100 Pot):</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[14pt]">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[14pt]">
                                 <div>
                                     <p className="font-bold text-green-400 mb-1">Front/Back 9 ($40 each)</p>
                                     <ul className="space-y-1 opacity-80">
@@ -237,23 +237,23 @@ export default function FAQClient({ players }: { players: Player[] }) {
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">Scoring Format</h3>
-                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm space-y-4 text-[14pt]">
-                    <div className="flex gap-4">
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">Scoring Format</h3>
+                <div className="bg-white border border-gray-100 rounded-xl py-3 px-1 shadow-sm space-y-3 text-[14pt]">
+                    <div className="flex gap-3">
                         <div className="w-1 bg-green-500 rounded-full"></div>
                         <div>
                             <p className="font-black text-gray-900">Gross Score</p>
                             <p className="text-gray-600">Your actual strokes taken</p>
                         </div>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                         <div className="w-1 bg-blue-500 rounded-full"></div>
                         <div>
                             <p className="font-black text-gray-900">Net Score</p>
                             <p className="text-gray-600">Gross score minus your course handicap</p>
                         </div>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                         <div className="w-1 bg-amber-500 rounded-full"></div>
                         <div>
                             <p className="font-black text-gray-900">Adjusted Gross Score</p>
@@ -264,14 +264,14 @@ export default function FAQClient({ players }: { players: Player[] }) {
             </section>
 
             <section>
-                <h3 className="text-[14pt] font-black text-gray-900 mb-4 border-b-2 border-green-500 inline-block">Support & Joining</h3>
-                <div className="space-y-4 text-[14pt] font-medium">
-                    <div className="bg-white border border-gray-100 p-5 rounded-xl shadow-sm space-y-4">
+                <h3 className="text-[14pt] font-black text-gray-900 mb-3 border-b-2 border-green-500 inline-block">Support & Joining</h3>
+                <div className="space-y-3 text-[14pt] font-medium">
+                    <div className="bg-white border border-gray-100 py-3 px-1 rounded-xl shadow-sm space-y-3">
                         <div>
                             <p className="font-black text-gray-900 text-[14pt] mb-1 uppercase tracking-tight">Joining the Club</p>
                             <p className="text-gray-600">We welcome new players! Join us for a few Saturday rounds to see if it's a good fit. Contact us at <span className="font-bold text-green-600">Viet53@gmail.com</span> for more information.</p>
                         </div>
-                        <div className="pt-4 border-t border-gray-50">
+                        <div className="pt-3 border-t border-gray-50">
                             <p className="font-black text-gray-900 text-[14pt] mb-1 uppercase tracking-tight">Questions?</p>
                             <p className="text-gray-600">For rules clarifications or any questions, contact <a href="mailto:Viet53@gmail.com" className="text-green-600 font-black hover:underline">Viet53@gmail.com</a></p>
                         </div>
@@ -282,15 +282,15 @@ export default function FAQClient({ players }: { players: Player[] }) {
     );
 
     const handicapRules = (
-        <div className="space-y-10 max-w-full overflow-hidden">
-            <header className="border-b border-gray-100 pb-4">
+        <div className="space-y-3 max-w-full overflow-hidden">
+            <header className="border-b border-gray-100 pb-3">
                 <h3 className="text-[14pt] font-black text-gray-900 tracking-tight uppercase">WHS Handicap System</h3>
                 <p className="text-[14pt] text-green-600 font-bold italic mt-1">All mechanisms are 2025 USGA/WHS compliant</p>
             </header>
 
             {/* 2024 Update Section */}
-            <section className="bg-white border-2 border-green-500 rounded-2xl p-6 shadow-xl mb-8">
-                <div className="flex items-center gap-3 mb-4">
+            <section className="bg-white border-2 border-green-500 rounded-2xl py-3 px-1 shadow-xl mb-3">
+                <div className="flex items-center gap-3 mb-3">
                     <div className="bg-green-500 text-white p-2 rounded-lg font-black text-[12pt]">NEW</div>
                     <h4 className="text-[16pt] font-black text-gray-900 uppercase">The 2024 "Playing to Par" Update</h4>
                 </div>
@@ -749,9 +749,9 @@ export default function FAQClient({ players }: { players: Player[] }) {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-1 py-8">
+            <main className="max-w-7xl mx-auto px-1 py-3">
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 px-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 px-1">
                     <button onClick={() => openModal('Club Rules', clubRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Club Rules</button>
                     <button onClick={() => openModal('Handicap Rules', handicapRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Handicap Rules</button>
                     <Link href="#" className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-center text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 flex items-center justify-center border-b-2 border-gray-700">Download Member App</Link>
