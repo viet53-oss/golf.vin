@@ -264,6 +264,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return scores.get(playerId)?.get(holeNumber) ?? null;
     };
 
+    // Get only saved scores (no pending) - use this for summary/leaderboard
+    const getSavedScore = (playerId: string, holeNumber: number): number | null => {
+        return scores.get(playerId)?.get(holeNumber) ?? null;
+    };
+
     const getPlayerTee = (player: Player) => {
         if (!defaultCourse) return null;
         if (player.preferred_tee_box) {
@@ -1028,7 +1033,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             {/* Row 1: Holes 1-9 */}
                                             <div className="grid grid-cols-9 border-b border-black">
                                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
-                                                    const score = getScore(p.id, num);
+                                                    const score = getSavedScore(p.id, num);
                                                     const isActive = activeHole === num;
                                                     const hole = defaultCourse?.holes.find(h => h.hole_number === num);
                                                     const holePar = hole?.par || 4;
@@ -1061,7 +1066,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             {/* Row 2: Holes 10-18 */}
                                             <div className="grid grid-cols-9">
                                                 {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
-                                                    const score = getScore(p.id, num);
+                                                    const score = getSavedScore(p.id, num);
                                                     const isActive = activeHole === num;
                                                     const hole = defaultCourse?.holes.find(h => h.hole_number === num);
                                                     const holePar = hole?.par || 4;
