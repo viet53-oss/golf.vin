@@ -70,6 +70,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [guestPlayers, setGuestPlayers] = useState<Player[]>([]);
     const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; index: number; courseHandicap: number } | null>(null);
     const [isAddToClubModalOpen, setIsAddToClubModalOpen] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
@@ -198,6 +199,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
         return 1;
     });
+
+    // Reset unsaved changes when hole changes
+    useEffect(() => {
+        setHasUnsavedChanges(false);
+    }, [activeHole]);
     const [isAdmin, setIsAdmin] = useState(false);
 
     // Check admin status
@@ -410,7 +416,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
 
         // Calculate next score based on current state closure
-        // This avoids putting side effects (API calls) inside the setState updater
         const currentScore = scores.get(playerId)?.get(activeHole) || activeHolePar;
 
         let nextScore = increment ? currentScore + 1 : currentScore - 1;
@@ -425,12 +430,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             return newScores;
         });
 
-        // Persist to Server (Side Effect)
-        saveLiveScore({
-            liveRoundId,
-            holeNumber: activeHole,
-            playerScores: [{ playerId, strokes: nextScore }]
-        });
+        // Mark as unsaved - don't auto-save anymore
+        setHasUnsavedChanges(true);
     };
 
     // Standardize Persistence logic: 
@@ -871,24 +872,30 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                         selectedPlayers.forEach(p => {
                                             const playerScores = new Map(newScores.get(p.id) || []);
+                                            const currentScore = playerScores.get(activeHole);
+
                                             // If no score exists for this hole, default to Par
                                             if (!playerScores.has(activeHole)) {
                                                 playerScores.set(activeHole, activeHolePar);
                                                 updates.push({ playerId: p.id, strokes: activeHolePar });
+                                            } else {
+                                                // Always save current score when button is clicked
+                                                updates.push({ playerId: p.id, strokes: currentScore! });
                                             }
                                             newScores.set(p.id, playerScores);
                                         });
 
+                                        // Save all scores to server
                                         if (updates.length > 0) {
-                                            // Update UI
-                                            setScores(newScores);
-                                            // Save to Server
                                             saveLiveScore({
                                                 liveRoundId,
                                                 holeNumber: activeHole,
                                                 playerScores: updates
                                             });
                                         }
+
+                                        // Reset unsaved changes flag
+                                        setHasUnsavedChanges(false);
 
                                         if (activeHole < 18) {
                                             setActiveHole(activeHole + 1);
@@ -912,7 +919,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         // Silent refresh to keep server data in sync without flashing the page
                                         router.refresh();
                                     }}
-                                    className="w-1/2 bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2"
+                                    className={`w-1/2 ${hasUnsavedChanges ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800'} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
                                 >
                                     Save Hole {activeHole}
                                 </button>
