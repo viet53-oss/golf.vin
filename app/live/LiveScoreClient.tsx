@@ -617,15 +617,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         <div className="flex flex-col gap-2 shrink-0">
 
                             {canUpdate && !hideSettings && (
-                                <button
-                                    onClick={() => {
-                                        setRoundModalMode('edit');
-                                        setIsRoundModalOpen(true);
-                                    }}
-                                    className="bg-black text-white text-[14pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
-                                >
-                                    Select Course
-                                </button>
+                                <div className="bg-gray-100 text-gray-700 text-[12pt] font-bold px-4 py-2 rounded-full border-2 border-gray-300">
+                                    Course for Today
+                                </div>
                             )}
 
                             {isAdmin && (
