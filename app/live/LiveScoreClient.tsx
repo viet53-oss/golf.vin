@@ -624,7 +624,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     }}
                                     className="bg-black text-white text-[14pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
                                 >
-                                    Select Course
+                                    Course
                                 </button>
                             )}
 
