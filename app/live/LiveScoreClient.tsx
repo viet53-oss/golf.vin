@@ -743,7 +743,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         // Determine styling
                                         let btnClass = "bg-white text-black border border-gray-200 hover:bg-gray-50"; // Default (Blank on White)
                                         if (isActive) {
-                                            btnClass = "bg-[#059669] text-white shadow-md scale-105 z-10";
+                                            btnClass = "bg-blue-600 text-white shadow-md scale-105 z-10";
                                         } else if (isSaved) {
                                             btnClass = "bg-gray-400 text-white border border-gray-400 shadow-sm";
                                         }
