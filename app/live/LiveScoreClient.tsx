@@ -719,7 +719,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     </button>
                                     <button
                                         onClick={() => setIsGuestModalOpen(true)}
-                                        className="bg-blue-600 text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-blue-700 active:scale-95 transition-all"
+                                        className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
                                     >
                                         Add Guest
                                     </button>
@@ -818,9 +818,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="bg-black text-white font-bold rounded w-8 h-8 flex items-center justify-center text-[12pt] shrink-0">
-                                                        {displayRank}
-                                                    </div>
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="flex items-center gap-1">
                                                             <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
