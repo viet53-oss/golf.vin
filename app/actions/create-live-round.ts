@@ -44,6 +44,7 @@ export async function updateLiveRound(data: {
     id: string;
     name: string;
     date: string;
+    courseId?: string;
     par: number;
     rating: number;
     slope: number;
@@ -54,6 +55,7 @@ export async function updateLiveRound(data: {
             data: {
                 name: data.name,
                 date: data.date,
+                course_id: data.courseId,
                 par: data.par,
                 rating: data.rating,
                 slope: data.slope

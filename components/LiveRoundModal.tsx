@@ -100,6 +100,7 @@ export function LiveRoundModal({
                     id: existingRound.id,
                     name: name || 'Live Round',
                     date: date || today,
+                    courseId: selectedCourseId || courseId,
                     par: parVal,
                     rating: ratingVal,
                     slope: slopeVal
