@@ -143,7 +143,21 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         return redirect(`/live?roundId=${activeRound.id}`);
     }
 
-    // 8. Get rounds for list
+    // 8. If activeRound has a specific course_id, use that as the defaultCourse
+    if (activeRound?.course_id) {
+        const roundCourse = await prisma.course.findUnique({
+            where: { id: activeRound.course_id },
+            include: {
+                tee_boxes: true,
+                holes: { orderBy: { hole_number: 'asc' } }
+            }
+        });
+        if (roundCourse) {
+            defaultCourse = roundCourse;
+        }
+    }
+
+    // 9. Get rounds for list
     const allLiveRounds = await prisma.liveRound.findMany({
         orderBy: { created_at: 'desc' },
         select: { id: true, name: true, date: true, created_at: true }
