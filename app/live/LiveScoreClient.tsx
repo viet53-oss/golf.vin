@@ -877,6 +877,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         const updates: { playerId: string; strokes: number }[] = [];
                                         const newScores = new Map(scores);
 
+                                        // Check if this hole was already scored (for all players)
+                                        const wasAlreadyScored = selectedPlayers.every(p => {
+                                            const playerScores = scores.get(p.id);
+                                            return playerScores && playerScores.has(activeHole);
+                                        });
+
                                         selectedPlayers.forEach(p => {
                                             const playerScores = new Map(newScores.get(p.id) || []);
 
@@ -909,23 +915,26 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         setPendingScores(new Map());
                                         setHasUnsavedChanges(false);
 
-                                        if (activeHole < 18) {
-                                            setActiveHole(activeHole + 1);
-                                        } else {
-                                            // After 18th hole, find the first hole that has missing scores
-                                            let nextHole = 1;
-                                            for (let h = 1; h <= 18; h++) {
-                                                const isHoleIncomplete = selectedPlayers.some(p => {
-                                                    const pScores = newScores.get(p.id);
-                                                    return !pScores || !pScores.has(h);
-                                                });
+                                        // Only advance to next hole if this was a new hole (not an update)
+                                        if (!wasAlreadyScored) {
+                                            if (activeHole < 18) {
+                                                setActiveHole(activeHole + 1);
+                                            } else {
+                                                // After 18th hole, find the first hole that has missing scores
+                                                let nextHole = 1;
+                                                for (let h = 1; h <= 18; h++) {
+                                                    const isHoleIncomplete = selectedPlayers.some(p => {
+                                                        const pScores = newScores.get(p.id);
+                                                        return !pScores || !pScores.has(h);
+                                                    });
 
-                                                if (isHoleIncomplete) {
-                                                    nextHole = h;
-                                                    break;
+                                                    if (isHoleIncomplete) {
+                                                        nextHole = h;
+                                                        break;
+                                                    }
                                                 }
+                                                setActiveHole(nextHole);
                                             }
-                                            setActiveHole(nextHole);
                                         }
 
                                         // Silent refresh to keep server data in sync without flashing the page
