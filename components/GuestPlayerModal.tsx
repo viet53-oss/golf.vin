@@ -23,8 +23,8 @@ interface GuestPlayerModalProps {
 
 export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, roundData, editingGuest }: GuestPlayerModalProps) {
     const [name, setName] = useState('');
-    const [index, setIndex] = useState('0');
-    const [courseHandicap, setCourseHandicap] = useState('0');
+    const [index, setIndex] = useState('');
+    const [courseHandicap, setCourseHandicap] = useState('');
     const [manuallyEditedHandicap, setManuallyEditedHandicap] = useState(false);
 
     // Load editing guest data when modal opens
@@ -36,8 +36,8 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
             setManuallyEditedHandicap(false);
         } else {
             setName('');
-            setIndex('0');
-            setCourseHandicap('0');
+            setIndex('');
+            setCourseHandicap('');
             setManuallyEditedHandicap(false);
         }
     }, [editingGuest, isOpen]);
@@ -45,7 +45,9 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
     // Auto-calculate course handicap when index changes (only if not manually edited)
     useEffect(() => {
         if (roundData && index && !editingGuest && !manuallyEditedHandicap) {
-            const indexNum = parseFloat(index) || 0;
+            const indexNum = parseFloat(index);
+            if (isNaN(indexNum)) return;
+
             const { rating, slope, par } = roundData;
 
             // Course Handicap formula: (Index × Slope / 113) + (Rating - Par)
@@ -76,8 +78,8 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
 
         // Reset form
         setName('');
-        setIndex('0');
-        setCourseHandicap('0');
+        setIndex('');
+        setCourseHandicap('');
         onClose();
     };
 
