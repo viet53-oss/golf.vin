@@ -598,7 +598,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 )}
 
                 {/* Course Info Card */}
-                <div className="bg-white rounded-xl shadow-lg p-3 border-4 border-gray-300">
+                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
                     <div className="flex justify-between items-start">
                         <div className="flex-1">
                             <div className="flex items-center gap-2">
