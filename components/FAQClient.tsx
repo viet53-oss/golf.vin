@@ -327,37 +327,35 @@ export default function FAQClient({ players }: { players: Player[] }) {
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <div className="overflow-y-auto max-h-[300px]">
-                        <table className="w-full text-[13pt] text-center font-medium">
-                            <thead className="bg-gray-900 text-white sticky top-0 z-10">
-                                <tr>
-                                    <th className="py-2 px-2 w-1/3">HCP</th>
-                                    <th className="py-2 px-2 w-2/3 border-l border-gray-700">Index Range</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 text-gray-700">
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-3</td><td className="py-1.5 border-l border-gray-100">0.8 — 1.9</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-2</td><td className="py-1.5 border-l border-gray-100">2.0 — 3.0</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-1</td><td className="py-1.5 border-l border-gray-100">3.1 — 4.1</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">0</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">4.2 — 5.3</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">1</td><td className="py-1.5 border-l border-gray-100">5.4 — 6.4</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">2</td><td className="py-1.5 border-l border-gray-100">6.5 — 7.5</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">3</td><td className="py-1.5 border-l border-gray-100">7.6 — 8.7</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">4</td><td className="py-1.5 border-l border-gray-100">8.8 — 9.8</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">5</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">9.9 — 10.9</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">6</td><td className="py-1.5 border-l border-gray-100">11.0 — 12.0</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">7</td><td className="py-1.5 border-l border-gray-100">12.1 — 13.2</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">8</td><td className="py-1.5 border-l border-gray-100">13.3 — 14.3</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">9</td><td className="py-1.5 border-l border-gray-100">14.4 — 15.4</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">10</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">15.5 — 16.6</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">11</td><td className="py-1.5 border-l border-gray-100">16.7 — 17.7</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">12</td><td className="py-1.5 border-l border-gray-100">17.8 — 18.8</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">13</td><td className="py-1.5 border-l border-gray-100">18.9 — 20.0</td></tr>
-                                <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">14</td><td className="py-1.5 border-l border-gray-100">20.1 — 21.1</td></tr>
-                                <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">15</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">21.2 — 22.2</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table className="w-full text-[13pt] text-center font-medium">
+                        <thead className="bg-gray-900 text-white sticky top-0 z-10">
+                            <tr>
+                                <th className="py-2 px-2 w-1/3">HCP</th>
+                                <th className="py-2 px-2 w-2/3 border-l border-gray-700">Index Range</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 text-gray-700">
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-3</td><td className="py-1.5 border-l border-gray-100">0.8 — 1.9</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-2</td><td className="py-1.5 border-l border-gray-100">2.0 — 3.0</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">-1</td><td className="py-1.5 border-l border-gray-100">3.1 — 4.1</td></tr>
+                            <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">0</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">4.2 — 5.3</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">1</td><td className="py-1.5 border-l border-gray-100">5.4 — 6.4</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">2</td><td className="py-1.5 border-l border-gray-100">6.5 — 7.5</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">3</td><td className="py-1.5 border-l border-gray-100">7.6 — 8.7</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">4</td><td className="py-1.5 border-l border-gray-100">8.8 — 9.8</td></tr>
+                            <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">5</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">9.9 — 10.9</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">6</td><td className="py-1.5 border-l border-gray-100">11.0 — 12.0</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">7</td><td className="py-1.5 border-l border-gray-100">12.1 — 13.2</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">8</td><td className="py-1.5 border-l border-gray-100">13.3 — 14.3</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">9</td><td className="py-1.5 border-l border-gray-100">14.4 — 15.4</td></tr>
+                            <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">10</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">15.5 — 16.6</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">11</td><td className="py-1.5 border-l border-gray-100">16.7 — 17.7</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">12</td><td className="py-1.5 border-l border-gray-100">17.8 — 18.8</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">13</td><td className="py-1.5 border-l border-gray-100">18.9 — 20.0</td></tr>
+                            <tr className="even:bg-gray-50"><td className="py-1.5 font-black text-black">14</td><td className="py-1.5 border-l border-gray-100">20.1 — 21.1</td></tr>
+                            <tr className="even:bg-gray-50 border-t-2 border-gray-200"><td className="py-1.5 font-black text-green-600 text-[15pt]">15</td><td className="py-1.5 border-l border-gray-100 font-bold text-gray-900 bg-green-50">21.2 — 22.2</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 

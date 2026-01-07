@@ -7,7 +7,9 @@ import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
 import { GuestPlayerModal } from '@/components/GuestPlayerModal';
+import AddToClubModal from '@/components/AddToClubModal';
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound } from '@/app/actions/create-live-round';
+import { copyLiveToClub } from '@/app/actions/copy-live-to-club';
 
 interface Player {
     id: string;
@@ -15,6 +17,7 @@ interface Player {
     index: number;
     preferred_tee_box: string | null;
     isGuest?: boolean;
+    liveRoundPlayerId?: string; // LiveRoundPlayer ID for server actions
     liveRoundData?: {
         tee_box_name: string | null;
         course_hcp: number | null;
@@ -66,6 +69,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
     const [guestPlayers, setGuestPlayers] = useState<Player[]>([]);
     const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; index: number; courseHandicap: number } | null>(null);
+    const [isAddToClubModalOpen, setIsAddToClubModalOpen] = useState(false);
 
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
@@ -346,6 +350,24 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
     };
 
+    const handleCopyToClub = async (selectedPlayerIds: string[]) => {
+        if (!liveRoundId) {
+            alert('No live round selected');
+            return;
+        }
+
+        const result = await copyLiveToClub({
+            liveRoundId,
+            playerIds: selectedPlayerIds
+        });
+
+        if (result.success) {
+            alert(result.message || 'Successfully copied to club scores!');
+        } else {
+            alert('Failed to copy: ' + result.error);
+        }
+    };
+
 
 
 
@@ -433,6 +455,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     index: p.index_at_time,
                     preferred_tee_box: null,
                     isGuest: true,
+                    liveRoundPlayerId: p.id, // For guests, the ID is already the LiveRoundPlayer ID
                     liveRoundData: {
                         tee_box_name: p.tee_box_name,
                         course_hcp: p.course_handicap
@@ -445,6 +468,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     name: p.player.name,
                     index: p.player.index,
                     preferred_tee_box: p.player.preferred_tee_box,
+                    liveRoundPlayerId: p.id, // Store the LiveRoundPlayer ID
                     liveRoundData: {
                         tee_box_name: p.tee_box_name,
                         course_hcp: p.course_handicap
@@ -592,32 +616,40 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             )}
 
                             {isAdmin && (
-                                <button
-                                    onClick={async () => {
-                                        console.log('Delete button clicked');
-                                        console.log('liveRoundId:', liveRoundId);
-                                        console.log('isAdmin:', isAdmin);
+                                <>
+                                    <button
+                                        onClick={async () => {
+                                            console.log('Delete button clicked');
+                                            console.log('liveRoundId:', liveRoundId);
+                                            console.log('isAdmin:', isAdmin);
 
-                                        if (!liveRoundId) {
-                                            console.log('No liveRoundId, returning');
-                                            return;
-                                        }
+                                            if (!liveRoundId) {
+                                                console.log('No liveRoundId, returning');
+                                                return;
+                                            }
 
-                                        console.log('Deleting round...');
-                                        try {
-                                            console.log('Calling deleteLiveRound...');
-                                            await deleteLiveRound(liveRoundId);
-                                            console.log('Delete successful, redirecting to home');
-                                            window.location.href = '/';
-                                        } catch (err) {
-                                            console.error('Failed to delete round:', err);
-                                            alert('Failed to delete round.');
-                                        }
-                                    }}
-                                    className="bg-red-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
-                                >
-                                    Delete
-                                </button>
+                                            console.log('Deleting round...');
+                                            try {
+                                                console.log('Calling deleteLiveRound...');
+                                                await deleteLiveRound(liveRoundId);
+                                                console.log('Delete successful, redirecting to home');
+                                                window.location.href = '/';
+                                            } catch (err) {
+                                                console.error('Failed to delete round:', err);
+                                                alert('Failed to delete round.');
+                                            }
+                                        }}
+                                        className="bg-red-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        onClick={() => setIsAddToClubModalOpen(true)}
+                                        className="bg-green-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
+                                    >
+                                        Add to Club
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -829,60 +861,62 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                         {/* Save Hole Button */}
                         {selectedPlayers.length > 0 && canUpdate && (
-                            <button
-                                onClick={() => {
-                                    if (!liveRoundId) return;
+                            <div className="flex justify-end mt-2">
+                                <button
+                                    onClick={() => {
+                                        if (!liveRoundId) return;
 
-                                    const updates: { playerId: string; strokes: number }[] = [];
-                                    const newScores = new Map(scores); // Use current render state
+                                        const updates: { playerId: string; strokes: number }[] = [];
+                                        const newScores = new Map(scores); // Use current render state
 
-                                    selectedPlayers.forEach(p => {
-                                        const playerScores = new Map(newScores.get(p.id) || []);
-                                        // If no score exists for this hole, default to Par
-                                        if (!playerScores.has(activeHole)) {
-                                            playerScores.set(activeHole, activeHolePar);
-                                            updates.push({ playerId: p.id, strokes: activeHolePar });
-                                        }
-                                        newScores.set(p.id, playerScores);
-                                    });
-
-                                    if (updates.length > 0) {
-                                        // Update UI
-                                        setScores(newScores);
-                                        // Save to Server
-                                        saveLiveScore({
-                                            liveRoundId,
-                                            holeNumber: activeHole,
-                                            playerScores: updates
-                                        });
-                                    }
-
-                                    if (activeHole < 18) {
-                                        setActiveHole(activeHole + 1);
-                                    } else {
-                                        // After 18th hole, find the first hole that has missing scores
-                                        let nextHole = 1;
-                                        for (let h = 1; h <= 18; h++) {
-                                            const isHoleIncomplete = selectedPlayers.some(p => {
-                                                const pScores = newScores.get(p.id);
-                                                return !pScores || !pScores.has(h);
-                                            });
-
-                                            if (isHoleIncomplete) {
-                                                nextHole = h;
-                                                break;
+                                        selectedPlayers.forEach(p => {
+                                            const playerScores = new Map(newScores.get(p.id) || []);
+                                            // If no score exists for this hole, default to Par
+                                            if (!playerScores.has(activeHole)) {
+                                                playerScores.set(activeHole, activeHolePar);
+                                                updates.push({ playerId: p.id, strokes: activeHolePar });
                                             }
-                                        }
-                                        setActiveHole(nextHole);
-                                    }
+                                            newScores.set(p.id, playerScores);
+                                        });
 
-                                    // Silent refresh to keep server data in sync without flashing the page
-                                    router.refresh();
-                                }}
-                                className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2 mt-2"
-                            >
-                                Save Hole {activeHole}
-                            </button>
+                                        if (updates.length > 0) {
+                                            // Update UI
+                                            setScores(newScores);
+                                            // Save to Server
+                                            saveLiveScore({
+                                                liveRoundId,
+                                                holeNumber: activeHole,
+                                                playerScores: updates
+                                            });
+                                        }
+
+                                        if (activeHole < 18) {
+                                            setActiveHole(activeHole + 1);
+                                        } else {
+                                            // After 18th hole, find the first hole that has missing scores
+                                            let nextHole = 1;
+                                            for (let h = 1; h <= 18; h++) {
+                                                const isHoleIncomplete = selectedPlayers.some(p => {
+                                                    const pScores = newScores.get(p.id);
+                                                    return !pScores || !pScores.has(h);
+                                                });
+
+                                                if (isHoleIncomplete) {
+                                                    nextHole = h;
+                                                    break;
+                                                }
+                                            }
+                                            setActiveHole(nextHole);
+                                        }
+
+                                        // Silent refresh to keep server data in sync without flashing the page
+                                        router.refresh();
+                                    }}
+                                    className="w-1/2 bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] flex items-center justify-center gap-2"
+                                >
+                                    Save Hole {activeHole}
+                                </button>
+                            </div>
                         )}
                     </div>
                 )}
@@ -1039,18 +1073,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 }
 
                 {/* Score Legend */}
-                {
-                    selectedPlayers.length > 0 && (
-                        <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[14pt]">
-                            <div className="font-bold text-gray-700 mr-1 text-[14pt]">Score Legend</div>
-                            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
-                            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
-                            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-50 border border-gray-200"></div>Par (E)</div>
-                            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-200"></div>Bogey (+1)</div>
-                            <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-200"></div>Double+ (+2)</div>
-                        </div>
-                    )
-                }
+                <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[14pt]">
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-50 border border-gray-200"></div>Par (E)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-200"></div>Bogey (+1)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-200"></div>Double+ (+2)</div>
+                </div>
 
                 {/* Save Round Button - Admin Only */}
                 {
@@ -1069,6 +1098,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     )
                 }
             </main >
+
+            {/* Add to Club Modal */}
+            <AddToClubModal
+                isOpen={isAddToClubModalOpen}
+                onClose={() => setIsAddToClubModalOpen(false)}
+                players={rankedPlayers}
+                liveRoundId={liveRoundId || ''}
+                onSave={handleCopyToClub}
+            />
         </div >
     );
 }
