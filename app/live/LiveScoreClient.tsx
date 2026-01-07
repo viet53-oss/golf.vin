@@ -708,7 +708,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 my-1">
                         {/* Section Header: Group Players */}
                         <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <h2 className="text-[16pt] font-bold text-gray-900">Group Players</h2>
+                            <h2 className="text-[16pt] font-bold text-gray-900">Group</h2>
                             {canUpdate && !hideSettings && (
                                 <div className="flex gap-2">
                                     <button
