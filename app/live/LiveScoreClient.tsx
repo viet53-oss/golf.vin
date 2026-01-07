@@ -567,7 +567,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-1">
                 <div className="w-full flex justify-between items-center">
                     <h1 className="text-[16pt] font-bold text-green-700 tracking-tight">Live Scoring</h1>
-                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">
+                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
                         Home
                     </Link>
                 </div>
@@ -577,7 +577,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* Round Selector - Admin Only */}
                 {isAdmin && allLiveRounds.length > 0 && (
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                        <label className="block text-[14pt] font-bold text-gray-900 mb-2">Select Round:</label>
+                        <label className="block text-[15pt] font-bold text-gray-900 mb-2">Select Round:</label>
                         <select
                             value={liveRoundId || ''}
                             onChange={(e) => {
@@ -585,7 +585,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     window.location.href = `/live?roundId=${e.target.value}`;
                                 }
                             }}
-                            className="w-full px-4 py-2 text-[14pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                            className="w-full px-4 py-2 text-[15pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                         >
                             <option value="">-- Select a Round --</option>
                             {allLiveRounds.map(round => (
@@ -622,7 +622,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         setRoundModalMode('edit');
                                         setIsRoundModalOpen(true);
                                     }}
-                                    className="bg-black text-white text-[14pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
+                                    className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
                                 >
                                     Course
                                 </button>
@@ -713,13 +713,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setIsPlayerModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
+                                        className="bg-black text-white rounded-full px-4 py-2 text-[15pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
                                     >
                                         Players
                                     </button>
                                     <button
                                         onClick={() => setIsGuestModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-2 text-[14pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
+                                        className="bg-black text-white rounded-full px-4 py-2 text-[15pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
                                     >
                                         Guest
                                     </button>
@@ -753,7 +753,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 key={hole.hole_number}
                                                 onClick={() => setActiveHole(hole.hole_number)}
                                                 className={`
-                                                flex items-center justify-center font-bold text-[14pt] px-1 py-2 rounded-full transition-all whitespace-nowrap
+                                                flex items-center justify-center font-bold text-[15pt] px-1 py-2 rounded-full transition-all whitespace-nowrap
                                                 ${btnClass}
                                             `}
                                             >
@@ -839,7 +839,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 </button>
                                                             )}
                                                         </div>
-                                                        <div className="text-gray-700 text-[14pt] leading-tight">{splitName(player.name).last}</div>
+                                                        <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-4">
@@ -965,7 +965,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     <div className="mt-4 space-y-2">
                         <button
                             onClick={() => router.refresh()}
-                            className="w-full bg-black text-white rounded-full py-2 text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                            className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                         >
                             Summary - Refresh
                         </button>
@@ -1007,7 +1007,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-1">
-                                                            <div className="font-bold text-[14pt] leading-tight">{splitName(p.name).first}</div>
+                                                            <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
                                                             {showFlagInSummary && <span className="text-[16pt]">🏁</span>}
                                                         </div>
                                                         <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
@@ -1015,20 +1015,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 </div>
 
                                                 <div className="flex gap-4 items-center">
-                                                    <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[14pt] min-w-[3rem] ${toParClass}`}>
+                                                    <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[15pt] min-w-[3rem] ${toParClass}`}>
                                                         {toParStr}
                                                     </div>
                                                     <div className="text-center">
-                                                        <div className="text-[14pt] opacity-80 font-bold tracking-wider">GRS</div>
-                                                        <div className="text-[14pt] font-bold leading-none">{p.totalGross}</div>
+                                                        <div className="text-[15pt] opacity-80 font-bold tracking-wider">GRS</div>
+                                                        <div className="text-[15pt] font-bold leading-none">{p.totalGross}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-[14pt] opacity-80 font-bold tracking-wider">HCP</div>
-                                                        <div className="text-[14pt] font-bold leading-none">{p.strokesReceivedSoFar}/{p.courseHcp}</div>
+                                                        <div className="text-[15pt] opacity-80 font-bold tracking-wider">HCP</div>
+                                                        <div className="text-[15pt] font-bold leading-none">{p.strokesReceivedSoFar}/{p.courseHcp}</div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-[14pt] opacity-80 font-bold tracking-wider">NET</div>
-                                                        <div className="text-[14pt] font-bold leading-none">{p.totalNet}</div>
+                                                        <div className="text-[15pt] opacity-80 font-bold tracking-wider">NET</div>
+                                                        <div className="text-[15pt] font-bold leading-none">{p.totalNet}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1062,7 +1062,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
                                                         `}>
                                                             <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                            <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                            <div className={`text-[15pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                                 {score || '-'}
                                                             </div>
                                                         </div>
@@ -1095,7 +1095,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             ${isActive ? 'ring-2 ring-green-600 ring-inset z-10' : ''}
                                                         `}>
                                                             <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                            <div className={`text-[14pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                            <div className={`text-[15pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                                 {score || '-'}
                                                             </div>
                                                         </div>
@@ -1112,7 +1112,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 }
 
                 {/* Score Legend */}
-                <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[14pt]">
+                <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]">
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-50 border border-gray-200"></div>Par (E)</div>
@@ -1130,7 +1130,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     window.location.reload();
                                 }
                             }}
-                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-lg transition-colors text-[14pt] mt-1 mb-1"
+                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-lg transition-colors text-[15pt] mt-1 mb-1"
                         >
                             💾 Save Round
                         </button>
