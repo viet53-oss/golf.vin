@@ -284,6 +284,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     }, [selectedPlayers]); // Intentionally not including scores to avoid jumping while scoring
 
     const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
+    const activeHoleDifficulty = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.difficulty;
 
     // Helper to split name into first and last
     const splitName = (fullName: string) => {
@@ -748,27 +749,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 />
 
                 {/* Scoring Section */}
-                {(selectedPlayers.length > 0 || (canUpdate && !hideSettings)) && (
-                    <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 my-1">
-                        {/* Section Header: Group Players */}
-                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <h2 className="text-[16pt] font-bold text-gray-900">Group</h2>
-                            {canUpdate && !hideSettings && (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setIsPlayerModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-2 text-[15pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
-                                    >
-                                        Players
-                                    </button>
-                                    <button
-                                        onClick={() => setIsGuestModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-2 text-[15pt] font-bold shadow-md hover:bg-gray-800 active:scale-95 transition-all"
-                                    >
-                                        Guest
-                                    </button>
-                                </div>
-                            )}
+                {/* GPS SECTION */}
+                {selectedPlayers.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
+                        <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
+                            <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">GPS</h2>
+                            <div className="flex items-center gap-2">
+                                <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[18pt] font-bold">Hole {activeHole}</span>
+                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[18pt] font-bold">Par {activeHolePar}</span>
+                                {activeHoleDifficulty && (
+                                    <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full text-[18pt] font-bold">Hard {activeHoleDifficulty}</span>
+                                )}
+                            </div>
                         </div>
 
                         {/* GPS Distance Display */}
@@ -782,13 +774,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     Number(currentHole.longitude)
                                 );
                                 return (
-                                    <div className="bg-green-50 border-b border-green-100 py-2 text-center">
-                                        <p className="text-green-800 font-bold text-[16pt] flex items-center justify-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <circle cx="12" cy="12" r="10" />
-                                                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-                                            </svg>
-                                            {dist} Yards to Pin
+                                    <div className="bg-green-600 text-white py-1.5 rounded-lg text-center mb-2 shadow-inner">
+                                        <p className="font-black text-[50pt] flex items-center justify-center gap-2">
+                                            {dist} yd
                                         </p>
                                     </div>
                                 );
@@ -796,250 +784,274 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             return null;
                         })()}
 
-                        {/* Hole Selection Grid */}
-                        {selectedPlayers.length > 0 && (
-                            <div className="mb-1">
-                                <div className="grid grid-cols-6 gap-1">
-                                    {defaultCourse?.holes.map(hole => {
-                                        // Check if this hole has been saved (has scores)
-                                        const isSaved = selectedPlayers.some(p => {
-                                            const pScores = scores.get(p.id);
-                                            return pScores && pScores.has(hole.hole_number);
-                                        });
+                        <div className="grid grid-cols-6 gap-1">
+                            {defaultCourse?.holes.map(hole => {
+                                // Check if this hole has been saved (has scores)
+                                const isSaved = selectedPlayers.some(p => {
+                                    const pScores = scores.get(p.id);
+                                    return pScores && pScores.has(hole.hole_number);
+                                });
 
-                                        const isActive = activeHole === hole.hole_number;
+                                const isActive = activeHole === hole.hole_number;
 
-                                        // Determine styling
-                                        let btnClass = "bg-white text-black border-2 border-gray-300 hover:bg-gray-50"; // Default (Blank on White) with light gray border
-                                        if (isActive) {
-                                            btnClass = "bg-blue-600 text-white shadow-md scale-105 z-10 border-2 border-gray-300";
-                                        } else if (isSaved) {
-                                            btnClass = "bg-gray-400 text-white border-2 border-gray-300 shadow-sm";
-                                        }
+                                // Determine styling
+                                let btnClass = "bg-white text-black border border-gray-200";
+                                if (isActive) {
+                                    btnClass = "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-1 z-10 scale-105 shadow-md";
+                                } else if (isSaved) {
+                                    btnClass = "bg-gray-100 text-gray-500 border-none opacity-60";
+                                }
 
-                                        return (
-                                            <button
-                                                key={hole.hole_number}
-                                                onClick={() => setActiveHole(hole.hole_number)}
-                                                className={`
-                                                flex items-center justify-center font-bold px-1 py-2 rounded-full transition-all whitespace-nowrap
-                                                ${btnClass}
-                                            `}
-                                            >
-                                                <span className="text-[18pt] font-black">{hole.hole_number}</span>
-                                                <span className="text-[17pt] font-medium opacity-80">/{hole.par}</span>
-                                            </button>
-                                        );
-                                    })}
+                                return (
+                                    <button
+                                        key={hole.hole_number}
+                                        onClick={() => setActiveHole(hole.hole_number)}
+                                        className={`
+                                            flex flex-col items-center justify-center py-1 rounded-lg transition-all
+                                            ${btnClass}
+                                        `}
+                                    >
+                                        <span className="text-[14pt] font-black leading-tight">{hole.hole_number}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* GROUP SECTION */}
+                {(selectedPlayers.length > 0 || (canUpdate && !hideSettings)) && (
+                    <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Group</h2>
+                            {canUpdate && !hideSettings && (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setIsPlayerModalOpen(true)}
+                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                    >
+                                        Players
+                                    </button>
+                                    <button
+                                        onClick={() => setIsGuestModalOpen(true)}
+                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                    >
+                                        Guest
+                                    </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                    </div>
+                )}
 
-                        {/* Player Scoring Rows */}
-                        {selectedPlayers.length > 0 ? (
-                            <div className="space-y-1">
-                                {[...selectedPlayers]
-                                    .sort((a, b) => {
-                                        const firstA = splitName(a.name).first.toLowerCase();
-                                        const firstB = splitName(b.name).first.toLowerCase();
-                                        return firstA.localeCompare(firstB);
-                                    })
-                                    .map(player => {
-                                        const score = getScore(player.id, activeHole);
-                                        // Calculate Totals for To Par
-                                        const pScores = scores.get(player.id);
-                                        let totalScore = 0;
-                                        let totalScoredPar = 0;
-                                        if (pScores) {
-                                            pScores.forEach((strokes, hNum) => {
-                                                totalScore += strokes;
-                                                const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
-                                                totalScoredPar += hPar;
-                                            });
-                                        }
-                                        const diff = totalScore - totalScoredPar;
-                                        let toParStr = "E";
-                                        let toParClass = "text-green-600";
-                                        if (diff > 0) {
-                                            toParStr = `+${diff}`;
-                                            toParClass = "text-gray-900";
-                                        } else if (diff < 0) {
-                                            toParStr = `${diff}`;
-                                            toParClass = "text-red-600";
-                                        }
+                {/* PLAYERS SECTION (Scoring) */}
+                {selectedPlayers.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
+                        <div className="flex justify-between items-center mb-1">
+                            <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
+                        </div>
+                        <div className="space-y-1">
+                            {[...selectedPlayers]
+                                .sort((a, b) => {
+                                    const firstA = splitName(a.name).first.toLowerCase();
+                                    const firstB = splitName(b.name).first.toLowerCase();
+                                    return firstA.localeCompare(firstB);
+                                })
+                                .map(player => {
+                                    const score = getScore(player.id, activeHole);
+                                    // Calculate Totals for To Par
+                                    const pScores = scores.get(player.id);
+                                    let totalScore = 0;
+                                    let totalScoredPar = 0;
+                                    if (pScores) {
+                                        pScores.forEach((strokes, hNum) => {
+                                            totalScore += strokes;
+                                            const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
+                                            totalScoredPar += hPar;
+                                        });
+                                    }
+                                    const diff = totalScore - totalScoredPar;
+                                    let toParStr = "E";
+                                    let toParClass = "text-green-600";
+                                    if (diff > 0) {
+                                        toParStr = `+${diff}`;
+                                        toParClass = "text-gray-900";
+                                    } else if (diff < 0) {
+                                        toParStr = `${diff}`;
+                                        toParClass = "text-red-600";
+                                    }
 
-                                        const courseHcp = getCourseHandicap(player);
+                                    const courseHcp = getCourseHandicap(player);
 
-                                        const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
-                                        let displayRank: React.ReactNode = playerRankIndex !== -1 ? playerRankIndex + 1 : '-';
-                                        let showFlagNextToName = false;
-                                        let showRankIconNextToName: React.ReactNode = null;
+                                    const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
+                                    let displayRank: React.ReactNode = playerRankIndex !== -1 ? playerRankIndex + 1 : '-';
+                                    let showFlagNextToName = false;
+                                    let showRankIconNextToName: React.ReactNode = null;
 
-                                        if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
-                                            if (allActiveFinished) {
-                                                if (playerRankIndex === 0) {
-                                                    displayRank = "🏆";
-                                                    showRankIconNextToName = "🏆";
-                                                } else if (playerRankIndex === 1) {
-                                                    displayRank = "🥈";
-                                                    showRankIconNextToName = "🥈";
-                                                } else if (playerRankIndex === 2) {
-                                                    displayRank = "🥉";
-                                                    showRankIconNextToName = "🥉";
-                                                } else {
-                                                    showFlagNextToName = true;
-                                                }
+                                    if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
+                                        if (allActiveFinished) {
+                                            if (playerRankIndex === 0) {
+                                                displayRank = "🏆";
+                                                showRankIconNextToName = "🏆";
+                                            } else if (playerRankIndex === 1) {
+                                                displayRank = "🥈";
+                                                showRankIconNextToName = "🥈";
+                                            } else if (playerRankIndex === 2) {
+                                                displayRank = "🥉";
+                                                showRankIconNextToName = "🥉";
                                             } else {
                                                 showFlagNextToName = true;
                                             }
+                                        } else {
+                                            showFlagNextToName = true;
                                         }
+                                    }
 
-                                        return (
-                                            <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex flex-col items-start leading-tight">
-                                                        <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
-                                                        <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        {showRankIconNextToName && <span className="text-[20pt] leading-none">{showRankIconNextToName}</span>}
-                                                        {showFlagNextToName && <span className="text-[20pt] leading-none">🏁</span>}
-                                                        {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
-                                                            <button
-                                                                onClick={() => {
-                                                                    setEditingGuest({
-                                                                        id: player.id,
-                                                                        name: player.name,
-                                                                        index: player.index,
-                                                                        courseHandicap: player.liveRoundData?.course_hcp || 0
-                                                                    });
-                                                                    setIsGuestModalOpen(true);
-                                                                }}
-                                                                className="ml-1 text-blue-600 hover:text-blue-800 text-[12pt] font-semibold"
-                                                            >
-                                                                ✏️
-                                                            </button>
-                                                        )}
-                                                    </div>
+                                    return (
+                                        <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex flex-col items-start leading-tight">
+                                                    <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                    <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    {canUpdate && (
+                                                <div className="flex items-center gap-1">
+                                                    {showRankIconNextToName && <span className="text-[20pt] leading-none">{showRankIconNextToName}</span>}
+                                                    {showFlagNextToName && <span className="text-[20pt] leading-none">🏁</span>}
+                                                    {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
                                                         <button
-                                                            onClick={() => updateScore(player.id, false)}
-                                                            className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
+                                                            onClick={() => {
+                                                                setEditingGuest({
+                                                                    id: player.id,
+                                                                    name: player.name,
+                                                                    index: player.index,
+                                                                    courseHandicap: player.liveRoundData?.course_hcp || 0
+                                                                });
+                                                                setIsGuestModalOpen(true);
+                                                            }}
+                                                            className="ml-1 text-blue-600 hover:text-blue-800 text-[12pt] font-semibold"
                                                         >
-                                                            -
-                                                        </button>
-                                                    )}
-                                                    <div className="w-16 text-center font-bold text-[35pt] text-gray-800">
-                                                        {score || <span className="text-gray-800">{activeHolePar}</span>}
-                                                    </div>
-                                                    {canUpdate && (
-                                                        <button
-                                                            onClick={() => updateScore(player.id, true)}
-                                                            className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
-                                                        >
-                                                            +
+                                                            ✏️
                                                         </button>
                                                     )}
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                            </div>
-                        ) : null}
-
-                        {/* Save Hole Button */}
-                        {selectedPlayers.length > 0 && canUpdate && (
-                            <div className="flex justify-end mt-2">
-                                <button
-                                    onClick={() => {
-                                        if (!liveRoundId) return;
-
-                                        const updates: { playerId: string; strokes: number }[] = [];
-                                        const newScores = new Map(scores);
-
-                                        // Check if this hole was already scored (for all players)
-                                        const wasAlreadyScored = selectedPlayers.every(p => {
-                                            const playerScores = scores.get(p.id);
-                                            return playerScores && playerScores.has(activeHole);
-                                        });
-
-                                        selectedPlayers.forEach(p => {
-                                            const playerScores = new Map(newScores.get(p.id) || []);
-
-                                            // Use pending score if it exists, otherwise use saved score or par
-                                            const pendingScore = pendingScores.get(p.id);
-                                            const savedScore = playerScores.get(activeHole);
-                                            const finalScore = pendingScore ?? savedScore ?? activeHolePar;
-
-                                            // Update the score in the map
-                                            playerScores.set(activeHole, finalScore);
-                                            newScores.set(p.id, playerScores);
-
-                                            // Add to updates for server
-                                            updates.push({ playerId: p.id, strokes: finalScore });
-                                        });
-
-                                        // Update main scores state with pending changes
-                                        setScores(newScores);
-
-                                        // Save all scores to server
-                                        if (updates.length > 0) {
-                                            saveLiveScore({
-                                                liveRoundId,
-                                                holeNumber: activeHole,
-                                                playerScores: updates
-                                            });
-                                        }
-
-                                        // Clear pending scores and reset unsaved flag
-                                        setPendingScores(new Map());
-                                        setHasUnsavedChanges(false);
-
-                                        // Only advance to next hole if this was a new hole (not an update)
-                                        if (!wasAlreadyScored) {
-                                            if (activeHole < 18) {
-                                                setActiveHole(activeHole + 1);
-                                            } else {
-                                                // After 18th hole, find the first hole that has missing scores
-                                                let nextHole = 1;
-                                                for (let h = 1; h <= 18; h++) {
-                                                    const isHoleIncomplete = selectedPlayers.some(p => {
-                                                        const pScores = newScores.get(p.id);
-                                                        return !pScores || !pScores.has(h);
-                                                    });
-
-                                                    if (isHoleIncomplete) {
-                                                        nextHole = h;
-                                                        break;
-                                                    }
-                                                }
-                                                setActiveHole(nextHole);
-                                            }
-                                        }
-
-                                        // Silent refresh to keep server data in sync without flashing the page
-                                        router.refresh();
-                                    }}
-                                    className={`w-1/2 ${(() => {
-                                        // Check if this hole has been scored for all selected players
-                                        const isHoleScored = selectedPlayers.every(p => {
-                                            const playerScores = scores.get(p.id);
-                                            return playerScores && playerScores.has(activeHole);
-                                        });
-                                        // Blue if: has unsaved changes OR hole is not yet scored
-                                        // Black if: hole is scored AND no unsaved changes
-                                        return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
-                                    })()} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
-                                >
-                                    Save Hole {activeHole}
-                                </button>
-                            </div>
-                        )}
+                                            <div className="flex items-center gap-4">
+                                                {canUpdate && (
+                                                    <button
+                                                        onClick={() => updateScore(player.id, false)}
+                                                        className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
+                                                    >
+                                                        -
+                                                    </button>
+                                                )}
+                                                <div className="w-16 text-center font-bold text-[35pt] text-gray-800">
+                                                    {score || <span className="text-gray-800">{activeHolePar}</span>}
+                                                </div>
+                                                {canUpdate && (
+                                                    <button
+                                                        onClick={() => updateScore(player.id, true)}
+                                                        className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
+                                                    >
+                                                        +
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                        </div>
                     </div>
                 )}
 
+                {/* Save Hole Button */}
+                {selectedPlayers.length > 0 && canUpdate && (
+                    <div className="flex justify-end mt-2">
+                        <button
+                            onClick={() => {
+                                if (!liveRoundId) return;
+
+                                const updates: { playerId: string; strokes: number }[] = [];
+                                const newScores = new Map(scores);
+
+                                // Check if this hole was already scored (for all players)
+                                const wasAlreadyScored = selectedPlayers.every(p => {
+                                    const playerScores = scores.get(p.id);
+                                    return playerScores && playerScores.has(activeHole);
+                                });
+
+                                selectedPlayers.forEach(p => {
+                                    const playerScores = new Map(newScores.get(p.id) || []);
+
+                                    // Use pending score if it exists, otherwise use saved score or par
+                                    const pendingScore = pendingScores.get(p.id);
+                                    const savedScore = playerScores.get(activeHole);
+                                    const finalScore = pendingScore ?? savedScore ?? activeHolePar;
+
+                                    // Update the score in the map
+                                    playerScores.set(activeHole, finalScore);
+                                    newScores.set(p.id, playerScores);
+
+                                    // Add to updates for server
+                                    updates.push({ playerId: p.id, strokes: finalScore });
+                                });
+
+                                // Update main scores state with pending changes
+                                setScores(newScores);
+
+                                // Save all scores to server
+                                if (updates.length > 0) {
+                                    saveLiveScore({
+                                        liveRoundId,
+                                        holeNumber: activeHole,
+                                        playerScores: updates
+                                    });
+                                }
+
+                                // Clear pending scores and reset unsaved flag
+                                setPendingScores(new Map());
+                                setHasUnsavedChanges(false);
+
+                                // Only advance to next hole if this was a new hole (not an update)
+                                if (!wasAlreadyScored) {
+                                    if (activeHole < 18) {
+                                        setActiveHole(activeHole + 1);
+                                    } else {
+                                        // After 18th hole, find the first hole that has missing scores
+                                        let nextHole = 1;
+                                        for (let h = 1; h <= 18; h++) {
+                                            const isHoleIncomplete = selectedPlayers.some(p => {
+                                                const pScores = newScores.get(p.id);
+                                                return !pScores || !pScores.has(h);
+                                            });
+
+                                            if (isHoleIncomplete) {
+                                                nextHole = h;
+                                                break;
+                                            }
+                                        }
+                                        setActiveHole(nextHole);
+                                    }
+                                }
+
+                                // Silent refresh to keep server data in sync without flashing the page
+                                router.refresh();
+                            }}
+                            className={`w-1/2 ${(() => {
+                                // Check if this hole has been scored for all selected players
+                                const isHoleScored = selectedPlayers.every(p => {
+                                    const playerScores = scores.get(p.id);
+                                    return playerScores && playerScores.has(activeHole);
+                                });
+                                // Blue if: has unsaved changes OR hole is not yet scored
+                                // Black if: hole is scored AND no unsaved changes
+                                return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
+                            })()} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
+                        >
+                            Save Hole {activeHole}
+                        </button>
+                    </div>
+                )}
+                <div className="pt-4"></div>
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
                     <div className="mt-1 space-y-2">
@@ -1201,11 +1213,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             })}
                         </div>
                     </div>
-                )
-                }
+                )}
 
                 {/* Score Legend */}
-                <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]">
+                < div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]" >
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-white border border-gray-300"></div>Par (E)</div>
@@ -1239,7 +1250,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             </main >
 
             {/* Add to Club Modal */}
-            <AddToClubModal
+            < AddToClubModal
                 isOpen={isAddToClubModalOpen}
                 onClose={() => setIsAddToClubModalOpen(false)}
                 players={rankedPlayers}
