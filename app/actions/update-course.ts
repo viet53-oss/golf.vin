@@ -27,10 +27,13 @@ export async function updateCourse(
                 data: {
                     par: hole.par,
                     difficulty: hole.difficulty,
-                    ...(hole.latitude !== undefined && { latitude: hole.latitude }),
-                    ...(hole.longitude !== undefined && { longitude: hole.longitude })
-                } as any
+                }
             });
+
+            // Use raw SQL for coordinates to bypass Prisma Client validation issues in the dev server cache
+            if (hole.latitude !== undefined || hole.longitude !== undefined) {
+                await prisma.$executeRaw`UPDATE holes SET latitude = ${hole.latitude}, longitude = ${hole.longitude} WHERE id = ${hole.id}`;
+            }
         }
     }
 
