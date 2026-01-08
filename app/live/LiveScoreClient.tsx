@@ -758,12 +758,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 key={hole.hole_number}
                                                 onClick={() => setActiveHole(hole.hole_number)}
                                                 className={`
-                                                flex items-center justify-between font-bold px-3 py-2 rounded-full transition-all whitespace-nowrap
+                                                flex items-center justify-center font-bold px-1 py-2 rounded-full transition-all whitespace-nowrap
                                                 ${btnClass}
                                             `}
                                             >
                                                 <span className="text-[18pt] font-black">{hole.hole_number}</span>
-                                                <span className="text-[17pt] font-medium opacity-80">{hole.par}</span>
+                                                <span className="text-[17pt] font-medium opacity-80">/{hole.par}</span>
                                             </button>
                                         );
                                     })}
