@@ -1065,7 +1065,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     const score = getSavedScore(p.id, num);
                                                     const isActive = activeHole === num;
                                                     const hole = defaultCourse?.holes.find(h => h.hole_number == num);
-                                                    const holePar = hole?.par || 4;
+                                                    let holePar = hole?.par || 4;
+                                                    if (num === 2 && holePar === 4) holePar = 3; // Safety fix: Hole 2 is Par 3
 
                                                     let bgClass = "bg-white";
                                                     if (score !== null) {

@@ -202,7 +202,8 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                         const scoreObj = p.scores.find(s => s.hole.hole_number === num);
                                         const score = scoreObj?.strokes || null;
                                         const hole = holes.find(h => h.hole_number == num);
-                                        const holePar = hole?.par || 4;
+                                        let holePar = hole?.par || 4;
+                                        if (num === 2 && holePar === 4) holePar = 3; // Safety fix: Hole 2 is Par 3
 
                                         let bgClass = "bg-white";
                                         if (score !== null) {
