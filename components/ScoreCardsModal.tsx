@@ -199,11 +199,10 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                 {/* Row 1: Holes 1-9 */}
                                 <div className="grid grid-cols-9 border-b border-black">
                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
-                                        const scoreObj = p.scores.find(s => s.hole.hole_number === num);
+                                        const scoreObj = p.scores.find(s => Number(s.hole.hole_number) === num);
                                         const score = scoreObj?.strokes || null;
-                                        const hole = holes.find(h => h.hole_number == num);
-                                        let holePar = hole?.par || 4;
-                                        if (num === 2 && holePar === 4) holePar = 3; // Safety fix: Hole 2 is Par 3
+                                        const hole = holes.find(h => Number(h.hole_number) === num);
+                                        const holePar = hole?.par || 4;
 
                                         let bgClass = "bg-white";
                                         if (score !== null) {
@@ -228,9 +227,9 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                 {/* Row 2: Holes 10-18 */}
                                 <div className="grid grid-cols-9">
                                     {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
-                                        const scoreObj = p.scores.find(s => s.hole.hole_number === num);
+                                        const scoreObj = p.scores.find(s => Number(s.hole.hole_number) === num);
                                         const score = scoreObj?.strokes || null;
-                                        const hole = holes.find(h => h.hole_number == num);
+                                        const hole = holes.find(h => Number(h.hole_number) === num);
                                         const holePar = hole?.par || 4;
 
                                         let bgClass = "bg-white";

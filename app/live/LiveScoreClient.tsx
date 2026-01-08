@@ -1064,9 +1064,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
                                                     const score = getSavedScore(p.id, num);
                                                     const isActive = activeHole === num;
-                                                    const hole = defaultCourse?.holes.find(h => h.hole_number == num);
-                                                    let holePar = hole?.par || 4;
-                                                    if (num === 2 && holePar === 4) holePar = 3; // Safety fix: Hole 2 is Par 3
+                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                    const holePar = hole?.par || 4;
 
                                                     let bgClass = "bg-white";
                                                     if (score !== null) {
@@ -1098,7 +1097,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
                                                     const score = getSavedScore(p.id, num);
                                                     const isActive = activeHole === num;
-                                                    const hole = defaultCourse?.holes.find(h => h.hole_number == num);
+                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
                                                     const holePar = hole?.par || 4;
 
                                                     let bgClass = "bg-white";
