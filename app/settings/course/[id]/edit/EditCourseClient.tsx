@@ -49,6 +49,27 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
 
 
 
+    const parseCoordinate = (val: any): number | null => {
+        if (!val || typeof val !== 'string') return typeof val === 'number' ? val : null;
+        const trimmed = val.trim();
+        if (trimmed === '') return null;
+
+        // Try DMS format: 30°00'57.2"N or 90°05'22.0"W
+        const dmsMatch = trimmed.match(/(\d+)°\s*(\d+)'\s*(\d+(?:\.\d+)?)"\s*([NSEW])/i);
+        if (dmsMatch) {
+            const d = parseFloat(dmsMatch[1]);
+            const m = parseFloat(dmsMatch[2]);
+            const s = parseFloat(dmsMatch[3]);
+            const dir = dmsMatch[4].toUpperCase();
+            let decimal = d + m / 60 + s / 3600;
+            if (dir === 'S' || dir === 'W') decimal = -decimal;
+            return decimal;
+        }
+
+        const parsed = parseFloat(trimmed);
+        return isNaN(parsed) ? null : parsed;
+    };
+
     const handleSubmit = () => {
 
         startTransition(async () => {
@@ -58,8 +79,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     tees,
                     holes: holes.map(h => ({
                         ...h,
-                        latitude: typeof h.latitude === 'string' ? (parseFloat(h.latitude) || null) : h.latitude,
-                        longitude: typeof h.longitude === 'string' ? (parseFloat(h.longitude) || null) : h.longitude
+                        latitude: parseCoordinate(h.latitude),
+                        longitude: parseCoordinate(h.longitude)
                     }))
                 });
             } else {
@@ -68,8 +89,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     tees,
                     holes: holes.map(h => ({
                         ...h,
-                        latitude: typeof h.latitude === 'string' ? (parseFloat(h.latitude) || null) : h.latitude,
-                        longitude: typeof h.longitude === 'string' ? (parseFloat(h.longitude) || null) : h.longitude
+                        latitude: parseCoordinate(h.latitude),
+                        longitude: parseCoordinate(h.longitude)
                     }))
                 });
             }
