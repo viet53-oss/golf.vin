@@ -100,7 +100,7 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
         const diff = score - par;
         if (diff <= -2) return "bg-yellow-300"; // Eagle: Yellow
         if (diff === -1) return "bg-green-300"; // Birdie: Green
-        if (diff === 0) return "bg-gray-100 text-black"; // Par: Light Gray
+        if (diff === 0) return "bg-gray-50 text-black"; // Par: White/Very Light Gray
         if (diff === 1) return "bg-orange-100"; // Bogey: Lighter Orange
         return "bg-red-200"; // Double Bogey+: Red
     };
@@ -259,7 +259,7 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                             <span className="text-[14pt] font-bold text-gray-500 uppercase">Birdie (-1)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-gray-100 border border-gray-300 rounded-sm"></span>
+                            <span className="w-3 h-3 bg-gray-50 border border-gray-300 rounded-sm"></span>
                             <span className="text-[14pt] font-bold text-gray-500 uppercase">Par (E)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
