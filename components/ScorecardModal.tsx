@@ -98,11 +98,11 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
     const getScoreClass = (par: number, score: number | undefined) => {
         if (!score) return "bg-transparent";
         const diff = score - par;
-        if (diff <= -2) return "bg-yellow-200"; // Eagle: Softer Yellow
-        if (diff === -1) return "bg-green-200"; // Birdie: Softer Green
+        if (diff <= -2) return "bg-yellow-300"; // Eagle: Darker Yellow
+        if (diff === -1) return "bg-green-300"; // Birdie: Darker Green
         if (diff === 0) return "bg-white text-black"; // Par: Pure White
-        if (diff === 1) return "bg-orange-100"; // Bogey: Lighter Orange
-        return "bg-red-200"; // Double Bogey+: Red
+        if (diff === 1) return "bg-orange-200"; // Bogey: Darker Orange
+        return "bg-red-300"; // Double Bogey+: Darker Red
     };
 
     // Sub-component for a 9-hole section
@@ -251,11 +251,11 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                     {/* Legend */}
                     <div className="flex flex-wrap justify-center gap-3 mt-8">
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-yellow-200 rounded-sm"></span>
+                            <span className="w-3 h-3 bg-yellow-300 rounded-sm"></span>
                             <span className="text-[14pt] font-bold text-gray-500 uppercase">Eagle (-2)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-green-200 rounded-sm"></span>
+                            <span className="w-3 h-3 bg-green-300 rounded-sm"></span>
                             <span className="text-[14pt] font-bold text-gray-500 uppercase">Birdie (-1)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -263,11 +263,11 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                             <span className="text-[14pt] font-bold text-gray-500 uppercase">Par (E)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-orange-100 rounded-sm"></span>
+                            <span className="w-3 h-3 bg-orange-200 rounded-sm"></span>
                             <span className="text-[14pt] font-bold text-gray-500 uppercase">Bogey (+1)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-red-200 rounded-sm"></span>
+                            <span className="w-3 h-3 bg-red-300 rounded-sm"></span>
                             <span className="text-[14pt] font-bold text-gray-500 uppercase">Double+ (+2)</span>
                         </div>
                     </div>

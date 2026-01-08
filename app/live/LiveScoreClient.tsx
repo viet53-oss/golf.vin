@@ -1070,11 +1070,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     let bgClass = "bg-white";
                                                     if (score !== null) {
                                                         const diff = score - holePar;
-                                                        if (diff <= -2) bgClass = "bg-yellow-200"; // Eagle: Softer Yellow
-                                                        else if (diff === -1) bgClass = "bg-green-200"; // Birdie: Softer Green
+                                                        if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Darker Yellow
+                                                        else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Darker Green
                                                         else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
-                                                        else if (diff === 1) bgClass = "bg-orange-100"; // Bogey: Lighter Orange
-                                                        else if (diff >= 2) bgClass = "bg-red-200"; // Double Bogey+: Red
+                                                        else if (diff === 1) bgClass = "bg-orange-200"; // Bogey: Darker Orange
+                                                        else if (diff >= 2) bgClass = "bg-red-300"; // Double Bogey+: Darker Red
                                                     } else if (isActive) {
                                                         bgClass = "bg-green-50";
                                                     }
@@ -1103,11 +1103,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     let bgClass = "bg-white";
                                                     if (score !== null) {
                                                         const diff = score - holePar;
-                                                        if (diff <= -2) bgClass = "bg-yellow-200"; // Eagle: Softer Yellow
-                                                        else if (diff === -1) bgClass = "bg-green-200"; // Birdie: Softer Green
+                                                        if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Darker Yellow
+                                                        else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Darker Green
                                                         else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
-                                                        else if (diff === 1) bgClass = "bg-orange-100"; // Bogey: Lighter Orange
-                                                        else if (diff >= 2) bgClass = "bg-red-200"; // Double Bogey+: Red
+                                                        else if (diff === 1) bgClass = "bg-orange-200"; // Bogey: Darker Orange
+                                                        else if (diff >= 2) bgClass = "bg-red-300"; // Double Bogey+: Darker Red
                                                     } else if (isActive) {
                                                         bgClass = "bg-green-50";
                                                     }
@@ -1136,11 +1136,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Score Legend */}
                 <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]">
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-200"></div>Eagle (-2)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-200"></div>Birdie (-1)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-white border border-gray-300"></div>Par (E)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-100"></div>Bogey (+1)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-200"></div>Double+ (+2)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-200"></div>Bogey (+1)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-300"></div>Double+ (+2)</div>
                 </div>
 
                 {/* Save Round Button - Admin Only */}
