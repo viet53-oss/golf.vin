@@ -94,7 +94,7 @@ export default async function SettingsPage() {
                     </div>
                     <div className="p-3 space-y-4">
                         <p className="text-[14pt] text-gray-500">
-                            Install CPGC on your phone or tablet for quick access. The app works offline and provides a native app experience.
+                            Install CPGC.app on your phone or tablet for quick access.
                         </p>
                         <InstallAppButton />
                     </div>
@@ -137,15 +137,13 @@ export default async function SettingsPage() {
                             <MapPinIcon className="w-5 h-5 text-gray-700" />
                             <h2 className="font-bold text-gray-900 text-[14pt]">Courses</h2>
                         </div>
-                        {isAdmin && (
-                            <Link href="/settings/course/new" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M5 12h14" />
-                                    <path d="M12 5v14" />
-                                </svg>
-                                Add Course
-                            </Link>
-                        )}
+                        <Link href="/settings/course/new" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 12h14" />
+                                <path d="M12 5v14" />
+                            </svg>
+                            Add Course
+                        </Link>
                     </div>
                     <div className="p-3 space-y-4">
                         {courses.map((course: any) => {
