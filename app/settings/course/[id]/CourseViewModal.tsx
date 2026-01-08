@@ -27,7 +27,7 @@ export default function CourseViewModal({ course }: { course: CourseData }) {
             {/* Header */}
             <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0">
                 <div className="flex flex-col">
-                    <h1 className="text-[16pt] font-black text-gray-900 tracking-tight">{course.name}</h1>
+                    <h1 className="text-[18pt] font-black text-gray-900 tracking-tight text-center flex-1">{course.name}</h1>
                     <p className="text-[14pt] text-gray-500">Course Details</p>
                 </div>
                 <div className="flex items-center gap-2">

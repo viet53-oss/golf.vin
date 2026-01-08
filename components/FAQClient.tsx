@@ -535,6 +535,84 @@ export default function FAQClient({ players }: { players: Player[] }) {
         </div>
     );
 
+    const appInstructions = (
+        <div className="space-y-6 text-[14pt]">
+            {/* Live Score Page Section */}
+            <section className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-200 shadow-lg">
+                <h3 className="text-[16pt] font-black text-blue-900 mb-4 flex items-center gap-2">
+                    <span className="text-[20pt]">📱</span> Live Score Page - Button Guide
+                </h3>
+
+                {/* FYI Notice */}
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-xl border-2 border-amber-300 shadow-md mb-4">
+                    <h4 className="text-[14pt] font-black text-amber-900 mb-2 flex items-center gap-2">
+                        <span className="text-[16pt]">ℹ️</span> FYI:
+                    </h4>
+                    <div className="space-y-2 text-gray-800 leading-relaxed text-[13pt]">
+                        <p className="font-bold">
+                            Live score data is isolated from club rounds. So test all you want and it will not affect your club index or handicap.
+                        </p>
+                        <p>
+                            Will be locked after midnight, for viewing only.
+                        </p>
+                        <p className="bg-white p-2 rounded-lg border-l-4 border-amber-500 font-bold">
+                            You have to text Vincent to turn in your scorecard, for the club.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {/* Course Button */}
+                    <div className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="bg-black text-white px-3 py-1 rounded-full font-bold text-[12pt]">Course</div>
+                            <span className="text-gray-500 italic">(Course Info Section)</span>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed mb-2">Opens a modal to edit the live round settings including:</p>
+                        <ul className="list-disc pl-6 space-y-1 text-gray-600">
+                            <li>Select a different course</li>
+                            <li>Adjust Par, Rating, and Slope values</li>
+                            <li>Update round name and date</li>
+                        </ul>
+                        <p className="text-amber-700 font-bold mt-2 italic">⚠️ Hidden after hole 3 is completed or when all players finish</p>
+                    </div>
+
+                    {/* Players Button */}
+                    <div className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="bg-black text-white px-3 py-1 rounded-full font-bold text-[12pt]">Players</div>
+                            <span className="text-gray-500 italic">(Group Section)</span>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed mb-2">Opens the player selection modal to add players to your group. Features:</p>
+                        <ul className="list-disc pl-6 space-y-1 text-gray-600">
+                            <li>Search and select from all club members</li>
+                            <li>Players are added to the round automatically</li>
+                            <li>Your selection is saved locally for this device</li>
+                            <li>Each device can track their own group</li>
+                        </ul>
+                        <p className="text-amber-700 font-bold mt-2 italic">⚠️ Hidden after hole 3 is completed</p>
+                    </div>
+
+                    {/* Guest Button */}
+                    <div className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="bg-black text-white px-3 py-1 rounded-full font-bold text-[12pt]">Guest</div>
+                            <span className="text-gray-500 italic">(Group Section)</span>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed mb-2">Add a guest player to the round. Opens a form to enter:</p>
+                        <ul className="list-disc pl-6 space-y-1 text-gray-600">
+                            <li>Guest name</li>
+                            <li>Handicap Index</li>
+                            <li>Course Handicap (auto-calculated or manual entry)</li>
+                        </ul>
+                        <p className="text-blue-700 font-bold mt-2">✓ Guest data is saved to the database and visible on all devices</p>
+                        <p className="text-amber-700 font-bold mt-1 italic">⚠️ Hidden after hole 3 is completed</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+
     const appLogicContent = (
         <div className="space-y-12 text-gray-700 text-[14pt]">
             {/* Tie Breaker Section */}
@@ -742,7 +820,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
         <div className="min-h-screen bg-slate-50 pb-10">
             <header className="bg-white sticky top-0 z-50 py-4 shadow-md px-1 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <h1 className="text-[14pt] font-black text-[#22c55e] tracking-tighter uppercase">FAQ</h1>
+                    <h1 className="text-[18pt] font-black text-[#22c55e] tracking-tighter uppercase text-center flex-1">FAQ</h1>
                     <Link href="/" className="bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-all shadow-md">Home</Link>
                 </div>
             </header>
@@ -750,6 +828,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
             <main className="max-w-7xl mx-auto px-1 py-3">
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 px-1">
+                    <button onClick={() => openModal('App Instructions', appInstructions)} className="bg-blue-600 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-blue-700 transition-all active:scale-95 border-b-2 border-blue-800">📱 App Instructions</button>
                     <button onClick={() => openModal('Club Rules', clubRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Club Rules</button>
                     <button onClick={() => openModal('Handicap Rules', handicapRules)} className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 border-b-2 border-gray-700">Handicap Rules</button>
                     <Link href="#" className="bg-gray-900 text-white py-2 px-1 rounded-full font-black text-center text-[14pt] shadow-lg hover:bg-black transition-all active:scale-95 flex items-center justify-center border-b-2 border-gray-700">Download Member App</Link>

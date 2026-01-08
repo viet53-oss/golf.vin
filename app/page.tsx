@@ -122,10 +122,13 @@ export default async function Home() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="bg-white rounded-xl shadow-lg p-2 sm:p-4 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-transform duration-200 w-full sm:w-[300px] h-[85px] sm:h-[100px]"
+                className="bg-white rounded-xl shadow-lg p-2 sm:p-4 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-transform duration-200 w-full sm:w-[444px] h-[100px] sm:h-[115px]"
               >
                 <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${item.color}`} />
                 <span className="text-gray-900 font-bold text-[18pt] whitespace-nowrap">{item.name}</span>
+                <span className="text-gray-900 text-[12pt] italic font-medium text-center px-2">
+                  (Is isolated from club rounds, so play all you want.)
+                </span>
               </Link>
             )
           })}

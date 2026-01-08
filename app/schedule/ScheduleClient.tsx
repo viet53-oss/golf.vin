@@ -82,7 +82,7 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
         <div className="w-full">
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3 mb-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-[16pt] font-bold text-green-600 tracking-tight">Schedule</h1>
+                    <h1 className="text-[18pt] font-bold text-green-600 tracking-tight text-center flex-1">Schedule</h1>
                     <div className="flex items-center gap-2">
                         {isAdmin && (
                             <button

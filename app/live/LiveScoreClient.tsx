@@ -566,14 +566,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-1">
                 <div className="w-full flex justify-between items-center">
-                    <h1 className="text-[16pt] font-bold text-green-700 tracking-tight">Live Scoring</h1>
+                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight flex-1 text-center">Live Scoring</h1>
                     <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
                         Home
                     </Link>
                 </div>
             </header>
 
-            <main className="w-full px-1 m-0 space-y-1">
+            <main className="w-full px-1 pt-1 m-0 space-y-1">
                 {/* Round Selector - Admin Only */}
                 {isAdmin && allLiveRounds.length > 0 && (
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
@@ -641,6 +641,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 return;
                                             }
 
+                                            // Confirmation popup
+                                            if (!confirm('Are you sure you want to delete this live round? This action cannot be undone.')) {
+                                                return;
+                                            }
+
                                             console.log('Deleting round...');
                                             try {
                                                 console.log('Calling deleteLiveRound...');
@@ -652,13 +657,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 alert('Failed to delete round.');
                                             }
                                         }}
-                                        className="bg-red-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                        className="bg-red-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
                                     >
                                         Delete
                                     </button>
                                     <button
                                         onClick={() => setIsAddToClubModalOpen(true)}
-                                        className="bg-green-600 text-white text-[12pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
+                                        className="bg-green-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
                                     >
                                         Add to Club
                                     </button>
@@ -741,11 +746,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         const isActive = activeHole === hole.hole_number;
 
                                         // Determine styling
-                                        let btnClass = "bg-white text-black border border-gray-200 hover:bg-gray-50"; // Default (Blank on White)
+                                        let btnClass = "bg-white text-black border-2 border-gray-900 hover:bg-gray-50"; // Default (Blank on White) with dark border
                                         if (isActive) {
-                                            btnClass = "bg-blue-600 text-white shadow-md scale-105 z-10";
+                                            btnClass = "bg-blue-600 text-white shadow-md scale-105 z-10 border-2 border-gray-900";
                                         } else if (isSaved) {
-                                            btnClass = "bg-gray-400 text-white border border-gray-400 shadow-sm";
+                                            btnClass = "bg-gray-400 text-white border-2 border-gray-900 shadow-sm";
                                         }
 
                                         return (
@@ -753,11 +758,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 key={hole.hole_number}
                                                 onClick={() => setActiveHole(hole.hole_number)}
                                                 className={`
-                                                flex items-center justify-center font-bold text-[15pt] px-1 py-2 rounded-full transition-all whitespace-nowrap
+                                                flex items-center justify-center font-bold px-1 py-2 rounded-full transition-all whitespace-nowrap
                                                 ${btnClass}
                                             `}
                                             >
-                                                {hole.hole_number}/{hole.par}
+                                                <span className="text-[18pt]">{hole.hole_number}</span>
+                                                <span className="text-[17pt]">/{hole.par}</span>
                                             </button>
                                         );
                                     })}
@@ -846,18 +852,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     {canUpdate && (
                                                         <button
                                                             onClick={() => updateScore(player.id, false)}
-                                                            className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[17pt]"
+                                                            className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
                                                         >
                                                             -
                                                         </button>
                                                     )}
-                                                    <div className="w-16 text-center font-bold text-[33pt] text-gray-800">
+                                                    <div className="w-16 text-center font-bold text-[35pt] text-gray-800">
                                                         {score || <span className="text-gray-800">{activeHolePar}</span>}
                                                     </div>
                                                     {canUpdate && (
                                                         <button
                                                             onClick={() => updateScore(player.id, true)}
-                                                            className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[17pt]"
+                                                            className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
                                                         >
                                                             +
                                                         </button>
@@ -962,10 +968,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-1 space-y-2">
                         <button
                             onClick={() => router.refresh()}
-                            className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                            className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95 my-1"
                         >
                             Summary - Refresh
                         </button>
@@ -1035,7 +1041,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         </div>
 
                                         {/* Score Grid */}
-                                        <div className="m-1 border border-black rounded shadow-sm overflow-hidden">
+                                        <div className="p-1 border border-black rounded shadow-sm overflow-hidden">
                                             {/* Row 1: Holes 1-9 */}
                                             <div className="grid grid-cols-9 border-b border-black">
                                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {

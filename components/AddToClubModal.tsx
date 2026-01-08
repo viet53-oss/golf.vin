@@ -87,7 +87,7 @@ export default function AddToClubModal({ isOpen, onClose, players, liveRoundId, 
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 rounded-t-xl">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-[18pt] font-bold text-white">Add to Club Scores</h2>
+                        <h2 className="text-[18pt] font-bold text-white text-center">Add to Club Scores</h2>
                         <button
                             onClick={onClose}
                             className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
