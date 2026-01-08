@@ -54,7 +54,7 @@ type RoundWithPlayers = {
     name: string | null;
     is_tournament: boolean;
     course: {
-        holes: Array<{ par: number }>;
+        holes: Array<{ hole_number: number; par: number; difficulty: number }>;
         tee_boxes: Array<{ name: string; rating: number; slope: number }>;
     };
     players: Array<{

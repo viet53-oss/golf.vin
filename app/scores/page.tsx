@@ -35,7 +35,9 @@ export default async function ScoresPage() {
                     select: {
                         holes: {
                             select: {
-                                par: true
+                                hole_number: true,
+                                par: true,
+                                difficulty: true
                             }
                         },
                         tee_boxes: {
