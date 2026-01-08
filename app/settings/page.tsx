@@ -10,6 +10,7 @@ import { prisma } from '@/lib/prisma';
 import ManualScoreForm from './ManualScoreForm';
 import DeleteCourseButton from '@/components/DeleteCourseButton';
 import InstallAppButton from './InstallAppButton';
+import GPSPermissionButton from './GPSPermissionButton';
 
 // Native SVG components for settings/page.tsx
 const SettingsIcon = ({ className }: { className?: string }) => (
@@ -97,6 +98,20 @@ export default async function SettingsPage() {
                             Install CPGC.app on your phone or tablet for quick access.
                         </p>
                         <InstallAppButton />
+                    </div>
+                </div>
+
+                {/* GPS Access - For Everyone */}
+                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                    <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                        <MapPinIcon className="text-blue-600" />
+                        <h2 className="font-bold text-blue-900 text-[14pt]">Location Services</h2>
+                    </div>
+                    <div className="p-3 space-y-4">
+                        <p className="text-[14pt] text-gray-500">
+                            Enable GPS to see your distance to the green on the Live Scoring page.
+                        </p>
+                        <GPSPermissionButton />
                     </div>
                 </div>
 
