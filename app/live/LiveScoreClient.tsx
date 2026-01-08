@@ -267,21 +267,21 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const isLocked = todayStr > roundDateStr;
     const canUpdate = isAdmin || !isLocked;
 
-    // Auto-select next available hole for the specific group
-    useEffect(() => {
-        if (selectedPlayers.length === 0) return;
+    // Auto-select next available hole for the specific group - DISABLED to allow manual hole selection
+    // useEffect(() => {
+    //     if (selectedPlayers.length === 0) return;
 
-        for (let h = 1; h <= 18; h++) {
-            const allHaveScore = selectedPlayers.every(p => {
-                const pScores = scores.get(p.id);
-                return pScores && pScores.has(h);
-            });
-            if (!allHaveScore) {
-                setActiveHole(h);
-                return;
-            }
-        }
-    }, [selectedPlayers]); // Intentionally not including scores to avoid jumping while scoring
+    //     for (let h = 1; h <= 18; h++) {
+    //         const allHaveScore = selectedPlayers.every(p => {
+    //             const pScores = scores.get(p.id);
+    //             return pScores && pScores.has(h);
+    //         });
+    //         if (!allHaveScore) {
+    //             setActiveHole(h);
+    //             return;
+    //         }
+    //     }
+    // }, [selectedPlayers]); // Intentionally not including scores to avoid jumping while scoring
 
     const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
     const activeHoleDifficulty = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.difficulty;
