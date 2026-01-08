@@ -792,7 +792,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <p className="font-black text-[90pt] flex items-baseline justify-center">
                                         {dist}
                                     </p>
-                                    <span className="text-[20pt] absolute right-4 bottom-0">yd</span>
                                 </div>
                             );
                         })()}
