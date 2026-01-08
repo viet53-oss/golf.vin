@@ -89,7 +89,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 });
             },
             (error) => {
-                console.error("Error getting location", error);
+                console.warn("GPS location unavailable:", error.message);
             },
             { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
         );
