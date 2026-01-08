@@ -757,9 +757,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             <div className="flex items-center gap-2">
                                 <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[18pt] font-bold">Hole {activeHole}</span>
                                 <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[18pt] font-bold">Par {activeHolePar}</span>
-                                {activeHoleDifficulty && (
-                                    <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full text-[18pt] font-bold">Hard {activeHoleDifficulty}</span>
-                                )}
                             </div>
                         </div>
 
