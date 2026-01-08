@@ -834,29 +834,38 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 )}
 
                 {/* GROUP SECTION */}
-                {activeHole <= 3 && (selectedPlayers.length > 0 || (canUpdate && !hideSettings)) && (
-                    <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-[15pt] font-black text-gray-900 tracking-tight">Group</h2>
-                            {canUpdate && !hideSettings && (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setIsPlayerModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
-                                    >
-                                        Players
-                                    </button>
-                                    <button
-                                        onClick={() => setIsGuestModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
-                                    >
-                                        Guest
-                                    </button>
-                                </div>
-                            )}
+                {(() => {
+                    // Check if all players have completed hole 3
+                    const allPlayersCompletedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => {
+                        const pScores = scores.get(p.id);
+                        return pScores && pScores.has(3);
+                    });
+
+                    // Show Group section only if hole 3 is not yet completed by all players
+                    return !allPlayersCompletedHole3 && (selectedPlayers.length > 0 || (canUpdate && !hideSettings));
+                })() && (
+                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-[15pt] font-black text-gray-900 tracking-tight">Group</h2>
+                                {canUpdate && !hideSettings && (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setIsPlayerModalOpen(true)}
+                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                        >
+                                            Players
+                                        </button>
+                                        <button
+                                            onClick={() => setIsGuestModalOpen(true)}
+                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                        >
+                                            Guest
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
                 {/* PLAYERS SECTION (Scoring) */}
                 {selectedPlayers.length > 0 && (
