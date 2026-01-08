@@ -1064,15 +1064,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
                                                     const score = getSavedScore(p.id, num);
                                                     const isActive = activeHole === num;
-                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                    const hole = defaultCourse?.holes.find(h => h.hole_number == num);
                                                     const holePar = hole?.par || 4;
 
                                                     let bgClass = "bg-white";
                                                     if (score !== null) {
                                                         const diff = score - holePar;
-                                                        if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Yellow
-                                                        else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Green
-                                                        else if (diff === 0) bgClass = "bg-gray-50"; // Par: White/Very Light Gray
+                                                        if (diff <= -2) bgClass = "bg-yellow-200"; // Eagle: Softer Yellow
+                                                        else if (diff === -1) bgClass = "bg-green-200"; // Birdie: Softer Green
+                                                        else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
                                                         else if (diff === 1) bgClass = "bg-orange-100"; // Bogey: Lighter Orange
                                                         else if (diff >= 2) bgClass = "bg-red-200"; // Double Bogey+: Red
                                                     } else if (isActive) {
@@ -1097,15 +1097,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
                                                     const score = getSavedScore(p.id, num);
                                                     const isActive = activeHole === num;
-                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                    const hole = defaultCourse?.holes.find(h => h.hole_number == num);
                                                     const holePar = hole?.par || 4;
 
                                                     let bgClass = "bg-white";
                                                     if (score !== null) {
                                                         const diff = score - holePar;
-                                                        if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Yellow
-                                                        else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Green
-                                                        else if (diff === 0) bgClass = "bg-gray-50"; // Par: White/Very Light Gray
+                                                        if (diff <= -2) bgClass = "bg-yellow-200"; // Eagle: Softer Yellow
+                                                        else if (diff === -1) bgClass = "bg-green-200"; // Birdie: Softer Green
+                                                        else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
                                                         else if (diff === 1) bgClass = "bg-orange-100"; // Bogey: Lighter Orange
                                                         else if (diff >= 2) bgClass = "bg-red-200"; // Double Bogey+: Red
                                                     } else if (isActive) {
@@ -1136,9 +1136,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Score Legend */}
                 <div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]">
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-gray-50 border border-gray-300"></div>Par (E)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-200"></div>Eagle (-2)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-200"></div>Birdie (-1)</div>
+                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-white border border-gray-300"></div>Par (E)</div>
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-100"></div>Bogey (+1)</div>
                     <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-200"></div>Double+ (+2)</div>
                 </div>
