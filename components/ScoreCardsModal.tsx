@@ -216,8 +216,9 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
 
                                         return (
                                             <div key={num} className="flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white">
-                                                <div className="absolute top-1 inset-x-0 text-center text-[10pt] text-gray-500">
-                                                    <span className="font-bold text-gray-900">{num}</span>/{holePar}
+                                                <div className="absolute top-1 inset-x-0 flex justify-between px-1.5 text-[10pt] text-gray-500">
+                                                    <span className="font-bold text-gray-900">{num}</span>
+                                                    <span>{holePar}</span>
                                                 </div>
                                                 <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                     {score || '-'}
@@ -246,8 +247,9 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
 
                                         return (
                                             <div key={num} className="flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white">
-                                                <div className="absolute top-1 inset-x-0 text-center text-[10pt] text-gray-500">
-                                                    <span className="font-bold text-gray-900">{num}</span>/{holePar}
+                                                <div className="absolute top-1 inset-x-0 flex justify-between px-1.5 text-[10pt] text-gray-500">
+                                                    <span className="font-bold text-gray-900">{num}</span>
+                                                    <span>{holePar}</span>
                                                 </div>
                                                 <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                     {score || '-'}
