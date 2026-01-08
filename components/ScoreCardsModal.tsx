@@ -207,11 +207,11 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                         let bgClass = "bg-white";
                                         if (score !== null) {
                                             const diff = score - holePar;
-                                            if (diff <= -2) bgClass = "bg-red-500 text-white"; // Eagle: Red
-                                            else if (diff === -1) bgClass = "bg-green-500 text-white"; // Birdie: Green
-                                            else if (diff === 0) bgClass = "bg-gray-100"; // Par: Light Grey
-                                            else if (diff === 1) bgClass = "bg-blue-500 text-white"; // Bogey: Blue
-                                            else if (diff >= 2) bgClass = "bg-gray-700 text-white"; // Double Bogey+: Dark Grey
+                                            if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Yellow
+                                            else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Green
+                                            else if (diff === 0) bgClass = "bg-gray-100"; // Par: Light Gray
+                                            else if (diff === 1) bgClass = "bg-orange-100"; // Bogey: Lighter Orange
+                                            else if (diff >= 2) bgClass = "bg-red-200"; // Double Bogey+: Red
                                         }
 
                                         return (
@@ -235,11 +235,11 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                         let bgClass = "bg-white";
                                         if (score !== null) {
                                             const diff = score - holePar;
-                                            if (diff <= -2) bgClass = "bg-red-500 text-white"; // Eagle: Red
-                                            else if (diff === -1) bgClass = "bg-green-500 text-white"; // Birdie: Green
-                                            else if (diff === 0) bgClass = "bg-gray-100"; // Par: Light Grey
-                                            else if (diff === 1) bgClass = "bg-blue-500 text-white"; // Bogey: Blue
-                                            else if (diff >= 2) bgClass = "bg-gray-700 text-white"; // Double Bogey+: Dark Grey
+                                            if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Yellow
+                                            else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Green
+                                            else if (diff === 0) bgClass = "bg-gray-100"; // Par: Light Gray
+                                            else if (diff === 1) bgClass = "bg-orange-100"; // Bogey: Lighter Orange
+                                            else if (diff >= 2) bgClass = "bg-red-200"; // Double Bogey+: Red
                                         }
 
                                         return (
@@ -260,11 +260,11 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
 
             {/* Score Legend */}
             <div className="bg-white rounded-xl shadow-lg p-1 m-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]">
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-500"></div>Eagle (-2)</div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-500"></div>Birdie (-1)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
                 <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-gray-100 border border-gray-300"></div>Par (E)</div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-500"></div>Bogey (+1)</div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-gray-700"></div>Double+ (+2)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-100"></div>Bogey (+1)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-200"></div>Double+ (+2)</div>
             </div>
         </div>
     );
