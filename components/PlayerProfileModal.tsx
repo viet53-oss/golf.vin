@@ -65,19 +65,19 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
 
                 <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                     {/* Header */}
-                    <div className="relative pt-8 pb-4 px-1 text-center border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
+                    <div className="relative pt-8 pb-4 px-1 text-left border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="absolute right-6 top-6 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                            className="absolute right-6 top-6 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
                         >
-                            <X size={24} />
+                            Close
                         </button>
 
-                        <h2 className="text-[14pt] font-extrabold text-gray-900 tracking-tight">
+                        <h2 className="text-[14pt] font-extrabold text-gray-900 tracking-tight ml-3">
                             {player.name}
                         </h2>
-                        <p className="text-gray-500 font-medium mt-1 uppercase tracking-wide text-[14pt]">Player Profile</p>
+                        <p className="text-gray-500 font-medium mt-1 uppercase tracking-wide text-[14pt] ml-3">Player Profile</p>
                     </div>
 
                     {/* Scrollable Content */}

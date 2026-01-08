@@ -61,7 +61,7 @@ export function LivePlayerSelectionModal({
 
                 {/* Header */}
                 <div className="px-4 py-5 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-600 to-purple-600">
-                    <h2 className="text-[18pt] font-bold text-white tracking-tight text-center">Select Players in My Group</h2>
+                    <h2 className="text-[18pt] font-bold text-white tracking-tight text-left ml-3">Select Players in My Group</h2>
                     <button
                         onClick={onClose}
                         className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors"

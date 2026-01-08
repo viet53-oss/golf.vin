@@ -165,10 +165,10 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
             {/* Header */}
             <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0 safe-top">
                 <div className="flex flex-col">
-                    <h2 className="text-[14pt] font-black text-gray-900 leading-tight">
+                    <h2 className="text-[14pt] font-black text-gray-900 leading-tight ml-3">
                         {data?.player.name || 'Loading...'}
                     </h2>
-                    <p className="text-[14pt] text-blue-600 font-bold">Handicap History</p>
+                    <p className="text-[14pt] text-blue-600 font-bold ml-3">Handicap History</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
@@ -180,9 +180,9 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                     </button>
                     <button
                         onClick={onClose}
-                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
                     >
-                        <XIcon size={24} />
+                        Close
                     </button>
                 </div>
             </div>

@@ -210,7 +210,7 @@ export default async function ScoresPage() {
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3">
                 <div className="flex items-center justify-between p-1">
-                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight text-center flex-1">Scores</h1>
+                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight text-left ml-3">Scores</h1>
                     <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Home</Link>
                 </div>
             </header>

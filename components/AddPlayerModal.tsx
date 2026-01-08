@@ -36,7 +36,7 @@ export function AddPlayerModal({ isOpen, onClose }: AddPlayerModalProps) {
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl">
-                    <h2 className="text-[18pt] font-bold text-gray-900 text-center">Add New Player</h2>
+                    <h2 className="text-[18pt] font-bold text-gray-900 text-left ml-3">Add New Player</h2>
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-gray-100 rounded-full transition-colors"

@@ -65,7 +65,7 @@ export function PoolModal({ roundId: initialRoundId, isOpen, onClose }: PoolModa
             {/* Header */}
             <header className="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm sticky top-0 z-10">
                 <div className="flex flex-col">
-                    <h2 className="text-[18pt] font-black text-green-600 leading-tight text-center">$5 Pool Results</h2>
+                    <h2 className="text-[18pt] font-black text-green-600 leading-tight text-left ml-3">$5 Pool Results</h2>
                     {data?.round && (
                         <p className="text-[12pt] text-gray-500 font-medium">
                             {new Date(data.round.date).toLocaleDateString()} {data.round.name ? `- ${data.round.name}` : ''}
@@ -74,9 +74,9 @@ export function PoolModal({ roundId: initialRoundId, isOpen, onClose }: PoolModa
                 </div>
                 <button
                     onClick={onClose}
-                    className="p-1 bg-black text-white rounded-full hover:bg-gray-800 transition-colors shadow-md"
+                    className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
                 >
-                    <X className="w-8 h-8" />
+                    Close
                 </button>
             </header>
 

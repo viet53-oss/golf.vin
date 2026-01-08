@@ -17,6 +17,11 @@ const PoolModal = dynamic(() => import('./PoolModal').then(mod => mod.PoolModal)
     loading: () => null
 });
 
+const ScoreCardsModal = dynamic(() => import('./ScoreCardsModal'), {
+    ssr: false,
+    loading: () => null
+});
+
 // Custom SVG Icons to bypass Lucide/Turbopack HMR bug
 const TrophyIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -91,6 +96,7 @@ export default function ScoresDashboard({
     const [selectedScorecard, setSelectedScorecard] = useState<any>(null);
     const [isLoadingScorecard, setIsLoadingScorecard] = useState<string | null>(null); // Stores ID of loading scorecard
     const [selectedPoolRoundId, setSelectedPoolRoundId] = useState<string | null>(null);
+    const [selectedScoreCardsRound, setSelectedScoreCardsRound] = useState<any>(null);
 
     const visibleRounds = rounds.slice(0, visibleCount);
     const hasMore = visibleCount < rounds.length;
@@ -361,6 +367,12 @@ export default function ScoresDashboard({
                                             );
                                         })()
                                     }
+                                    <button
+                                        onClick={() => setSelectedScoreCardsRound(round)}
+                                        className="px-1 py-1.5 sm:py-2 rounded-full text-[14pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap bg-black text-white hover:bg-gray-800"
+                                    >
+                                        ScoreCards
+                                    </button>
                                     {isAdmin && (
                                         <>
                                             <button
@@ -595,6 +607,16 @@ export default function ScoresDashboard({
                     roundId={selectedPoolRoundId}
                     isOpen={!!selectedPoolRoundId}
                     onClose={() => setSelectedPoolRoundId(null)}
+                />
+            )}
+            {/* ScoreCards Modal */}
+            {selectedScoreCardsRound && (
+                <ScoreCardsModal
+                    isOpen={!!selectedScoreCardsRound}
+                    onClose={() => setSelectedScoreCardsRound(null)}
+                    roundPlayers={selectedScoreCardsRound.players}
+                    holes={selectedScoreCardsRound.course.holes}
+                    coursePar={selectedScoreCardsRound.course.holes.reduce((sum: number, h: any) => sum + h.par, 0)}
                 />
             )}
         </div >

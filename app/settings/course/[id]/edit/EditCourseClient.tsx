@@ -88,7 +88,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
             <div className="fixed inset-0 z-[200] flex flex-col bg-white animate-in fade-in">
                 {/* Header */}
                 <div className="bg-slate-50 border-b border-gray-100 px-1 py-4 flex justify-between items-center shrink-0">
-                    <h1 className="text-[18pt] font-black text-gray-900 tracking-tight text-center flex-1">{isNew ? 'Add Course' : 'Edit Course'}</h1>
+                    <h1 className="text-[18pt] font-black text-gray-900 tracking-tight text-left ml-3">{isNew ? 'Add Course' : 'Edit Course'}</h1>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={handleSubmit}

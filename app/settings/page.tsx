@@ -76,7 +76,7 @@ export default async function SettingsPage() {
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3 mb-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight text-center flex-1">System Settings</h1>
+                    <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight text-left ml-3">System Settings</h1>
                     <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Home</Link>
                 </div>
             </header>

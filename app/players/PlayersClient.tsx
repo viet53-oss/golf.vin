@@ -370,7 +370,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight text-center flex-1">Players</h1>
+                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight text-left ml-3">Players</h1>
                     <div className="flex items-center gap-2">
                         {isAdmin && (
                             <>
