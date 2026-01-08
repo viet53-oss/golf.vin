@@ -750,7 +750,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Scoring Section */}
                 {/* GPS SECTION */}
-                {selectedPlayers.length > 0 && (
+                {initialRound && (
                     <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
                         <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
                             <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">GPS</h2>
