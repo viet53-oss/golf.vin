@@ -766,22 +766,37 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         {/* GPS Distance Display */}
                         {(() => {
                             const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
-                            if (userLocation && currentHole?.latitude && currentHole?.longitude) {
-                                const dist = calculateDistance(
-                                    userLocation.latitude,
-                                    userLocation.longitude,
-                                    Number(currentHole.latitude),
-                                    Number(currentHole.longitude)
-                                );
+
+                            if (!userLocation) {
                                 return (
-                                    <div className="bg-green-600 text-white py-1.5 rounded-lg text-center mb-2 shadow-inner">
-                                        <p className="font-black text-[50pt] flex items-center justify-center gap-2">
-                                            {dist} yd
-                                        </p>
+                                    <div className="bg-gray-100 text-gray-500 py-4 rounded-lg text-center mb-2 shadow-inner">
+                                        <p className="font-medium text-[15pt] animate-pulse">🛰️ Waiting for GPS...</p>
                                     </div>
                                 );
                             }
-                            return null;
+
+                            if (!currentHole?.latitude || !currentHole?.longitude) {
+                                return (
+                                    <div className="bg-yellow-50 text-yellow-700 py-4 rounded-lg text-center mb-2 shadow-inner border border-yellow-200">
+                                        <p className="font-medium text-[15pt]">📍 Coordinates missing for Hole {activeHole}</p>
+                                    </div>
+                                );
+                            }
+
+                            const dist = calculateDistance(
+                                userLocation.latitude,
+                                userLocation.longitude,
+                                Number(currentHole.latitude),
+                                Number(currentHole.longitude)
+                            );
+
+                            return (
+                                <div className="bg-green-600 text-white py-1.5 rounded-lg text-center mb-2 shadow-inner">
+                                    <p className="font-black text-[50pt] flex items-center justify-center gap-2">
+                                        {dist} yd
+                                    </p>
+                                </div>
+                            );
                         })()}
 
                         <div className="grid grid-cols-6 gap-1">
