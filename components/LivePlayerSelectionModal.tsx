@@ -34,10 +34,6 @@ export function LivePlayerSelectionModal({
     if (!isOpen) return null;
 
     const togglePlayer = (id: string) => {
-        // Don't allow toggling if player is already in round (added by another phone)
-        if (playersInRound.includes(id) && !selectedIds.includes(id)) {
-            return;
-        }
         setLocalSelectedIds(prev =>
             prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
         );
