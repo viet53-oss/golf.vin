@@ -565,16 +565,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-1">
-                <div className="w-full flex flex-col items-center">
-                    <div className="w-full flex justify-between items-center">
-                        <h1 className="text-[18pt] font-bold text-green-700 tracking-tight flex-1 text-center">Live Scoring</h1>
-                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
-                            Home
-                        </Link>
-                    </div>
-                    <p className="text-[14pt] text-gray-600 italic font-medium text-center w-full">
-                        (Text Vincent to turn in your scorecard.)
-                    </p>
+                <div className="w-full flex justify-between items-center">
+                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight flex-1 text-center">Live Scoring</h1>
+                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
+                        Home
+                    </Link>
                 </div>
             </header>
 
@@ -839,28 +834,28 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex flex-col items-start leading-tight">
-                                                        <div className="flex items-center gap-1">
-                                                            <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
-                                                            {showRankIconNextToName && <span className="text-[16pt]">{showRankIconNextToName}</span>}
-                                                            {showFlagNextToName && <span className="text-[16pt]">🏁</span>}
-                                                            {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setEditingGuest({
-                                                                            id: player.id,
-                                                                            name: player.name,
-                                                                            index: player.index,
-                                                                            courseHandicap: player.liveRoundData?.course_hcp || 0
-                                                                        });
-                                                                        setIsGuestModalOpen(true);
-                                                                    }}
-                                                                    className="ml-1 text-blue-600 hover:text-blue-800 text-[12pt] font-semibold"
-                                                                >
-                                                                    ✏️
-                                                                </button>
-                                                            )}
-                                                        </div>
+                                                        <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
                                                         <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        {showRankIconNextToName && <span className="text-[20pt] leading-none">{showRankIconNextToName}</span>}
+                                                        {showFlagNextToName && <span className="text-[20pt] leading-none">🏁</span>}
+                                                        {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingGuest({
+                                                                        id: player.id,
+                                                                        name: player.name,
+                                                                        index: player.index,
+                                                                        courseHandicap: player.liveRoundData?.course_hcp || 0
+                                                                    });
+                                                                    setIsGuestModalOpen(true);
+                                                                }}
+                                                                className="ml-1 text-blue-600 hover:text-blue-800 text-[12pt] font-semibold"
+                                                            >
+                                                                ✏️
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-4">
@@ -1033,12 +1028,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex flex-col">
-                                                        <div className="flex items-center gap-1">
-                                                            <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
-                                                            {showRankIconInSummary && <span className="text-[16pt]">{showRankIconInSummary}</span>}
-                                                            {showFlagInSummary && <span className="text-[16pt]">🏁</span>}
-                                                        </div>
+                                                        <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
                                                         <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        {showRankIconInSummary && <span className="text-[20pt] leading-none">{showRankIconInSummary}</span>}
+                                                        {showFlagInSummary && <span className="text-[20pt] leading-none">🏁</span>}
                                                     </div>
                                                 </div>
 
@@ -1164,6 +1159,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         </button>
                     )
                 }
+
+                {/* Scorecard Reminder */}
+                <div className="w-full text-center py-4">
+                    <p className="text-[18pt] font-bold text-gray-900">
+                        (Text Vincent to turn in your scorecard.)
+                    </p>
+                </div>
             </main >
 
             {/* Add to Club Modal */}
