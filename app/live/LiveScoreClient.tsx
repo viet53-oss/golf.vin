@@ -789,7 +789,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                             return (
                                 <div className="bg-green-600 text-white py-1.5 rounded-lg text-center mb-2 shadow-inner">
-                                    <p className="font-black text-[80pt] flex items-center justify-end gap-2 pr-4">
+                                    <p className="font-black text-[70pt] flex items-center justify-end gap-2 pr-4">
                                         {dist} yd
                                     </p>
                                 </div>
