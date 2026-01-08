@@ -565,11 +565,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-1">
-                <div className="w-full flex justify-between items-center">
-                    <h1 className="text-[18pt] font-bold text-green-700 tracking-tight flex-1 text-center">Live Scoring</h1>
-                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
-                        Home
-                    </Link>
+                <div className="w-full flex flex-col items-center">
+                    <div className="w-full flex justify-between items-center">
+                        <h1 className="text-[18pt] font-bold text-green-700 tracking-tight flex-1 text-center">Live Scoring</h1>
+                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
+                            Home
+                        </Link>
+                    </div>
+                    <p className="text-[14pt] text-gray-600 italic font-medium text-center w-full">
+                        (Text Vincent to turn in your scorecard.)
+                    </p>
                 </div>
             </header>
 
@@ -809,13 +814,22 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
                                         let displayRank: React.ReactNode = playerRankIndex !== -1 ? playerRankIndex + 1 : '-';
                                         let showFlagNextToName = false;
+                                        let showRankIconNextToName: React.ReactNode = null;
 
                                         if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
                                             if (allActiveFinished) {
-                                                if (playerRankIndex === 0) displayRank = "🏆";
-                                                else if (playerRankIndex === 1) displayRank = "🥈";
-                                                else if (playerRankIndex === 2) displayRank = "🥉";
-                                                else showFlagNextToName = true;
+                                                if (playerRankIndex === 0) {
+                                                    displayRank = "🏆";
+                                                    showRankIconNextToName = "🏆";
+                                                } else if (playerRankIndex === 1) {
+                                                    displayRank = "🥈";
+                                                    showRankIconNextToName = "🥈";
+                                                } else if (playerRankIndex === 2) {
+                                                    displayRank = "🥉";
+                                                    showRankIconNextToName = "🥉";
+                                                } else {
+                                                    showFlagNextToName = true;
+                                                }
                                             } else {
                                                 showFlagNextToName = true;
                                             }
@@ -827,6 +841,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="flex items-center gap-1">
                                                             <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                            {showRankIconNextToName && <span className="text-[16pt]">{showRankIconNextToName}</span>}
                                                             {showFlagNextToName && <span className="text-[16pt]">🏁</span>}
                                                             {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
                                                                 <button
@@ -990,13 +1005,22 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 let displayRankInSummary: React.ReactNode = i + 1;
                                 let showFlagInSummary = false;
+                                let showRankIconInSummary: React.ReactNode = null;
 
                                 if (p.thru >= 18) {
                                     if (allActiveFinished) {
-                                        if (i === 0) displayRankInSummary = "🏆";
-                                        else if (i === 1) displayRankInSummary = "🥈";
-                                        else if (i === 2) displayRankInSummary = "🥉";
-                                        else showFlagInSummary = true;
+                                        if (i === 0) {
+                                            displayRankInSummary = "🏆";
+                                            showRankIconInSummary = "🏆";
+                                        } else if (i === 1) {
+                                            displayRankInSummary = "🥈";
+                                            showRankIconInSummary = "🥈";
+                                        } else if (i === 2) {
+                                            displayRankInSummary = "🥉";
+                                            showRankIconInSummary = "🥉";
+                                        } else {
+                                            showFlagInSummary = true;
+                                        }
                                     } else {
                                         showFlagInSummary = true;
                                     }
@@ -1008,12 +1032,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         <div className="bg-[#1d4ed8] p-1 text-white">
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="bg-white text-[#1d4ed8] font-bold rounded w-10 h-10 flex items-center justify-center text-[16pt] border-2 border-white/20">
-                                                        {displayRankInSummary}
-                                                    </div>
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-1">
                                                             <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
+                                                            {showRankIconInSummary && <span className="text-[16pt]">{showRankIconInSummary}</span>}
                                                             {showFlagInSummary && <span className="text-[16pt]">🏁</span>}
                                                         </div>
                                                         <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
