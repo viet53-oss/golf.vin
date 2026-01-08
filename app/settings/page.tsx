@@ -78,7 +78,7 @@ export default async function SettingsPage() {
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-3 mb-6">
                 <div className="flex items-center justify-between">
                     <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight text-left ml-3">System Settings</h1>
-                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Home</Link>
+                    <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95">Home</Link>
                 </div>
             </header>
 
@@ -152,7 +152,7 @@ export default async function SettingsPage() {
                             <MapPinIcon className="w-5 h-5 text-gray-700" />
                             <h2 className="font-bold text-gray-900 text-[14pt]">Courses</h2>
                         </div>
-                        <Link href="/settings/course/new" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1">
+                        <Link href="/settings/course/new" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1 shadow-md active:scale-95">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M5 12h14" />
                                 <path d="M12 5v14" />
@@ -174,12 +174,12 @@ export default async function SettingsPage() {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 w-full md:w-auto">
-                                        <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none px-1 py-2 bg-blue-600 text-white rounded-full text-[14pt] font-bold hover:bg-blue-700 transition-colors text-center">
+                                        <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none px-4 py-2 bg-blue-600 text-white rounded-full text-[15pt] font-bold hover:bg-blue-700 transition-colors text-center shadow-md active:scale-95">
                                             View
                                         </Link>
                                         {isAdmin && (
                                             <>
-                                                <Link href={`/settings/course/${course.id}/edit`} className="flex-1 md:flex-none px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors text-center">
+                                                <Link href={`/settings/course/${course.id}/edit`} className="flex-1 md:flex-none px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors text-center shadow-md active:scale-95">
                                                     Edit
                                                 </Link>
                                                 {canDelete && (

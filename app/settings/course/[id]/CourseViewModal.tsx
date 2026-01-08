@@ -11,7 +11,7 @@ type CourseData = {
     holes: { id: string; hole_number: number; par: number; difficulty: number | null }[];
 };
 
-export default function CourseViewModal({ course }: { course: CourseData }) {
+export default function CourseViewModal({ course, isAdmin }: { course: CourseData; isAdmin: boolean }) {
     const router = useRouter();
 
     // Group holes by Front/Back
@@ -31,17 +31,19 @@ export default function CourseViewModal({ course }: { course: CourseData }) {
                     <p className="text-[14pt] text-gray-500">Course Details</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Link
-                        href={`/settings/course/${course.id}/edit`}
-                        className="flex items-center gap-2 text-sm font-bold bg-white border border-gray-300 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        <Edit className="w-4 h-4" /> Edit
-                    </Link>
+                    {isAdmin && (
+                        <Link
+                            href={`/settings/course/${course.id}/edit`}
+                            className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95"
+                        >
+                            Edit
+                        </Link>
+                    )}
                     <button
                         onClick={() => router.push('/settings')}
-                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                     >
-                        <X size={24} />
+                        Close
                     </button>
                 </div>
             </div>
