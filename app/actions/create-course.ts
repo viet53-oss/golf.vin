@@ -28,7 +28,7 @@ export async function createCourse(data: {
                     longitude: h.longitude
                 }))
             }
-        }
+        } as any
     });
 
     revalidatePath('/settings');

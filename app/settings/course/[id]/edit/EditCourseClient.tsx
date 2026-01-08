@@ -31,9 +31,33 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
     // Ensure we have exactly 18 holes state even if DB gaps (unlikely but safe)
     // Actually we will just respect DB state for simplicity unless create mode.
 
-    const handleHoleChange = (index: number, field: 'par' | 'difficulty' | 'latitude' | 'longitude', value: string) => {
-        const numVal = parseInt(value) || 0;
+    const handleHoleChange = (index: number, field: 'par' | 'difficulty' | 'latitude' | 'longitude' | 'gps', value: string) => {
         const newHoles = [...holes];
+
+        if (field === 'gps') {
+            const trimmed = value.trim();
+            // Split by space(s) or comma
+            const parts = trimmed.split(/[\s,]+/).filter(p => p.length > 0);
+            if (parts.length >= 2) {
+                // If we find two or more parts, take the first two as lat/long
+                newHoles[index] = {
+                    ...newHoles[index],
+                    latitude: parts[0],
+                    longitude: parts[1]
+                };
+            } else {
+                // Only one part, assume it's latitude
+                newHoles[index] = {
+                    ...newHoles[index],
+                    latitude: value,
+                    longitude: ''
+                };
+            }
+            setHoles(newHoles);
+            return;
+        }
+
+        const numVal = parseInt(value) || 0;
         if (field === 'par') newHoles[index] = { ...newHoles[index], par: numVal };
         else if (field === 'difficulty') newHoles[index] = { ...newHoles[index], difficulty: numVal };
         else newHoles[index] = { ...newHoles[index], [field]: value }; // Store string for lat/long
@@ -78,7 +102,9 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     name,
                     tees,
                     holes: holes.map(h => ({
-                        ...h,
+                        hole_number: h.hole_number,
+                        par: h.par,
+                        difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
                         longitude: parseCoordinate(h.longitude)
                     }))
@@ -88,7 +114,10 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     name,
                     tees,
                     holes: holes.map(h => ({
-                        ...h,
+                        id: h.id,
+                        hole_number: h.hole_number,
+                        par: h.par,
+                        difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
                         longitude: parseCoordinate(h.longitude)
                     }))
@@ -252,29 +281,15 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                         </tr>
 
                                         <tr className="border-t border-gray-100">
-                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Lat</td>
+                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">GPS</td>
                                             {frontNine.map((h: any, i: number) => (
                                                 <td key={h.id} className="p-1">
                                                     <input
                                                         type="text"
-                                                        className="w-10 text-center border border-gray-300 rounded p-1 text-[10px]"
-                                                        placeholder="Lat"
-                                                        value={h.latitude || ''}
-                                                        onChange={(e) => handleHoleChange(i, 'latitude', e.target.value)}
-                                                    />
-                                                </td>
-                                            ))}
-                                        </tr>
-                                        <tr className="border-t border-gray-100">
-                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Long</td>
-                                            {frontNine.map((h: any, i: number) => (
-                                                <td key={h.id} className="p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="w-10 text-center border border-gray-300 rounded p-1 text-[10px]"
-                                                        placeholder="Lng"
-                                                        value={h.longitude || ''}
-                                                        onChange={(e) => handleHoleChange(i, 'longitude', e.target.value)}
+                                                        className="w-16 text-center border border-gray-300 rounded p-1 text-[8px]"
+                                                        placeholder="Lat Long"
+                                                        value={h.latitude && h.longitude ? `${h.latitude} ${h.longitude}` : (h.latitude || h.longitude || '')}
+                                                        onChange={(e) => handleHoleChange(i, 'gps', e.target.value)}
                                                     />
                                                 </td>
                                             ))}
@@ -324,29 +339,15 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                         </tr>
 
                                         <tr className="border-t border-gray-100">
-                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Lat</td>
+                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">GPS</td>
                                             {backNine.map((h: any, i: number) => (
                                                 <td key={h.id} className="p-1">
                                                     <input
                                                         type="text"
-                                                        className="w-10 text-center border border-gray-300 rounded p-1 text-[10px]"
-                                                        placeholder="Lat"
-                                                        value={h.latitude || ''}
-                                                        onChange={(e) => handleHoleChange(frontNine.length + i, 'latitude', e.target.value)}
-                                                    />
-                                                </td>
-                                            ))}
-                                        </tr>
-                                        <tr className="border-t border-gray-100">
-                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Long</td>
-                                            {backNine.map((h: any, i: number) => (
-                                                <td key={h.id} className="p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="w-10 text-center border border-gray-300 rounded p-1 text-[10px]"
-                                                        placeholder="Lng"
-                                                        value={h.longitude || ''}
-                                                        onChange={(e) => handleHoleChange(frontNine.length + i, 'longitude', e.target.value)}
+                                                        className="w-16 text-center border border-gray-300 rounded p-1 text-[8px]"
+                                                        placeholder="Lat Long"
+                                                        value={h.latitude && h.longitude ? `${h.latitude} ${h.longitude}` : (h.latitude || h.longitude || '')}
+                                                        onChange={(e) => handleHoleChange(frontNine.length + i, 'gps', e.target.value)}
                                                     />
                                                 </td>
                                             ))}

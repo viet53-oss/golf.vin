@@ -27,9 +27,9 @@ export async function updateCourse(
                 data: {
                     par: hole.par,
                     difficulty: hole.difficulty,
-                    latitude: hole.latitude,
-                    longitude: hole.longitude
-                }
+                    ...(hole.latitude !== undefined && { latitude: hole.latitude }),
+                    ...(hole.longitude !== undefined && { longitude: hole.longitude })
+                } as any
             });
         }
     }
