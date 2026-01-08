@@ -27,6 +27,7 @@ interface ProcessedPlayer extends PlayerWithRounds {
     rank: number; // Official Rank based on Index
     points: number;
     money: number;
+    age: number | string;
     pointsBreakdown: Array<{ date: string; roundName?: string; amount: number; isTournament?: boolean }>;
     moneyBreakdown: Array<{ date: string; roundName?: string; amount: number; isTournament?: boolean }>;
 }
@@ -179,6 +180,18 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                 roundCount: allRounds.length,
                 points: totalPoints,
                 money,
+                age: ((p: any) => {
+                    if (!p.birthday) return '-';
+                    const dob = new Date(p.birthday);
+                    if (isNaN(dob.getTime())) return '-';
+                    const today = new Date();
+                    let age = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                        age--;
+                    }
+                    return age;
+                })(player),
                 pointsBreakdown,
                 moneyBreakdown,
             };
@@ -527,6 +540,14 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                                     <span className="text-[14pt] text-gray-400 uppercase font-bold tracking-wider">$</span>
                                     <span className="font-bold text-[14pt] text-green-600 group-hover:text-green-800 underline decoration-black decoration-2 underline-offset-2">
                                         ${player.money.toFixed(2)}
+                                    </span>
+                                </div>
+
+                                {/* Age */}
+                                <div className="flex flex-col items-center w-[40px] p-1">
+                                    <span className="text-[14pt] text-gray-400 font-bold tracking-wider">Age</span>
+                                    <span className="font-bold text-[14pt] text-gray-900">
+                                        {player.age}
                                     </span>
                                 </div>
 
