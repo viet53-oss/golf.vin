@@ -28,6 +28,8 @@ interface Hole {
     hole_number: number;
     par: number;
     difficulty?: number | null;
+    latitude?: number | null;
+    longitude?: number | null;
 }
 
 interface Course {
@@ -73,6 +75,43 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     // Track pending (unsaved) scores for the current hole only
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
+    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+    // GPS Logic
+    useEffect(() => {
+        if (!navigator.geolocation) return;
+
+        const watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                setUserLocation({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                });
+            },
+            (error) => {
+                console.error("Error getting location", error);
+            },
+            { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+        );
+
+        return () => navigator.geolocation.clearWatch(watchId);
+    }, []);
+
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const R = 6371e3; // metres
+        const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        const d = R * c; // in metres
+        return Math.round(d * 1.09361); // convert to yards
+    };
 
     // Load saved group from localStorage after mount to avoid hydration mismatch
     useEffect(() => {
@@ -731,6 +770,31 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 </div>
                             )}
                         </div>
+
+                        {/* GPS Distance Display */}
+                        {(() => {
+                            const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
+                            if (userLocation && currentHole?.latitude && currentHole?.longitude) {
+                                const dist = calculateDistance(
+                                    userLocation.latitude,
+                                    userLocation.longitude,
+                                    Number(currentHole.latitude),
+                                    Number(currentHole.longitude)
+                                );
+                                return (
+                                    <div className="bg-green-50 border-b border-green-100 py-2 text-center">
+                                        <p className="text-green-800 font-bold text-[16pt] flex items-center justify-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                                            </svg>
+                                            {dist} Yards to Pin
+                                        </p>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
 
                         {/* Hole Selection Grid */}
                         {selectedPlayers.length > 0 && (

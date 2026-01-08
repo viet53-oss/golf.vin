@@ -9,7 +9,7 @@ export async function updateCourse(
     data: {
         name: string,
         tees: { id?: string, name: string, rating: number, slope: number, yardages?: number[] }[],
-        holes: { id?: string, hole_number: number, par: number, difficulty: number | null }[]
+        holes: { id?: string, hole_number: number, par: number, difficulty: number | null, latitude?: number | null, longitude?: number | null }[]
     }
 ) {
     // 1. Update Course Name
@@ -24,7 +24,12 @@ export async function updateCourse(
         if (hole.id) {
             await prisma.hole.update({
                 where: { id: hole.id },
-                data: { par: hole.par, difficulty: hole.difficulty }
+                data: {
+                    par: hole.par,
+                    difficulty: hole.difficulty,
+                    latitude: hole.latitude,
+                    longitude: hole.longitude
+                }
             });
         }
     }

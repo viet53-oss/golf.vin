@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 export async function createCourse(data: {
     name: string,
     tees: { name: string, rating: number, slope: number }[],
-    holes: { hole_number: number, par: number, difficulty: number | null }[]
+    holes: { hole_number: number, par: number, difficulty: number | null, latitude?: number | null, longitude?: number | null }[]
 }) {
     await prisma.course.create({
         data: {
@@ -23,7 +23,9 @@ export async function createCourse(data: {
                 create: data.holes.map(h => ({
                     hole_number: h.hole_number,
                     par: h.par,
-                    difficulty: h.difficulty
+                    difficulty: h.difficulty,
+                    latitude: h.latitude,
+                    longitude: h.longitude
                 }))
             }
         }

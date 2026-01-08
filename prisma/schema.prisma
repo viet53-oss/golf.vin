@@ -62,6 +62,8 @@ model Hole {
   hole_number Int
   par         Int
   difficulty  Int?
+  latitude    Float?
+  longitude   Float?
   course      Course      @relation(fields: [course_id], references: [id])
   scores      Score[]
   live_scores LiveScore[]
