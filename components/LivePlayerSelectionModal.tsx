@@ -24,12 +24,12 @@ export function LivePlayerSelectionModal({
 }) {
     const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedIds);
 
-    // Sync local state with prop when modal opens or prop updates
+    // Sync local state with prop only when modal opens
     useEffect(() => {
         if (isOpen) {
             setLocalSelectedIds(selectedIds);
         }
-    }, [isOpen, selectedIds]);
+    }, [isOpen]); // Remove selectedIds from dependencies
 
     if (!isOpen) return null;
 
