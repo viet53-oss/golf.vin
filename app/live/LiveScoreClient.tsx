@@ -808,12 +808,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 // Determine styling
                                 let btnClass = "bg-white text-black border border-black";
-                                if (isSaved) {
-                                    // Saved holes: white on black (whether active or not)
-                                    btnClass = "bg-black text-white border border-black";
-                                } else if (isActive) {
-                                    // Active unsaved hole: white on blue
+                                if (isActive) {
+                                    // Active hole: always white on blue (with or without data)
                                     btnClass = "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-1 z-10 scale-105 shadow-md";
+                                } else if (isSaved) {
+                                    // Inactive saved holes: white on black
+                                    btnClass = "bg-black text-white border border-black";
                                 }
 
                                 return (
