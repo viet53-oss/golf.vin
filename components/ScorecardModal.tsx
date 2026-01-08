@@ -98,11 +98,11 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
     const getScoreClass = (par: number, score: number | undefined) => {
         if (!score) return "bg-transparent";
         const diff = score - par;
-        if (diff <= -2) return "bg-blue-200 text-blue-900"; // Eagle+
-        if (diff === -1) return "bg-emerald-200 text-emerald-900"; // Birdie
-        if (diff === 0) return "bg-white text-black"; // Par
-        if (diff === 1) return "bg-amber-100 text-amber-900"; // Bogey
-        return "bg-rose-200 text-rose-900"; // Double+
+        if (diff <= -2) return "bg-red-500 text-white"; // Eagle: Red
+        if (diff === -1) return "bg-green-500 text-white"; // Birdie: Green
+        if (diff === 0) return "bg-gray-100 text-black"; // Par: Light Grey
+        if (diff === 1) return "bg-blue-500 text-white"; // Bogey: Blue
+        return "bg-gray-700 text-white"; // Double Bogey+: Dark Grey
     };
 
     // Sub-component for a 9-hole section
@@ -251,24 +251,24 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                     {/* Legend */}
                     <div className="flex flex-wrap justify-center gap-3 mt-8">
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-blue-200 border border-blue-300 rounded-sm"></span>
-                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Eagle+</span>
+                            <span className="w-3 h-3 bg-red-500 rounded-sm"></span>
+                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Eagle (-2)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-emerald-200 border border-emerald-300 rounded-sm"></span>
-                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Birdie</span>
+                            <span className="w-3 h-3 bg-green-500 rounded-sm"></span>
+                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Birdie (-1)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></span>
-                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Par</span>
+                            <span className="w-3 h-3 bg-gray-100 border border-gray-300 rounded-sm"></span>
+                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Par (E)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-amber-100 border border-amber-200 rounded-sm"></span>
-                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Bogey</span>
+                            <span className="w-3 h-3 bg-blue-500 rounded-sm"></span>
+                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Bogey (+1)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 bg-rose-200 border border-rose-300 rounded-sm"></span>
-                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Double+</span>
+                            <span className="w-3 h-3 bg-gray-700 rounded-sm"></span>
+                            <span className="text-[14pt] font-bold text-gray-500 uppercase">Double+ (+2)</span>
                         </div>
                     </div>
 

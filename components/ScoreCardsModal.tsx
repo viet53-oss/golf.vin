@@ -207,17 +207,17 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                         let bgClass = "bg-white";
                                         if (score !== null) {
                                             const diff = score - holePar;
-                                            if (diff <= -2) bgClass = "bg-yellow-300";
-                                            else if (diff === -1) bgClass = "bg-green-300";
-                                            else if (diff === 0) bgClass = "bg-blue-50";
-                                            else if (diff === 1) bgClass = "bg-orange-200";
-                                            else if (diff >= 2) bgClass = "bg-red-200";
+                                            if (diff <= -2) bgClass = "bg-red-500 text-white"; // Eagle: Red
+                                            else if (diff === -1) bgClass = "bg-green-500 text-white"; // Birdie: Green
+                                            else if (diff === 0) bgClass = "bg-gray-100"; // Par: Light Grey
+                                            else if (diff === 1) bgClass = "bg-blue-500 text-white"; // Bogey: Blue
+                                            else if (diff >= 2) bgClass = "bg-gray-700 text-white"; // Double Bogey+: Dark Grey
                                         }
 
                                         return (
                                             <div key={num} className="flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white">
-                                                <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                <div className={`text-[15pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                <div className="absolute top-1 inset-x-0 text-center text-[10pt] text-gray-500">{num}</div>
+                                                <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                     {score || '-'}
                                                 </div>
                                             </div>
@@ -235,17 +235,17 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                         let bgClass = "bg-white";
                                         if (score !== null) {
                                             const diff = score - holePar;
-                                            if (diff <= -2) bgClass = "bg-yellow-300";
-                                            else if (diff === -1) bgClass = "bg-green-300";
-                                            else if (diff === 0) bgClass = "bg-blue-50";
-                                            else if (diff === 1) bgClass = "bg-orange-200";
-                                            else if (diff >= 2) bgClass = "bg-red-200";
+                                            if (diff <= -2) bgClass = "bg-red-500 text-white"; // Eagle: Red
+                                            else if (diff === -1) bgClass = "bg-green-500 text-white"; // Birdie: Green
+                                            else if (diff === 0) bgClass = "bg-gray-100"; // Par: Light Grey
+                                            else if (diff === 1) bgClass = "bg-blue-500 text-white"; // Bogey: Blue
+                                            else if (diff >= 2) bgClass = "bg-gray-700 text-white"; // Double Bogey+: Dark Grey
                                         }
 
                                         return (
                                             <div key={num} className="flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white">
-                                                <div className="text-[12pt] text-gray-500 mb-1">{num}</div>
-                                                <div className={`text-[15pt] font-bold px-2 py-0.5 rounded ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                <div className="absolute top-1 inset-x-0 text-center text-[10pt] text-gray-500">{num}</div>
+                                                <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                     {score || '-'}
                                                 </div>
                                             </div>
@@ -260,11 +260,11 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
 
             {/* Score Legend */}
             <div className="bg-white rounded-xl shadow-lg p-1 m-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]">
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-50 border border-gray-200"></div>Par (E)</div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-200"></div>Bogey (+1)</div>
-                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-200"></div>Double+ (+2)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-500"></div>Eagle (-2)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-500"></div>Birdie (-1)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-gray-100 border border-gray-300"></div>Par (E)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-500"></div>Bogey (+1)</div>
+                <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-gray-700"></div>Double+ (+2)</div>
             </div>
         </div>
     );
