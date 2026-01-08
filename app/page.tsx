@@ -57,7 +57,7 @@ export default async function Home() {
 
     { name: "FAQ's", icon: HelpCircle, href: "/faq", color: "text-orange-500" },
     { name: "Photos", icon: ImageIcon, href: "/photos", color: "text-pink-500" },
-    ...(isAdmin ? [{ name: "Settings", icon: SettingsIcon, href: "/settings", color: "text-gray-500" }] : []),
+    { name: "Settings", icon: SettingsIcon, href: "/settings", color: "text-gray-500" },
   ];
 
 

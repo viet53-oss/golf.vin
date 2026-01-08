@@ -9,6 +9,7 @@ import AppLogicButton from './AppLogicButton';
 import { prisma } from '@/lib/prisma';
 import ManualScoreForm from './ManualScoreForm';
 import DeleteCourseButton from '@/components/DeleteCourseButton';
+import InstallAppButton from './InstallAppButton';
 
 // Native SVG components for settings/page.tsx
 const SettingsIcon = ({ className }: { className?: string }) => (
@@ -47,28 +48,6 @@ export default async function SettingsPage() {
     const cookieStore = await cookies();
     const isAdmin = cookieStore.get('admin_session')?.value === 'true';
 
-    if (!isAdmin) {
-        return (
-            <div className="min-h-screen bg-slate-50 font-sans flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 max-w-md w-full text-center space-y-6">
-                    <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
-                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                    </div>
-                    <div className="space-y-2">
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">Access Denied</h1>
-                        <p className="text-gray-500 text-[14pt]">You must be logged in as an administrator to access system settings.</p>
-                    </div>
-                    <div className="pt-4 space-y-3">
-                        <p className="text-gray-400 text-xs italic text-[14pt]">Please use the 'Login' button at the top of the page to authenticate.</p>
-                        <Link href="/" className="block w-full py-3 bg-black text-white rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-all active:scale-95">Return Home</Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     const courses = await prisma.course.findMany({
         include: {
             tee_boxes: true,
@@ -104,34 +83,52 @@ export default async function SettingsPage() {
 
             <main className="m-1 space-y-6">
 
-                {/* USGA Handicap System */}
-                {/* USGA Handicap System */}
+                {/* Install App - For Everyone */}
                 <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
-                    <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-                        <ShieldIcon className="w-5 h-5 text-blue-600" />
-                        <h2 className="font-bold text-blue-900 text-[14pt]">USGA Handicap System</h2>
+                    <div className="p-3 bg-green-50 border-b border-green-100 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <path d="M12 18h.01" />
+                        </svg>
+                        <h2 className="font-bold text-green-900 text-[14pt]">Install App</h2>
                     </div>
                     <div className="p-3 space-y-4">
                         <p className="text-[14pt] text-gray-500">
-                            Recalculate player handicaps using WHS rules. This will scan all rounds and update the Handicap Index for all players.
+                            Install CPGC on your phone or tablet for quick access. The app works offline and provides a native app experience.
                         </p>
-                        <RecalculateButton />
-                        <div className="pt-2 border-t border-gray-200">
-                            <p className="text-[14pt] text-orange-600 font-bold mb-2">⚠️ Emergency Fix</p>
-                            <p className="text-[14pt] text-gray-500 mb-3">
-                                If all handicaps are showing as 0, click this button to reset the low handicap indexes.
-                            </p>
-                            <FixLowIndexButton />
-                        </div>
-                        <div className="pt-2 border-t border-gray-200">
-                            <p className="text-[14pt] text-blue-600 font-bold mb-2">🔄 Tee Box Correction</p>
-                            <p className="text-[14pt] text-gray-500 mb-3">
-                                If you changed course tee definitions, use this to re-align all historical rounds to each player's preferred tee (White, Gold, etc.).
-                            </p>
-                            <SyncTeesButton />
-                        </div>
+                        <InstallAppButton />
                     </div>
                 </div>
+
+                {/* USGA Handicap System - Admin Only */}
+                {isAdmin && (
+                    <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                        <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                            <ShieldIcon className="w-5 h-5 text-blue-600" />
+                            <h2 className="font-bold text-blue-900 text-[14pt]">USGA Handicap System</h2>
+                        </div>
+                        <div className="p-3 space-y-4">
+                            <p className="text-[14pt] text-gray-500">
+                                Recalculate player handicaps using WHS rules. This will scan all rounds and update the Handicap Index for all players.
+                            </p>
+                            <RecalculateButton />
+                            <div className="pt-2 border-t border-gray-200">
+                                <p className="text-[14pt] text-orange-600 font-bold mb-2">⚠️ Emergency Fix</p>
+                                <p className="text-[14pt] text-gray-500 mb-3">
+                                    If all handicaps are showing as 0, click this button to reset the low handicap indexes.
+                                </p>
+                                <FixLowIndexButton />
+                            </div>
+                            <div className="pt-2 border-t border-gray-200">
+                                <p className="text-[14pt] text-blue-600 font-bold mb-2">🔄 Tee Box Correction</p>
+                                <p className="text-[14pt] text-gray-500 mb-3">
+                                    If you changed course tee definitions, use this to re-align all historical rounds to each player's preferred tee (White, Gold, etc.).
+                                </p>
+                                <SyncTeesButton />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Courses */}
                 <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
@@ -140,13 +137,15 @@ export default async function SettingsPage() {
                             <MapPinIcon className="w-5 h-5 text-gray-700" />
                             <h2 className="font-bold text-gray-900 text-[14pt]">Courses</h2>
                         </div>
-                        <Link href="/settings/course/new" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M5 12h14" />
-                                <path d="M12 5v14" />
-                            </svg>
-                            Add Course
-                        </Link>
+                        {isAdmin && (
+                            <Link href="/settings/course/new" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h14" />
+                                    <path d="M12 5v14" />
+                                </svg>
+                                Add Course
+                            </Link>
+                        )}
                     </div>
                     <div className="p-3 space-y-4">
                         {courses.map((course: any) => {
@@ -162,11 +161,18 @@ export default async function SettingsPage() {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 w-full md:w-auto">
-                                        <Link href={`/settings/course/${course.id}/edit`} className="flex-1 md:flex-none px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors text-center">
-                                            Edit
+                                        <Link href={`/settings/course/${course.id}`} className="flex-1 md:flex-none px-1 py-2 bg-blue-600 text-white rounded-full text-[14pt] font-bold hover:bg-blue-700 transition-colors text-center">
+                                            View
                                         </Link>
-                                        {canDelete && (
-                                            <DeleteCourseButton courseId={course.id} canDelete={true} />
+                                        {isAdmin && (
+                                            <>
+                                                <Link href={`/settings/course/${course.id}/edit`} className="flex-1 md:flex-none px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors text-center">
+                                                    Edit
+                                                </Link>
+                                                {canDelete && (
+                                                    <DeleteCourseButton courseId={course.id} canDelete={true} />
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -178,35 +184,39 @@ export default async function SettingsPage() {
                     </div>
                 </div>
 
-                {/* App Logic & Rules */}
-                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
-                    <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
-                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                        </svg>
-                        <h2 className="font-bold text-blue-900 text-[14pt]">App Logic & Rules</h2>
+                {/* App Logic & Rules - Admin Only */}
+                {isAdmin && (
+                    <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                        <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
+                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+                            </svg>
+                            <h2 className="font-bold text-blue-900 text-[14pt]">App Logic & Rules</h2>
+                        </div>
+                        <div className="p-3 space-y-4">
+                            <p className="text-[14pt] text-gray-500">
+                                View detailed documentation about the app's internal logic, scoring rules, and calculations.
+                            </p>
+                            <AppLogicButton />
+                        </div>
                     </div>
-                    <div className="p-3 space-y-4">
-                        <p className="text-[14pt] text-gray-500">
-                            View detailed documentation about the app's internal logic, scoring rules, and calculations.
-                        </p>
-                        <AppLogicButton />
-                    </div>
-                </div>
+                )}
 
-                {/* Backup & Restore */}
-                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
-                    <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
-                        <DatabaseIcon className="w-5 h-5 text-gray-700" />
-                        <h2 className="font-bold text-gray-900 text-[14pt]">Data Backup & Restore</h2>
+                {/* Backup & Restore - Admin Only */}
+                {isAdmin && (
+                    <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                        <div className="p-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+                            <DatabaseIcon className="w-5 h-5 text-gray-700" />
+                            <h2 className="font-bold text-gray-900 text-[14pt]">Data Backup & Restore</h2>
+                        </div>
+                        <div className="p-3">
+                            <p className="text-[14pt] text-gray-500 mb-4">
+                                Download a backup of all your data to protect against data loss.
+                            </p>
+                            <BackupManager />
+                        </div>
                     </div>
-                    <div className="p-3">
-                        <p className="text-[14pt] text-gray-500 mb-4">
-                            Download a backup of all your data to protect against data loss.
-                        </p>
-                        <BackupManager />
-                    </div>
-                </div>
+                )}
 
                 {/* Manual Score Entry */}
                 <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
@@ -227,19 +237,21 @@ export default async function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Site Configuration */}
-                <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
-                    <div className="p-3 bg-purple-50 border-b border-purple-100 flex items-center gap-2">
-                        <GlobeIcon className="w-5 h-5 text-purple-600" />
-                        <h2 className="font-bold text-purple-900 text-[14pt]">Site Configuration</h2>
+                {/* Site Configuration - Admin Only */}
+                {isAdmin && (
+                    <div className="bg-white rounded-xl shadow-sm border-2 border-black overflow-hidden">
+                        <div className="p-3 bg-purple-50 border-b border-purple-100 flex items-center gap-2">
+                            <GlobeIcon className="w-5 h-5 text-purple-600" />
+                            <h2 className="font-bold text-purple-900 text-[14pt]">Site Configuration</h2>
+                        </div>
+                        <div className="p-3 space-y-4">
+                            <p className="text-[14pt] text-gray-500">
+                                Manage global SEO settings and meta tags. Update the site title, description, and keywords.
+                            </p>
+                            <MetaTagEditor />
+                        </div>
                     </div>
-                    <div className="p-3 space-y-4">
-                        <p className="text-[14pt] text-gray-500">
-                            Manage global SEO settings and meta tags. Update the site title, description, and keywords.
-                        </p>
-                        <MetaTagEditor />
-                    </div>
-                </div>
+                )}
 
             </main>
         </div>

@@ -1162,7 +1162,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Scorecard Reminder */}
                 <div className="w-full text-center py-4">
-                    <p className="text-[18pt] font-bold text-gray-900">
+                    <p className="text-[16pt] font-bold text-gray-900">
                         (Text Vincent to turn in your scorecard.)
                     </p>
                 </div>
