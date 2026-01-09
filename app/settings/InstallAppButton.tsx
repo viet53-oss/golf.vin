@@ -9,9 +9,10 @@ export default function InstallAppButton() {
     const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
     useEffect(() => {
-        // Detect iOS
+        // Detect iOS (including iPadOS 13+ which reports as Mac)
         const userAgent = window.navigator.userAgent.toLowerCase();
-        const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+        const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         setIsIOS(isIOSDevice);
 
         const handler = (e: Event) => {
@@ -64,8 +65,8 @@ export default function InstallAppButton() {
                 onClick={handleInstallClick}
                 disabled={!isInstallable && !isIOS}
                 className={`w-full px-4 py-3 rounded-full text-[14pt] font-bold transition-all ${isInstallable || isIOS
-                        ? 'bg-green-600 text-white hover:bg-green-700 active:scale-95'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-green-600 text-white hover:bg-green-700 active:scale-95'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
             >
                 {isIOS
