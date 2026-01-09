@@ -10,6 +10,7 @@ export async function createLiveRound(data: {
     name: string;
     date: string;
     courseId: string;
+    courseName: string;
     par: number;
     rating: number;
     slope: number;
@@ -20,6 +21,7 @@ export async function createLiveRound(data: {
                 name: data.name,
                 date: data.date,
                 course_id: data.courseId,
+                course_name: data.courseName,
                 par: data.par,
                 rating: data.rating,
                 slope: data.slope

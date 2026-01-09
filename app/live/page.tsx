@@ -89,6 +89,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
                         name: `Live Round - ${todayStr}`,
                         date: todayStr,
                         course_id: defaultCourse.id,
+                        course_name: defaultCourse.name,
                         par: coursePar,
                         rating: defaultTeeBox?.rating ?? coursePar,
                         slope: defaultTeeBox?.slope ?? 113

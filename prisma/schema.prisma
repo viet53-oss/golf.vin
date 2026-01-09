@@ -74,6 +74,7 @@ model Round {
   id            String        @id @default(uuid())
   date          String
   course_id     String
+  course_name   String?
   created_at    DateTime      @default(now())
   is_tournament Boolean       @default(false)
   name          String?
@@ -182,17 +183,18 @@ model MoneyEvent {
 }
 
 model LiveRound {
-  id         String            @id @default(uuid())
-  name       String
-  date       String
-  course_id  String
-  created_at DateTime          @default(now())
-  updated_at DateTime          @updatedAt
-  par        Int
-  rating     Float
-  slope      Int
-  players    LiveRoundPlayer[]
-  course     Course            @relation(fields: [course_id], references: [id])
+  id          String            @id @default(uuid())
+  name        String
+  date        String
+  course_id   String
+  course_name String?
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+  par         Int
+  rating      Float
+  slope       Int
+  players     LiveRoundPlayer[]
+  course      Course            @relation(fields: [course_id], references: [id])
 
   @@index([date])
   @@index([course_id])

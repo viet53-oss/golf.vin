@@ -37,6 +37,7 @@ export async function completeLiveRound(liveRoundId: string) {
                 date: liveRound.date,
                 name: liveRound.name,
                 course_id: liveRound.course_id,
+                course_name: liveRound.course_name,
                 completed: true,
                 is_live: false,
                 is_tournament: false
