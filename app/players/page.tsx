@@ -86,8 +86,14 @@ export default async function PlayersPage() {
             }
         });
 
-        // Fetch Course Data for HCP Calculation
+        // Fetch Course Data for HCP Calculation (City Park North)
         course = await prisma.course.findFirst({
+            where: {
+                name: {
+                    contains: 'North',
+                    mode: 'insensitive'
+                }
+            },
             include: { tee_boxes: true, holes: true }
         });
     } catch (error) {

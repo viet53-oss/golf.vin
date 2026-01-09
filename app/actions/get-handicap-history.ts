@@ -56,6 +56,12 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
 
     // 2. Fetch Course Data (Main Course: City Park North)
     const course = await prisma.course.findFirst({
+        where: {
+            name: {
+                contains: 'North',
+                mode: 'insensitive'
+            }
+        },
         include: { tee_boxes: true, holes: true }
     });
 
@@ -96,11 +102,20 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             par: coursePar,
         })),
         ...v3Rounds.map((r: RoundWithDetails) => {
-            // Use the actual tee box assigned to this round (no override)
-            const teeBox = r.tee_box;
+            // PRIORITY 1: Use the tee box data SAVED with this round
+            // PRIORITY 2: Fall back to current tee box data if saved data is missing (old rounds)
+            const savedPar = r.tee_box_par;
+            const savedRating = r.tee_box_rating;
+            const savedSlope = r.tee_box_slope;
+            const savedTeeName = r.tee_box_name;
 
-            const rating = teeBox?.rating || 72;
-            const slope = teeBox?.slope || 113;
+            // Fallback to current tee box if saved data is missing
+            const teeBox = r.tee_box;
+            const rating = savedRating ?? teeBox?.rating ?? 72;
+            const slope = savedSlope ?? teeBox?.slope ?? 113;
+            const par = savedPar ?? coursePar;
+            const teeName = savedTeeName ?? teeBox?.name;
+
             const adjustedScore = r.adjusted_gross_score || r.gross_score!;
 
             // Calculate differential based on the actual tee box used
@@ -113,10 +128,10 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
                 differential: diff,
                 gross: r.gross_score!,
                 adjusted: adjustedScore,
-                teeColor: teeBox?.name,
+                teeColor: teeName,
                 rating,
                 slope,
-                par: coursePar,
+                par,
             };
         })
     ];

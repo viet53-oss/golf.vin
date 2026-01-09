@@ -73,8 +73,9 @@ export async function recalculateAllHandicaps() {
                         date: r.round.date,
                         id: r.id,
                         score: r.adjusted_gross_score || r.gross_score || 0,
-                        rating: r.tee_box!.rating,
-                        slope: r.tee_box!.slope,
+                        // PRIORITY: Use saved tee box data, fallback to current tee box relationship
+                        rating: r.tee_box_rating ?? r.tee_box!.rating,
+                        slope: r.tee_box_slope ?? r.tee_box!.slope,
                         timestamp: new Date(r.round.date).getTime()
                     }));
 

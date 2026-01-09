@@ -24,12 +24,22 @@ export async function postScore(formData: FormData) {
     const points = parseFloat(formData.get('points') as string || '0');
     const payout = parseFloat(formData.get('payout') as string || '0');
 
-    // Fetch tee box for rating/slope
+    // Fetch tee box and course for rating/slope/par
     const teeBox = await prisma.teeBox.findUnique({
-        where: { id: teeBoxId }
+        where: { id: teeBoxId },
+        include: {
+            course: {
+                include: {
+                    holes: true
+                }
+            }
+        }
     });
 
     if (!teeBox) throw new Error('Tee Box not found');
+
+    // Calculate course par from holes
+    const coursePar = teeBox.course.holes.reduce((sum, hole) => sum + hole.par, 0);
 
     // Calculate differential (using Gross as Adjusted Gross since we have no hole scores)
     const differential = calculateScoreDifferential(grossScore, teeBox.rating, teeBox.slope, 0);
@@ -65,12 +75,16 @@ export async function postScore(formData: FormData) {
         }
     }
 
-    // 2. Add the Player's Score
+    // 2. Add the Player's Score with tee box data
     await prisma.roundPlayer.create({
         data: {
             round_id: round.id,
             player_id: playerId,
             tee_box_id: teeBoxId,
+            tee_box_name: teeBox.name,
+            tee_box_par: coursePar,
+            tee_box_rating: teeBox.rating,
+            tee_box_slope: Math.round(teeBox.slope),
             gross_score: grossScore,
             points: points,
             payout: payout,

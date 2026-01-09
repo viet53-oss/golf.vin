@@ -188,9 +188,9 @@ model LiveRound {
   course_id  String
   created_at DateTime          @default(now())
   updated_at DateTime          @updatedAt
-  par        Int               @default(72)
-  rating     Float             @default(72.0)
-  slope      Int               @default(113)
+  par        Int
+  rating     Float
+  slope      Int
   players    LiveRoundPlayer[]
   course     Course            @relation(fields: [course_id], references: [id])
 

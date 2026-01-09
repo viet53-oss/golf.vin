@@ -10,9 +10,9 @@ export async function createLiveRound(data: {
     name: string;
     date: string;
     courseId: string;
-    par?: number;
-    rating?: number;
-    slope?: number;
+    par: number;
+    rating: number;
+    slope: number;
 }) {
     try {
         const liveRound = await prisma.liveRound.create({
@@ -20,10 +20,10 @@ export async function createLiveRound(data: {
                 name: data.name,
                 date: data.date,
                 course_id: data.courseId,
-                par: data.par ?? 72,
-                rating: data.rating ?? 72.0,
-                slope: data.slope ?? 113
-            } as any
+                par: data.par,
+                rating: data.rating,
+                slope: data.slope
+            }
         });
 
         // revalidatePath('/live'); // Removing to prevent client-side state loss during modal save

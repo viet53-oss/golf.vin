@@ -79,15 +79,20 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
             // Found existing
         } else if (defaultCourse) {
             try {
+                // Calculate par from holes
+                const coursePar = defaultCourse.holes.reduce((sum, hole) => sum + hole.par, 0);
+                // Use first tee box for default values (or fallback if none exist)
+                const defaultTeeBox = defaultCourse.tee_boxes[0];
+
                 activeRound = await prisma.liveRound.create({
                     data: {
                         name: `Live Round - ${todayStr}`,
                         date: todayStr,
                         course_id: defaultCourse.id,
-                        par: 68,
-                        rating: 63.8,
-                        slope: 100
-                    } as any,
+                        par: coursePar,
+                        rating: defaultTeeBox?.rating ?? coursePar,
+                        slope: defaultTeeBox?.slope ?? 113
+                    },
                     include: {
                         players: {
                             include: {
