@@ -72,6 +72,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [guestPlayers, setGuestPlayers] = useState<Player[]>([]);
     const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; index: number; courseHandicap: number } | null>(null);
     const [isAddToClubModalOpen, setIsAddToClubModalOpen] = useState(false);
+    const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     // Track pending (unsaved) scores for the current hole only
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
@@ -597,6 +598,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const rankedPlayers = summaryPlayers.map(player => {
         const playerScores = scores.get(player.id);
         let totalGross = 0;
+        let front9 = 0;
+        let back9 = 0;
         let strokesReceivedSoFar = 0;
         let parTotal = 0;
         let thru = 0;
@@ -607,6 +610,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         if (playerScores) {
             playerScores.forEach((strokes, holeNum) => {
                 totalGross += strokes;
+
+                // Track front 9 and back 9
+                if (holeNum <= 9) {
+                    front9 += strokes;
+                } else {
+                    back9 += strokes;
+                }
+
                 const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
                 const holePar = hole?.par || 4;
                 const difficulty = hole?.difficulty || holeNum;
@@ -636,7 +647,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         const totalNet = totalGross - strokesReceivedSoFar;
         const toPar = totalGross - parTotal;
 
-        return { ...player, totalGross, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal, grossHoleScores };
+        return { ...player, totalGross, front9, back9, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal, grossHoleScores };
     }).sort((a, b) => {
         // Primary Sort: Total Net (Ascending)
         if (a.totalNet !== b.totalNet) return a.totalNet - b.totalNet;
@@ -656,8 +667,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const allActiveFinished = activePlayers.length > 0 && activePlayers.every(p => p.thru >= 18);
     const allPlayersFinished = rankedPlayers.length > 0 && rankedPlayers.every(p => p.thru >= 18);
 
-    // Optimized: Check if all selected players have completed hole 3
-    const allPlayersCompletedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => scores.get(p.id)?.has(3));
+    // Optimized: Check if all players in the round have completed hole 3
+    // Use summaryPlayers to include both local selections and server data
+    const allPlayersCompletedHole3 = summaryPlayers.length > 0 && summaryPlayers.every(p => scores.get(p.id)?.has(3));
 
     // Hide Course and Group sections after hole 3 is completed by all players (except for admins)
     const hideCourseAndGroupSections = !isAdmin && allPlayersCompletedHole3;
@@ -1132,12 +1144,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* Live Scores Summary */}
                 {summaryPlayers.length > 0 && (
                     <div className="mt-1 space-y-2">
-                        <button
-                            onClick={() => router.refresh()}
-                            className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95 my-1"
-                        >
-                            Summary - Refresh
-                        </button>
+                        <div className="flex gap-2 my-1">
+                            <button
+                                onClick={() => router.refresh()}
+                                className="flex-1 bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                            >
+                                Summary - Refresh
+                            </button>
+                            <button
+                                onClick={() => setIsStatsModalOpen(true)}
+                                className="w-16 bg-black text-white rounded-full py-2 text-[25pt] hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                            >
+                                🖕
+                            </button>
+                        </div>
 
                         <div className="space-y-1">
                             {rankedPlayers.map((p, i) => {
@@ -1194,9 +1214,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[15pt] min-w-[3rem] ${toParClass}`}>
                                                         {toParStr}
                                                     </div>
-                                                    <div className="text-center">
+                                                    <div className="text-left">
                                                         <div className="text-[15pt] opacity-80 font-bold tracking-wider">GRS</div>
-                                                        <div className="text-[15pt] font-bold leading-none">{p.totalGross}</div>
+                                                        <div className="text-[15pt] font-bold leading-none">
+                                                            {p.front9 > 0 || p.back9 > 0 ? (
+                                                                <>{p.front9} + {p.back9} = {p.totalGross}</>
+                                                            ) : (
+                                                                <>{p.totalGross}</>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <div>
                                                         <div className="text-[15pt] opacity-80 font-bold tracking-wider">HCP</div>
@@ -1334,6 +1360,139 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 liveRoundId={liveRoundId || ''}
                 onSave={handleCopyToClub}
             />
+
+            {/* Stats Modal */}
+            {isStatsModalOpen && (
+                <div className="fixed inset-0 z-[300] bg-gray-50 overflow-y-auto">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm sticky top-0 z-10 px-1 py-3 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight text-left ml-3">Round Stats</h1>
+                            <button
+                                onClick={() => setIsStatsModalOpen(false)}
+                                className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-3 space-y-4">
+                        {/* Birdies Section */}
+                        <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-green-500">
+                            <h2 className="text-[16pt] font-bold text-green-700 mb-3 flex items-center gap-2">
+                                🐦 Birdies (1 Under Par)
+                            </h2>
+                            <div className="space-y-2">
+                                {rankedPlayers.map(player => {
+                                    const playerScores = scores.get(player.id);
+                                    let birdieCount = 0;
+
+                                    if (playerScores) {
+                                        playerScores.forEach((strokes, holeNum) => {
+                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                            const holePar = hole?.par || 4;
+                                            const diff = strokes - holePar;
+                                            if (diff === -1) birdieCount++;
+                                        });
+                                    }
+
+                                    if (birdieCount === 0) return null;
+
+                                    return (
+                                        <div key={player.id} className="flex justify-between items-center bg-green-50 rounded-lg p-2">
+                                            <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
+                                            <span className="text-[18pt] font-black text-green-700">{birdieCount}</span>
+                                        </div>
+                                    );
+                                }).filter(Boolean).length > 0 ? (
+                                    rankedPlayers.map(player => {
+                                        const playerScores = scores.get(player.id);
+                                        let birdieCount = 0;
+
+                                        if (playerScores) {
+                                            playerScores.forEach((strokes, holeNum) => {
+                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                const holePar = hole?.par || 4;
+                                                const diff = strokes - holePar;
+                                                if (diff === -1) birdieCount++;
+                                            });
+                                        }
+
+                                        if (birdieCount === 0) return null;
+
+                                        return (
+                                            <div key={player.id} className="flex justify-between items-center bg-green-50 rounded-lg p-2">
+                                                <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
+                                                <span className="text-[18pt] font-black text-green-700">{birdieCount}</span>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <p className="text-gray-500 text-center py-4">No birdies yet</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Eagles Section */}
+                        <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-yellow-500">
+                            <h2 className="text-[16pt] font-bold text-yellow-700 mb-3 flex items-center gap-2">
+                                🦅 Eagles (2 Under Par)
+                            </h2>
+                            <div className="space-y-2">
+                                {rankedPlayers.map(player => {
+                                    const playerScores = scores.get(player.id);
+                                    let eagleCount = 0;
+
+                                    if (playerScores) {
+                                        playerScores.forEach((strokes, holeNum) => {
+                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                            const holePar = hole?.par || 4;
+                                            const diff = strokes - holePar;
+                                            if (diff <= -2) eagleCount++;
+                                        });
+                                    }
+
+                                    if (eagleCount === 0) return null;
+
+                                    return (
+                                        <div key={player.id} className="flex justify-between items-center bg-yellow-50 rounded-lg p-2">
+                                            <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
+                                            <span className="text-[18pt] font-black text-yellow-700">{eagleCount}</span>
+                                        </div>
+                                    );
+                                }).filter(Boolean).length > 0 ? (
+                                    rankedPlayers.map(player => {
+                                        const playerScores = scores.get(player.id);
+                                        let eagleCount = 0;
+
+                                        if (playerScores) {
+                                            playerScores.forEach((strokes, holeNum) => {
+                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                const holePar = hole?.par || 4;
+                                                const diff = strokes - holePar;
+                                                if (diff <= -2) eagleCount++;
+                                            });
+                                        }
+
+                                        if (eagleCount === 0) return null;
+
+                                        return (
+                                            <div key={player.id} className="flex justify-between items-center bg-yellow-50 rounded-lg p-2">
+                                                <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
+                                                <span className="text-[18pt] font-black text-yellow-700">{eagleCount}</span>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <p className="text-gray-500 text-center py-4">No eagles yet</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }

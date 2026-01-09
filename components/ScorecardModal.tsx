@@ -274,9 +274,15 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
 
                     {/* Big Stats Row */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mt-8 flex justify-around items-center text-center">
-                        <div>
+                        <div className="text-left">
                             <span className="text-[14pt] font-bold text-gray-400 uppercase tracking-wider block mb-1">GRS</span>
-                            <span className="text-[14pt] font-black text-black">{totalScore || '-'}</span>
+                            <span className="text-[14pt] font-black text-black">
+                                {front9Score > 0 || back9Score > 0 ? (
+                                    <>{front9Score} + {back9Score} = {totalScore}</>
+                                ) : (
+                                    <>{totalScore || '-'}</>
+                                )}
+                            </span>
                         </div>
                         <div className="w-px h-10 bg-gray-100 mx-1"></div>
                         <div>

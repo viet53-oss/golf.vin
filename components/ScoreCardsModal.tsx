@@ -54,6 +54,8 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
     const rankedPlayers = roundPlayers.map(player => {
         const playerScores = player.scores || [];
         let totalGross = 0;
+        let front9 = 0;
+        let back9 = 0;
         let strokesReceivedSoFar = 0;
         let parTotal = 0;
         let thru = 0;
@@ -67,6 +69,14 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
 
         playerScores.forEach((score) => {
             totalGross += score.strokes;
+
+            // Track front 9 and back 9
+            if (score.hole.hole_number <= 9) {
+                front9 += score.strokes;
+            } else {
+                back9 += score.strokes;
+            }
+
             const hole = holes.find(h => h.hole_number === score.hole.hole_number);
             const holePar = hole?.par || 4;
             const difficulty = hole?.difficulty || score.hole.hole_number;
@@ -93,7 +103,7 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
         const totalNet = totalGross - strokesReceivedSoFar;
         const toPar = totalGross - parTotal;
 
-        return { ...player, totalGross, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal, grossHoleScores };
+        return { ...player, totalGross, front9, back9, strokesReceivedSoFar, courseHcp, totalNet, thru, toPar, parTotal, grossHoleScores };
     }).sort((a, b) => {
         if (a.totalNet !== b.totalNet) return a.totalNet - b.totalNet;
         const len = Math.min(a.grossHoleScores.length, b.grossHoleScores.length);
@@ -178,9 +188,15 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                         <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[15pt] min-w-[3rem] ${toParClass}`}>
                                             {toParStr}
                                         </div>
-                                        <div className="text-center">
+                                        <div className="text-left">
                                             <div className="text-[15pt] opacity-80 font-bold tracking-wider">GRS</div>
-                                            <div className="text-[15pt] font-bold leading-none">{p.totalGross}</div>
+                                            <div className="text-[15pt] font-bold leading-none">
+                                                {p.front9 > 0 || p.back9 > 0 ? (
+                                                    <>{p.front9} + {p.back9} = {p.totalGross}</>
+                                                ) : (
+                                                    <>{p.totalGross}</>
+                                                )}
+                                            </div>
                                         </div>
                                         <div>
                                             <div className="text-[15pt] opacity-80 font-bold tracking-wider">HCP</div>
