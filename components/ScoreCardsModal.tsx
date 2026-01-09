@@ -192,7 +192,7 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                             <div className="text-[15pt] opacity-80 font-bold tracking-wider">GRS</div>
                                             <div className="text-[15pt] font-bold leading-none">
                                                 {p.front9 > 0 || p.back9 > 0 ? (
-                                                    <>{p.front9} + {p.back9} = {p.totalGross}</>
+                                                    <>{p.front9}+{p.back9}={p.totalGross}</>
                                                 ) : (
                                                     <>{p.totalGross}</>
                                                 )}
