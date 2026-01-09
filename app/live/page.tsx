@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import LiveScoreClient from './LiveScoreClient';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -9,6 +10,10 @@ export const fetchCache = 'force-no-store';
 export default async function LiveScorePage(props: { searchParams: Promise<{ roundId?: string }> }) {
     const resolvedSearchParams = await props.searchParams;
     const roundIdFromUrl = resolvedSearchParams.roundId;
+
+    // Check if user is admin
+    const cookieStore = await cookies();
+    const isAdmin = cookieStore.get('admin_session')?.value === 'true';
 
     // 1. Get default course
     let defaultCourse = await prisma.course.findFirst({
@@ -45,7 +50,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
 
     let activeRound = null;
 
-    // 3. Priority A: Load from URL
+    // 3. Priority A: Load from URL (Admin only for old rounds)
     if (roundIdFromUrl) {
         activeRound = await prisma.liveRound.findUnique({
             where: { id: roundIdFromUrl },
@@ -58,6 +63,12 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
                 }
             }
         });
+
+        // If non-admin user tries to access an old round, redirect to today's round
+        if (activeRound && !isAdmin && activeRound.date !== todayStr) {
+            redirect('/live');
+        }
+
         if (activeRound) console.log('LOG-4: Loaded URL round:', activeRound.name);
     }
 
