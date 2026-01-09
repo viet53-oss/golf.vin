@@ -73,6 +73,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; index: number; courseHandicap: number } | null>(null);
     const [isAddToClubModalOpen, setIsAddToClubModalOpen] = useState(false);
     const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+    const [birdiePlayers, setBirdiePlayers] = useState<Array<{ name: string; totalBirdies: number }>>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     // Track pending (unsaved) scores for the current hole only
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
@@ -1068,6 +1069,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     return playerScores && playerScores.has(activeHole);
                                 });
 
+                                // Check if anyone scored a birdie on this hole
+                                const birdiePlayerData: Array<{ name: string; totalBirdies: number }> = [];
+                                const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
+
                                 selectedPlayers.forEach(p => {
                                     const playerScores = new Map(newScores.get(p.id) || []);
 
@@ -1082,6 +1087,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                     // Add to updates for server
                                     updates.push({ playerId: p.id, strokes: finalScore });
+
+                                    // Check if this hole is a birdie
+                                    if (finalScore === activeHolePar - 1) {
+                                        // Calculate total birdies for this player in the round
+                                        let totalBirdies = 0;
+                                        playerScores.forEach((strokes, holeNum) => {
+                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                            const holePar = hole?.par || 4;
+                                            if (strokes === holePar - 1) {
+                                                totalBirdies++;
+                                            }
+                                        });
+                                        birdiePlayerData.push({ name: p.name, totalBirdies });
+                                    }
                                 });
 
                                 // Update main scores state with pending changes
@@ -1094,6 +1113,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         holeNumber: activeHole,
                                         playerScores: updates
                                     });
+                                }
+
+                                // Show celebration if there's a birdie on this hole
+                                if (birdiePlayerData.length > 0) {
+                                    setBirdiePlayers(birdiePlayerData);
                                 }
 
                                 // Clear pending scores and reset unsaved flag
@@ -1382,7 +1406,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         {/* Birdies Section */}
                         <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-green-500">
                             <h2 className="text-[16pt] font-bold text-green-700 mb-3 flex items-center gap-2">
-                                🐦 Birdies (1 Under Par)
+                                🖕 Birdies (1 Under Par)
                             </h2>
                             <div className="space-y-2">
                                 {rankedPlayers.map(player => {
@@ -1489,6 +1513,46 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <p className="text-gray-500 text-center py-4">No eagles yet</p>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Birdie Celebration Popup */}
+            {birdiePlayers.length > 0 && (
+                <div
+                    className="fixed inset-0 z-[400] flex items-center justify-center bg-black/70 animate-in fade-in duration-300"
+                    onClick={() => setBirdiePlayers([])}
+                >
+                    <div
+                        className="animate-in zoom-in-95 duration-500 flex flex-col items-center gap-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img
+                            src="/birdie-celebration.png"
+                            alt="Birdie!"
+                            className="w-80 h-80 object-contain drop-shadow-2xl"
+                        />
+                        <div className="bg-white rounded-2xl px-6 py-4 shadow-2xl">
+                            <h2 className="text-[24pt] font-black text-green-700 text-center mb-2">
+                                {birdiePlayers.length === 1 ? 'BIRDIE!' : 'BIRDIES!'}
+                            </h2>
+                            <div className="text-[18pt] font-bold text-gray-900 text-center mb-4">
+                                {birdiePlayers.map((player, index) => (
+                                    <div key={index} className="mb-2">
+                                        <div>{player.name}</div>
+                                        <div className="text-[15pt] text-green-700">
+                                            {player.totalBirdies} {player.totalBirdies === 1 ? 'Birdie' : 'Birdies'} for Round
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setBirdiePlayers([])}
+                                className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
