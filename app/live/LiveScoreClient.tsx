@@ -659,8 +659,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Optimized: Check if all selected players have completed hole 3
     const allPlayersCompletedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => scores.get(p.id)?.has(3));
 
-    // Hide Course and Group sections after hole 3 is completed by all players
-    const hideCourseAndGroupSections = allPlayersCompletedHole3;
+    // Hide Course and Group sections after hole 3 is completed by all players (except for admins)
+    const hideCourseAndGroupSections = !isAdmin && allPlayersCompletedHole3;
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
