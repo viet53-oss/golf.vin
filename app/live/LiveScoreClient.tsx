@@ -77,24 +77,81 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
     const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
-    // GPS Logic
+    // GPS Logic with fallback for desktop
     useEffect(() => {
         if (!navigator.geolocation) return;
 
-        const watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                setUserLocation({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude
-                });
-            },
-            (error) => {
-                console.warn("GPS location unavailable:", error.message);
-            },
-            { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-        );
+        let watchId: number | null = null;
+        let hasGotLocation = false;
 
-        return () => navigator.geolocation.clearWatch(watchId);
+        // First, try to get an initial position with fallback strategy
+        const getInitialPosition = () => {
+            // Try high accuracy first (for mobile with GPS)
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    hasGotLocation = true;
+                    setUserLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+
+                    // Start watching with high accuracy
+                    watchId = navigator.geolocation.watchPosition(
+                        (position) => {
+                            setUserLocation({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            });
+                        },
+                        (error) => {
+                            console.warn("GPS watch error:", error.message);
+                        },
+                        { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 }
+                    );
+                },
+                (error) => {
+                    // High accuracy failed, try low accuracy (for desktop)
+                    console.warn("High accuracy GPS failed, trying low accuracy:", error.message);
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            hasGotLocation = true;
+                            setUserLocation({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            });
+
+                            // Start watching with low accuracy
+                            watchId = navigator.geolocation.watchPosition(
+                                (position) => {
+                                    setUserLocation({
+                                        latitude: position.coords.latitude,
+                                        longitude: position.coords.longitude
+                                    });
+                                },
+                                (error) => {
+                                    console.warn("GPS watch error:", error.message);
+                                },
+                                { enableHighAccuracy: false, timeout: 60000, maximumAge: 30000 }
+                            );
+                        },
+                        (error) => {
+                            console.error("GPS location unavailable:", error.message);
+                        },
+                        { enableHighAccuracy: false, timeout: 60000, maximumAge: 30000 }
+                    );
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+            );
+        };
+
+        getInitialPosition();
+
+        return () => {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+        };
     }, []);
 
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
