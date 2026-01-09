@@ -598,8 +598,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const activePlayers = rankedPlayers.filter(p => p.thru > 0);
     const allActiveFinished = activePlayers.length > 0 && activePlayers.every(p => p.thru >= 18);
     const allPlayersFinished = rankedPlayers.length > 0 && rankedPlayers.every(p => p.thru >= 18);
-    const allPlayersFinishedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => scores.get(p.id)?.has(3));
-    const hideSettings = allActiveFinished || allPlayersFinishedHole3 || activeHole > 3;
+
+    // Optimized: Check if all selected players have completed hole 3
+    const allPlayersCompletedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => scores.get(p.id)?.has(3));
+
+    // Hide Course and Group sections after hole 3 is completed by all players
+    const hideCourseAndGroupSections = allPlayersCompletedHole3;
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -638,80 +642,82 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 )}
 
                 {/* Course Info Card */}
-                <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                    <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-[16pt] font-bold text-gray-900">{defaultCourse?.name || 'Round'}</h2>
-                                {isLocked && (
-                                    <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
+                {!hideCourseAndGroupSections && (
+                    <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
+                        <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-[16pt] font-bold text-gray-900">{defaultCourse?.name || 'Round'}</h2>
+                                    {isLocked && (
+                                        <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
+                                    )}
+                                </div>
+                                <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
+                                    <span>{initialRound?.date || new Date().toLocaleDateString()}</span>
+                                    <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
+                                    <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
+                                    <span>S: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2 shrink-0">
+
+                                {canUpdate && !hideCourseAndGroupSections && (
+                                    <button
+                                        onClick={() => {
+                                            setRoundModalMode('edit');
+                                            setIsRoundModalOpen(true);
+                                        }}
+                                        className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
+                                    >
+                                        Course
+                                    </button>
+                                )}
+
+                                {isAdmin && (
+                                    <>
+                                        <button
+                                            onClick={async () => {
+                                                console.log('Delete button clicked');
+                                                console.log('liveRoundId:', liveRoundId);
+                                                console.log('isAdmin:', isAdmin);
+
+                                                if (!liveRoundId) {
+                                                    console.log('No liveRoundId, returning');
+                                                    return;
+                                                }
+
+                                                // Confirmation popup
+                                                if (!confirm('Are you sure you want to delete this live round? This action cannot be undone.')) {
+                                                    return;
+                                                }
+
+                                                console.log('Deleting round...');
+                                                try {
+                                                    console.log('Calling deleteLiveRound...');
+                                                    await deleteLiveRound(liveRoundId);
+                                                    console.log('Delete successful, redirecting to home');
+                                                    window.location.href = '/';
+                                                } catch (err) {
+                                                    console.error('Failed to delete round:', err);
+                                                    alert('Failed to delete round.');
+                                                }
+                                            }}
+                                            className="bg-red-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                        >
+                                            Delete
+                                        </button>
+                                        <button
+                                            onClick={() => setIsAddToClubModalOpen(true)}
+                                            className="bg-green-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
+                                        >
+                                            Add to Club
+                                        </button>
+                                    </>
                                 )}
                             </div>
-                            <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
-                                <span>{initialRound?.date || new Date().toLocaleDateString()}</span>
-                                <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
-                                <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
-                                <span>S: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-2 shrink-0">
-
-                            {canUpdate && !hideSettings && (
-                                <button
-                                    onClick={() => {
-                                        setRoundModalMode('edit');
-                                        setIsRoundModalOpen(true);
-                                    }}
-                                    className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
-                                >
-                                    Course
-                                </button>
-                            )}
-
-                            {isAdmin && (
-                                <>
-                                    <button
-                                        onClick={async () => {
-                                            console.log('Delete button clicked');
-                                            console.log('liveRoundId:', liveRoundId);
-                                            console.log('isAdmin:', isAdmin);
-
-                                            if (!liveRoundId) {
-                                                console.log('No liveRoundId, returning');
-                                                return;
-                                            }
-
-                                            // Confirmation popup
-                                            if (!confirm('Are you sure you want to delete this live round? This action cannot be undone.')) {
-                                                return;
-                                            }
-
-                                            console.log('Deleting round...');
-                                            try {
-                                                console.log('Calling deleteLiveRound...');
-                                                await deleteLiveRound(liveRoundId);
-                                                console.log('Delete successful, redirecting to home');
-                                                window.location.href = '/';
-                                            } catch (err) {
-                                                console.error('Failed to delete round:', err);
-                                                alert('Failed to delete round.');
-                                            }
-                                        }}
-                                        className="bg-red-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        onClick={() => setIsAddToClubModalOpen(true)}
-                                        className="bg-green-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
-                                    >
-                                        Add to Club
-                                    </button>
-                                </>
-                            )}
                         </div>
                     </div>
-                </div>
+                )}
 
                 <LiveRoundModal
                     isOpen={isRoundModalOpen}
@@ -834,38 +840,29 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 )}
 
                 {/* GROUP SECTION */}
-                {(() => {
-                    // Check if all players have completed hole 3
-                    const allPlayersCompletedHole3 = selectedPlayers.length > 0 && selectedPlayers.every(p => {
-                        const pScores = scores.get(p.id);
-                        return pScores && pScores.has(3);
-                    });
-
-                    // Show Group section only if hole 3 is not yet completed by all players
-                    return !allPlayersCompletedHole3 && (selectedPlayers.length > 0 || (canUpdate && !hideSettings));
-                })() && (
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-[15pt] font-black text-gray-900 tracking-tight">Group</h2>
-                                {canUpdate && !hideSettings && (
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setIsPlayerModalOpen(true)}
-                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
-                                        >
-                                            Players
-                                        </button>
-                                        <button
-                                            onClick={() => setIsGuestModalOpen(true)}
-                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
-                                        >
-                                            Guest
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                {!hideCourseAndGroupSections && (selectedPlayers.length > 0 || canUpdate) && (
+                    <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-[15pt] font-black text-gray-900 tracking-tight">Group</h2>
+                            {canUpdate && !hideCourseAndGroupSections && (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setIsPlayerModalOpen(true)}
+                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                    >
+                                        Players
+                                    </button>
+                                    <button
+                                        onClick={() => setIsGuestModalOpen(true)}
+                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                    >
+                                        Guest
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
+                )}
 
                 {/* PLAYERS SECTION (Scoring) */}
                 {selectedPlayers.length > 0 && (
