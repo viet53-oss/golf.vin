@@ -986,10 +986,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
                             <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
                                 <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">GPS</h2>
-                                <div className="flex items-baseline gap-1 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                                    <span className="text-[20pt] font-black text-blue-900">{activeHole}</span>
-                                    <span className="text-[14pt] font-bold text-gray-400">/</span>
-                                    <span className="text-[12pt] font-bold text-green-700">{activeHolePar}</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Hole {activeHole}</span>
+                                    <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Par {activeHolePar}</span>
                                 </div>
                             </div>
 
@@ -1060,7 +1059,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             ${btnClass}
                                         `}
                                         >
-                                            <span className="text-[20pt] font-black leading-tight">{hole.hole_number}</span>
+                                            <div className="flex items-baseline">
+                                                <span className="text-[20pt] font-black leading-none">{hole.hole_number}</span>
+                                                <span className="text-[12pt] font-bold leading-none opacity-80">/{hole.par}</span>
+                                            </div>
                                         </button>
                                     );
                                 })}
