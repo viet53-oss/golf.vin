@@ -74,6 +74,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [isAddToClubModalOpen, setIsAddToClubModalOpen] = useState(false);
     const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
     const [birdiePlayers, setBirdiePlayers] = useState<Array<{ name: string; totalBirdies: number }>>([]);
+    const [eaglePlayers, setEaglePlayers] = useState<Array<{ name: string; totalEagles: number }>>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     // Track pending (unsaved) scores for the current hole only
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
@@ -292,35 +293,50 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return () => clearInterval(interval);
     }, [router]);
 
-    // Global Birdie Watcher
+    // Global Score Watcher (Birdies & Eagles)
     const knownBirdiesRef = useRef<Map<string, Set<number>>>(new Map());
+    const knownEaglesRef = useRef<Map<string, Set<number>>>(new Map());
     const hasInitializedRef = useRef(false);
 
     useEffect(() => {
         if (!initialRound?.players || !defaultCourse) return;
 
         const newBirdies: { name: string; totalBirdies: number }[] = [];
+        const newEagles: { name: string; totalEagles: number }[] = [];
 
         initialRound.players.forEach((p: any) => {
             const playerId = p.is_guest ? p.id : p.player.id;
 
-            if (!knownBirdiesRef.current.has(playerId)) {
-                knownBirdiesRef.current.set(playerId, new Set());
-            }
+            // Init Birdie Ref
+            if (!knownBirdiesRef.current.has(playerId)) knownBirdiesRef.current.set(playerId, new Set());
+
+            // Init Eagle Ref
+            if (!knownEaglesRef.current.has(playerId)) knownEaglesRef.current.set(playerId, new Set());
+            const playerEagleSet = knownEaglesRef.current.get(playerId)!;
             const playerKnownSet = knownBirdiesRef.current.get(playerId)!;
             let playerHasNewBirdie = false;
+            let playerHasNewEagle = false;
 
             if (p.scores) {
                 p.scores.forEach((s: any) => {
                     if (s.hole?.hole_number && s.strokes) {
                         const hole = defaultCourse.holes.find(h => h.hole_number === s.hole.hole_number);
-                        if (hole && (s.strokes - hole.par === -1)) {
-                            // It's a birdie
-                            if (!playerKnownSet.has(s.hole.hole_number)) {
-                                // Track it
-                                playerKnownSet.add(s.hole.hole_number);
-                                if (hasInitializedRef.current) {
-                                    playerHasNewBirdie = true;
+                        if (hole) {
+                            const diff = s.strokes - hole.par;
+
+                            // Birdie Check
+                            if (diff === -1) {
+                                if (!playerKnownSet.has(s.hole.hole_number)) {
+                                    playerKnownSet.add(s.hole.hole_number);
+                                    if (hasInitializedRef.current) playerHasNewBirdie = true;
+                                }
+                            }
+
+                            // Eagle Check
+                            if (diff <= -2) {
+                                if (!playerEagleSet.has(s.hole.hole_number)) {
+                                    playerEagleSet.add(s.hole.hole_number);
+                                    if (hasInitializedRef.current) playerHasNewEagle = true;
                                 }
                             }
                         }
@@ -329,12 +345,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             }
 
             if (playerHasNewBirdie) {
-                // Calculate total birdies for this player for the popup
-                const total = playerKnownSet.size;
-                // Use full display name
                 newBirdies.push({
                     name: p.is_guest ? (p.guest_name || 'Guest') : p.player.name,
-                    totalBirdies: total
+                    totalBirdies: playerKnownSet.size
+                });
+            }
+            if (playerHasNewEagle) {
+                newEagles.push({
+                    name: p.is_guest ? (p.guest_name || 'Guest') : p.player.name,
+                    totalEagles: playerEagleSet.size
                 });
             }
         });
@@ -343,6 +362,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             setBirdiePlayers(prev => {
                 const existingNames = new Set(prev.map(x => x.name));
                 const uniqueNew = newBirdies.filter(x => !existingNames.has(x.name));
+                if (uniqueNew.length === 0) return prev;
+                return [...prev, ...uniqueNew];
+            });
+        }
+
+        if (newEagles.length > 0) {
+            setEaglePlayers(prev => {
+                const existingNames = new Set(prev.map(x => x.name));
+                const uniqueNew = newEagles.filter(x => !existingNames.has(x.name));
                 if (uniqueNew.length === 0) return prev;
                 return [...prev, ...uniqueNew];
             });
@@ -1205,6 +1233,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                     // Check if anyone scored a birdie on this hole
                                     const birdiePlayerData: Array<{ name: string; totalBirdies: number }> = [];
+                                    const eaglePlayerData: Array<{ name: string; totalEagles: number }> = [];
                                     const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
 
                                     selectedPlayers.forEach(p => {
@@ -1241,6 +1270,26 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             });
                                             birdiePlayerData.push({ name: p.name, totalBirdies });
                                         }
+
+                                        // Check if this hole is an eagle (or better)
+                                        if (finalScore <= activeHolePar - 2) {
+                                            // Register eagle locally to prevent global watcher duplicate trigger
+                                            if (!knownEaglesRef.current.has(p.id)) {
+                                                knownEaglesRef.current.set(p.id, new Set());
+                                            }
+                                            knownEaglesRef.current.get(p.id)!.add(activeHole);
+
+                                            // Calculate total eagles for this player in the round
+                                            let totalEagles = 0;
+                                            playerScores.forEach((strokes, holeNum) => {
+                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                const holePar = hole?.par || 4;
+                                                if (strokes <= holePar - 2) {
+                                                    totalEagles++;
+                                                }
+                                            });
+                                            eaglePlayerData.push({ name: p.name, totalEagles });
+                                        }
                                     });
 
                                     // Update main scores state with pending changes
@@ -1255,9 +1304,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         });
                                     }
 
-                                    // Show celebration if there's a birdie on this hole
+                                    // Show celebration if there's a birdie or eagle on this hole
                                     if (birdiePlayerData.length > 0) {
                                         setBirdiePlayers(birdiePlayerData);
+                                    }
+                                    if (eaglePlayerData.length > 0) {
+                                        setEaglePlayers(eaglePlayerData);
                                     }
 
                                     // Clear pending scores and reset unsaved flag
@@ -1620,6 +1672,46 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setBirdiePlayers([]);
+                                    }}
+                                    className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Eagle Celebration Popup */}
+            {
+                eaglePlayers.length > 0 && (
+                    <div
+                        className="fixed inset-0 z-[400] flex items-center justify-center bg-black/70 animate-in fade-in duration-300"
+                        onClick={() => setEaglePlayers([])}
+                    >
+                        <div
+                            className="animate-in zoom-in-95 duration-500 flex flex-col items-center gap-4"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="bg-white rounded-2xl px-6 py-4 shadow-2xl flex flex-col items-center max-w-sm mx-4 border-4 border-yellow-400">
+                                <div className="text-[100pt] leading-none mb-2">🦅</div>
+                                <h1 className="text-[30pt] font-black text-yellow-500 mb-4 text-center leading-tight drop-shadow-sm uppercase italic">Awesome Eagle!</h1>
+
+                                <div className="text-[18pt] font-bold text-gray-900 text-center mb-4 w-full">
+                                    {[...eaglePlayers].sort((a, b) => b.totalEagles - a.totalEagles).map((player, index) => (
+                                        <div key={index} className="mb-2 last:mb-0 border-b last:border-0 border-gray-100 pb-2 last:pb-0">
+                                            <div className="leading-tight">{player.name}</div>
+                                            <div className="text-[14pt] text-yellow-600 font-bold leading-tight">
+                                                {player.totalEagles} {player.totalEagles === 1 ? 'Eagle' : 'Eagles'} Total
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEaglePlayers([]);
                                     }}
                                     className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                                 >
