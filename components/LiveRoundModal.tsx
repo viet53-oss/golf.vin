@@ -125,6 +125,7 @@ export function LiveRoundModal({
                     name: name || 'Live Round',
                     date: date || today,
                     courseId: cId,
+                    courseName: allCourses.find(c => c.id === cId)?.name || 'Unknown Course',
                     par: parVal,
                     rating: ratingVal,
                     slope: slopeVal
