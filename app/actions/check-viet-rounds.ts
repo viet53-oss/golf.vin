@@ -40,6 +40,7 @@ export async function checkVietRounds() {
 
         const details = rounds.map(r => ({
             date: r.round.date,
+            course_name: r.round.course_name,
             gross: r.gross_score,
             // Saved data
             saved_name: r.tee_box_name,
