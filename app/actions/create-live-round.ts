@@ -40,6 +40,60 @@ export async function createLiveRound(data: {
 }
 
 /**
+ * Creates a new live round with default settings (City Park North)
+ * Used by the "New Round" button in the UI
+ */
+export async function createDefaultLiveRound(date: string) {
+    // Check admin permission
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const isAdmin = cookieStore.get('admin_session')?.value === 'true';
+
+    if (!isAdmin) {
+        throw new Error('Unauthorized');
+    }
+
+    try {
+        // Get default course (City Park North)
+        let defaultCourse = await prisma.course.findFirst({
+            where: { name: { contains: 'City Park North', mode: 'insensitive' } },
+            include: { tee_boxes: true, holes: true }
+        });
+
+        if (!defaultCourse) {
+            defaultCourse = await prisma.course.findFirst({
+                include: { tee_boxes: true, holes: true }
+            });
+        }
+
+        if (!defaultCourse) {
+            throw new Error('No course found');
+        }
+
+        const coursePar = defaultCourse.holes.reduce((sum, h) => sum + h.par, 0);
+        const defaultTeeBox = defaultCourse.tee_boxes[0];
+
+        const newRound = await prisma.liveRound.create({
+            data: {
+                name: `Live Round - ${date}`,
+                date: date,
+                course_id: defaultCourse.id,
+                course_name: defaultCourse.name,
+                par: coursePar,
+                rating: defaultTeeBox?.rating ?? coursePar,
+                slope: defaultTeeBox?.slope ?? 113
+            }
+        });
+
+        revalidatePath('/live');
+        return { success: true, roundId: newRound.id };
+    } catch (error) {
+        console.error('Error creating live round:', error);
+        return { success: false, error: 'Failed to create round' };
+    }
+}
+
+/**
  * Updates an existing live round metadata
  */
 export async function updateLiveRound(data: {

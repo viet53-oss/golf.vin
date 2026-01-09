@@ -8,7 +8,7 @@ import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal'
 import { LiveRoundModal } from '@/components/LiveRoundModal';
 import { GuestPlayerModal } from '@/components/GuestPlayerModal';
 import AddToClubModal from '@/components/AddToClubModal';
-import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound } from '@/app/actions/create-live-round';
+import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound, createDefaultLiveRound } from '@/app/actions/create-live-round';
 import { copyLiveToClub } from '@/app/actions/copy-live-to-club';
 
 interface Player {
@@ -521,6 +521,29 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
     };
 
+    const handleCreateNewRound = async () => {
+        if (confirm('Create a new live round for today?')) {
+            // Get today's date in Chicago time to match server logic
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'America/Chicago',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            const today = formatter.format(new Date());
+
+            const result = await createDefaultLiveRound(today);
+            if (result.success && result.roundId) {
+                // Navigate to the new round
+                router.push(`/live?roundId=${result.roundId}`);
+                // Force a hard refresh to ensure state is clean
+                setTimeout(() => window.location.reload(), 100);
+            } else {
+                alert('Failed to create new round: ' + (result.error || 'Unknown error'));
+            }
+        }
+    };
+
     const updateScore = (playerId: string, increment: boolean) => {
         if (!liveRoundId) {
             console.warn("No live round ID available to save score.");
@@ -675,6 +698,27 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Hide Course and Group sections after hole 3 is completed by all players (except for admins)
     const hideCourseAndGroupSections = !isAdmin && allPlayersCompletedHole3;
 
+    // Calculate Stats (Birdies/Eagles) for Modal
+    const playerStats = rankedPlayers.map(player => {
+        const playerScores = scores.get(player.id);
+        let birdieCount = 0;
+        let eagleCount = 0;
+
+        if (playerScores) {
+            playerScores.forEach((strokes, holeNum) => {
+                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                const holePar = hole?.par || 4;
+                const diff = strokes - holePar;
+                if (diff === -1) birdieCount++;
+                if (diff <= -2) eagleCount++;
+            });
+        }
+        return { ...player, birdieCount, eagleCount };
+    });
+
+    const birdieLeaders = playerStats.filter(p => p.birdieCount > 0).sort((a, b) => b.birdieCount - a.birdieCount);
+    const eagleLeaders = playerStats.filter(p => p.eagleCount > 0).sort((a, b) => b.eagleCount - a.eagleCount);
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
@@ -691,7 +735,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* Round Selector - Admin Only */}
                 {isAdmin && allLiveRounds.length > 0 && (
                     <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                        <label className="block text-[15pt] font-bold text-gray-900 mb-2">Select Round:</label>
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="text-[15pt] font-bold text-gray-900">Select Round:</label>
+                            {isAdmin && (
+                                <button
+                                    onClick={handleCreateNewRound}
+                                    className="px-3 py-1 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-colors shadow-md active:scale-95 text-sm"
+                                >
+                                    + New Round
+                                </button>
+                            )}
+                        </div>
+
                         <select
                             value={liveRoundId || ''}
                             onChange={(e) => {
@@ -699,7 +754,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     window.location.href = `/live?roundId=${e.target.value}`;
                                 }
                             }}
-                            className="w-full px-4 py-2 text-[15pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                            className="flex-1 px-4 py-2 text-[15pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 min-w-0"
                         >
                             <option value="">-- Select a Round --</option>
                             {allLiveRounds.map(round => (
@@ -711,83 +766,86 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     </div>
                 )}
 
+
                 {/* Course Info Card */}
-                {!hideCourseAndGroupSections && (
-                    <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                        <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-[16pt] font-bold text-gray-900">{defaultCourse?.name || 'Round'}</h2>
-                                    {isLocked && (
-                                        <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
+                {
+                    !hideCourseAndGroupSections && (
+                        <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-[16pt] font-bold text-gray-900">{defaultCourse?.name || 'Round'}</h2>
+                                        {isLocked && (
+                                            <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
+                                        <span>{initialRound?.date || todayStr}</span>
+                                        <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
+                                        <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
+                                        <span>S: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2 shrink-0">
+
+                                    {canUpdate && !hideCourseAndGroupSections && (
+                                        <button
+                                            onClick={() => {
+                                                setRoundModalMode('edit');
+                                                setIsRoundModalOpen(true);
+                                            }}
+                                            className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
+                                        >
+                                            Course
+                                        </button>
+                                    )}
+
+                                    {isAdmin && (
+                                        <>
+                                            <button
+                                                onClick={async () => {
+                                                    console.log('Delete button clicked');
+                                                    console.log('liveRoundId:', liveRoundId);
+                                                    console.log('isAdmin:', isAdmin);
+
+                                                    if (!liveRoundId) {
+                                                        console.log('No liveRoundId, returning');
+                                                        return;
+                                                    }
+
+                                                    // Confirmation popup
+                                                    if (!confirm('Are you sure you want to delete this live round? This action cannot be undone.')) {
+                                                        return;
+                                                    }
+
+                                                    console.log('Deleting round...');
+                                                    try {
+                                                        console.log('Calling deleteLiveRound...');
+                                                        await deleteLiveRound(liveRoundId);
+                                                        console.log('Delete successful, redirecting to home');
+                                                        window.location.href = '/';
+                                                    } catch (err) {
+                                                        console.error('Failed to delete round:', err);
+                                                        alert('Failed to delete round.');
+                                                    }
+                                                }}
+                                                className="bg-red-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                            >
+                                                Delete
+                                            </button>
+                                            <button
+                                                onClick={() => setIsAddToClubModalOpen(true)}
+                                                className="bg-green-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
+                                            >
+                                                Add to Club
+                                            </button>
+                                        </>
                                     )}
                                 </div>
-                                <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
-                                    <span>{initialRound?.date || todayStr}</span>
-                                    <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
-                                    <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
-                                    <span>S: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-2 shrink-0">
-
-                                {canUpdate && !hideCourseAndGroupSections && (
-                                    <button
-                                        onClick={() => {
-                                            setRoundModalMode('edit');
-                                            setIsRoundModalOpen(true);
-                                        }}
-                                        className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-all shadow-md active:scale-95"
-                                    >
-                                        Course
-                                    </button>
-                                )}
-
-                                {isAdmin && (
-                                    <>
-                                        <button
-                                            onClick={async () => {
-                                                console.log('Delete button clicked');
-                                                console.log('liveRoundId:', liveRoundId);
-                                                console.log('isAdmin:', isAdmin);
-
-                                                if (!liveRoundId) {
-                                                    console.log('No liveRoundId, returning');
-                                                    return;
-                                                }
-
-                                                // Confirmation popup
-                                                if (!confirm('Are you sure you want to delete this live round? This action cannot be undone.')) {
-                                                    return;
-                                                }
-
-                                                console.log('Deleting round...');
-                                                try {
-                                                    console.log('Calling deleteLiveRound...');
-                                                    await deleteLiveRound(liveRoundId);
-                                                    console.log('Delete successful, redirecting to home');
-                                                    window.location.href = '/';
-                                                } catch (err) {
-                                                    console.error('Failed to delete round:', err);
-                                                    alert('Failed to delete round.');
-                                                }
-                                            }}
-                                            className="bg-red-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
-                                        >
-                                            Delete
-                                        </button>
-                                        <button
-                                            onClick={() => setIsAddToClubModalOpen(true)}
-                                            className="bg-green-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
-                                        >
-                                            Add to Club
-                                        </button>
-                                    </>
-                                )}
                             </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
                 <LiveRoundModal
                     isOpen={isRoundModalOpen}
@@ -826,519 +884,529 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* Scoring Section */}
                 {/* GPS SECTION */}
-                {initialRound && (
-                    <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
-                        <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
-                            <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">GPS</h2>
-                            <div className="flex items-center gap-2">
-                                <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Hole {activeHole}</span>
-                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Par {activeHolePar}</span>
-                            </div>
-                        </div>
-
-                        {/* GPS Distance Display */}
-                        {(() => {
-                            const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
-
-                            if (!userLocation) {
-                                return (
-                                    <div className="bg-gray-100 text-gray-500 py-4 rounded-lg text-center mb-2 shadow-inner">
-                                        <p className="font-medium text-[15pt] animate-pulse">🛰️ Waiting for GPS...</p>
-                                    </div>
-                                );
-                            }
-
-                            if (!currentHole?.latitude || !currentHole?.longitude) {
-                                return (
-                                    <div className="bg-yellow-50 text-yellow-700 py-4 rounded-lg text-center mb-2 shadow-inner border border-yellow-200">
-                                        <p className="font-medium text-[15pt]">📍 Coordinates missing for Hole {activeHole}</p>
-                                    </div>
-                                );
-                            }
-
-                            const dist = calculateDistance(
-                                userLocation.latitude,
-                                userLocation.longitude,
-                                Number(currentHole.latitude),
-                                Number(currentHole.longitude)
-                            );
-
-                            return (
-                                <div className="bg-green-600 text-white py-0 rounded-lg text-center mb-2 shadow-inner relative">
-                                    <p className="font-black text-[90pt] flex items-baseline justify-center">
-                                        {dist}
-                                    </p>
+                {
+                    initialRound && (
+                        <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
+                            <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
+                                <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">GPS</h2>
+                                <div className="flex items-center gap-2">
+                                    <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Hole {activeHole}</span>
+                                    <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Par {activeHolePar}</span>
                                 </div>
-                            );
-                        })()}
+                            </div>
 
-                        <div className="grid grid-cols-6 gap-1">
-                            {defaultCourse?.holes.map(hole => {
-                                // Check if this hole has been saved (has scores)
-                                const isSaved = selectedPlayers.some(p => {
-                                    const pScores = scores.get(p.id);
-                                    return pScores && pScores.has(hole.hole_number);
-                                });
+                            {/* GPS Distance Display */}
+                            {(() => {
+                                const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
 
-                                const isActive = activeHole === hole.hole_number;
-
-                                // Determine styling
-                                let btnClass = "bg-white text-black border border-black";
-                                if (isActive) {
-                                    // Active hole: always white on blue (with or without data)
-                                    btnClass = "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-1 z-10 scale-105 shadow-md";
-                                } else if (isSaved) {
-                                    // Inactive saved holes: white on black
-                                    btnClass = "bg-black text-white border border-black";
+                                if (!userLocation) {
+                                    return (
+                                        <div className="bg-gray-100 text-gray-500 py-4 rounded-lg text-center mb-2 shadow-inner">
+                                            <p className="font-medium text-[15pt] animate-pulse">🛰️ Waiting for GPS...</p>
+                                        </div>
+                                    );
                                 }
 
-                                return (
-                                    <button
-                                        key={hole.hole_number}
-                                        onClick={() => setActiveHole(hole.hole_number)}
-                                        className={`
-                                            flex flex-col items-center justify-center py-1 rounded-lg transition-all
-                                            ${btnClass}
-                                        `}
-                                    >
-                                        <span className="text-[20pt] font-black leading-tight">{hole.hole_number}</span>
-                                    </button>
+                                if (!currentHole?.latitude || !currentHole?.longitude) {
+                                    return (
+                                        <div className="bg-yellow-50 text-yellow-700 py-4 rounded-lg text-center mb-2 shadow-inner border border-yellow-200">
+                                            <p className="font-medium text-[15pt]">📍 Coordinates missing for Hole {activeHole}</p>
+                                        </div>
+                                    );
+                                }
+
+                                const dist = calculateDistance(
+                                    userLocation.latitude,
+                                    userLocation.longitude,
+                                    Number(currentHole.latitude),
+                                    Number(currentHole.longitude)
                                 );
-                            })}
-                        </div>
-                    </div>
-                )}
 
-                {/* GROUP SECTION */}
-                {!hideCourseAndGroupSections && (selectedPlayers.length > 0 || canUpdate) && (
-                    <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-[15pt] font-black text-gray-900 tracking-tight">Group</h2>
-                            {canUpdate && !hideCourseAndGroupSections && (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setIsPlayerModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
-                                    >
-                                        Players
-                                    </button>
-                                    <button
-                                        onClick={() => setIsGuestModalOpen(true)}
-                                        className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
-                                    >
-                                        Guest
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
+                                return (
+                                    <div className="bg-green-600 text-white py-0 rounded-lg text-center mb-2 shadow-inner relative">
+                                        <p className="font-black text-[90pt] flex items-baseline justify-center">
+                                            {dist}
+                                        </p>
+                                    </div>
+                                );
+                            })()}
 
-                {/* PLAYERS SECTION (Scoring) */}
-                {selectedPlayers.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
-                        <div className="flex justify-between items-center mb-1">
-                            <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
-                        </div>
-                        <div className="space-y-1">
-                            {[...selectedPlayers]
-                                .sort((a, b) => {
-                                    const firstA = splitName(a.name).first.toLowerCase();
-                                    const firstB = splitName(b.name).first.toLowerCase();
-                                    return firstA.localeCompare(firstB);
-                                })
-                                .map(player => {
-                                    const score = getScore(player.id, activeHole);
-                                    // Calculate Totals for To Par
-                                    const pScores = scores.get(player.id);
-                                    let totalScore = 0;
-                                    let totalScoredPar = 0;
-                                    if (pScores) {
-                                        pScores.forEach((strokes, hNum) => {
-                                            totalScore += strokes;
-                                            const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
-                                            totalScoredPar += hPar;
-                                        });
-                                    }
-                                    const diff = totalScore - totalScoredPar;
-                                    let toParStr = "E";
-                                    let toParClass = "text-green-600";
-                                    if (diff > 0) {
-                                        toParStr = `+${diff}`;
-                                        toParClass = "text-gray-900";
-                                    } else if (diff < 0) {
-                                        toParStr = `${diff}`;
-                                        toParClass = "text-red-600";
-                                    }
+                            <div className="grid grid-cols-6 gap-1">
+                                {defaultCourse?.holes.map(hole => {
+                                    // Check if this hole has been saved (has scores)
+                                    const isSaved = selectedPlayers.some(p => {
+                                        const pScores = scores.get(p.id);
+                                        return pScores && pScores.has(hole.hole_number);
+                                    });
 
-                                    const courseHcp = getCourseHandicap(player);
+                                    const isActive = activeHole === hole.hole_number;
 
-                                    const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
-                                    let displayRank: React.ReactNode = playerRankIndex !== -1 ? playerRankIndex + 1 : '-';
-                                    let showFlagNextToName = false;
-                                    let showRankIconNextToName: React.ReactNode = null;
-
-                                    if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
-                                        if (allActiveFinished) {
-                                            if (playerRankIndex === 0) {
-                                                displayRank = "🏆";
-                                                showRankIconNextToName = "🏆";
-                                            } else if (playerRankIndex === 1) {
-                                                displayRank = "🥈";
-                                                showRankIconNextToName = "🥈";
-                                            } else if (playerRankIndex === 2) {
-                                                displayRank = "🥉";
-                                                showRankIconNextToName = "🥉";
-                                            } else {
-                                                showFlagNextToName = true;
-                                            }
-                                        } else {
-                                            showFlagNextToName = true;
-                                        }
+                                    // Determine styling
+                                    let btnClass = "bg-white text-black border border-black";
+                                    if (isActive) {
+                                        // Active hole: always white on blue (with or without data)
+                                        btnClass = "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-1 z-10 scale-105 shadow-md";
+                                    } else if (isSaved) {
+                                        // Inactive saved holes: white on black
+                                        btnClass = "bg-black text-white border border-black";
                                     }
 
                                     return (
-                                        <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex flex-col items-start leading-tight">
-                                                    <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
-                                                    <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
+                                        <button
+                                            key={hole.hole_number}
+                                            onClick={() => setActiveHole(hole.hole_number)}
+                                            className={`
+                                            flex flex-col items-center justify-center py-1 rounded-lg transition-all
+                                            ${btnClass}
+                                        `}
+                                        >
+                                            <span className="text-[20pt] font-black leading-tight">{hole.hole_number}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* GROUP SECTION */}
+                {
+                    !hideCourseAndGroupSections && (selectedPlayers.length > 0 || canUpdate) && (
+                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-[15pt] font-black text-gray-900 tracking-tight">Group</h2>
+                                {canUpdate && !hideCourseAndGroupSections && (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setIsPlayerModalOpen(true)}
+                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                        >
+                                            Players
+                                        </button>
+                                        <button
+                                            onClick={() => setIsGuestModalOpen(true)}
+                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                        >
+                                            Guest
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* PLAYERS SECTION (Scoring) */}
+                {
+                    selectedPlayers.length > 0 && (
+                        <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
+                            <div className="flex justify-between items-center mb-1">
+                                <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
+                            </div>
+                            <div className="space-y-1">
+                                {[...selectedPlayers]
+                                    .sort((a, b) => {
+                                        const firstA = splitName(a.name).first.toLowerCase();
+                                        const firstB = splitName(b.name).first.toLowerCase();
+                                        return firstA.localeCompare(firstB);
+                                    })
+                                    .map(player => {
+                                        const score = getScore(player.id, activeHole);
+                                        // Calculate Totals for To Par
+                                        const pScores = scores.get(player.id);
+                                        let totalScore = 0;
+                                        let totalScoredPar = 0;
+                                        if (pScores) {
+                                            pScores.forEach((strokes, hNum) => {
+                                                totalScore += strokes;
+                                                const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
+                                                totalScoredPar += hPar;
+                                            });
+                                        }
+                                        const diff = totalScore - totalScoredPar;
+                                        let toParStr = "E";
+                                        let toParClass = "text-green-600";
+                                        if (diff > 0) {
+                                            toParStr = `+${diff}`;
+                                            toParClass = "text-gray-900";
+                                        } else if (diff < 0) {
+                                            toParStr = `${diff}`;
+                                            toParClass = "text-red-600";
+                                        }
+
+                                        const courseHcp = getCourseHandicap(player);
+
+                                        const playerRankIndex = rankedPlayers.findIndex(rp => rp.id === player.id);
+                                        let displayRank: React.ReactNode = playerRankIndex !== -1 ? playerRankIndex + 1 : '-';
+                                        let showFlagNextToName = false;
+                                        let showRankIconNextToName: React.ReactNode = null;
+
+                                        if (playerRankIndex !== -1 && rankedPlayers[playerRankIndex].thru >= 18) {
+                                            if (allActiveFinished) {
+                                                if (playerRankIndex === 0) {
+                                                    displayRank = "🏆";
+                                                    showRankIconNextToName = "🏆";
+                                                } else if (playerRankIndex === 1) {
+                                                    displayRank = "🥈";
+                                                    showRankIconNextToName = "🥈";
+                                                } else if (playerRankIndex === 2) {
+                                                    displayRank = "🥉";
+                                                    showRankIconNextToName = "🥉";
+                                                } else {
+                                                    showFlagNextToName = true;
+                                                }
+                                            } else {
+                                                showFlagNextToName = true;
+                                            }
+                                        }
+
+                                        return (
+                                            <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex flex-col items-start leading-tight">
+                                                        <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
+                                                        <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        {showRankIconNextToName && <span className="text-[20pt] leading-none">{showRankIconNextToName}</span>}
+                                                        {showFlagNextToName && <span className="text-[20pt] leading-none">🏁</span>}
+                                                        {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingGuest({
+                                                                        id: player.id,
+                                                                        name: player.name,
+                                                                        index: player.index,
+                                                                        courseHandicap: player.liveRoundData?.course_hcp || 0
+                                                                    });
+                                                                    setIsGuestModalOpen(true);
+                                                                }}
+                                                                className="ml-1 text-blue-600 hover:text-blue-800 text-[12pt] font-semibold"
+                                                            >
+                                                                ✏️
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-1">
-                                                    {showRankIconNextToName && <span className="text-[20pt] leading-none">{showRankIconNextToName}</span>}
-                                                    {showFlagNextToName && <span className="text-[20pt] leading-none">🏁</span>}
-                                                    {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
+                                                <div className="flex items-center gap-4">
+                                                    {canUpdate && (
                                                         <button
-                                                            onClick={() => {
-                                                                setEditingGuest({
-                                                                    id: player.id,
-                                                                    name: player.name,
-                                                                    index: player.index,
-                                                                    courseHandicap: player.liveRoundData?.course_hcp || 0
-                                                                });
-                                                                setIsGuestModalOpen(true);
-                                                            }}
-                                                            className="ml-1 text-blue-600 hover:text-blue-800 text-[12pt] font-semibold"
+                                                            onClick={() => updateScore(player.id, false)}
+                                                            className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
                                                         >
-                                                            ✏️
+                                                            -
+                                                        </button>
+                                                    )}
+                                                    <div className="w-16 text-center font-bold text-[35pt] text-gray-800">
+                                                        {score || <span className="text-gray-800">{activeHolePar}</span>}
+                                                    </div>
+                                                    {canUpdate && (
+                                                        <button
+                                                            onClick={() => updateScore(player.id, true)}
+                                                            className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
+                                                        >
+                                                            +
                                                         </button>
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                {canUpdate && (
-                                                    <button
-                                                        onClick={() => updateScore(player.id, false)}
-                                                        className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
-                                                    >
-                                                        -
-                                                    </button>
-                                                )}
-                                                <div className="w-16 text-center font-bold text-[35pt] text-gray-800">
-                                                    {score || <span className="text-gray-800">{activeHolePar}</span>}
+                                        );
+                                    })}
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Save Hole Button */}
+                {
+                    selectedPlayers.length > 0 && canUpdate && (
+                        <div className="flex justify-end mt-2">
+                            <button
+                                onClick={() => {
+                                    if (!liveRoundId) return;
+
+                                    const updates: { playerId: string; strokes: number }[] = [];
+                                    const newScores = new Map(scores);
+
+                                    // Check if this hole was already scored (for all players)
+                                    const wasAlreadyScored = selectedPlayers.every(p => {
+                                        const playerScores = scores.get(p.id);
+                                        return playerScores && playerScores.has(activeHole);
+                                    });
+
+                                    // Check if anyone scored a birdie on this hole
+                                    const birdiePlayerData: Array<{ name: string; totalBirdies: number }> = [];
+                                    const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
+
+                                    selectedPlayers.forEach(p => {
+                                        const playerScores = new Map(newScores.get(p.id) || []);
+
+                                        // Use pending score if it exists, otherwise use saved score or par
+                                        const pendingScore = pendingScores.get(p.id);
+                                        const savedScore = playerScores.get(activeHole);
+                                        const finalScore = pendingScore ?? savedScore ?? activeHolePar;
+
+                                        // Update the score in the map
+                                        playerScores.set(activeHole, finalScore);
+                                        newScores.set(p.id, playerScores);
+
+                                        // Add to updates for server
+                                        updates.push({ playerId: p.id, strokes: finalScore });
+
+                                        // Check if this hole is a birdie
+                                        if (finalScore === activeHolePar - 1) {
+                                            // Calculate total birdies for this player in the round
+                                            let totalBirdies = 0;
+                                            playerScores.forEach((strokes, holeNum) => {
+                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                const holePar = hole?.par || 4;
+                                                if (strokes === holePar - 1) {
+                                                    totalBirdies++;
+                                                }
+                                            });
+                                            birdiePlayerData.push({ name: p.name, totalBirdies });
+                                        }
+                                    });
+
+                                    // Update main scores state with pending changes
+                                    setScores(newScores);
+
+                                    // Save all scores to server
+                                    if (updates.length > 0) {
+                                        saveLiveScore({
+                                            liveRoundId,
+                                            holeNumber: activeHole,
+                                            playerScores: updates
+                                        });
+                                    }
+
+                                    // Show celebration if there's a birdie on this hole
+                                    if (birdiePlayerData.length > 0) {
+                                        setBirdiePlayers(birdiePlayerData);
+                                    }
+
+                                    // Clear pending scores and reset unsaved flag
+                                    setPendingScores(new Map());
+                                    setHasUnsavedChanges(false);
+
+                                    // Only advance to next hole if this was a new hole (not an update)
+                                    if (!wasAlreadyScored) {
+                                        if (activeHole < 18) {
+                                            setActiveHole(activeHole + 1);
+                                        } else {
+                                            // After 18th hole, find the first hole that has missing scores
+                                            let nextHole = 1;
+                                            for (let h = 1; h <= 18; h++) {
+                                                const isHoleIncomplete = selectedPlayers.some(p => {
+                                                    const pScores = newScores.get(p.id);
+                                                    return !pScores || !pScores.has(h);
+                                                });
+
+                                                if (isHoleIncomplete) {
+                                                    nextHole = h;
+                                                    break;
+                                                }
+                                            }
+                                            setActiveHole(nextHole);
+                                        }
+                                    }
+
+                                    // Silent refresh to keep server data in sync without flashing the page
+                                    router.refresh();
+                                }}
+                                className={`w-1/2 ${(() => {
+                                    // Check if this hole has been scored for all selected players
+                                    const isHoleScored = selectedPlayers.every(p => {
+                                        const playerScores = scores.get(p.id);
+                                        return playerScores && playerScores.has(activeHole);
+                                    });
+                                    // Blue if: has unsaved changes OR hole is not yet scored
+                                    // Black if: hole is scored AND no unsaved changes
+                                    return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
+                                })()} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
+                            >
+                                Save Hole {activeHole}
+                            </button>
+                        </div>
+                    )
+                }
+                <div className="pt-4"></div>
+                {/* Live Scores Summary */}
+                {
+                    summaryPlayers.length > 0 && (
+                        <div className="mt-1 space-y-2">
+                            <div className="flex gap-2 my-1">
+                                <button
+                                    onClick={() => router.refresh()}
+                                    className="flex-1 bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                >
+                                    Summary - Refresh
+                                </button>
+                                <button
+                                    onClick={() => setIsStatsModalOpen(true)}
+                                    className="w-16 bg-black text-white rounded-full py-2 text-[25pt] hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                >
+                                    🖕
+                                </button>
+                            </div>
+
+                            <div className="space-y-1">
+                                {rankedPlayers.map((p, i) => {
+                                    let toParStr = "E";
+                                    let toParClass = "text-green-600";
+                                    if (p.toPar > 0) {
+                                        toParStr = `+${p.toPar}`;
+                                        toParClass = "text-gray-900";
+                                    } else if (p.toPar < 0) {
+                                        toParStr = `${p.toPar}`;
+                                        toParClass = "text-red-600";
+                                    }
+
+                                    let displayRankInSummary: React.ReactNode = i + 1;
+                                    let showFlagInSummary = false;
+                                    let showRankIconInSummary: React.ReactNode = null;
+
+                                    if (p.thru >= 18) {
+                                        if (allActiveFinished) {
+                                            if (i === 0) {
+                                                displayRankInSummary = "🏆";
+                                                showRankIconInSummary = "🏆";
+                                            } else if (i === 1) {
+                                                displayRankInSummary = "🥈";
+                                                showRankIconInSummary = "🥈";
+                                            } else if (i === 2) {
+                                                displayRankInSummary = "🥉";
+                                                showRankIconInSummary = "🥉";
+                                            } else {
+                                                showFlagInSummary = true;
+                                            }
+                                        } else {
+                                            showFlagInSummary = true;
+                                        }
+                                    }
+
+                                    return (
+                                        <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden my-1 border-4 border-gray-300">
+                                            {/* Player Header */}
+                                            <div className="bg-[#1d4ed8] p-1 text-white">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex flex-col">
+                                                            <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
+                                                            <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            {showRankIconInSummary && <span className="text-[20pt] leading-none">{showRankIconInSummary}</span>}
+                                                            {showFlagInSummary && <span className="text-[20pt] leading-none">🏁</span>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex gap-4 items-center">
+                                                        <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[15pt] min-w-[3rem] ${toParClass}`}>
+                                                            {toParStr}
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <div className="text-[15pt] opacity-80 font-bold tracking-wider">GRS</div>
+                                                            <div className="text-[15pt] font-bold leading-none">
+                                                                {p.front9 > 0 || p.back9 > 0 ? (
+                                                                    <>{p.front9}+{p.back9}={p.totalGross}</>
+                                                                ) : (
+                                                                    <>{p.totalGross}</>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[15pt] opacity-80 font-bold tracking-wider">HCP</div>
+                                                            <div className="text-[15pt] font-bold leading-none">{p.strokesReceivedSoFar}/{p.courseHcp}</div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[15pt] opacity-80 font-bold tracking-wider">NET</div>
+                                                            <div className="text-[15pt] font-bold leading-none">{p.totalNet}</div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                {canUpdate && (
-                                                    <button
-                                                        onClick={() => updateScore(player.id, true)}
-                                                        className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
-                                                    >
-                                                        +
-                                                    </button>
-                                                )}
+                                            </div>
+
+                                            {/* Score Grid */}
+                                            <div className="p-1 border border-black rounded shadow-sm overflow-hidden">
+                                                {/* Row 1: Holes 1-9 */}
+                                                <div className="grid grid-cols-9 border-b border-black">
+                                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
+                                                        const score = getSavedScore(p.id, num);
+                                                        const isActive = activeHole === num;
+                                                        const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                        const holePar = hole?.par || 4;
+
+                                                        let bgClass = "bg-white";
+                                                        if (score !== null) {
+                                                            const diff = score - holePar;
+                                                            if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Darker Yellow
+                                                            else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Darker Green
+                                                            else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
+                                                            else if (diff === 1) bgClass = "bg-orange-200"; // Bogey: Darker Orange
+                                                            else if (diff >= 2) bgClass = "bg-red-300"; // Double Bogey+: Darker Red
+                                                        } else if (isActive) {
+                                                            bgClass = "bg-green-50";
+                                                        }
+
+                                                        return (
+                                                            <div key={num} className={`
+                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
+                                                            ${isActive ? 'ring-2 ring-black ring-inset z-10' : ''}
+                                                        `}>
+                                                                <div className="absolute top-1 inset-x-0 flex justify-center px-1.5 text-[12pt] text-gray-900">
+                                                                    <span><span className="font-bold">{num}</span>/{holePar}</span>
+                                                                </div>
+                                                                <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                    {score || '-'}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                                {/* Row 2: Holes 10-18 */}
+                                                <div className="grid grid-cols-9">
+                                                    {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
+                                                        const score = getSavedScore(p.id, num);
+                                                        const isActive = activeHole === num;
+                                                        const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                        const holePar = hole?.par || 4;
+
+                                                        let bgClass = "bg-white";
+                                                        if (score !== null) {
+                                                            const diff = score - holePar;
+                                                            if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Darker Yellow
+                                                            else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Darker Green
+                                                            else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
+                                                            else if (diff === 1) bgClass = "bg-orange-200"; // Bogey: Darker Orange
+                                                            else if (diff >= 2) bgClass = "bg-red-300"; // Double Bogey+: Darker Red
+                                                        } else if (isActive) {
+                                                            bgClass = "bg-green-50";
+                                                        }
+
+                                                        return (
+                                                            <div key={num} className={`
+                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
+                                                            ${isActive ? 'ring-2 ring-black ring-inset z-10' : ''}
+                                                        `}>
+                                                                <div className="absolute top-1 inset-x-0 flex justify-center px-1.5 text-[12pt] text-gray-900">
+                                                                    <span><span className="font-bold">{num}</span>/{holePar}</span>
+                                                                </div>
+                                                                <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                    {score || '-'}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
                                         </div>
                                     );
                                 })}
+                            </div>
                         </div>
-                    </div>
-                )}
-
-                {/* Save Hole Button */}
-                {selectedPlayers.length > 0 && canUpdate && (
-                    <div className="flex justify-end mt-2">
-                        <button
-                            onClick={() => {
-                                if (!liveRoundId) return;
-
-                                const updates: { playerId: string; strokes: number }[] = [];
-                                const newScores = new Map(scores);
-
-                                // Check if this hole was already scored (for all players)
-                                const wasAlreadyScored = selectedPlayers.every(p => {
-                                    const playerScores = scores.get(p.id);
-                                    return playerScores && playerScores.has(activeHole);
-                                });
-
-                                // Check if anyone scored a birdie on this hole
-                                const birdiePlayerData: Array<{ name: string; totalBirdies: number }> = [];
-                                const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
-
-                                selectedPlayers.forEach(p => {
-                                    const playerScores = new Map(newScores.get(p.id) || []);
-
-                                    // Use pending score if it exists, otherwise use saved score or par
-                                    const pendingScore = pendingScores.get(p.id);
-                                    const savedScore = playerScores.get(activeHole);
-                                    const finalScore = pendingScore ?? savedScore ?? activeHolePar;
-
-                                    // Update the score in the map
-                                    playerScores.set(activeHole, finalScore);
-                                    newScores.set(p.id, playerScores);
-
-                                    // Add to updates for server
-                                    updates.push({ playerId: p.id, strokes: finalScore });
-
-                                    // Check if this hole is a birdie
-                                    if (finalScore === activeHolePar - 1) {
-                                        // Calculate total birdies for this player in the round
-                                        let totalBirdies = 0;
-                                        playerScores.forEach((strokes, holeNum) => {
-                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                            const holePar = hole?.par || 4;
-                                            if (strokes === holePar - 1) {
-                                                totalBirdies++;
-                                            }
-                                        });
-                                        birdiePlayerData.push({ name: p.name, totalBirdies });
-                                    }
-                                });
-
-                                // Update main scores state with pending changes
-                                setScores(newScores);
-
-                                // Save all scores to server
-                                if (updates.length > 0) {
-                                    saveLiveScore({
-                                        liveRoundId,
-                                        holeNumber: activeHole,
-                                        playerScores: updates
-                                    });
-                                }
-
-                                // Show celebration if there's a birdie on this hole
-                                if (birdiePlayerData.length > 0) {
-                                    setBirdiePlayers(birdiePlayerData);
-                                }
-
-                                // Clear pending scores and reset unsaved flag
-                                setPendingScores(new Map());
-                                setHasUnsavedChanges(false);
-
-                                // Only advance to next hole if this was a new hole (not an update)
-                                if (!wasAlreadyScored) {
-                                    if (activeHole < 18) {
-                                        setActiveHole(activeHole + 1);
-                                    } else {
-                                        // After 18th hole, find the first hole that has missing scores
-                                        let nextHole = 1;
-                                        for (let h = 1; h <= 18; h++) {
-                                            const isHoleIncomplete = selectedPlayers.some(p => {
-                                                const pScores = newScores.get(p.id);
-                                                return !pScores || !pScores.has(h);
-                                            });
-
-                                            if (isHoleIncomplete) {
-                                                nextHole = h;
-                                                break;
-                                            }
-                                        }
-                                        setActiveHole(nextHole);
-                                    }
-                                }
-
-                                // Silent refresh to keep server data in sync without flashing the page
-                                router.refresh();
-                            }}
-                            className={`w-1/2 ${(() => {
-                                // Check if this hole has been scored for all selected players
-                                const isHoleScored = selectedPlayers.every(p => {
-                                    const playerScores = scores.get(p.id);
-                                    return playerScores && playerScores.has(activeHole);
-                                });
-                                // Blue if: has unsaved changes OR hole is not yet scored
-                                // Black if: hole is scored AND no unsaved changes
-                                return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
-                            })()} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
-                        >
-                            Save Hole {activeHole}
-                        </button>
-                    </div>
-                )}
-                <div className="pt-4"></div>
-                {/* Live Scores Summary */}
-                {summaryPlayers.length > 0 && (
-                    <div className="mt-1 space-y-2">
-                        <div className="flex gap-2 my-1">
-                            <button
-                                onClick={() => router.refresh()}
-                                className="flex-1 bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
-                            >
-                                Summary - Refresh
-                            </button>
-                            <button
-                                onClick={() => setIsStatsModalOpen(true)}
-                                className="w-16 bg-black text-white rounded-full py-2 text-[25pt] hover:bg-gray-800 transition-colors shadow-md active:scale-95"
-                            >
-                                🖕
-                            </button>
-                        </div>
-
-                        <div className="space-y-1">
-                            {rankedPlayers.map((p, i) => {
-                                let toParStr = "E";
-                                let toParClass = "text-green-600";
-                                if (p.toPar > 0) {
-                                    toParStr = `+${p.toPar}`;
-                                    toParClass = "text-gray-900";
-                                } else if (p.toPar < 0) {
-                                    toParStr = `${p.toPar}`;
-                                    toParClass = "text-red-600";
-                                }
-
-                                let displayRankInSummary: React.ReactNode = i + 1;
-                                let showFlagInSummary = false;
-                                let showRankIconInSummary: React.ReactNode = null;
-
-                                if (p.thru >= 18) {
-                                    if (allActiveFinished) {
-                                        if (i === 0) {
-                                            displayRankInSummary = "🏆";
-                                            showRankIconInSummary = "🏆";
-                                        } else if (i === 1) {
-                                            displayRankInSummary = "🥈";
-                                            showRankIconInSummary = "🥈";
-                                        } else if (i === 2) {
-                                            displayRankInSummary = "🥉";
-                                            showRankIconInSummary = "🥉";
-                                        } else {
-                                            showFlagInSummary = true;
-                                        }
-                                    } else {
-                                        showFlagInSummary = true;
-                                    }
-                                }
-
-                                return (
-                                    <div key={p.id} className="bg-white shadow-lg rounded-xl overflow-hidden my-1 border-4 border-gray-300">
-                                        {/* Player Header */}
-                                        <div className="bg-[#1d4ed8] p-1 text-white">
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex flex-col">
-                                                        <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
-                                                        <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
-                                                    </div>
-                                                    <div className="flex items-center">
-                                                        {showRankIconInSummary && <span className="text-[20pt] leading-none">{showRankIconInSummary}</span>}
-                                                        {showFlagInSummary && <span className="text-[20pt] leading-none">🏁</span>}
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex gap-4 items-center">
-                                                    <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[15pt] min-w-[3rem] ${toParClass}`}>
-                                                        {toParStr}
-                                                    </div>
-                                                    <div className="text-left">
-                                                        <div className="text-[15pt] opacity-80 font-bold tracking-wider">GRS</div>
-                                                        <div className="text-[15pt] font-bold leading-none">
-                                                            {p.front9 > 0 || p.back9 > 0 ? (
-                                                                <>{p.front9}+{p.back9}={p.totalGross}</>
-                                                            ) : (
-                                                                <>{p.totalGross}</>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[15pt] opacity-80 font-bold tracking-wider">HCP</div>
-                                                        <div className="text-[15pt] font-bold leading-none">{p.strokesReceivedSoFar}/{p.courseHcp}</div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-[15pt] opacity-80 font-bold tracking-wider">NET</div>
-                                                        <div className="text-[15pt] font-bold leading-none">{p.totalNet}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Score Grid */}
-                                        <div className="p-1 border border-black rounded shadow-sm overflow-hidden">
-                                            {/* Row 1: Holes 1-9 */}
-                                            <div className="grid grid-cols-9 border-b border-black">
-                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
-                                                    const score = getSavedScore(p.id, num);
-                                                    const isActive = activeHole === num;
-                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
-                                                    const holePar = hole?.par || 4;
-
-                                                    let bgClass = "bg-white";
-                                                    if (score !== null) {
-                                                        const diff = score - holePar;
-                                                        if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Darker Yellow
-                                                        else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Darker Green
-                                                        else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
-                                                        else if (diff === 1) bgClass = "bg-orange-200"; // Bogey: Darker Orange
-                                                        else if (diff >= 2) bgClass = "bg-red-300"; // Double Bogey+: Darker Red
-                                                    } else if (isActive) {
-                                                        bgClass = "bg-green-50";
-                                                    }
-
-                                                    return (
-                                                        <div key={num} className={`
-                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
-                                                            ${isActive ? 'ring-2 ring-black ring-inset z-10' : ''}
-                                                        `}>
-                                                            <div className="absolute top-1 inset-x-0 flex justify-center px-1.5 text-[12pt] text-gray-900">
-                                                                <span><span className="font-bold">{num}</span>/{holePar}</span>
-                                                            </div>
-                                                            <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
-                                                                {score || '-'}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                            {/* Row 2: Holes 10-18 */}
-                                            <div className="grid grid-cols-9">
-                                                {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
-                                                    const score = getSavedScore(p.id, num);
-                                                    const isActive = activeHole === num;
-                                                    const hole = defaultCourse?.holes.find(h => h.hole_number === num);
-                                                    const holePar = hole?.par || 4;
-
-                                                    let bgClass = "bg-white";
-                                                    if (score !== null) {
-                                                        const diff = score - holePar;
-                                                        if (diff <= -2) bgClass = "bg-yellow-300"; // Eagle: Darker Yellow
-                                                        else if (diff === -1) bgClass = "bg-green-300"; // Birdie: Darker Green
-                                                        else if (diff === 0) bgClass = "bg-white"; // Par: Pure White
-                                                        else if (diff === 1) bgClass = "bg-orange-200"; // Bogey: Darker Orange
-                                                        else if (diff >= 2) bgClass = "bg-red-300"; // Double Bogey+: Darker Red
-                                                    } else if (isActive) {
-                                                        bgClass = "bg-green-50";
-                                                    }
-
-                                                    return (
-                                                        <div key={num} className={`
-                                                            flex flex-col items-center justify-center h-16 border-r border-black last:border-r-0 relative bg-white
-                                                            ${isActive ? 'ring-2 ring-black ring-inset z-10' : ''}
-                                                        `}>
-                                                            <div className="absolute top-1 inset-x-0 flex justify-center px-1.5 text-[12pt] text-gray-900">
-                                                                <span><span className="font-bold">{num}</span>/{holePar}</span>
-                                                            </div>
-                                                            <div className={`text-[15pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
-                                                                {score || '-'}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* Score Legend */}
                 < div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]" >
@@ -1384,177 +1452,109 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             />
 
             {/* Stats Modal */}
-            {isStatsModalOpen && (
-                <div className="fixed inset-0 z-[300] bg-gray-50 overflow-y-auto">
-                    {/* Header */}
-                    <div className="bg-white shadow-sm sticky top-0 z-10 px-1 py-3 border-b border-gray-200">
-                        <div className="flex items-center justify-between">
-                            <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight text-left ml-3">Round Stats</h1>
-                            <button
-                                onClick={() => setIsStatsModalOpen(false)}
-                                className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
-                            >
-                                Close
-                            </button>
+            {
+                isStatsModalOpen && (
+                    <div className="fixed inset-0 z-[300] bg-gray-50 overflow-y-auto">
+                        {/* Header */}
+                        <div className="bg-white shadow-sm sticky top-0 z-10 px-1 py-3 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                                <h1 className="text-[18pt] font-bold text-gray-900 tracking-tight text-left ml-3">Round Stats</h1>
+                                <button
+                                    onClick={() => setIsStatsModalOpen(false)}
+                                    className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Content */}
-                    <div className="p-3 space-y-4">
-                        {/* Birdies Section */}
-                        <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-green-500">
-                            <h2 className="text-[16pt] font-bold text-green-700 mb-3 flex items-center gap-2">
-                                🖕 Birdies (1 Under Par)
-                            </h2>
-                            <div className="space-y-2">
-                                {rankedPlayers.map(player => {
-                                    const playerScores = scores.get(player.id);
-                                    let birdieCount = 0;
-
-                                    if (playerScores) {
-                                        playerScores.forEach((strokes, holeNum) => {
-                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                            const holePar = hole?.par || 4;
-                                            const diff = strokes - holePar;
-                                            if (diff === -1) birdieCount++;
-                                        });
-                                    }
-
-                                    if (birdieCount === 0) return null;
-
-                                    return (
-                                        <div key={player.id} className="flex justify-between items-center bg-green-50 rounded-lg p-2">
-                                            <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
-                                            <span className="text-[18pt] font-black text-green-700">{birdieCount}</span>
-                                        </div>
-                                    );
-                                }).filter(Boolean).length > 0 ? (
-                                    rankedPlayers.map(player => {
-                                        const playerScores = scores.get(player.id);
-                                        let birdieCount = 0;
-
-                                        if (playerScores) {
-                                            playerScores.forEach((strokes, holeNum) => {
-                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                                const holePar = hole?.par || 4;
-                                                const diff = strokes - holePar;
-                                                if (diff === -1) birdieCount++;
-                                            });
-                                        }
-
-                                        if (birdieCount === 0) return null;
-
-                                        return (
+                        {/* Content */}
+                        <div className="p-3 space-y-4">
+                            {/* Birdies Section */}
+                            <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-green-500">
+                                <h2 className="text-[16pt] font-bold text-green-700 mb-3 flex items-center gap-2">
+                                    🖕 Birdies (1 Under Par)
+                                </h2>
+                                <div className="space-y-2">
+                                    {birdieLeaders.length > 0 ? (
+                                        birdieLeaders.map(player => (
                                             <div key={player.id} className="flex justify-between items-center bg-green-50 rounded-lg p-2">
                                                 <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
-                                                <span className="text-[18pt] font-black text-green-700">{birdieCount}</span>
+                                                <span className="text-[18pt] font-black text-green-700">{player.birdieCount}</span>
                                             </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p className="text-gray-500 text-center py-4">No birdies yet</p>
-                                )}
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500 text-center py-4">No birdies yet</p>
+                                    )}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Eagles Section */}
-                        <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-yellow-500">
-                            <h2 className="text-[16pt] font-bold text-yellow-700 mb-3 flex items-center gap-2">
-                                🦅 Eagles (2 Under Par)
-                            </h2>
-                            <div className="space-y-2">
-                                {rankedPlayers.map(player => {
-                                    const playerScores = scores.get(player.id);
-                                    let eagleCount = 0;
-
-                                    if (playerScores) {
-                                        playerScores.forEach((strokes, holeNum) => {
-                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                            const holePar = hole?.par || 4;
-                                            const diff = strokes - holePar;
-                                            if (diff <= -2) eagleCount++;
-                                        });
-                                    }
-
-                                    if (eagleCount === 0) return null;
-
-                                    return (
-                                        <div key={player.id} className="flex justify-between items-center bg-yellow-50 rounded-lg p-2">
-                                            <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
-                                            <span className="text-[18pt] font-black text-yellow-700">{eagleCount}</span>
-                                        </div>
-                                    );
-                                }).filter(Boolean).length > 0 ? (
-                                    rankedPlayers.map(player => {
-                                        const playerScores = scores.get(player.id);
-                                        let eagleCount = 0;
-
-                                        if (playerScores) {
-                                            playerScores.forEach((strokes, holeNum) => {
-                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                                const holePar = hole?.par || 4;
-                                                const diff = strokes - holePar;
-                                                if (diff <= -2) eagleCount++;
-                                            });
-                                        }
-
-                                        if (eagleCount === 0) return null;
-
-                                        return (
+                            {/* Eagles Section */}
+                            <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-yellow-500">
+                                <h2 className="text-[16pt] font-bold text-yellow-700 mb-3 flex items-center gap-2">
+                                    🦅 Eagles (2 Under Par)
+                                </h2>
+                                <div className="space-y-2">
+                                    {eagleLeaders.length > 0 ? (
+                                        eagleLeaders.map(player => (
                                             <div key={player.id} className="flex justify-between items-center bg-yellow-50 rounded-lg p-2">
                                                 <span className="text-[15pt] font-bold text-gray-900">{player.name}</span>
-                                                <span className="text-[18pt] font-black text-yellow-700">{eagleCount}</span>
+                                                <span className="text-[18pt] font-black text-yellow-700">{player.eagleCount}</span>
                                             </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p className="text-gray-500 text-center py-4">No eagles yet</p>
-                                )}
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500 text-center py-4">No eagles yet</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Birdie Celebration Popup */}
-            {birdiePlayers.length > 0 && (
-                <div
-                    className="fixed inset-0 z-[400] flex items-center justify-center bg-black/70 animate-in fade-in duration-300"
-                    onClick={() => setBirdiePlayers([])}
-                >
+            {
+                birdiePlayers.length > 0 && (
                     <div
-                        className="animate-in zoom-in-95 duration-500 flex flex-col items-center gap-4"
-                        onClick={(e) => e.stopPropagation()}
+                        className="fixed inset-0 z-[400] flex items-center justify-center bg-black/70 animate-in fade-in duration-300"
+                        onClick={() => setBirdiePlayers([])}
                     >
-                        <img
-                            src="/birdie-celebration.png"
-                            alt="Birdie!"
-                            className="w-80 h-80 object-contain drop-shadow-2xl"
-                        />
-                        <div className="bg-white rounded-2xl px-6 py-4 shadow-2xl">
-                            <h2 className="text-[24pt] font-black text-green-700 text-center mb-2">
-                                {birdiePlayers.length === 1 ? 'BIRDIE!' : 'BIRDIES!'}
-                            </h2>
-                            <div className="text-[18pt] font-bold text-gray-900 text-center mb-4">
-                                {birdiePlayers.map((player, index) => (
-                                    <div key={index} className="mb-2">
-                                        <div>{player.name}</div>
-                                        <div className="text-[15pt] text-green-700">
-                                            {player.totalBirdies} {player.totalBirdies === 1 ? 'Birdie' : 'Birdies'} for Round
+                        <div
+                            className="animate-in zoom-in-95 duration-500 flex flex-col items-center gap-4"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+
+                            <div className="bg-white rounded-2xl px-6 py-4 shadow-2xl flex flex-col items-center max-w-sm mx-4">
+                                <img
+                                    src="/birdie-celebration.png"
+                                    alt="Birdie!"
+                                    className="w-64 h-64 object-contain drop-shadow-md mb-2"
+                                />
+
+                                <div className="text-[18pt] font-bold text-gray-900 text-center mb-4 w-full">
+                                    {[...birdiePlayers].sort((a, b) => b.totalBirdies - a.totalBirdies).map((player, index) => (
+                                        <div key={index} className="mb-2 last:mb-0 border-b last:border-0 border-gray-100 pb-2 last:pb-0">
+                                            <div className="leading-tight">{player.name}</div>
+                                            <div className="text-[14pt] text-green-600 font-bold leading-tight">
+                                                {player.totalBirdies} {player.totalBirdies === 1 ? 'Birdie' : 'Birdies'} Total
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setBirdiePlayers([]);
+                                    }}
+                                    className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                >
+                                    Close
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setBirdiePlayers([])}
-                                className="w-full bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
-                            >
-                                Close
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </div >
     );
 }
