@@ -985,15 +985,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     initialRound && (
                         <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
                             <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
-                                <h2 className="text-[14pt] font-black text-gray-900 tracking-tight shrink-0">GPS</h2>
-                                <span className="text-[18pt] font-bold text-gray-900 truncate mx-2">
-                                    {defaultCourse?.name}
-                                </span>
-                                <div className="flex items-center gap-2 shrink-0">
+                                <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">GPS</h2>
+                                <div className="flex items-center gap-2">
                                     <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Hole {activeHole}</span>
                                     <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-[20pt] font-bold">Par {activeHolePar}</span>
                                 </div>
                             </div>
+
+                            <p className="text-center text-[18pt] font-bold text-gray-900 leading-tight mb-1">{defaultCourse?.name}</p>
 
                             {/* GPS Distance Display */}
                             {(() => {
