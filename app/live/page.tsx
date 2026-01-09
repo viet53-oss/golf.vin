@@ -76,6 +76,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     if (!activeRound) {
         activeRound = await prisma.liveRound.findFirst({
             where: { date: todayStr },
+            orderBy: { created_at: 'desc' }, // Get the most recent round for today
             include: {
                 players: {
                     include: {
