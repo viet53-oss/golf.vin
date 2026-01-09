@@ -986,7 +986,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
                             <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
                                 <h2 className="text-[14pt] font-black text-gray-900 tracking-tight shrink-0">GPS</h2>
-                                <span className="text-[14pt] font-bold text-gray-700 truncate mx-2">
+                                <span className="text-[18pt] font-bold text-gray-900 truncate mx-2">
                                     {defaultCourse?.name}
                                 </span>
                                 <div className="flex items-center gap-2 shrink-0">
