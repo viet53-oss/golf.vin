@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -282,6 +282,75 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             });
         }
     }, [initialRound]);
+
+
+    // Polling for updates (every 10 seconds)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            router.refresh();
+        }, 10000);
+        return () => clearInterval(interval);
+    }, [router]);
+
+    // Global Birdie Watcher
+    const knownBirdiesRef = useRef<Map<string, Set<number>>>(new Map());
+    const hasInitializedRef = useRef(false);
+
+    useEffect(() => {
+        if (!initialRound?.players || !defaultCourse) return;
+
+        const newBirdies: { name: string; totalBirdies: number }[] = [];
+
+        initialRound.players.forEach((p: any) => {
+            const playerId = p.is_guest ? p.id : p.player.id;
+
+            if (!knownBirdiesRef.current.has(playerId)) {
+                knownBirdiesRef.current.set(playerId, new Set());
+            }
+            const playerKnownSet = knownBirdiesRef.current.get(playerId)!;
+            let playerHasNewBirdie = false;
+
+            if (p.scores) {
+                p.scores.forEach((s: any) => {
+                    if (s.hole?.hole_number && s.strokes) {
+                        const hole = defaultCourse.holes.find(h => h.hole_number === s.hole.hole_number);
+                        if (hole && (s.strokes - hole.par === -1)) {
+                            // It's a birdie
+                            if (!playerKnownSet.has(s.hole.hole_number)) {
+                                // Track it
+                                playerKnownSet.add(s.hole.hole_number);
+                                if (hasInitializedRef.current) {
+                                    playerHasNewBirdie = true;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (playerHasNewBirdie) {
+                // Calculate total birdies for this player for the popup
+                const total = playerKnownSet.size;
+                // Use full display name
+                newBirdies.push({
+                    name: p.is_guest ? (p.guest_name || 'Guest') : p.player.name,
+                    totalBirdies: total
+                });
+            }
+        });
+
+        if (newBirdies.length > 0) {
+            setBirdiePlayers(prev => {
+                const existingNames = new Set(prev.map(x => x.name));
+                const uniqueNew = newBirdies.filter(x => !existingNames.has(x.name));
+                if (uniqueNew.length === 0) return prev;
+                return [...prev, ...uniqueNew];
+            });
+        }
+
+        hasInitializedRef.current = true;
+
+    }, [initialRound, defaultCourse]);
 
     const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
     const [activeHole, setActiveHole] = useState(() => {
@@ -1155,6 +1224,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                         // Check if this hole is a birdie
                                         if (finalScore === activeHolePar - 1) {
+                                            // Register birdie locally to prevent global watcher duplicate trigger
+                                            if (!knownBirdiesRef.current.has(p.id)) {
+                                                knownBirdiesRef.current.set(p.id, new Set());
+                                            }
+                                            knownBirdiesRef.current.get(p.id)!.add(activeHole);
+
                                             // Calculate total birdies for this player in the round
                                             let totalBirdies = 0;
                                             playerScores.forEach((strokes, holeNum) => {
