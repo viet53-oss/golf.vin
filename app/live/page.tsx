@@ -133,9 +133,18 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         }
     }
 
-    // 5. Final Fallback
+
+    // 5. Final Fallback (Admin only for old rounds)
     if (!activeRound) {
         console.log('LOG-11: Still no round. Falling back to latest in DB.');
+
+        // For non-admin users, only allow today's rounds
+        if (!isAdmin) {
+            console.log('LOG-11b: Non-admin user, no round for today. Redirecting to home.');
+            return redirect('/');
+        }
+
+        // Admin users can access old rounds
         activeRound = await prisma.liveRound.findFirst({
             orderBy: { created_at: 'desc' },
             include: {
@@ -156,12 +165,18 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         return redirect('/');
     }
 
-    // 7. Redirect to ensure ID is in URL
+    // 7. Final safety check: Non-admin users should only see today's round
+    if (!isAdmin && activeRound && activeRound.date !== todayStr) {
+        console.log('LOG-13b: Non-admin user trying to access old round. Redirecting to today.');
+        return redirect('/live');
+    }
+
+    // 8. Redirect to ensure ID is in URL
     if (!roundIdFromUrl && activeRound) {
         return redirect(`/live?roundId=${activeRound.id}`);
     }
 
-    // 8. If activeRound has a specific course_id, use that as the defaultCourse
+    // 9. If activeRound has a specific course_id, use that as the defaultCourse
     if (activeRound?.course_id) {
         const roundCourse = await prisma.course.findUnique({
             where: { id: activeRound.course_id },
@@ -175,7 +190,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         }
     }
 
-    // 9. Get rounds for list
+    // 10. Get rounds for list
     const allLiveRounds = await prisma.liveRound.findMany({
         orderBy: { created_at: 'desc' },
         select: { id: true, name: true, date: true, created_at: true }
