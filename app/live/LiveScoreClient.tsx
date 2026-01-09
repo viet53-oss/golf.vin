@@ -837,9 +837,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             {isAdmin && (
                                 <button
                                     onClick={handleCreateNewRound}
-                                    className="px-3 py-1 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-colors shadow-md active:scale-95 text-sm"
+                                    className="px-3 py-1 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                                 >
-                                    + New Round
+                                    New Round
                                 </button>
                             )}
                         </div>
