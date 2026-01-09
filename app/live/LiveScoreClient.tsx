@@ -1061,7 +1061,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         >
                                             <div className="flex items-baseline">
                                                 <span className="text-[20pt] font-black leading-none">{hole.hole_number}</span>
-                                                <span className="text-[12pt] font-bold leading-none opacity-80">/{hole.par}</span>
+                                                <span className="text-[14pt] font-bold leading-none opacity-80">/{hole.par}</span>
                                             </div>
                                         </button>
                                     );
