@@ -72,9 +72,9 @@ export default function MetaTagEditor() {
                     <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative">
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-black"
+                            className="absolute top-4 right-4 px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                         >
-                            <X className="w-6 h-6" />
+                            Close
                         </button>
 
                         <h2 className="text-[14pt] font-bold mb-6 flex items-center gap-2">
