@@ -236,7 +236,7 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                                     <span className="text-[13pt] font-bold">{num}</span>
                                                     <span className="text-[12pt] font-normal opacity-80">/{holePar}</span>
                                                 </div>
-                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-7 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                     {score || '-'}
                                                 </div>
                                             </div>
@@ -267,7 +267,7 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                                     <span className="text-[13pt] font-bold">{num}</span>
                                                     <span className="text-[12pt] font-normal opacity-80">/{holePar}</span>
                                                 </div>
-                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-7 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                     {score || '-'}
                                                 </div>
                                             </div>

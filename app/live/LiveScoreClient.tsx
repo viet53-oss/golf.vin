@@ -1521,7 +1521,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                     <span className="text-[13pt] font-bold">{num}</span>
                                                                     <span className="text-[12pt] font-normal opacity-80">/{holePar}</span>
                                                                 </div>
-                                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-7 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                                     {score || '-'}
                                                                 </div>
                                                             </div>
@@ -1557,7 +1557,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                     <span className="text-[13pt] font-bold">{num}</span>
                                                                     <span className="text-[12pt] font-normal opacity-80">/{holePar}</span>
                                                                 </div>
-                                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-5 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
+                                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-7 ${bgClass} ${score !== null ? 'text-gray-900' : 'text-transparent'}`}>
                                                                     {score || '-'}
                                                                 </div>
                                                             </div>
@@ -1574,7 +1574,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 }
 
                 {/* Score Legend */}
-                < div className="bg-white rounded-[100px] shadow-lg border-2 border-black p-5 mt-1 flex flex-wrap gap-5 items-center justify-center text-[15pt]" >
+                < div className="bg-white rounded-[100px] shadow-lg border-2 border-black py-1 px-5 mt-1 flex flex-wrap gap-5 items-center justify-center text-[15pt]" >
                     <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-yellow-300 border-2 border-black/20"></div>Eagle (-2)</div>
                     <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-green-300 border-2 border-black/20"></div>Birdie (-1)</div>
                     <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-white border-2 border-black/20"></div>Par (E)</div>
