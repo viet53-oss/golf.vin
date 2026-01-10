@@ -1053,7 +1053,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 );
 
                                 return (
-                                    <div className="bg-green-600 text-white w-fit mx-auto px-6 py-0 rounded-[100px] text-center mb-2 border-2 border-black shadow-inner relative">
+                                    <div className="bg-green-600 text-white w-full mx-auto px-1 py-0 rounded-[100px] text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
                                         <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-3 pb-5">
                                             {dist}
                                         </p>
