@@ -357,7 +357,7 @@ export default function ScoresDashboard({
                                             return (
                                                 <button
                                                     onClick={() => setSelectedPoolRoundId(round.id)}
-                                                    className={`px-1 py-1.5 sm:py-2 rounded-full text-[14pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap border-2 ${hasPool
+                                                    className={`px-4 py-2 rounded-full text-[15pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap border-2 ${hasPool
                                                         ? "bg-black text-white border-black hover:bg-gray-800"
                                                         : "bg-white text-black border-black hover:bg-gray-50"
                                                         }`}
@@ -369,7 +369,7 @@ export default function ScoresDashboard({
                                     }
                                     <button
                                         onClick={() => setSelectedScoreCardsRound(round)}
-                                        className="px-1 py-1.5 sm:py-2 rounded-full text-[14pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap bg-black text-white hover:bg-gray-800"
+                                        className="px-4 py-2 rounded-full text-[15pt] font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap bg-black text-white hover:bg-gray-800"
                                     >
                                         ScoreCards
                                     </button>
@@ -391,7 +391,7 @@ export default function ScoresDashboard({
                                             </button>
                                             <Link
                                                 href={`/scores/${round.id}/edit`}
-                                                className="bg-black text-white text-[14pt] font-bold px-1 sm:px-1 py-1.5 sm:py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm ml-2 cursor-pointer"
+                                                className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm ml-2 cursor-pointer"
                                             >
                                                 Edit
                                             </Link>
@@ -583,7 +583,7 @@ export default function ScoresDashboard({
                     <div className="flex justify-center pt-4">
                         <button
                             onClick={loadMore}
-                            className="bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
+                            className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
                         >
                             More Rounds
                         </button>

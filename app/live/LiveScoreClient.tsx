@@ -837,7 +837,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             <header className="bg-white shadow-sm sticky top-0 z-50 px-1 py-1">
                 <div className="w-full flex justify-between items-center">
                     <h1 className="text-[18pt] font-bold text-green-700 tracking-tight flex-1 text-left ml-3">Live Scoring</h1>
-                    <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
+                    <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">
                         Home
                     </Link>
                 </div>
@@ -852,7 +852,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             {isAdmin && (
                                 <button
                                     onClick={handleCreateNewRound}
-                                    className="px-3 py-1 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                    className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                                 >
                                     New Round
                                 </button>
@@ -953,13 +953,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         alert('Failed to delete round.');
                                                     }
                                                 }}
-                                                className="bg-red-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                                className="bg-red-600 text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
                                             >
                                                 Delete
                                             </button>
                                             <button
                                                 onClick={() => setIsAddToClubModalOpen(true)}
-                                                className="bg-green-600 text-white text-[15pt] font-bold px-4 py-1.5 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
+                                                className="bg-green-600 text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
                                             >
                                                 Add to Club
                                             </button>
@@ -1112,13 +1112,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setIsPlayerModalOpen(true)}
-                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                            className="bg-black text-white rounded-full px-4 py-2 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
                                         >
                                             Players
                                         </button>
                                         <button
                                             onClick={() => setIsGuestModalOpen(true)}
-                                            className="bg-black text-white rounded-full px-4 py-1 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
+                                            className="bg-black text-white rounded-full px-4 py-2 text-[15pt] font-bold shadow hover:bg-gray-800 active:scale-95 transition-all"
                                         >
                                             Guest
                                         </button>
