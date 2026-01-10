@@ -87,12 +87,12 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
                         {isAdmin && (
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="bg-black text-white text-[14pt] font-bold px-1 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
+                                className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 whitespace-nowrap cursor-pointer"
                             >
                                 New
                             </button>
                         )}
-                        <Link href="/" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 whitespace-nowrap">
                             Home
                         </Link>
                     </div>

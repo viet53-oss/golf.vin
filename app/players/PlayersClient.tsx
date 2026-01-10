@@ -410,7 +410,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                                 </button>
                             </>
                         )}
-                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors">Home</Link>
+                        <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95">Home</Link>
                     </div>
                 </div>
 

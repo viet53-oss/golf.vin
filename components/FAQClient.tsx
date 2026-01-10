@@ -821,7 +821,7 @@ export default function FAQClient({ players }: { players: Player[] }) {
             <header className="bg-white sticky top-0 z-50 py-4 shadow-md px-1 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <h1 className="text-[18pt] font-black text-[#22c55e] tracking-tighter uppercase text-left ml-3">FAQ</h1>
-                    <Link href="/" className="bg-black text-white px-1 py-2 rounded-full font-bold text-[14pt] hover:bg-gray-800 transition-all shadow-md">Home</Link>
+                    <Link href="/" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95">Home</Link>
                 </div>
             </header>
 
