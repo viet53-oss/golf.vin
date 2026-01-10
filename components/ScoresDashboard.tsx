@@ -350,7 +350,7 @@ export default function ScoresDashboard({
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex gap-2 items-center">
+                                <div className="flex flex-wrap gap-1 items-center justify-end">
                                     {
                                         (() => {
                                             const hasPool = round.players.some(p => p.in_pool);
@@ -391,7 +391,7 @@ export default function ScoresDashboard({
                                             </button>
                                             <Link
                                                 href={`/scores/${round.id}/edit`}
-                                                className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm ml-2 cursor-pointer"
+                                                className="bg-black text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
                                             >
                                                 Edit
                                             </Link>
