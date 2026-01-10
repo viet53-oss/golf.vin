@@ -32,8 +32,13 @@ export function LivePlayerSelectionModal({
     isOpen: boolean;
     onClose: () => void;
     courseData?: {
+        courseName: string;
         teeBoxes: TeeBox[];
         par: number;
+        roundTeeBox?: {
+            rating: number;
+            slope: number;
+        } | null;
     } | null;
 }) {
     const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedIds);
@@ -69,15 +74,29 @@ export function LivePlayerSelectionModal({
     const getCourseHandicap = (player: Player): number | null => {
         if (!player.index || !courseData) return null;
 
-        // Find the player's preferred tee box
-        const preferredTee = courseData.teeBoxes.find(t =>
-            player.preferred_tee_box && t.name.toLowerCase().includes(player.preferred_tee_box.toLowerCase())
-        );
+        // Only use player's preferred tee box for City Park North
+        const isCityParkNorth = courseData.courseName.toLowerCase().includes('city park north');
 
-        // Fallback to white tee if no preference
-        const teeBox = preferredTee || courseData.teeBoxes.find(t =>
-            t.name.toLowerCase().includes('white')
-        ) || courseData.teeBoxes[0];
+        let teeBox: TeeBox | undefined;
+
+        if (isCityParkNorth && player.preferred_tee_box) {
+            // For City Park North, use player's preferred tee
+            teeBox = courseData.teeBoxes.find(t =>
+                player.preferred_tee_box && t.name.toLowerCase().includes(player.preferred_tee_box.toLowerCase())
+            );
+        }
+
+        // For other courses, or if no preference, use the round's selected tee box
+        if (!teeBox && courseData.roundTeeBox) {
+            teeBox = courseData.teeBoxes.find(t =>
+                t.rating === courseData.roundTeeBox!.rating && t.slope === courseData.roundTeeBox!.slope
+            );
+        }
+
+        // Fallback to white tee or first available
+        if (!teeBox) {
+            teeBox = courseData.teeBoxes.find(t => t.name.toLowerCase().includes('white')) || courseData.teeBoxes[0];
+        }
 
         if (!teeBox) return null;
 

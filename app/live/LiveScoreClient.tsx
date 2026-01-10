@@ -467,12 +467,27 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
     const getPlayerTee = (player: Player) => {
         if (!defaultCourse) return null;
-        if (player.preferred_tee_box) {
+
+        // Only use player's preferred tee box for City Park North
+        const isCityParkNorth = defaultCourse.name.toLowerCase().includes('city park north');
+
+        if (isCityParkNorth && player.preferred_tee_box) {
             const match = defaultCourse.tee_boxes.find(t => t.name.toLowerCase() === player.preferred_tee_box?.toLowerCase());
             if (match) return match;
             const partial = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes(player.preferred_tee_box!.toLowerCase()));
             if (partial) return partial;
         }
+
+        // For other courses, or if no preference, use the round's tee box
+        // Try to get from initialRound first (the selected tee for this round)
+        if (initialRound?.rating && initialRound?.slope) {
+            const roundTee = defaultCourse.tee_boxes.find(t =>
+                t.rating === initialRound.rating && t.slope === initialRound.slope
+            );
+            if (roundTee) return roundTee;
+        }
+
+        // Fallback to White tee or first available
         const white = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes('white'));
         return white || defaultCourse.tee_boxes[0];
     };
@@ -961,8 +976,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     playersInRound={initialRound?.players?.map((p: any) => p.is_guest ? p.id : p.player.id) || []}
                     onSelectionChange={handleAddPlayers}
                     courseData={defaultCourse ? {
+                        courseName: defaultCourse.name,
                         teeBoxes: defaultCourse.tee_boxes,
-                        par: defaultCourse.holes.reduce((sum, h) => sum + h.par, 0)
+                        par: defaultCourse.holes.reduce((sum, h) => sum + h.par, 0),
+                        roundTeeBox: initialRound ? {
+                            rating: initialRound.rating,
+                            slope: initialRound.slope
+                        } : null
                     } : null}
                 />
 
