@@ -42,17 +42,17 @@ export async function recalculatePlayerHandicap(playerId: string) {
 
         const v3Rounds: HistoryItem[] = v3RoundsRaw
             .filter((r: any) => {
-                const isComplete = r.round.completed === true;
+                // const isComplete = r.round.completed === true;
                 const isNotLive = r.round.is_live !== true;  // Exclude live rounds (include false and null)
                 const score = r.adjusted_gross_score || r.gross_score;
                 const isHighEnough = score > 60;
 
-                if (!isComplete) console.log(`[Recalc] Skipping round ${r.round.date} (Incomplete)`);
-                else if (!isNotLive) console.log(`[Recalc] Skipping round ${r.round.date} (Live round)`);
+                // if (!isComplete) console.log(`[Recalc] Skipping round ${r.round.date} (Incomplete)`);
+                if (!isNotLive) console.log(`[Recalc] Skipping round ${r.round.date} (Live round)`);
                 else if (!isHighEnough) console.log(`[Recalc] Skipping round ${r.round.date} (Score too low: ${score})`);
                 else console.log(`[Recalc] INCLUDING round ${r.round.date} (Score: ${score})`);
 
-                return r.tee_box && score && isComplete && isNotLive && isHighEnough;
+                return r.tee_box && score && isNotLive && isHighEnough;
             })
             .map((r: any) => ({
                 type: 'v3',

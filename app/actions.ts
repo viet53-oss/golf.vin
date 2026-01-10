@@ -7,6 +7,29 @@ import { calculateAdjustedGrossScore } from '@/lib/adjusted-score';
 import { calculateScoreDifferential } from '@/lib/handicap';
 import { recalculatePlayerHandicap } from './actions/recalculate-player';
 
+export async function updateRoundPlayerTeeBox(roundPlayerId: string, teeBoxId: string) {
+    const teeBox = await prisma.teeBox.findUnique({
+        where: { id: teeBoxId }
+    });
+
+    if (!teeBox) {
+        throw new Error("Tee box not found");
+    }
+
+    const roundPlayer = await prisma.roundPlayer.update({
+        where: { id: roundPlayerId },
+        data: {
+            tee_box_id: teeBoxId,
+            tee_box_name: teeBox.name,
+            tee_box_slope: Math.round(teeBox.slope),
+            tee_box_rating: teeBox.rating
+        }
+    });
+
+    revalidatePath(`/scores/${roundPlayer.round_id}/edit`);
+    revalidatePath('/scores');
+}
+
 type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
 
 export async function postScore(formData: FormData) {
@@ -96,7 +119,7 @@ export async function postScore(formData: FormData) {
     });
 
     // Automatically recalculate handicap for this player
-    // await recalculatePlayerHandicap(playerId);
+    await recalculatePlayerHandicap(playerId);
 
     revalidatePath('/players');
     revalidatePath('/scores');
@@ -172,15 +195,52 @@ export async function createLiveRound(data: {
     return round;
 }
 
-export async function updateRound(roundId: string, data: { date: string; name?: string; is_tournament: boolean }) {
-    await prisma.round.update({
-        where: { id: roundId },
-        data: {
-            date: data.date,
-            name: data.name,
-            is_tournament: data.is_tournament,
-        },
-    });
+export async function updateRound(roundId: string, data: { date: string; name?: string; is_tournament: boolean; courseId?: string }) {
+    if (data.courseId) {
+        // If course is changing, we need to:
+        // 1. Update round course_id
+        // 2. Clear tee_box_id for all players (since tee boxes belong to old course)
+        // 3. Delete all scores (since hole_ids belong to old course)
+        await prisma.$transaction([
+            prisma.round.update({
+                where: { id: roundId },
+                data: {
+                    date: data.date,
+                    name: data.name,
+                    is_tournament: data.is_tournament,
+                    course_id: data.courseId,
+                },
+            }),
+            // Reset tee boxes for players in this round
+            prisma.roundPlayer.updateMany({
+                where: { round_id: roundId },
+                data: { tee_box_id: null, tee_box_name: null, tee_box_slope: null, tee_box_rating: null }
+            }),
+            // Delete scores for players in this round (can't do simple deleteMany on scores directly via round relation easily without generic deleteMany with join, 
+            // so finding players first or deleteMany on Score where round_player.round_id = roundId if schema supports. 
+            // Prisma doesn't support deep nested deleteMany easily. Let's find players first.)
+        ]);
+
+        // Delete scores separately or via raw query for efficiency? 
+        // Or fetch round players and delete their scores.
+        const rps = await prisma.roundPlayer.findMany({ where: { round_id: roundId }, select: { id: true } });
+        if (rps.length > 0) {
+            await prisma.score.deleteMany({
+                where: { round_player_id: { in: rps.map(rp => rp.id) } }
+            });
+        }
+
+    } else {
+        await prisma.round.update({
+            where: { id: roundId },
+            data: {
+                date: data.date,
+                name: data.name,
+                is_tournament: data.is_tournament,
+            },
+        });
+    }
+    revalidatePath(`/scores/${roundId}/edit`);
     revalidatePath('/scores');
 }
 
@@ -249,8 +309,8 @@ export async function addPlayersToRound(roundId: string, playerIds: string[]) {
             tee_box_id: defaultTee?.id // May be undefined if no tees exist, but schema usually requires it or allows null. Schema allows null? Let's assume nullable or handled.
         })),
     });
+    revalidatePath(`/scores/${roundId}/edit`);
     revalidatePath('/scores');
-    // We might need to revalidate the specific edit page, but typically server actions revalidate paths.
 }
 
 export async function removePlayerFromRound(roundPlayerId: string) {
@@ -260,9 +320,10 @@ export async function removePlayerFromRound(roundPlayerId: string) {
             where: { round_player_id: roundPlayerId }
         });
 
-        await prisma.roundPlayer.delete({
+        const deleted = await prisma.roundPlayer.delete({
             where: { id: roundPlayerId },
         });
+        revalidatePath(`/scores/${deleted.round_id}/edit`);
         revalidatePath('/scores');
     } catch (error) {
         console.error("Error removing player:", error);
@@ -392,7 +453,15 @@ export async function updatePlayerScore(
             },
         });
 
-        // 2. If hole-by-hole scores provided, update them
+        // 2. Ensure round is marked completed if not live (fixes "stuck" rounds)
+        if (!roundPlayer.round.is_live) {
+            await tx.round.update({
+                where: { id: roundPlayer.round.id },
+                data: { completed: true }
+            });
+        }
+
+        // 3. If hole-by-hole scores provided, update them
         if (holeScores && holeScores.length > 0) {
             // Delete existing scores for this round player
             await tx.score.deleteMany({
@@ -416,9 +485,10 @@ export async function updatePlayerScore(
         select: { player_id: true }
     });
     if (playerInfo) {
-        // await recalculatePlayerHandicap(playerInfo.player_id);
+        await recalculatePlayerHandicap(playerInfo.player_id);
     }
 
+    revalidatePath(`/scores/${roundPlayer.round.id}/edit`);
     revalidatePath('/scores');
 }
 
@@ -489,40 +559,151 @@ export async function deleteEvent(id: string) {
 }
 
 export async function createRoundWithPlayers(
-    data: { date: string; name: string; is_tournament: boolean },
-    playerIds: string[]
+    data: { date: string; name: string; is_tournament: boolean; courseId?: string },
+    players: {
+        playerId: string;
+        teeBoxId?: string;
+        gross?: number | null;
+        points?: number;
+        payout?: number;
+        scores?: { holeId: string; strokes: number }[];
+    }[]
 ) {
-    // 1. Get a default course (needed for DB constraint)
-    const defaultCourse = await prisma.course.findFirst({
-        include: { tee_boxes: true }
-    });
-    if (!defaultCourse) {
-        throw new Error('No courses found.');
+    // 1. Get the course WITH holes
+    let course;
+    const include = { tee_boxes: true, holes: true };
+
+    if (data.courseId) {
+        course = await prisma.course.findUnique({
+            where: { id: data.courseId },
+            include
+        });
+        if (!course) throw new Error('Course not found.');
+    } else {
+        course = await prisma.course.findFirst({
+            include
+        });
+        if (!course) throw new Error('No courses found.');
     }
 
-    // 2. Create the round
+    // 2. Fetch Player Indices for Snapshot
+    const playerIds = players.map(p => p.playerId);
+    const dbPlayers = await prisma.player.findMany({
+        where: { id: { in: playerIds } },
+        select: { id: true, index: true }
+    });
+    const playerMap = new Map(dbPlayers.map(p => [p.id, p]));
+
+    // 3. Create the round
     const round = await prisma.round.create({
         data: {
-            date: data.date, // Expecting full ISO string or YYYY-MM-DD
-            course_id: defaultCourse.id,
+            date: data.date,
+            course_id: course.id,
             name: data.name,
             is_tournament: data.is_tournament,
+            completed: true,
         },
     });
 
-    // 3. Add players if any
-    if (playerIds.length > 0) {
-        const defaultTee = defaultCourse.tee_boxes.find(t => t.name === 'White') || defaultCourse.tee_boxes[0];
+    // 4. Add players and calculate stats
+    if (players.length > 0) {
+        const defaultTee = course.tee_boxes.find(t => t.name === 'White') || course.tee_boxes[0];
+        const holesMap = new Map<string, { id: string; hole_number: number; par: number }>(
+            course.holes.map(h => [h.id, h])
+        );
+        const coursePar = course.holes.reduce((sum, h) => sum + h.par, 0);
 
-        await prisma.roundPlayer.createMany({
-            data: playerIds.map(pid => ({
-                round_id: round.id,
-                player_id: pid,
-                gross_score: null,
-                tee_box_id: defaultTee?.id
-            })),
-        });
+        // Process sequentially
+        for (const p of players) {
+            const teeBoxId = p.teeBoxId || defaultTee?.id;
+            const teeBox = course.tee_boxes.find(t => t.id === teeBoxId);
+            const dbPlayer = playerMap.get(p.playerId);
+
+            let front9: number | null = null;
+            let back9: number | null = null;
+            let adjustedGross = p.gross ?? null;
+            let differential: number | null = null;
+            let courseHandicap: number | null = null;
+
+            // Calculate Front/Back/Adjusted from hole scores if available
+            if (p.scores && p.scores.length > 0) {
+                let f9 = 0;
+                let b9 = 0;
+                const calcHoles: { holeNumber: number; par: number; strokes: number }[] = [];
+
+                for (const s of p.scores) {
+                    const hole = holesMap.get(s.holeId);
+                    if (hole) {
+                        calcHoles.push({ holeNumber: hole.hole_number, par: hole.par, strokes: s.strokes });
+                        if (hole.hole_number <= 9) f9 += s.strokes;
+                        else b9 += s.strokes;
+                    }
+                }
+                front9 = f9 > 0 ? f9 : null;
+                back9 = b9 > 0 ? b9 : null;
+
+                // ESC Calculation
+                const result = calculateAdjustedGrossScore(calcHoles);
+                // Only use calculated adjusted gross if we have scores, otherwise trust p.gross (or keep logic consistent)
+                if (calcHoles.length > 0) {
+                    adjustedGross = result.adjustedGrossScore;
+                }
+            }
+
+            // Calculate Course Handicap
+            // Formula: Index * (Slope / 113) + (Rating - Par)
+            if (dbPlayer && teeBox) {
+                // Determine par for this tee box (approximate with course par if tee box par not stored)
+                // Assuming defaults. Ideally TeeBox model would have Par.
+                courseHandicap = Math.round(dbPlayer.index * (teeBox.slope / 113) + (teeBox.rating - coursePar));
+            }
+
+            // Calculate Score Differential
+            if (adjustedGross && teeBox) {
+                differential = calculateScoreDifferential(adjustedGross, teeBox.rating, teeBox.slope, 0);
+            }
+
+            const rp = await prisma.roundPlayer.create({
+                data: {
+                    round_id: round.id,
+                    player_id: p.playerId,
+                    gross_score: p.gross ?? null,
+                    adjusted_gross_score: adjustedGross,
+                    score_differential: differential,
+
+                    tee_box_id: teeBox?.id,
+                    tee_box_name: teeBox?.name,
+                    tee_box_rating: teeBox?.rating,
+                    tee_box_slope: teeBox?.slope ? Math.round(teeBox.slope) : null,
+                    tee_box_par: coursePar,
+
+                    course_handicap: courseHandicap,
+                    index_at_time: dbPlayer?.index,
+
+                    front_nine: front9,
+                    back_nine: back9,
+
+                    points: p.points || 0,
+                    payout: p.payout || 0
+                }
+            });
+
+            // Insert scores if present
+            if (p.scores && p.scores.length > 0) {
+                await prisma.score.createMany({
+                    data: p.scores.map(s => ({
+                        round_player_id: rp.id,
+                        hole_id: s.holeId,
+                        strokes: s.strokes
+                    }))
+                });
+            }
+        }
     }
+
+    // 5. Recalculate Handicap for all involved players
+    // Using Promise.allSettled to avoid failing the request if one calculation fails
+    await Promise.allSettled(players.map(p => recalculatePlayerHandicap(p.playerId)));
 
     revalidatePath('/scores');
     return round.id;

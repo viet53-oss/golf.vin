@@ -35,6 +35,14 @@ export default async function EditRoundPage({ params }: { params: Promise<{ id: 
         orderBy: { name: 'asc' }
     });
 
+    const allCourses = await prisma.course.findMany({
+        include: {
+            holes: true,
+            tee_boxes: true
+        },
+        orderBy: { name: 'asc' }
+    });
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
             <header className="bg-white shadow-sm sticky top-0 z-10 px-1 py-3">
@@ -44,7 +52,7 @@ export default async function EditRoundPage({ params }: { params: Promise<{ id: 
             </header>
 
             <main className="px-1 py-6">
-                <EditRoundForm round={round} allPlayers={allPlayers} />
+                <EditRoundForm round={round} allPlayers={allPlayers} allCourses={allCourses} />
             </main>
         </div>
     );

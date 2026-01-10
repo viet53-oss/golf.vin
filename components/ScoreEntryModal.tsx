@@ -20,6 +20,7 @@ type ScoreModalProps = {
     isOpen: boolean;
     onClose: () => void;
     playerName: string;
+    courseName: string;
     courseId: string;
     roundPlayerId: string;
     currentGross: number | null;
@@ -151,6 +152,7 @@ export default function ScoreEntryModal({
     isOpen,
     onClose,
     playerName,
+    courseName,
     courseId,
     roundPlayerId,
     currentGross,
@@ -180,37 +182,58 @@ export default function ScoreEntryModal({
             setPoints(currentPoints || 0);
             setPayout(currentPayout || 0);
 
-            Promise.all([
-                fetch(`/api/holes?courseId=${courseId}`).then(res => res.json()),
-                fetch(`/api/round-player/${roundPlayerId}/scores`).then(res => res.json())
-            ])
-                .then(([holeData, existingScores]) => {
-                    console.log('Loaded holes:', holeData);
-                    console.log('Loaded existing scores:', existingScores);
-                    setHoles(holeData);
+            // Check if this is a temporary/new round player
+            const isNewRoundPlayer = roundPlayerId.startsWith('temp-');
 
-                    // If we have existing scores, map them to our scores array
-                    if (Array.isArray(existingScores) && existingScores.length > 0) {
-                        const newScores = Array(18).fill(0);
-                        existingScores.forEach((s: any) => {
-                            // Find which hole index this is (0-17)
-                            const holeIndex = holeData.findIndex((h: any) => h.id === s.hole_id);
-                            if (holeIndex !== -1) {
-                                newScores[holeIndex] = s.strokes;
-                            }
-                        });
-                        setScores(newScores);
-                        console.log('Mapped scores:', newScores);
-                    } else {
-                        console.log('No existing scores found');
-                    }
+            if (isNewRoundPlayer) {
+                // For new rounds, just fetch holes, no existing scores
+                fetch(`/api/holes?courseId=${courseId}`)
+                    .then(res => res.json())
+                    .then(holeData => {
+                        console.log('Loaded holes:', holeData);
+                        setHoles(holeData);
+                        // Initialize with empty scores
+                        setScores(Array(18).fill(0));
+                        setIsLoading(false);
+                    })
+                    .catch(err => {
+                        console.error('Failed to load holes:', err);
+                        setIsLoading(false);
+                    });
+            } else {
+                // For existing rounds, fetch both holes and scores
+                Promise.all([
+                    fetch(`/api/holes?courseId=${courseId}`).then(res => res.json()),
+                    fetch(`/api/round-player/${roundPlayerId}/scores`).then(res => res.json())
+                ])
+                    .then(([holeData, existingScores]) => {
+                        console.log('Loaded holes:', holeData);
+                        console.log('Loaded existing scores:', existingScores);
+                        setHoles(holeData);
 
-                    setIsLoading(false);
-                })
-                .catch(err => {
-                    console.error('Failed to load scorecard detail:', err);
-                    setIsLoading(false);
-                });
+                        // If we have existing scores, map them to our scores array
+                        if (Array.isArray(existingScores) && existingScores.length > 0) {
+                            const newScores = Array(18).fill(0);
+                            existingScores.forEach((s: any) => {
+                                // Find which hole index this is (0-17)
+                                const holeIndex = holeData.findIndex((h: any) => h.id === s.hole_id);
+                                if (holeIndex !== -1) {
+                                    newScores[holeIndex] = s.strokes;
+                                }
+                            });
+                            setScores(newScores);
+                            console.log('Mapped scores:', newScores);
+                        } else {
+                            console.log('No existing scores found');
+                        }
+
+                        setIsLoading(false);
+                    })
+                    .catch(err => {
+                        console.error('Failed to load scorecard detail:', err);
+                        setIsLoading(false);
+                    });
+            }
         }
     }, [isOpen, courseId, roundPlayerId, currentPoints, currentPayout]);
 
@@ -296,85 +319,104 @@ export default function ScoreEntryModal({
                         <p className="text-sm text-gray-400 mt-2">Please add hole information in the database first.</p>
                     </div>
                 ) : (
-                    <div className="overflow-y-auto px-1 pb-8 bg-slate-50">
+                    <>
+                        <div className="overflow-y-auto flex-1 px-1 pb-8 bg-slate-50">
 
-                        {/* Header Title */}
-                        <div className="text-center mb-8">
-                            <h2 className="text-3xl font-black text-black tracking-tight">{playerName}</h2>
+                            {/* Header Title */}
+                            <div className="text-center mb-6">
+                                <h2 className="text-3xl font-black text-black tracking-tight">{playerName}</h2>
+
+                                {/* Course and Tee Box Info */}
+                                <div className="mt-3 space-y-1">
+                                    <p className="text-[14pt] font-bold text-gray-700">{courseName}</p>
+                                    {teeBox && (
+                                        <div className="flex justify-center items-center gap-3 text-[14pt] text-gray-600">
+                                            <span className="font-bold">Tee: {teeBox.name}</span>
+                                            <span>•</span>
+                                            <span>Par: {totalPar}</span>
+                                            <span>•</span>
+                                            <span>Rating: {teeBox.rating}</span>
+                                            <span>•</span>
+                                            <span>Slope: {teeBox.slope}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Big Stats Row moved to bottom */}
+
+                            {/* Front 9 */}
+                            <NineHoleSection
+                                title="Front 9"
+                                holes={frontNineHoles}
+                                totalLabel="OUT"
+                                totalPar={frontPar}
+                                totalScore={frontTotal}
+                                startIdx={0}
+                                scores={scores}
+                                updateScore={updateScore}
+                                getScoreClass={getScoreClass}
+                            />
+
+                            {/* Back 9 */}
+                            <NineHoleSection
+                                title="Back 9"
+                                holes={backNineHoles}
+                                totalLabel="IN"
+                                totalPar={backPar}
+                                totalScore={backTotal}
+                                startIdx={9}
+                                scores={scores}
+                                updateScore={updateScore}
+                                getScoreClass={getScoreClass}
+                            />
+
+                            {/* Legend */}
+                            <div className="flex flex-wrap justify-center gap-3 mt-8">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-3 h-3 bg-blue-200 border border-blue-300 rounded-sm"></span>
+                                    <span className="text-[14pt] font-bold text-gray-500 uppercase">Eagle+</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-3 h-3 bg-emerald-200 border border-emerald-300 rounded-sm"></span>
+                                    <span className="text-[14pt] font-bold text-gray-500 uppercase">Birdie</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></span>
+                                    <span className="text-[14pt] font-bold text-gray-500 uppercase">Par</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-3 h-3 bg-amber-100 border border-amber-200 rounded-sm"></span>
+                                    <span className="text-[14pt] font-bold text-gray-500 uppercase">Bogey</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="w-3 h-3 bg-rose-200 border border-rose-300 rounded-sm"></span>
+                                    <span className="text-[14pt] font-bold text-gray-500 uppercase">Double+</span>
+                                </div>
+                            </div>
+
+                            {/* Big Stats Row */}
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mt-8 flex justify-around items-center text-center">
+                                <div>
+                                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">GRS</span>
+                                    <span className="text-3xl sm:text-4xl font-black text-black">{grossTotal || '-'}</span>
+                                </div>
+                                <div className="w-px h-10 bg-gray-100 mx-1"></div>
+                                <div>
+                                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">HCP</span>
+                                    <span className="text-3xl sm:text-4xl font-black text-black">{courseHcp}</span>
+                                </div>
+                                <div className="w-px h-10 bg-gray-100 mx-1"></div>
+                                <div>
+                                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">NET</span>
+                                    <span className="text-3xl sm:text-4xl font-black text-black">{netScore || '-'}</span>
+                                </div>
+                            </div>
+
                         </div>
 
-                        {/* Big Stats Row moved to bottom */}
-
-                        {/* Front 9 */}
-                        <NineHoleSection
-                            title="Front 9"
-                            holes={frontNineHoles}
-                            totalLabel="OUT"
-                            totalPar={frontPar}
-                            totalScore={frontTotal}
-                            startIdx={0}
-                            scores={scores}
-                            updateScore={updateScore}
-                            getScoreClass={getScoreClass}
-                        />
-
-                        {/* Back 9 */}
-                        <NineHoleSection
-                            title="Back 9"
-                            holes={backNineHoles}
-                            totalLabel="IN"
-                            totalPar={backPar}
-                            totalScore={backTotal}
-                            startIdx={9}
-                            scores={scores}
-                            updateScore={updateScore}
-                            getScoreClass={getScoreClass}
-                        />
-
-                        {/* Legend */}
-                        <div className="flex flex-wrap justify-center gap-3 mt-8">
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-3 h-3 bg-blue-200 border border-blue-300 rounded-sm"></span>
-                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Eagle+</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-3 h-3 bg-emerald-200 border border-emerald-300 rounded-sm"></span>
-                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Birdie</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-3 h-3 bg-white border border-gray-200 rounded-sm"></span>
-                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Par</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-3 h-3 bg-amber-100 border border-amber-200 rounded-sm"></span>
-                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Bogey</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-3 h-3 bg-rose-200 border border-rose-300 rounded-sm"></span>
-                                <span className="text-[14pt] font-bold text-gray-500 uppercase">Double+</span>
-                            </div>
-                        </div>
-
-                        {/* Big Stats Row */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mt-8 flex justify-around items-center text-center">
-                            <div>
-                                <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">GRS</span>
-                                <span className="text-3xl sm:text-4xl font-black text-black">{grossTotal || '-'}</span>
-                            </div>
-                            <div className="w-px h-10 bg-gray-100 mx-1"></div>
-                            <div>
-                                <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">HCP</span>
-                                <span className="text-3xl sm:text-4xl font-black text-black">{courseHcp}</span>
-                            </div>
-                            <div className="w-px h-10 bg-gray-100 mx-1"></div>
-                            <div>
-                                <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">NET</span>
-                                <span className="text-3xl sm:text-4xl font-black text-black">{netScore || '-'}</span>
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-3 pt-6 mt-6 border-t border-gray-200">
+                        {/* Actions Footer - Fixed at bottom */}
+                        <div className="flex gap-3 p-3 border-t border-gray-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving || grossTotal === 0}
@@ -389,9 +431,9 @@ export default function ScoreEntryModal({
                                 Cancel
                             </button>
                         </div>
-                    </div>
+                    </>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

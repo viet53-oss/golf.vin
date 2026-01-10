@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ConfirmModal from './ConfirmModal';
 
 interface GuestPlayerModalProps {
     isOpen: boolean;
@@ -26,6 +27,13 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
     const [index, setIndex] = useState('');
     const [courseHandicap, setCourseHandicap] = useState('');
     const [manuallyEditedHandicap, setManuallyEditedHandicap] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        isDestructive?: boolean;
+    } | null>(null);
 
     // Load editing guest data when modal opens
     useEffect(() => {
@@ -144,16 +152,18 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
                     {editingGuest && (
                         <button
                             onClick={() => {
-                                console.log('Delete button clicked', editingGuest);
-                                if (confirm('Are you sure you want to delete this guest player?')) {
-                                    console.log('Delete confirmed, calling onDelete with ID:', editingGuest.id);
-                                    if (onDelete && editingGuest) {
-                                        onDelete(editingGuest.id);
-                                        console.log('onDelete called');
-                                    } else {
-                                        console.log('onDelete is missing or editingGuest is null', { onDelete, editingGuest });
+                                setConfirmConfig({
+                                    isOpen: true,
+                                    title: 'Delete Guest Player',
+                                    message: 'Are you sure you want to delete this guest player?',
+                                    isDestructive: true,
+                                    onConfirm: () => {
+                                        setConfirmConfig(null);
+                                        if (onDelete && editingGuest) {
+                                            onDelete(editingGuest.id);
+                                        }
                                     }
-                                }
+                                });
                             }}
                             className="px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all text-[15pt]"
                         >
@@ -174,6 +184,16 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
                     </button>
                 </div>
             </div>
+            {confirmConfig && (
+                <ConfirmModal
+                    isOpen={confirmConfig.isOpen}
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    isDestructive={confirmConfig.isDestructive}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig(null)}
+                />
+            )}
         </div>
     );
 }

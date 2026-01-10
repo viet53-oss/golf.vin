@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal';
 import { LiveRoundModal } from '@/components/LiveRoundModal';
 import { GuestPlayerModal } from '@/components/GuestPlayerModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import AddToClubModal from '@/components/AddToClubModal';
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound, createDefaultLiveRound } from '@/app/actions/create-live-round';
 import { copyLiveToClub } from '@/app/actions/copy-live-to-club';
@@ -79,6 +80,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Track pending (unsaved) scores for the current hole only
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
     const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        isDestructive?: boolean;
+    } | null>(null);
 
     // GPS Logic with fallback for desktop
     useEffect(() => {
@@ -633,27 +641,34 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
     };
 
-    const handleCreateNewRound = async () => {
-        if (confirm('Create a new live round for today?')) {
-            // Get today's date in Chicago time to match server logic
-            const formatter = new Intl.DateTimeFormat('en-CA', {
-                timeZone: 'America/Chicago',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
-            const today = formatter.format(new Date());
+    const handleCreateNewRound = () => {
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Create New Round',
+            message: 'Create a new live round for today?',
+            isDestructive: false,
+            onConfirm: async () => {
+                setConfirmConfig(null);
+                // Get today's date in Chicago time to match server logic
+                const formatter = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: 'America/Chicago',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+                const today = formatter.format(new Date());
 
-            const result = await createDefaultLiveRound(today);
-            if (result.success && result.roundId) {
-                // Navigate to the new round
-                router.push(`/live?roundId=${result.roundId}`);
-                // Force a hard refresh to ensure state is clean
-                setTimeout(() => window.location.reload(), 100);
-            } else {
-                alert('Failed to create new round: ' + (result.error || 'Unknown error'));
+                const result = await createDefaultLiveRound(today);
+                if (result.success && result.roundId) {
+                    // Navigate to the new round
+                    router.push(`/live?roundId=${result.roundId}`);
+                    // Force a hard refresh to ensure state is clean
+                    setTimeout(() => window.location.reload(), 100);
+                } else {
+                    alert('Failed to create new round: ' + (result.error || 'Unknown error'));
+                }
             }
-        }
+        });
     };
 
     const updateScore = (playerId: string, increment: boolean) => {
@@ -927,31 +942,24 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     {isAdmin && (
                                         <>
                                             <button
-                                                onClick={async () => {
-                                                    console.log('Delete button clicked');
-                                                    console.log('liveRoundId:', liveRoundId);
-                                                    console.log('isAdmin:', isAdmin);
-
-                                                    if (!liveRoundId) {
-                                                        console.log('No liveRoundId, returning');
-                                                        return;
-                                                    }
-
-                                                    // Confirmation popup
-                                                    if (!confirm('Are you sure you want to delete this live round? This action cannot be undone.')) {
-                                                        return;
-                                                    }
-
-                                                    console.log('Deleting round...');
-                                                    try {
-                                                        console.log('Calling deleteLiveRound...');
-                                                        await deleteLiveRound(liveRoundId);
-                                                        console.log('Delete successful, redirecting to home');
-                                                        window.location.href = '/';
-                                                    } catch (err) {
-                                                        console.error('Failed to delete round:', err);
-                                                        alert('Failed to delete round.');
-                                                    }
+                                                onClick={() => {
+                                                    if (!liveRoundId) return;
+                                                    setConfirmConfig({
+                                                        isOpen: true,
+                                                        title: 'Delete Live Round',
+                                                        message: 'Are you sure you want to delete this live round? This action cannot be undone.',
+                                                        isDestructive: true,
+                                                        onConfirm: async () => {
+                                                            setConfirmConfig(null);
+                                                            try {
+                                                                await deleteLiveRound(liveRoundId);
+                                                                window.location.href = '/';
+                                                            } catch (err) {
+                                                                console.error('Failed to delete round:', err);
+                                                                alert('Failed to delete round.');
+                                                            }
+                                                        }
+                                                    });
                                                 }}
                                                 className="bg-red-600 text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
                                             >
@@ -1586,11 +1594,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {
                     isAdmin && liveRoundId && selectedPlayers.length > 0 && (
                         <button
-                            onClick={async () => {
-                                if (confirm('Save this round? This will finalize all scores. This data is isolated and will NOT affect handicaps or main scores.')) {
-                                    alert('Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
-                                    window.location.reload();
-                                }
+                            onClick={() => {
+                                setConfirmConfig({
+                                    isOpen: true,
+                                    title: 'Save Round',
+                                    message: 'Save this round? This will finalize all scores. This data is isolated and will NOT affect handicaps or main scores.',
+                                    isDestructive: false,
+                                    onConfirm: async () => {
+                                        setConfirmConfig(null);
+                                        alert('Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
+                                        window.location.reload();
+                                    }
+                                });
                             }}
                             className="w-full bg-black hover:bg-gray-800 text-white font-bold px-4 py-2 rounded-full shadow-lg transition-colors text-[15pt] mt-1 mb-1"
                         >
@@ -1600,9 +1615,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 }
 
                 {/* Scorecard Reminder */}
-                <div className="w-full text-center py-4">
+                <div className="w-auto mx-1 px-1 text-center py-4">
                     <p className="text-[16pt] font-bold text-gray-900">
-                        (If non Sat, text Vincent to submit scorecard.)
+                        (If not Sat, text Vincent to submit scorecard.)
                     </p>
                 </div>
             </main >
@@ -1760,6 +1775,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     </div>
                 )
             }
+            {confirmConfig && (
+                <ConfirmModal
+                    isOpen={confirmConfig.isOpen}
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    isDestructive={confirmConfig.isDestructive}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig(null)}
+                />
+            )}
         </div >
     );
 }

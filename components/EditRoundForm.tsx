@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
-import { updateRound, addPlayersToRound, removePlayerFromRound, deleteRound, updatePlayerScore, createRoundWithPlayers } from '@/app/actions';
+import { updateRound, addPlayersToRound, removePlayerFromRound, deleteRound, updatePlayerScore, createRoundWithPlayers, updateRoundPlayerTeeBox } from '@/app/actions';
 import ScoreEntryModal from './ScoreEntryModal';
+import ConfirmModal from './ConfirmModal';
 
 type Player = {
     id: string;
@@ -18,6 +19,7 @@ type RoundPlayer = {
     gross_score: number | null;
     player: Player;
     tee_box: {
+        id: string;
         name: string;
         slope: number;
         rating: number;
@@ -25,6 +27,7 @@ type RoundPlayer = {
     index_at_time: number | null;
     points: number;
     payout: number;
+    hole_scores?: { holeId: string, strokes: number }[];
 };
 
 type RoundData = {
@@ -43,10 +46,12 @@ type RoundData = {
 
 export default function EditRoundForm({
     round,
-    allPlayers
+    allPlayers,
+    allCourses
 }: {
     round: RoundData;
     allPlayers: Player[];
+    allCourses?: { id: string; name: string; holes: { par: number }[]; tee_boxes: { id: string; name: string; slope: number; rating: number }[] }[];
 }) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
@@ -66,9 +71,12 @@ export default function EditRoundForm({
     // Selection state for adding members
     const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<string>>(new Set());
 
-    // Filter out players already in the round (use local state)
     // Local state for players (to handle optimistic updates / new round mode)
     const [statePlayers, setStatePlayers] = useState<RoundPlayer[]>(round.players);
+
+    // State for selected course (for new rounds)
+    const [selectedCourseId, setSelectedCourseId] = useState<string>(round.course.id);
+    const [currentCourse, setCurrentCourse] = useState(round.course);
 
     // Initial load sync
     // update statePlayers if round.players changes (e.g. after server action refresh)
@@ -81,21 +89,21 @@ export default function EditRoundForm({
     // We can use a key on the component to force reset, or simpler:
     // Just initialize once. For existing rounds, router.refresh() will re-render this component with new props.
     // We want to update statePlayers when props change EXCEPT when we are locally managing 'new' round.
-    if (!isNew && round.players !== statePlayers && JSON.stringify(round.players) !== JSON.stringify(statePlayers)) {
-        // This pattern is risky in render, but with key navigation it might be okay.
-        // Better to use useEffect or just rely on key change remounting?
-        // Let's stick to initial state for now and update it manually or rely on router.refresh() for existing rounds.
-        // However, for existing rounds, add/remove triggers router.refresh(), so the parent passes new `round.players`.
-        // We need to keep `statePlayers` in sync.
-    }
+    // Sync statePlayers with round.players when props change (for existing rounds)
+    useEffect(() => {
+        if (!isNew) {
+            setStatePlayers(round.players);
+        }
+    }, [round.players, isNew]);
 
-    // Better approach: Derived state or Effect
-    // Since we are using router.refresh() for server actions, the component will re-render with new props.
-    // We should sync statePlayers to props.round.players whenever props change, IF !isNew.
-    // If isNew, we manage it fully locally.
-
-    // Use a key on the page.tsx to force remount? No, expensive.
-    // Let's use an effect to sync if not new.
+    // State for confirmation modal
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        isDestructive: boolean;
+    } | null>(null);
 
     // Calculate existing IDs based on STATE players
     const existingPlayerIds = new Set(statePlayers.map(rp => rp.player.id));
@@ -109,12 +117,34 @@ export default function EditRoundForm({
     });
 
     // Helper for Course Handicap Display in List
-    const coursePar = round.course.holes?.reduce((sum, h) => sum + h.par, 0) || 72;
-    const defaultTee = round.course.tee_boxes?.find(t => t.name === 'White') || round.course.tee_boxes?.[0];
+    const coursePar = currentCourse.holes?.reduce((sum, h) => sum + h.par, 0) || 72;
+    const defaultTee = currentCourse.tee_boxes?.find(t => t.name === 'White') || currentCourse.tee_boxes?.[0];
 
     const getCourseHcp = (index: number) => {
         if (!defaultTee) return Math.round(index);
         return Math.round(index * (defaultTee.slope / 113) + (defaultTee.rating - coursePar));
+    };
+
+    const handleCourseChange = (courseId: string) => {
+        if (!allCourses) return;
+
+        const newCourse = allCourses.find(c => c.id === courseId);
+        if (!newCourse) return;
+
+        setSelectedCourseId(courseId);
+        setCurrentCourse(newCourse);
+
+        if (isNew) {
+            // Reset players when course changes specifically for new rounds
+            setStatePlayers([]);
+        } else {
+            // For existing rounds, we keep players but invalidate their tee boxes
+            // since IDs won't match the new course
+            setStatePlayers(prev => prev.map(p => ({
+                ...p,
+                tee_box: null
+            })));
+        }
     };
 
     const handleSaveRound = async () => {
@@ -123,15 +153,29 @@ export default function EditRoundForm({
             const dateWithTime = date.includes('T') ? date : `${date}T12:00:00`;
 
             if (isNew) {
-                // Create new round with current players
-                const playerIds = statePlayers.map(p => p.player.id);
+                // Create new round with current players and selected course
+                const playersData = statePlayers.map(p => ({
+                    playerId: p.player.id,
+                    teeBoxId: p.tee_box?.id,
+                    gross: p.gross_score,
+                    points: p.points,
+                    payout: p.payout,
+                    scores: p.hole_scores
+                }));
+
                 await createRoundWithPlayers(
-                    { date: dateWithTime, name, is_tournament: isTournament },
-                    playerIds
+                    { date: dateWithTime, name, is_tournament: isTournament, courseId: selectedCourseId },
+                    playersData
                 );
             } else {
                 // Update existing
-                await updateRound(round.id, { date: dateWithTime, name, is_tournament: isTournament });
+                const courseChanged = selectedCourseId !== round.course.id;
+                await updateRound(round.id, {
+                    date: dateWithTime,
+                    name,
+                    is_tournament: isTournament,
+                    courseId: courseChanged ? selectedCourseId : undefined
+                });
             }
 
             router.push('/scores');
@@ -140,25 +184,27 @@ export default function EditRoundForm({
     };
 
     const handleDeleteClick = () => {
-        if (isNew) return; // Should be disabled anyway
+        if (isNew) return;
 
-        if (!deleteConfirm) {
-            setDeleteConfirm(true);
-            setTimeout(() => setDeleteConfirm(false), 3000); // Reset after 3s
-            return;
-        }
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Delete Round',
+            message: 'Are you sure you want to DELETE this round? This cannot be undone.',
+            isDestructive: true,
+            onConfirm: () => {
+                setConfirmConfig(null);
+                setErrorMessage('');
 
-        setErrorMessage('');
-
-        startTransition(async () => {
-            try {
-                await deleteRound(round.id);
-                router.push('/scores');
-                router.refresh();
-            } catch (e) {
-                console.error('Delete failed:', e);
-                setErrorMessage('Failed to delete. Error: ' + e);
-                setDeleteConfirm(false);
+                startTransition(async () => {
+                    try {
+                        await deleteRound(round.id);
+                        router.push('/scores');
+                        router.refresh();
+                    } catch (e) {
+                        console.error('Delete failed:', e);
+                        setErrorMessage('Failed to delete. Error: ' + e);
+                    }
+                });
             }
         });
     };
@@ -167,40 +213,94 @@ export default function EditRoundForm({
         if (selectedPlayerIds.size === 0) return;
 
         startTransition(async () => {
+            // Optimistic update logic (reused for both New and Edit modes)
+            const newPlayers: RoundPlayer[] = Array.from(selectedPlayerIds).map(pid => {
+                const player = allPlayers.find(p => p.id === pid)!;
+                const defaultTee = currentCourse.tee_boxes?.find(t => t.name === 'White') || currentCourse.tee_boxes?.[0] || null;
+                return {
+                    id: isNew ? `temp-${pid}` : `temp-opt-${pid}`, // temp ID for key
+                    gross_score: null,
+                    player: player,
+                    tee_box: defaultTee,
+                    index_at_time: player.index,
+                    points: 0,
+                    payout: 0
+                };
+            });
+
+            // Apply optimistic update
+            setStatePlayers(prev => [...prev, ...newPlayers]);
+            setSelectedPlayerIds(new Set()); // Clear selection immediately
+
             if (isNew) {
-                // Add to local state only
-                const newPlayers: RoundPlayer[] = Array.from(selectedPlayerIds).map(pid => {
-                    const player = allPlayers.find(p => p.id === pid)!;
-                    const defaultTee = round.course.tee_boxes?.find(t => t.name === 'White') || round.course.tee_boxes?.[0] || null;
-                    return {
-                        id: `temp-${pid}`, // Temp ID
-                        gross_score: null,
-                        player: player,
-                        tee_box: defaultTee,
-                        index_at_time: player.index,
-                        points: 0,
-                        payout: 0
-                    };
-                });
-                setStatePlayers(prev => [...prev, ...newPlayers]);
+                // Local state is enough
             } else {
-                // Server action
-                await addPlayersToRound(round.id, Array.from(selectedPlayerIds));
-                router.refresh();
+                try {
+                    // Server action
+                    await addPlayersToRound(round.id, Array.from(selectedPlayerIds));
+                    router.refresh();
+                } catch (error) {
+                    console.error("Failed to add players:", error);
+                    alert("Failed to add players.");
+                    // Revert? (Complex, rely on refresh usually)
+                    router.refresh();
+                }
             }
-            setSelectedPlayerIds(new Set()); // Clear selection
         });
     };
 
-    const handleRemovePlayer = async (roundPlayerId: string) => {
-        if (!confirm('Remove this player from the round?')) return;
+    const handleRemovePlayer = (roundPlayerId: string) => {
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Remove Player',
+            message: 'Remove this player from the round?',
+            isDestructive: true,
+            onConfirm: () => {
+                setConfirmConfig(null);
+
+                // Optimistic update immediately
+                setStatePlayers(prev => prev.filter(p => p.id !== roundPlayerId));
+
+                startTransition(async () => {
+                    if (isNew) {
+                        // Already updated local state above, nothing else to do
+                    } else {
+                        try {
+                            await removePlayerFromRound(roundPlayerId);
+                            router.refresh();
+                        } catch (error) {
+                            console.error("Failed to remove player:", error);
+                            alert("Failed to remove player. Please try again.");
+                            router.refresh();
+                        }
+                    }
+                });
+            }
+        });
+    };
+
+    const handleTeeBoxChange = async (roundPlayerId: string, teeBoxId: string) => {
+        const selectedTee = currentCourse.tee_boxes.find(t => t.id === teeBoxId);
+        if (!selectedTee) return;
 
         startTransition(async () => {
             if (isNew) {
-                // Remove from local state
-                setStatePlayers(prev => prev.filter(p => p.id !== roundPlayerId));
+                setStatePlayers(prev => prev.map(p => {
+                    if (p.id === roundPlayerId) {
+                        return {
+                            ...p,
+                            tee_box: selectedTee
+                        };
+                    }
+                    return p;
+                }));
             } else {
-                await removePlayerFromRound(roundPlayerId);
+                // Determine optimistic update or just refresh
+                // Let's do optimistic for better feel, though router.refresh is safest
+                // But since we are inside a map, we can't easily set state for just one unless we switch to full local state sync
+                // For now, rely on router.refresh() but maybe show spinner?
+                // Actually startTransition handles the loading UI if we used isPending everywhere, but we don't on the select
+                await updateRoundPlayerTeeBox(roundPlayerId, teeBoxId);
                 router.refresh();
             }
         });
@@ -231,10 +331,9 @@ export default function EditRoundForm({
                                         type="button"
                                         onClick={handleDeleteClick}
                                         disabled={isPending}
-                                        className={`${deleteConfirm ? 'bg-red-800 ring-2 ring-red-400' : 'bg-red-600 hover:bg-red-700'
-                                            } text-white text-[15pt] font-bold px-4 py-2 rounded-full transition-all shadow-md active:scale-95`}
+                                        className="bg-red-600 hover:bg-red-700 text-white text-[15pt] font-bold px-4 py-2 rounded-full transition-all shadow-md active:scale-95 disabled:opacity-50"
                                     >
-                                        {isPending ? 'Deleting...' : deleteConfirm ? 'Click AGAIN to Confirm' : 'Delete Round'}
+                                        {isPending ? 'Deleting...' : 'Delete Round'}
                                     </button>
                                 )}
                                 <Link href="/scores" className="bg-black text-white px-4 py-2 rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 flex items-center">
@@ -256,6 +355,20 @@ export default function EditRoundForm({
                             onChange={(e) => setDate(e.target.value)}
                         />
                     </div>
+                    {allCourses && allCourses.length > 1 && (
+                        <div>
+                            <label className="block text-[14pt] font-bold text-gray-700 mb-1">Course</label>
+                            <select
+                                className="w-full border border-gray-300 rounded px-1 py-2 text-[14pt]"
+                                value={selectedCourseId}
+                                onChange={(e) => handleCourseChange(e.target.value)}
+                            >
+                                {allCourses.map(course => (
+                                    <option key={course.id} value={course.id}>{course.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                     <div>
                         <label className="block text-[14pt] font-bold text-gray-700 mb-1">Name</label>
                         <input
@@ -347,7 +460,7 @@ export default function EditRoundForm({
                                     const idx = rp.index_at_time ?? rp.player.index;
                                     const slope = rp.tee_box?.slope ?? 113;
                                     const rating = rp.tee_box?.rating ?? 0; // If no tee, use 0 to signal invalid
-                                    const coursePar = round.course.holes?.reduce((sum, h) => sum + h.par, 0) || 72;
+                                    const coursePar = currentCourse.holes?.reduce((sum, h) => sum + h.par, 0) || 72;
 
                                     let courseHcp = 0;
                                     if (rp.tee_box) {
@@ -362,7 +475,19 @@ export default function EditRoundForm({
                                     return (
                                         <tr key={rp.id} className="group hover:bg-gray-50">
                                             <td className="py-3 font-medium">{rp.player.name}</td>
-                                            <td className="py-3 text-center">{rp.tee_box?.name || '-'}</td>
+                                            <td className="py-3 text-center">
+                                                <select
+                                                    className="border-none bg-transparent text-center font-medium focus:ring-2 focus:ring-blue-500 rounded p-1 cursor-pointer"
+                                                    value={rp.tee_box?.id || ''}
+                                                    onChange={(e) => handleTeeBoxChange(rp.id, e.target.value)}
+                                                    disabled={isPending}
+                                                >
+                                                    {!rp.tee_box && <option value="">Select Tee</option>}
+                                                    {currentCourse.tee_boxes?.map(t => (
+                                                        <option key={t.id} value={t.id}>{t.name}</option>
+                                                    ))}
+                                                </select>
+                                            </td>
                                             <td className="py-3 text-center">{gross ?? '-'}</td>
                                             <td className="py-3 text-center">{courseHcp}</td>
                                             <td className="py-3 text-center font-bold">{net ?? '-'}</td>
@@ -370,12 +495,12 @@ export default function EditRoundForm({
                                                 <div className="flex justify-center gap-2">
                                                     <button
                                                         onClick={() => {
+
                                                             setSelectedPlayer(rp);
                                                             setScoreModalOpen(true);
                                                         }}
                                                         className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 disabled:opacity-50"
-                                                        disabled={isNew}
-                                                        title={isNew ? "Save round first to enter scores" : "Edit Score"}
+                                                        title="Edit Score"
                                                     >
                                                         Edit
                                                     </button>
@@ -416,7 +541,8 @@ export default function EditRoundForm({
                         setSelectedPlayer(null);
                     }}
                     playerName={selectedPlayer.player.name}
-                    courseId={round.course.id}
+                    courseName={currentCourse.name}
+                    courseId={currentCourse.id}
                     roundPlayerId={selectedPlayer.id}
                     currentGross={selectedPlayer.gross_score}
                     currentFront={null}
@@ -426,11 +552,43 @@ export default function EditRoundForm({
                     playerIndex={selectedPlayer.player.index}
                     indexAtTime={selectedPlayer.index_at_time}
                     teeBox={selectedPlayer.tee_box}
-                    coursePar={round.course.holes?.reduce((sum, h) => sum + h.par, 0)}
+                    coursePar={currentCourse.holes?.reduce((sum, h) => sum + h.par, 0)}
                     onSave={async (gross, front, back, pts, pay, holeScores) => {
-                        await updatePlayerScore(selectedPlayer.id, gross, front, back, pts, pay, holeScores);
-                        router.refresh();
+                        const courseChanged = existingPlayerIds.size > 0 && currentCourse.id !== round.course.id;
+
+                        // If it's a new round OR the course has changed (which makes db incompatible), save locally
+                        if (isNew || courseChanged) {
+                            // Update local state
+                            setStatePlayers(prev => prev.map(p => {
+                                if (p.id === selectedPlayer.id) {
+                                    return {
+                                        ...p,
+                                        gross_score: gross,
+                                        points: pts,
+                                        payout: pay,
+                                        hole_scores: holeScores
+                                    };
+                                }
+                                return p;
+                            }));
+                        } else {
+                            // For existing rounds with same course, save to database directly
+                            await updatePlayerScore(selectedPlayer.id, gross, front, back, pts, pay, holeScores);
+                            router.refresh();
+                        }
                     }}
+                />
+            )}
+
+            {/* Confirmation Modal */}
+            {confirmConfig && (
+                <ConfirmModal
+                    isOpen={confirmConfig.isOpen}
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    isDestructive={confirmConfig.isDestructive}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig(null)}
                 />
             )}
         </div>

@@ -1,8 +1,8 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { saveRoundWinnings } from '@/app/actions';
 import Cookies from 'js-cookie';
+import ConfirmModal from './ConfirmModal';
 
 interface PayoutEntry {
     playerId: string;
@@ -18,6 +18,13 @@ export function SaveWinningsButton({
 }) {
     const [isSaving, setIsSaving] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        isDestructive?: boolean;
+    } | null>(null);
 
     // Check admin status on mount and when admin status changes
     useEffect(() => {
@@ -33,21 +40,26 @@ export function SaveWinningsButton({
         return () => window.removeEventListener('admin-change', checkAdmin);
     }, []);
 
-    const handleSave = async () => {
-        if (!confirm('This will save these calculated winnings to the database. Continue?')) {
-            return;
-        }
-
-        setIsSaving(true);
-        try {
-            await saveRoundWinnings(roundId, payouts);
-            alert('Winnings saved successfully!');
-        } catch (err) {
-            console.error(err);
-            alert('Failed to save winnings.');
-        } finally {
-            setIsSaving(false);
-        }
+    const handleSave = () => {
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Save Winnings',
+            message: 'This will save these calculated winnings to the database. Continue?',
+            isDestructive: false,
+            onConfirm: async () => {
+                setConfirmConfig(null);
+                setIsSaving(true);
+                try {
+                    await saveRoundWinnings(roundId, payouts);
+                    alert('Winnings saved successfully!');
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to save winnings.');
+                } finally {
+                    setIsSaving(false);
+                }
+            }
+        });
     };
 
     // Only render for admins
@@ -58,7 +70,7 @@ export function SaveWinningsButton({
             <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer"
+                className="w-full bg-[#059669] hover:bg-[#047857] text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[14pt] uppercase tracking-wider flex items-center justify-center gap-2 h-auto cursor-pointer disabled:opacity-50"
             >
                 {isSaving ? (
                     <>
@@ -69,6 +81,17 @@ export function SaveWinningsButton({
                     'Save Pool'
                 )}
             </button>
+
+            {confirmConfig && (
+                <ConfirmModal
+                    isOpen={confirmConfig.isOpen}
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    isDestructive={confirmConfig.isDestructive}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig(null)}
+                />
+            )}
         </div>
     );
 }

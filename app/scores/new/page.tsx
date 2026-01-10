@@ -3,17 +3,21 @@ import EditRoundForm from '@/components/EditRoundForm';
 import Link from 'next/link';
 
 export default async function NewRoundPage() {
-    // 1. Get default course (needed for the form structure)
-    const defaultCourse = await prisma.course.findFirst({
+    // 1. Get all courses
+    const allCourses = await prisma.course.findMany({
         include: {
             holes: true,
             tee_boxes: true
-        }
+        },
+        orderBy: { name: 'asc' }
     });
 
-    if (!defaultCourse) {
+    if (!allCourses || allCourses.length === 0) {
         return <div className="p-8">No courses found. Please create a course first.</div>;
     }
+
+    // Use City Park North as default if available, otherwise first course
+    const defaultCourse = allCourses.find(c => c.name.toLowerCase().includes('city park north')) || allCourses[0];
 
     // 2. Create a "stub" round object that matches the RoundData type
     const now = new Date();
@@ -48,7 +52,7 @@ export default async function NewRoundPage() {
             </header>
 
             <main className="px-1 py-6">
-                <EditRoundForm round={stubRound as any} allPlayers={allPlayers} />
+                <EditRoundForm round={stubRound as any} allPlayers={allPlayers} allCourses={allCourses} />
             </main>
         </div>
     );

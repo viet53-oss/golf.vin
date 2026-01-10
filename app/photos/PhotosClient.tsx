@@ -5,6 +5,7 @@ import { Upload, X, Trash2, Calendar, ImageIcon, Loader2, Edit2 } from 'lucide-r
 import { uploadPhoto, deletePhoto, getPhotos } from '../actions/photos';
 import Image from 'next/image';
 import { getTodayLocal, formatLocalDate } from '@/lib/date-utils';
+import ConfirmModal from '@/components/ConfirmModal';
 
 type Photo = {
     id: string;
@@ -18,7 +19,15 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
     const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
     const [offset, setOffset] = useState(15);
     const [hasMore, setHasMore] = useState(true);
+
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        isDestructive?: boolean;
+    } | null>(null);
 
     const [dragActive, setDragActive] = useState(false);
     const [date, setDate] = useState(getTodayLocal());
@@ -70,21 +79,29 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
     };
 
     const handleDelete = (id: string) => {
-        if (!confirm('Are you sure you want to delete this photo?')) return;
-        console.log('Deleting photo:', id);
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Delete Photo',
+            message: 'Are you sure you want to delete this photo?',
+            isDestructive: true,
+            onConfirm: () => {
+                setConfirmConfig(null);
+                console.log('Deleting photo:', id);
 
-        startTransition(async () => {
-            try {
-                const res = await deletePhoto(id);
-                console.log('Delete response:', res);
-                if (res.success) {
-                    setPhotos(current => current.filter(p => p.id !== id));
-                } else {
-                    alert('Failed to delete photo: ' + res.error);
-                }
-            } catch (error) {
-                console.error('Delete error client-side:', error);
-                alert('An error occurred while deleting the photo.');
+                startTransition(async () => {
+                    try {
+                        const res = await deletePhoto(id);
+                        console.log('Delete response:', res);
+                        if (res.success) {
+                            setPhotos(current => current.filter(p => p.id !== id));
+                        } else {
+                            alert('Failed to delete photo: ' + res.error);
+                        }
+                    } catch (error) {
+                        console.error('Delete error client-side:', error);
+                        alert('An error occurred while deleting the photo.');
+                    }
+                });
             }
         });
     };
@@ -341,6 +358,17 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                         </form>
                     </div>
                 </div>
+            )}
+
+            {confirmConfig && (
+                <ConfirmModal
+                    isOpen={confirmConfig.isOpen}
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    isDestructive={confirmConfig.isDestructive}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig(null)}
+                />
             )}
         </div>
     );

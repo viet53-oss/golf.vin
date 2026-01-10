@@ -77,7 +77,7 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         where: {
             player_id: playerId,
             gross_score: { gte: 1 },
-            round: { completed: true } // Only include completed rounds
+            // round: { completed: true } // Removed to showing all scored rounds
         },
         include: { round: true, tee_box: true }
     }) as RoundWithDetails[];

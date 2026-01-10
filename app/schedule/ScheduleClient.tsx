@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createEvent, deleteEvent } from '../actions';
 import Cookies from 'js-cookie';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface Event {
     id: string;
@@ -22,6 +23,13 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [isAdmin, setIsAdmin] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        isDestructive?: boolean;
+    } | null>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newEventName, setNewEventName] = useState('');
@@ -61,19 +69,26 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
 
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const handleDeleteEvent = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this event?')) return;
-
-        setDeletingId(id);
-        startTransition(async () => {
-            try {
-                await deleteEvent(id);
-                router.refresh();
-            } catch (error) {
-                console.error('Failed to delete:', error);
-                alert('Failed to delete event.');
-            } finally {
-                setDeletingId(null);
+    const handleDeleteEvent = (id: string) => {
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Delete Event',
+            message: 'Are you sure you want to delete this event?',
+            isDestructive: true,
+            onConfirm: () => {
+                setConfirmConfig(null);
+                setDeletingId(id);
+                startTransition(async () => {
+                    try {
+                        await deleteEvent(id);
+                        router.refresh();
+                    } catch (error) {
+                        console.error('Failed to delete:', error);
+                        alert('Failed to delete event.');
+                    } finally {
+                        setDeletingId(null);
+                    }
+                });
             }
         });
     };
@@ -182,6 +197,16 @@ export default function ScheduleClient({ initialEvents }: ScheduleClientProps) {
                         </div>
                     </div>
                 </div>
+            )}
+            {confirmConfig && (
+                <ConfirmModal
+                    isOpen={confirmConfig.isOpen}
+                    title={confirmConfig.title}
+                    message={confirmConfig.message}
+                    isDestructive={confirmConfig.isDestructive}
+                    onConfirm={confirmConfig.onConfirm}
+                    onCancel={() => setConfirmConfig(null)}
+                />
             )}
         </div>
     );
