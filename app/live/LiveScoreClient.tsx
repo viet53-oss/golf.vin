@@ -893,9 +893,21 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     </div>
                                     <div className="flex flex-wrap gap-x-2 gap-y-1 text-[15pt] text-gray-500 mt-1">
                                         <span>{initialRound?.date || todayStr}</span>
-                                        <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
-                                        <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
-                                        <span>S: {initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
+                                        <span>P:{initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
+                                        <span>R:{initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
+                                        <span>S:{initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
+                                        {(() => {
+                                            // Find the tee box name based on rating and slope
+                                            const teeBox = defaultCourse?.tee_boxes.find(t =>
+                                                t.rating === (initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating) &&
+                                                t.slope === (initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope)
+                                            );
+                                            const teeName = teeBox?.name || '';
+                                            const teeIndicator = teeName.toLowerCase().includes('white') ? 'W'
+                                                : teeName.toLowerCase().includes('gold') ? 'G'
+                                                    : teeName.charAt(0).toUpperCase();
+                                            return teeIndicator && <span className="px-2 py-0.5 rounded text-[12pt] font-bold bg-white text-black border border-black">{teeIndicator}</span>;
+                                        })()}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2 shrink-0">
@@ -1588,7 +1600,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* Scorecard Reminder */}
                 <div className="w-full text-center py-4">
                     <p className="text-[16pt] font-bold text-gray-900">
-                        (Text Vincent to turn in your scorecard.)
+                        (If non Sat, text Vincent to submit scorecard.)
                     </p>
                 </div>
             </main >
