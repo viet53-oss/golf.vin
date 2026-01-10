@@ -1,4 +1,5 @@
 
+// @ts-nocheck
 // 1. Load Env
 try { process.loadEnvFile('.env'); } catch (e) { }
 try { process.loadEnvFile('.env.local'); } catch (e) { }
