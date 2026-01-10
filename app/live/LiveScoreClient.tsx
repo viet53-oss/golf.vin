@@ -616,11 +616,32 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
         setSelectedPlayers(combinedSelection);
 
-        // 1. Ensure Live Round Exists (Fallback if server creation failed)
+        // 1. Ensure Live Round Exists (Auto-start or Auto-join)
         let currentLiveRoundId = liveRoundId;
         if (!currentLiveRoundId) {
-            alert("No active live round found. Please refresh the page.");
-            return;
+            // Check if there is already a live round for today to join
+            const existingRoundForToday = allLiveRounds.find(r => r.date === todayStr);
+
+            if (existingRoundForToday) {
+                console.log("Joining existing round:", existingRoundForToday.id);
+                currentLiveRoundId = existingRoundForToday.id;
+                setLiveRoundId(existingRoundForToday.id);
+                // Update URL silently
+                window.history.replaceState(null, '', `/live?roundId=${existingRoundForToday.id}`);
+            } else {
+                console.log("Starting new live round for today:", todayStr);
+                const result = await createDefaultLiveRound(todayStr);
+
+                if (result.success && result.roundId) {
+                    currentLiveRoundId = result.roundId;
+                    setLiveRoundId(result.roundId);
+                    // Update URL silently
+                    window.history.replaceState(null, '', `/live?roundId=${result.roundId}`);
+                } else {
+                    alert("Failed to start live round: " + result.error);
+                    return;
+                }
+            }
         }
 
         // 2. Add New Players to DB
@@ -631,11 +652,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             if (!alreadyExistsInInitialRound && !alreadyExistsInCurrentState) {
                 const teeBox = getPlayerTee(player);
                 if (currentLiveRoundId && teeBox?.id) {
-                    await addPlayerToLiveRound({
+                    const addResult = await addPlayerToLiveRound({
                         liveRoundId: currentLiveRoundId,
                         playerId: player.id,
                         teeBoxId: teeBox.id
                     });
+
+                    if (!addResult.success) {
+                        console.error(`Failed to add player ${player.name}:`, addResult.error);
+                    }
                 }
             }
         }
@@ -703,6 +728,49 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             localStorage.setItem('live_scoring_my_group', JSON.stringify(selectedPlayers.map(p => p.id)));
         }
     }, [selectedPlayers]);
+
+    // SELF-HEALING SYNC: Ensure locally selected players are actually ON the server
+    // This fixes the "missing players on other phones" issue by retrying the add if server state is stale
+    useEffect(() => {
+        if (!liveRoundId || selectedPlayers.length === 0) return;
+
+        const syncMissingPlayers = async () => {
+            const missingFromServer = selectedPlayers.filter(p => {
+                // Ignore guests (handled separately)
+                if (p.isGuest) return false;
+
+                // Check if player is in the server-provided initialRound
+                const existsOnServer = initialRound?.players?.some((rp: any) => rp.player?.id === p.id);
+                return !existsOnServer;
+            });
+
+            if (missingFromServer.length > 0) {
+                console.log("Found players missing from server (Ghost Players). Attempting repair:", missingFromServer.map(p => p.name));
+
+                let restoredCount = 0;
+                for (const p of missingFromServer) {
+                    const teeBox = getPlayerTee(p);
+                    if (teeBox && liveRoundId) {
+                        const res = await addPlayerToLiveRound({
+                            liveRoundId,
+                            playerId: p.id,
+                            teeBoxId: teeBox.id
+                        });
+                        if (res.success) restoredCount++;
+                    }
+                }
+
+                if (restoredCount > 0) {
+                    console.log(`Repaired ${restoredCount} ghost players. Refreshing...`);
+                    router.refresh();
+                }
+            }
+        };
+
+        // Debounce check to avoid spamming while initialRound loads
+        const timer = setTimeout(syncMissingPlayers, 3000);
+        return () => clearTimeout(timer);
+    }, [selectedPlayers, initialRound, liveRoundId]);
 
     // Calculate Summary Players (Union of Server State and Local Selection)
     // Create map from initialRound if available
@@ -818,12 +886,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const allActiveFinished = activePlayers.length > 0 && activePlayers.every(p => p.thru >= 18);
     const allPlayersFinished = rankedPlayers.length > 0 && rankedPlayers.every(p => p.thru >= 18);
 
-    // Optimized: Check if all players in the round have completed hole 3
+    // Optimized: Check if ANY player in the round has completed hole 3
     // Use summaryPlayers to include both local selections and server data
-    const allPlayersCompletedHole3 = summaryPlayers.length > 0 && summaryPlayers.every(p => scores.get(p.id)?.has(3));
+    const anyPlayerCompletedHole3 = summaryPlayers.length > 0 && summaryPlayers.some(p => scores.get(p.id)?.has(3));
 
-    // Hide Course and Group sections after hole 3 is completed by all players (except for admins)
-    const hideCourseAndGroupSections = !isAdmin && allPlayersCompletedHole3;
+    // Hide Course and Group sections after hole 3 is completed by ANY player (except for admins)
+    const hideCourseAndGroupSections = !isAdmin && anyPlayerCompletedHole3;
 
     // Calculate Stats (Birdies/Eagles) for Modal
     const playerStats = rankedPlayers.map(player => {

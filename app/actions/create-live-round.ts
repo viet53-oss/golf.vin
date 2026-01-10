@@ -44,14 +44,14 @@ export async function createLiveRound(data: {
  * Used by the "New Round" button in the UI
  */
 export async function createDefaultLiveRound(date: string) {
-    // Check admin permission
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    const isAdmin = cookieStore.get('admin_session')?.value === 'true';
+    // Check admin permission - REMOVED to allow first player to start round
+    // const { cookies } = await import('next/headers');
+    // const cookieStore = await cookies();
+    // const isAdmin = cookieStore.get('admin_session')?.value === 'true';
 
-    if (!isAdmin) {
-        throw new Error('Unauthorized');
-    }
+    // if (!isAdmin) {
+    //     throw new Error('Unauthorized');
+    // }
 
     try {
         // Get default course (City Park North)
