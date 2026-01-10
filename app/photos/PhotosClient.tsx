@@ -4,6 +4,7 @@ import { useState, useRef, useTransition, useEffect } from 'react';
 import { Upload, X, Trash2, Calendar, ImageIcon, Loader2, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { uploadPhoto, deletePhoto, getPhotos } from '../actions/photos';
 import Image from 'next/image';
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { getTodayLocal, formatLocalDate } from '@/lib/date-utils';
 import ConfirmModal from '@/components/ConfirmModal';
 
@@ -534,13 +535,26 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                 onClick={(e) => e.stopPropagation()}
                             />
                         ) : (
-                            /* Use simple img for Pinch-to-Zoom support on mobile browsers */
-                            <img
-                                src={sortedPhotos[viewingIndex].url}
-                                alt={sortedPhotos[viewingIndex].caption || 'Photo'}
-                                className="max-w-full max-h-full object-contain pointer-events-auto"
-                                onClick={(e) => e.stopPropagation()}
-                            />
+                            /* Use react-zoom-pan-pinch for Pinch-to-Zoom support */
+                            <TransformWrapper
+                                initialScale={1}
+                                minScale={1}
+                                maxScale={4}
+                                centerOnInit
+                                wheel={{ step: 0.2 }}
+                            >
+                                <TransformComponent
+                                    wrapperStyle={{ width: "100%", height: "100%" }}
+                                    contentStyle={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                >
+                                    <img
+                                        src={sortedPhotos[viewingIndex].url}
+                                        alt={sortedPhotos[viewingIndex].caption || 'Photo'}
+                                        className="max-w-full max-h-[90vh] object-contain pointer-events-auto shadow-2xl"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                </TransformComponent>
+                            </TransformWrapper>
                         )}
 
                         {/* Caption */}
