@@ -524,14 +524,14 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
 
                     {/* Main Content Area */}
                     <div
-                        className="relative w-full h-full flex items-center justify-center pointer-events-none"
+                        className="relative w-full h-full flex items-center justify-center"
                     >
                         {['.mp4', '.mov', '.webm', '.ogg'].some(ext => sortedPhotos[viewingIndex].url.toLowerCase().endsWith(ext)) ? (
                             <video
                                 src={sortedPhotos[viewingIndex].url}
                                 controls
                                 autoPlay
-                                className="max-w-full max-h-full object-contain pointer-events-auto"
+                                className="max-w-full max-h-full object-contain"
                                 onClick={(e) => e.stopPropagation()}
                             />
                         ) : (
@@ -550,7 +550,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                                     <img
                                         src={sortedPhotos[viewingIndex].url}
                                         alt={sortedPhotos[viewingIndex].caption || 'Photo'}
-                                        className="max-w-full max-h-[90vh] object-contain pointer-events-auto shadow-2xl"
+                                        className="max-w-full max-h-[90vh] object-contain shadow-2xl"
                                         onClick={(e) => e.stopPropagation()}
                                     />
                                 </TransformComponent>
