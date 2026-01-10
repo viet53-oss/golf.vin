@@ -93,8 +93,10 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
             try {
                 // Calculate par from holes
                 const coursePar = defaultCourse.holes.reduce((sum, hole) => sum + hole.par, 0);
-                // Use first tee box for default values (or fallback if none exist)
-                const defaultTeeBox = defaultCourse.tee_boxes[0];
+
+                // Find White tee box or fallback to first available
+                const whiteTee = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes('white'));
+                const defaultTeeBox = whiteTee || defaultCourse.tee_boxes[0];
 
                 activeRound = await prisma.liveRound.create({
                     data: {

@@ -38,32 +38,17 @@ export function LiveRoundModal({
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        if (existingRound) {
-            setName(existingRound.name);
-            setDate(existingRound.date);
-            setPar(existingRound.par);
-            setRating(existingRound.rating);
-            setSlope(existingRound.slope);
-            const cId = existingRound.course_id || '';
-            setSelectedCourseId(cId);
-
-            // Attempt to pre-select matching tee box or default to White
-            const c = allCourses.find(fc => fc.id === cId);
-            if (c) {
-                const match = c.tee_boxes.find((t: any) => t.rating === existingRound.rating && t.slope === existingRound.slope);
-                const whiteTee = c.tee_boxes.find((t: any) => t.name.toLowerCase().includes('white'));
-                const bestTee = match || whiteTee || c.tee_boxes[0];
-                if (bestTee) setSelectedTeeId(bestTee.id);
-            }
-        } else if (isOpen) {
-            // New Round defaults: City Park North & White Tee
+        if (isOpen) {
+            // Always default to City Park North & White Tee when modal opens
             const cpNorth = allCourses.find(c => c.name.toLowerCase().includes('city park north'));
             const initialCourse = cpNorth || allCourses.find(c => c.id === courseId) || allCourses[0];
 
             if (initialCourse) {
                 setSelectedCourseId(initialCourse.id);
                 setName(initialCourse.name);
-                setDate(today);
+
+                // Use existing round's date if editing, otherwise use today
+                setDate(existingRound?.date || today);
 
                 // Find White tee or first available
                 const whiteTee = initialCourse.tee_boxes.find((t: any) => t.name.toLowerCase().includes('white'));
@@ -84,7 +69,7 @@ export function LiveRoundModal({
                 }
             }
         }
-    }, [existingRound, isOpen, today, courseId, allCourses]);
+    }, [isOpen, today, courseId, allCourses, existingRound]);
 
     if (!isOpen) return null;
 

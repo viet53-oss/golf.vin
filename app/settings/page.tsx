@@ -14,6 +14,7 @@ import ManualScoreForm from './ManualScoreForm';
 import DeleteCourseButton from '@/components/DeleteCourseButton';
 import InstallAppButton from './InstallAppButton';
 import GPSPermissionButton from './GPSPermissionButton';
+import DeleteAllLiveRoundsButton from './DeleteAllLiveRoundsButton';
 
 // Native SVG components for settings/page.tsx
 const SettingsIcon = ({ className }: { className?: string }) => (
@@ -164,6 +165,13 @@ export default async function SettingsPage() {
                                     Check what data is actually saved in Viet's rounds.
                                 </p>
                                 <DiagnosticButton />
+                            </div>
+                            <div className="pt-2 border-t border-gray-200">
+                                <p className="text-[14pt] text-red-600 font-bold mb-2">🗑️ Reset Live Rounds</p>
+                                <p className="text-[14pt] text-gray-500 mb-3">
+                                    Delete all live rounds to test the default round creation with White tee.
+                                </p>
+                                <DeleteAllLiveRoundsButton />
                             </div>
                         </div>
                     </div>

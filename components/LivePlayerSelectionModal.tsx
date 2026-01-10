@@ -5,6 +5,15 @@ import { useState, useEffect } from 'react';
 interface Player {
     id: string;
     name: string;
+    index?: number;
+    preferred_tee_box?: string | null;
+}
+
+interface TeeBox {
+    id: string;
+    name: string;
+    rating: number;
+    slope: number;
 }
 
 export function LivePlayerSelectionModal({
@@ -13,7 +22,8 @@ export function LivePlayerSelectionModal({
     playersInRound = [],
     onSelectionChange,
     isOpen,
-    onClose
+    onClose,
+    courseData
 }: {
     allPlayers: Player[];
     selectedIds: string[];
@@ -21,6 +31,10 @@ export function LivePlayerSelectionModal({
     onSelectionChange: (ids: string[]) => void;
     isOpen: boolean;
     onClose: () => void;
+    courseData?: {
+        teeBoxes: TeeBox[];
+        par: number;
+    } | null;
 }) {
     const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedIds);
 
@@ -51,18 +65,39 @@ export function LivePlayerSelectionModal({
         return aLastName.localeCompare(bLastName);
     });
 
+    // Calculate course handicap for a player
+    const getCourseHandicap = (player: Player): number | null => {
+        if (!player.index || !courseData) return null;
+
+        // Find the player's preferred tee box
+        const preferredTee = courseData.teeBoxes.find(t =>
+            player.preferred_tee_box && t.name.toLowerCase().includes(player.preferred_tee_box.toLowerCase())
+        );
+
+        // Fallback to white tee if no preference
+        const teeBox = preferredTee || courseData.teeBoxes.find(t =>
+            t.name.toLowerCase().includes('white')
+        ) || courseData.teeBoxes[0];
+
+        if (!teeBox) return null;
+
+        // Course Handicap = (Handicap Index × Slope Rating / 113) + (Course Rating - Par)
+        const courseHandicap = (player.index * teeBox.slope / 113) + (teeBox.rating - courseData.par);
+        return Math.round(courseHandicap);
+    };
+
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <div className="bg-white w-full h-full flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
 
                 {/* Header */}
-                <div className="px-4 py-5 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-600 to-purple-600">
-                    <h2 className="text-[18pt] font-bold text-white tracking-tight text-left ml-3">Select Players in My Group</h2>
+                <div className="px-6 py-4 bg-white flex justify-between items-center">
+                    <h2 className="text-[18pt] font-bold text-left">Select Players in My Group</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors"
+                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        Close
                     </button>
                 </div>
 
@@ -97,11 +132,39 @@ export function LivePlayerSelectionModal({
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
                                             <span className={`text-[18pt] font-bold ${isDisabled ? 'text-gray-400' : isSelected ? 'text-blue-800' : 'text-gray-700'
                                                 }`}>
                                                 {player.name}
                                             </span>
+                                            <div className="flex items-center gap-1">
+                                                {/* Course Handicap */}
+                                                {(() => {
+                                                    const courseHcp = getCourseHandicap(player);
+                                                    return courseHcp !== null && (
+                                                        <span className={`text-[14pt] font-semibold ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            ({courseHcp})
+                                                        </span>
+                                                    );
+                                                })()}
+                                                {/* Tee Box Indicator */}
+                                                {player.preferred_tee_box && (
+                                                    <span className={`px-2 py-0.5 rounded text-[12pt] font-bold ${isDisabled
+                                                        ? 'bg-gray-200 text-gray-400'
+                                                        : player.preferred_tee_box.toLowerCase().includes('white')
+                                                            ? 'bg-white text-black border border-black'
+                                                            : player.preferred_tee_box.toLowerCase().includes('gold')
+                                                                ? 'bg-yellow-400 text-black'
+                                                                : 'bg-gray-300 text-gray-700'
+                                                        }`}>
+                                                        {player.preferred_tee_box.toLowerCase().includes('white')
+                                                            ? 'W'
+                                                            : player.preferred_tee_box.toLowerCase().includes('gold')
+                                                                ? 'G'
+                                                                : player.preferred_tee_box.charAt(0).toUpperCase()}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         {isDisabled && (
                                             <div className="text-[12pt] text-gray-500 italic mt-1">Already selected by another phone</div>

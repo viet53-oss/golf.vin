@@ -871,12 +871,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h2 className="text-[16pt] font-bold text-gray-900">{defaultCourse?.name || 'Round'}</h2>
+                                        <h2 className="text-[15pt] font-bold text-gray-900">{defaultCourse?.name || 'Round'}</h2>
                                         {isLocked && (
                                             <span className="bg-red-100 text-red-700 text-[10pt] font-black px-2 py-0.5 rounded-full uppercase">Locked</span>
                                         )}
                                     </div>
-                                    <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 mt-1">
+                                    <div className="flex flex-wrap gap-x-2 gap-y-1 text-[15pt] text-gray-500 mt-1">
                                         <span>{initialRound?.date || todayStr}</span>
                                         <span>Par: {initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
                                         <span>R: {initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
@@ -960,6 +960,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     selectedIds={selectedPlayers.map(p => p.id)}
                     playersInRound={initialRound?.players?.map((p: any) => p.is_guest ? p.id : p.player.id) || []}
                     onSelectionChange={handleAddPlayers}
+                    courseData={defaultCourse ? {
+                        teeBoxes: defaultCourse.tee_boxes,
+                        par: defaultCourse.holes.reduce((sum, h) => sum + h.par, 0)
+                    } : null}
                 />
 
                 <GuestPlayerModal

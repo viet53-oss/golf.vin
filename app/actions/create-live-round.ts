@@ -71,7 +71,10 @@ export async function createDefaultLiveRound(date: string) {
         }
 
         const coursePar = defaultCourse.holes.reduce((sum, h) => sum + h.par, 0);
-        const defaultTeeBox = defaultCourse.tee_boxes[0];
+
+        // Find White tee box or fallback to first available
+        const whiteTee = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes('white'));
+        const defaultTeeBox = whiteTee || defaultCourse.tee_boxes[0];
 
         const newRound = await prisma.liveRound.create({
             data: {
