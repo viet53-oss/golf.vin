@@ -359,6 +359,96 @@ export default function FAQClient({ players }: { players: Player[] }) {
                 </div>
             </section>
 
+            {/* 2026 PGA Tour Rule Changes */}
+            <section className="space-y-4 pt-6 mt-6 border-t border-gray-100">
+                <div className="bg-slate-900 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden ring-4 ring-slate-100">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl">2026</div>
+                    <h4 className="font-black text-[18pt] uppercase leading-tight mb-1">6 PGA Tour Rule Changes</h4>
+                    <p className="text-[12pt] text-green-400 font-bold uppercase tracking-widest mb-6 border-b border-gray-700 pb-4">Effective 2026 Season</p>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* 1. Ball Movement */}
+                            <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-2xl">⚠️</span>
+                                    <h5 className="font-black text-[15pt]">Ball Movement</h5>
+                                </div>
+                                <ul className="space-y-1 text-[13pt] text-gray-300 font-medium leading-snug">
+                                    <li>• <span className="text-white font-bold">1 stroke, not 2</span>, for unknowingly moving ball.</li>
+                                    <li>• No more harsh penalties.</li>
+                                </ul>
+                            </div>
+
+                            {/* 2. Embedded Ball */}
+                            <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-2xl">⛳</span>
+                                    <h5 className="font-black text-[15pt]">Embedded Ball</h5>
+                                </div>
+                                <ul className="space-y-1 text-[13pt] text-gray-300 font-medium leading-snug">
+                                    <li>• <span className="text-white font-bold">Free relief</span> from any pitch mark.</li>
+                                    <li>• Removes guesswork.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* 3. Internal O.B. */}
+                            <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-2xl">⛔</span>
+                                    <h5 className="font-black text-[15pt]">Internal O.B.</h5>
+                                </div>
+                                <ul className="space-y-1 text-[13pt] text-gray-300 font-medium leading-snug">
+                                    <li>• O.B. only for tee shots.</li>
+                                    <li>• No unfair limits on recovery.</li>
+                                </ul>
+                            </div>
+
+                            {/* 4. Obstructions */}
+                            <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-2xl">🚿</span>
+                                    <h5 className="font-black text-[15pt]">Obstructions</h5>
+                                </div>
+                                <ul className="space-y-1 text-[13pt] text-gray-300 font-medium leading-snug">
+                                    <li>• Relief beyond sprinkler heads.</li>
+                                    <li>• Includes mic holes.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* 5. Broken Clubs */}
+                            <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-2xl">🛠️</span>
+                                    <h5 className="font-black text-[15pt]">Broken Clubs</h5>
+                                </div>
+                                <ul className="space-y-1 text-[13pt] text-gray-300 font-medium leading-snug">
+                                    <li>• Repair with parts from bag.</li>
+                                    <li>• Practical mid-round fixes.</li>
+                                </ul>
+                            </div>
+
+                            {/* 6. Preferred Lies */}
+                            <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-2xl">📏</span>
+                                    <h5 className="font-black text-[15pt]">Preferred Lies</h5>
+                                </div>
+                                <ul className="space-y-1 text-[13pt] text-gray-300 font-medium leading-snug">
+                                    <li>• Relief reduced to scorecard.</li>
+                                    <li>• Fairer placements.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <p className="text-center mt-6 text-[11pt] text-gray-500 font-bold uppercase tracking-widest italic border-t border-gray-800 pt-3">Designed to reward skill — not technicalities.</p>
+                </div>
+            </section>
+
             {/* Stroke Allocation */}
             <section>
                 <div className="bg-amber-50 rounded-xl p-5 border border-amber-200 mb-6">

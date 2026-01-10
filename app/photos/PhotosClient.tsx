@@ -14,6 +14,57 @@ type Photo = {
     caption: string | null;
 };
 
+
+const compressImage = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        const img = document.createElement('img');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            img.src = e.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Max dimensions (1920px is good balance for web)
+                const MAX_WIDTH = 1920;
+                const MAX_HEIGHT = 1920;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const newFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(newFile);
+                    } else {
+                        reject(new Error('Canvas to Blob failed'));
+                    }
+                }, 'image/jpeg', 0.8); // 80% quality
+            };
+            img.onerror = reject;
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
 export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos: Photo[], isAdmin: boolean }) {
     const [isPending, startTransition] = useTransition();
     const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
@@ -62,9 +113,38 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
 
     const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
 
-    const handleUpload = async (file: File) => {
-        // Allow everyone to upload
-        // if (!isAdmin) return; 
+    const handleUpload = async (fileInput: File) => {
+        let file = fileInput;
+
+        // Validation & Compression
+        // Vercel Server Actions limit is ~4.5MB
+        const MAX_SIZE = 4.5 * 1024 * 1024;
+
+        if (file.size > MAX_SIZE) {
+            if (file.type.startsWith('video/')) {
+                alert("Video file is too large. Max limit is 4.5MB per upload.");
+                return;
+            }
+
+            // Attempt compression for images
+            if (file.type.startsWith('image/')) {
+                try {
+                    file = await compressImage(file);
+                    // Double check size after compression
+                    if (file.size > MAX_SIZE) {
+                        alert("Image is too large even after compression.");
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Compression failed", e);
+                    alert("Failed to process image.");
+                    return;
+                }
+            } else {
+                alert("File is too large (Max 4.5MB).");
+                return;
+            }
+        }
 
         const formData = new FormData();
         formData.append('file', file);
@@ -72,9 +152,18 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
         formData.append('caption', caption);
 
         startTransition(async () => {
-            await uploadPhoto(formData);
-            setCaption('');
-            window.location.reload();
+            try {
+                const res = await uploadPhoto(formData);
+                if (res.success) {
+                    setCaption('');
+                    window.location.reload();
+                } else {
+                    alert('Upload failed: ' + res.error);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Upload failed. File might be too large or network error.');
+            }
         });
     };
 
