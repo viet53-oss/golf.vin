@@ -54,7 +54,7 @@ interface LiveScoreClientProps {
         id: string;
         name: string;
         date: string;
-        created_at: Date;
+        created_at: string;
     }>;
     allCourses: Course[];
 }

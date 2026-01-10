@@ -204,11 +204,11 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
                 orderBy: { name: 'asc' },
                 select: { id: true, name: true, index: true, preferred_tee_box: true }
             })}
-            defaultCourse={defaultCourse}
-            allCourses={allCourses}
-            initialRound={activeRound}
+            defaultCourse={defaultCourse ? JSON.parse(JSON.stringify(defaultCourse)) : null}
+            allCourses={JSON.parse(JSON.stringify(allCourses))}
+            initialRound={activeRound ? JSON.parse(JSON.stringify(activeRound)) : null}
             todayStr={todayStr}
-            allLiveRounds={allLiveRounds}
+            allLiveRounds={allLiveRounds.map(r => ({ ...r, created_at: r.created_at.toISOString() }))}
         />
     );
 }

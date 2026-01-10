@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useTransition } from 'react';
-import { Upload, X, Trash2, Calendar, ImageIcon, Loader2, Edit2 } from 'lucide-react';
+import { useState, useRef, useTransition, useEffect } from 'react';
+import { Upload, X, Trash2, Calendar, ImageIcon, Loader2, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { uploadPhoto, deletePhoto, getPhotos } from '../actions/photos';
 import Image from 'next/image';
 import { getTodayLocal, formatLocalDate } from '@/lib/date-utils';
@@ -80,6 +80,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
         isDestructive?: boolean;
     } | null>(null);
 
+    const [viewingIndex, setViewingIndex] = useState<number | null>(null);
     const [dragActive, setDragActive] = useState(false);
     const [date, setDate] = useState(getTodayLocal());
     const [caption, setCaption] = useState('');
@@ -227,6 +228,7 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
             setHasMore(false);
         }
         setIsLoadingMore(false);
+        setIsLoadingMore(false);
     };
 
     const sortedPhotos = [...photos].sort((a, b) => {
@@ -234,6 +236,33 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
         const dateB = new Date(b.date).getTime();
         return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
+
+    const handleNext = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        if (viewingIndex === null) return;
+        setViewingIndex((prev) => (prev! + 1) % sortedPhotos.length);
+    };
+
+    const handlePrev = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        if (viewingIndex === null) return;
+        setViewingIndex((prev) => (prev! - 1 + sortedPhotos.length) % sortedPhotos.length);
+    };
+
+    // Keyboard support
+    // Keyboard support
+    useEffect(() => {
+        if (viewingIndex === null) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight') handleNext();
+            if (e.key === 'ArrowLeft') handlePrev();
+            if (e.key === 'Escape') setViewingIndex(null);
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [viewingIndex, sortedPhotos]);
 
     return (
         <div className="space-y-8">
@@ -320,12 +349,15 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {sortedPhotos.map(photo => {
+                    {sortedPhotos.map((photo, index) => {
                         const isVideo = ['.mp4', '.mov', '.webm', '.ogg'].some(ext => photo.url.toLowerCase().endsWith(ext));
 
                         return (
                             <div key={photo.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group hover:shadow-md transition-shadow">
-                                <div className="relative aspect-[4/3] bg-gray-100 flex items-center justify-center">
+                                <div
+                                    className="relative aspect-[4/3] bg-gray-100 flex items-center justify-center cursor-pointer"
+                                    onClick={() => setViewingIndex(index)}
+                                >
                                     {isVideo ? (
                                         <video
                                             src={photo.url}
@@ -458,6 +490,69 @@ export default function PhotosClient({ initialPhotos, isAdmin }: { initialPhotos
                     onConfirm={confirmConfig.onConfirm}
                     onCancel={() => setConfirmConfig(null)}
                 />
+            )}
+
+            {/* Lightbox Modal */}
+            {viewingIndex !== null && sortedPhotos[viewingIndex] && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black flex items-center justify-center p-0 sm:p-4 touch-none"
+                    onClick={() => setViewingIndex(null)}
+                >
+                    {/* Close Button */}
+                    <button
+                        className="absolute top-4 right-4 text-white/80 hover:text-white p-2 z-[110] bg-black/20 rounded-full"
+                        onClick={(e) => { e.stopPropagation(); setViewingIndex(null); }}
+                    >
+                        <X className="w-8 h-8" />
+                        <span className="sr-only">Close</span>
+                    </button>
+
+                    {/* Navigation */}
+                    <button
+                        className="absolute left-2 top-1/2 -translate-y-1/2 text-white/80 p-3 hover:bg-white/10 rounded-full z-[110]"
+                        onClick={handlePrev}
+                    >
+                        <ChevronLeft className="w-10 h-10" />
+                    </button>
+                    <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white/80 p-3 hover:bg-white/10 rounded-full z-[110]"
+                        onClick={handleNext}
+                    >
+                        <ChevronRight className="w-10 h-10" />
+                    </button>
+
+                    {/* Main Content Area */}
+                    <div
+                        className="relative w-full h-full flex items-center justify-center pointer-events-none"
+                    >
+                        {['.mp4', '.mov', '.webm', '.ogg'].some(ext => sortedPhotos[viewingIndex].url.toLowerCase().endsWith(ext)) ? (
+                            <video
+                                src={sortedPhotos[viewingIndex].url}
+                                controls
+                                autoPlay
+                                className="max-w-full max-h-full object-contain pointer-events-auto"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        ) : (
+                            /* Use simple img for Pinch-to-Zoom support on mobile browsers */
+                            <img
+                                src={sortedPhotos[viewingIndex].url}
+                                alt={sortedPhotos[viewingIndex].caption || 'Photo'}
+                                className="max-w-full max-h-full object-contain pointer-events-auto"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        )}
+
+                        {/* Caption */}
+                        {sortedPhotos[viewingIndex].caption && (
+                            <div className="absolute bottom-8 left-0 right-0 pointer-events-none">
+                                <div className="bg-black/60 text-white text-[14pt] py-2 px-4 mx-auto max-w-fit rounded-lg max-w-[90%] text-center backdrop-blur-md">
+                                    {sortedPhotos[viewingIndex].caption}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
         </div>
     );
