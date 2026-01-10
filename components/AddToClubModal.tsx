@@ -90,11 +90,9 @@ export default function AddToClubModal({ isOpen, onClose, players, liveRoundId, 
                         <h2 className="text-[18pt] font-bold text-white text-left ml-3">Add to Club Scores</h2>
                         <button
                             onClick={onClose}
-                            className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+                            className="bg-white/20 hover:bg-white/30 text-white rounded-lg px-4 py-2 transition-colors font-bold text-[15pt]"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            Close
                         </button>
                     </div>
                     <p className="text-white/90 text-[12pt] mt-1">
@@ -177,14 +175,14 @@ export default function AddToClubModal({ isOpen, onClose, players, liveRoundId, 
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 font-bold px-6 py-3 rounded-full text-[14pt] transition-colors"
+                            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 font-bold px-4 py-2 rounded-full text-[15pt] transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={selectedIds.size === 0 || isSaving}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full text-[14pt] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-full text-[15pt] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
                             {isSaving ? 'Saving...' : `Save to Club (${selectedIds.size})`}
                         </button>

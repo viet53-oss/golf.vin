@@ -74,7 +74,7 @@ export function PoolModal({ roundId: initialRoundId, isOpen, onClose }: PoolModa
                 </div>
                 <button
                     onClick={onClose}
-                    className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
+                    className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors mr-3"
                 >
                     Close
                 </button>

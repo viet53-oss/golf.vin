@@ -155,20 +155,20 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
                                     }
                                 }
                             }}
-                            className="px-4 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all"
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all text-[15pt]"
                         >
                             Delete
                         </button>
                     )}
                     <button
                         onClick={onClose}
-                        className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg font-bold hover:bg-gray-300 transition-all"
+                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-bold hover:bg-gray-300 transition-all text-[15pt]"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all"
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all text-[15pt]"
                     >
                         {editingGuest ? 'Update Guest' : 'Add Guest'}
                     </button>

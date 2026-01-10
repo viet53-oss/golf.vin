@@ -31,7 +31,7 @@ export default function DeleteAllLiveRoundsButton() {
         <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-red-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 transition-colors text-[14pt]"
+            className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 transition-colors text-[15pt]"
         >
             {isDeleting ? 'Deleting...' : 'Delete All Live Rounds'}
         </button>

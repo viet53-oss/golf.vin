@@ -36,7 +36,7 @@ export default function FixLowIndexButton() {
             <button
                 onClick={handleFix}
                 disabled={isPending}
-                className="w-full px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="w-full px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
                 {isPending ? 'Fixing...' : '🔧 Emergency Fix: Reset Low Handicap Indexes'}
             </button>

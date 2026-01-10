@@ -1031,7 +1031,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 if (!userLocation) {
                                     return (
-                                        <div className="bg-gray-100 text-gray-500 py-4 rounded-lg text-center mb-2 shadow-inner">
+                                        <div className="bg-gray-100 text-gray-500 py-6 rounded-[80px] border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
                                             <p className="font-medium text-[15pt] animate-pulse">🛰️ Waiting for GPS...</p>
                                         </div>
                                     );
@@ -1039,7 +1039,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 if (!currentHole?.latitude || !currentHole?.longitude) {
                                     return (
-                                        <div className="bg-yellow-50 text-yellow-700 py-4 rounded-lg text-center mb-2 shadow-inner border border-yellow-200">
+                                        <div className="bg-yellow-50 text-yellow-700 py-6 rounded-[80px] text-center mb-2 shadow-inner border-2 border-yellow-400">
                                             <p className="font-medium text-[15pt]">📍 Coordinates missing for Hole {activeHole}</p>
                                         </div>
                                     );
@@ -1053,7 +1053,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 );
 
                                 return (
-                                    <div className="bg-green-600 text-white py-0 rounded-lg text-center mb-2 shadow-inner relative">
+                                    <div className="bg-green-600 text-white py-2 rounded-[120px] text-center mb-2 border-2 border-black shadow-inner relative">
                                         <p className="font-black text-[90pt] flex items-baseline justify-center">
                                             {dist}
                                         </p>
@@ -1086,7 +1086,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             key={hole.hole_number}
                                             onClick={() => setActiveHole(hole.hole_number)}
                                             className={`
-                                            flex flex-col items-center justify-center py-1 rounded-lg transition-all
+                                            flex flex-col items-center justify-center py-1 rounded-2xl transition-all
                                             ${btnClass}
                                         `}
                                         >
@@ -1225,7 +1225,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     {canUpdate && (
                                                         <button
                                                             onClick={() => updateScore(player.id, false)}
-                                                            className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
+                                                            className="w-12 h-12 rounded-full bg-[#ff3b30] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[15pt]"
                                                         >
                                                             -
                                                         </button>
@@ -1236,7 +1236,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     {canUpdate && (
                                                         <button
                                                             onClick={() => updateScore(player.id, true)}
-                                                            className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[20pt]"
+                                                            className="w-12 h-12 rounded-full bg-[#00c950] flex items-center justify-center text-white font-bold shadow-md active:scale-95 transition-transform text-[15pt]"
                                                         >
                                                             +
                                                         </button>
@@ -1386,7 +1386,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     // Blue if: has unsaved changes OR hole is not yet scored
                                     // Black if: hole is scored AND no unsaved changes
                                     return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
-                                })()} text-white font-bold px-1 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2`}
+                                })()} text-white font-bold px-4 py-2 rounded-full shadow-sm transition-colors text-[15pt] flex items-center justify-center gap-2`}
                             >
                                 Save Hole {activeHole}
                             </button>
@@ -1407,7 +1407,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 </button>
                                 <button
                                     onClick={() => setIsStatsModalOpen(true)}
-                                    className="w-16 bg-black text-white rounded-full py-2 text-[25pt] hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                    className="w-16 bg-black text-white rounded-full py-2 text-[15pt] hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                                 >
                                     🖕
                                 </button>
@@ -1572,12 +1572,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 }
 
                 {/* Score Legend */}
-                < div className="bg-white rounded-xl shadow-lg p-1 mt-1 flex flex-wrap gap-1 items-center justify-center text-[15pt]" >
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-yellow-300"></div>Eagle (-2)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-green-300"></div>Birdie (-1)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-white border border-gray-300"></div>Par (E)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-orange-200"></div>Bogey (+1)</div>
-                    <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-red-300"></div>Double+ (+2)</div>
+                < div className="bg-white rounded-[100px] shadow-lg border-2 border-black p-5 mt-1 flex flex-wrap gap-5 items-center justify-center text-[15pt]" >
+                    <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-yellow-300 border-2 border-black/20"></div>Eagle (-2)</div>
+                    <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-green-300 border-2 border-black/20"></div>Birdie (-1)</div>
+                    <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-white border-2 border-black/20"></div>Par (E)</div>
+                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-orange-200 border-2 border-black/20"></div>Bogey (+1)</div>
+                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-red-300 border-2 border-black/20"></div>Double+ (+2)</div>
                 </div>
 
                 {/* Save Round Button - Admin Only */}
@@ -1590,7 +1590,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     window.location.reload();
                                 }
                             }}
-                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-1 py-2 rounded-full shadow-lg transition-colors text-[15pt] mt-1 mb-1"
+                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-4 py-2 rounded-full shadow-lg transition-colors text-[15pt] mt-1 mb-1"
                         >
                             💾 Save Round
                         </button>

@@ -42,8 +42,8 @@ export default async function NewRoundPage() {
     return (
         <div className="min-h-screen bg-slate-50 font-sans pb-10">
             <header className="bg-white shadow-sm sticky top-0 z-10 px-1 py-3">
-                <div className="flex items-center justify-end">
-                    <Link href="/scores" className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors">Home</Link>
+                <div className="flex items-center justify-end p-1">
+                    <Link href="/scores" className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95">Home</Link>
                 </div>
             </header>
 

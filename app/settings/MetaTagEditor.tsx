@@ -61,7 +61,7 @@ export default function MetaTagEditor() {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="w-full flex justify-center items-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                className="w-full flex justify-center items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors"
             >
                 <PenTool className="w-4 h-4" />
                 Edit Meta Tags
@@ -122,14 +122,14 @@ export default function MetaTagEditor() {
                                 <div className="pt-4 flex justify-end gap-2">
                                     <button
                                         onClick={() => setIsOpen(false)}
-                                        className="px-1 py-2 text-gray-600 font-medium hover:text-black text-[14pt]"
+                                        className="px-4 py-2 text-gray-600 font-medium hover:text-black text-[15pt]"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSave}
                                         disabled={isLoading}
-                                        className="px-1 py-2 bg-black text-white rounded-full font-bold hover:bg-gray-800 flex items-center gap-2 text-[14pt] active:scale-95"
+                                        className="px-4 py-2 bg-black text-white rounded-full font-bold hover:bg-gray-800 flex items-center gap-2 text-[15pt] active:scale-95"
                                     >
                                         <Save className="w-4 h-4" /> Save
                                     </button>

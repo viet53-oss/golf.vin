@@ -39,10 +39,10 @@ export function AddPlayerModal({ isOpen, onClose }: AddPlayerModalProps) {
                     <h2 className="text-[18pt] font-bold text-gray-900 text-left ml-3">Add New Player</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95"
                         disabled={isSubmitting}
                     >
-                        <X className="w-5 h-5 text-gray-500" />
+                        Close
                     </button>
                 </div>
 
@@ -115,14 +115,14 @@ export function AddPlayerModal({ isOpen, onClose }: AddPlayerModalProps) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-[14pt] font-bold hover:bg-gray-50 transition-colors"
+                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-full text-[15pt] font-bold hover:bg-gray-50 transition-all shadow-md active:scale-95"
                             disabled={isSubmitting}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-[14pt] font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-full text-[15pt] font-bold hover:bg-green-700 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Adding...' : 'Add Player'}

@@ -21,9 +21,9 @@ export function MapModal({ isOpen, onClose }: MapModalProps) {
                 <div className="flex-1 relative">
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 z-10 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors shadow-lg"
+                        className="absolute top-4 right-4 z-10 px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-lg"
                     >
-                        <X size={24} />
+                        Close
                     </button>
                     <iframe
                         src={mapUrl}

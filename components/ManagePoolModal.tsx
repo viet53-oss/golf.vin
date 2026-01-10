@@ -61,9 +61,9 @@ export function ManagePoolModal({
                     <h2 className="text-[14pt] font-black text-gray-800 tracking-tight">Manage Pool Participants</h2>
                     <button
                         onClick={onClose}
-                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        Close
                     </button>
                 </div>
 
@@ -120,7 +120,7 @@ export function ManagePoolModal({
                 <div className="px-1 py-5 bg-[#f8fafc] border-t border-gray-100 flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-1 py-2.5 rounded-xl text-[14pt] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+                        className="px-4 py-2 rounded-xl text-[15pt] font-bold text-gray-600 hover:bg-gray-200 transition-colors"
                         disabled={isSaving}
                     >
                         {isAdmin ? 'Cancel' : 'Close'}
@@ -129,7 +129,7 @@ export function ManagePoolModal({
                         <button
                             onClick={handleSave}
                             disabled={isSaving}
-                            className="bg-[#04d361] hover:bg-[#04b754] text-white px-1 py-2.5 rounded-xl text-[14pt] font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                            className="bg-[#04d361] hover:bg-[#04b754] text-white px-4 py-2 rounded-xl text-[15pt] font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
                         >
                             {isSaving ? (
                                 <>

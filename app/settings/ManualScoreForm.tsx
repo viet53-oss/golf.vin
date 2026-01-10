@@ -132,7 +132,7 @@ export default function ManualScoreForm({ players, course, coursePar }: ManualSc
             <div className="flex justify-end">
                 <button
                     type="submit"
-                    className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? 'Adding Score...' : 'Add Manual Score'}

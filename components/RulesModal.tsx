@@ -27,9 +27,9 @@ export default function RulesModal({ isOpen, onClose, title, content }: RulesMod
                     <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors"
                     >
-                        <X className="w-5 h-5" />
+                        Close
                     </button>
                 </div>
 
@@ -44,7 +44,7 @@ export default function RulesModal({ isOpen, onClose, title, content }: RulesMod
                 <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
                     <button
                         onClick={onClose}
-                        className="bg-gray-900 text-white px-1 py-2 rounded-xl font-bold text-sm hover:bg-black transition-all"
+                        className="bg-black text-white px-4 py-2 rounded-full font-bold text-[15pt] hover:bg-gray-800 transition-all"
                     >
                         Close
                     </button>

@@ -232,12 +232,12 @@ export default function EditRoundForm({
                                         onClick={handleDeleteClick}
                                         disabled={isPending}
                                         className={`${deleteConfirm ? 'bg-red-800 ring-2 ring-red-400' : 'bg-red-600 hover:bg-red-700'
-                                            } text-white text-[14pt] font-bold px-1 py-1.5 rounded-full transition-all`}
+                                            } text-white text-[15pt] font-bold px-4 py-2 rounded-full transition-all shadow-md active:scale-95`}
                                     >
                                         {isPending ? 'Deleting...' : deleteConfirm ? 'Click AGAIN to Confirm' : 'Delete Round'}
                                     </button>
                                 )}
-                                <Link href="/scores" className="text-gray-400 text-[14pt] font-bold hover:text-black flex items-center">
+                                <Link href="/scores" className="bg-black text-white px-4 py-2 rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 flex items-center">
                                     {isNew ? 'Cancel' : 'Close'}
                                 </Link>
                             </div>
@@ -314,7 +314,7 @@ export default function EditRoundForm({
                 <button
                     onClick={handleAddSelected}
                     disabled={selectedPlayerIds.size === 0 || isPending}
-                    className="mt-3 w-full bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 rounded-lg text-[14pt] transition-colors"
+                    className="mt-3 w-full bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-4 py-2 rounded-full text-[15pt] transition-colors"
                 >
                     Add Selected Players ({selectedPlayerIds.size})
                 </button>
@@ -373,7 +373,7 @@ export default function EditRoundForm({
                                                             setSelectedPlayer(rp);
                                                             setScoreModalOpen(true);
                                                         }}
-                                                        className="px-1 py-1 border border-gray-300 rounded text-[14pt] font-bold hover:bg-gray-100 disabled:opacity-50"
+                                                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 disabled:opacity-50"
                                                         disabled={isNew}
                                                         title={isNew ? "Save round first to enter scores" : "Edit Score"}
                                                     >
@@ -381,7 +381,7 @@ export default function EditRoundForm({
                                                     </button>
                                                     <button
                                                         onClick={() => handleRemovePlayer(rp.id)}
-                                                        className="px-1 py-1 text-red-600 font-bold text-[14pt] hover:bg-red-50 rounded"
+                                                        className="px-4 py-2 bg-red-600 text-white rounded-full text-[15pt] font-bold hover:bg-red-700 transition-all shadow-md active:scale-95"
                                                     >
                                                         Remove
                                                     </button>
@@ -401,7 +401,7 @@ export default function EditRoundForm({
                 <button
                     onClick={handleSaveRound}
                     disabled={isPending}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-sm transition-colors text-[14pt]"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-full shadow-md transition-all active:scale-95 text-[15pt]"
                 >
                     {isPending ? 'Saving...' : (isNew ? 'Create Round' : 'Save & Update Round')}
                 </button>

@@ -19,7 +19,7 @@ export default function DiagnosticButton() {
         <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
             <button
                 onClick={handleCheck}
-                className="px-4 py-2 bg-purple-600 text-white rounded-full text-[14pt] font-bold hover:bg-purple-700 transition-colors"
+                className="px-4 py-2 bg-purple-600 text-white rounded-full text-[15pt] font-bold hover:bg-purple-700 transition-colors"
             >
                 Check Data
             </button>

@@ -152,14 +152,14 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                         <button
                             onClick={handleSubmit}
                             disabled={isPending}
-                            className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center gap-2"
+                            className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center gap-2"
                         >
                             {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                             Save
                         </button>
                         <button
                             onClick={() => router.push('/settings')}
-                            className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                            className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M18 6 6 18" /><path d="m6 6 12 12" />

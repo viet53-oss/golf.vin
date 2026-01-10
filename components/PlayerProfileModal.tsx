@@ -69,7 +69,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                         <button
                             type="button"
                             onClick={onClose}
-                            className="absolute right-6 top-6 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
+                            className="absolute right-6 top-6 px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors mr-3"
                         >
                             Close
                         </button>
@@ -279,14 +279,14 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                                 <button
                                     type="button"
                                     onClick={() => setIsEditing(false)}
-                                    className="px-1 py-2.5 rounded-full font-bold text-[14pt] text-gray-600 hover:bg-gray-200 transition-colors"
+                                    className="px-4 py-2 rounded-full font-bold text-[15pt] text-gray-600 hover:bg-gray-200 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-1 py-2.5 rounded-full font-bold text-[14pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
+                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full font-bold text-[15pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
                                 >
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
@@ -295,7 +295,7 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                             <button
                                 type="button"
                                 onClick={() => setIsEditing(true)}
-                                className="bg-gray-900 hover:bg-black text-white px-1 py-2.5 rounded-full font-bold text-[14pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95"
+                                className="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-full font-bold text-[15pt] shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95"
                             >
                                 Edit Player Profile
                             </button>

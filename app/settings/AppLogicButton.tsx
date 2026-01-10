@@ -219,7 +219,7 @@ export default function AppLogicButton() {
         <>
             <button
                 onClick={() => setModalOpen(true)}
-                className="w-full px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                className="w-full px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
             >
                 <span className="text-xl">📘</span> App Logic & Rules
             </button>

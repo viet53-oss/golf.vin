@@ -136,7 +136,7 @@ export default function BackupManager() {
                 <button
                     onClick={handleDownload}
                     disabled={!!loadingAction}
-                    className="flex-1 flex items-center justify-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
                     {loadingAction === 'download' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                     Download Backup
@@ -145,7 +145,7 @@ export default function BackupManager() {
                 <button
                     onClick={handleRestoreClick}
                     disabled={!!loadingAction}
-                    className="flex-1 flex items-center justify-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
                     {loadingAction === 'restore' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                     Restore from Backup
@@ -175,7 +175,7 @@ export default function BackupManager() {
             <button
                 onClick={handlePhotoBackup}
                 disabled={!!loadingAction}
-                className="w-full flex items-center justify-center gap-2 px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
                 {loadingAction === 'photos' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                 Backup All Photos to Local Directory

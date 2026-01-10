@@ -58,7 +58,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                 <div className="text-gray-700 mb-6">{error}</div>
                 <button
                     onClick={onClose}
-                    className="px-6 py-2 bg-black text-white rounded-full text-[14pt] font-bold"
+                    className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold"
                 >
                     Close
                 </button>
@@ -180,7 +180,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                     </button>
                     <button
                         onClick={onClose}
-                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors mr-3"
+                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors mr-3"
                     >
                         Close
                     </button>
@@ -349,7 +349,7 @@ export function HandicapHistoryModal({ playerId, isOpen, onClose }: HandicapHist
                             <div className="pt-2 pb-4 text-center">
                                 <button
                                     onClick={() => setVisibleRounds(prev => prev + 20)}
-                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold py-3 px-8 rounded-full text-[14pt] shadow-sm transition-all active:scale-95"
+                                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-4 py-2 rounded-full text-[15pt] shadow-sm transition-all active:scale-95"
                                 >
                                     Load More History ↓
                                 </button>

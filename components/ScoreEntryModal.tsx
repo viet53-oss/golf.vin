@@ -282,9 +282,9 @@ export default function ScoreEntryModal({
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Scorecard</span>
                     <button
                         onClick={onClose}
-                        className="px-1 py-2 bg-black text-white rounded-full text-[14pt] font-bold hover:bg-gray-800 transition-colors"
+                        className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors"
                     >
-                        <CloseIcon size={24} />
+                        Close
                     </button>
                 </div>
 
@@ -378,13 +378,13 @@ export default function ScoreEntryModal({
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving || grossTotal === 0}
-                                className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 rounded-lg disabled:opacity-50 transition-colors"
+                                className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-bold px-4 py-2 text-[15pt] rounded-lg disabled:opacity-50 transition-colors"
                             >
                                 {isSaving ? 'Saving...' : 'Save Score'}
                             </button>
                             <button
                                 onClick={onClose}
-                                className="px-1 py-3 border border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition-colors"
+                                className="px-4 py-2 border border-gray-300 rounded-lg text-[15pt] font-bold hover:bg-gray-50 transition-colors"
                             >
                                 Cancel
                             </button>

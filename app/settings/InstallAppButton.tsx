@@ -64,7 +64,7 @@ export default function InstallAppButton() {
             <button
                 onClick={handleInstallClick}
                 disabled={!isInstallable && !isIOS}
-                className={`w-full px-4 py-3 rounded-full text-[14pt] font-bold transition-all ${isInstallable || isIOS
+                className={`w-full px-4 py-2 rounded-full text-[15pt] font-bold transition-all ${isInstallable || isIOS
                     ? 'bg-green-600 text-white hover:bg-green-700 active:scale-95'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
@@ -115,7 +115,7 @@ export default function InstallAppButton() {
 
                         <button
                             onClick={() => setShowIOSInstructions(false)}
-                            className="w-full mt-6 bg-black text-white rounded-full py-3 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                            className="w-full mt-6 bg-black text-white rounded-full px-4 py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                         >
                             Got It!
                         </button>
