@@ -2,9 +2,6 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import fs from 'fs/promises';
-import path from 'path';
-import { randomUUID } from 'crypto';
 
 export async function uploadPhoto(formData: FormData) {
     try {
@@ -16,28 +13,19 @@ export async function uploadPhoto(formData: FormData) {
             return { success: false, error: 'Missing required fields' };
         }
 
-        // 1. Save file to public/uploads
+        // Convert file to Base64 (Data URI)
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const base64 = buffer.toString('base64');
+        const mimeType = file.type || 'image/jpeg'; // Default to jpeg if unknown
 
-        // Ensure uploads directory exists
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-        await fs.mkdir(uploadDir, { recursive: true });
-
-        // Generate unique name
-        const ext = path.extname(file.name);
-        const fileName = `${randomUUID()}${ext}`;
-        const filePath = path.join(uploadDir, fileName);
-
-        await fs.writeFile(filePath, buffer);
-
-        // 2. Save to DB
-        // URL path relative to public
-        const url = `/uploads/${fileName}`;
+        // This stores the FULL image data in the DB "url" field
+        // Requires client-side compression to keep size reasonable (~300-500KB)
+        const url = `data:${mimeType};base64,${base64}`;
 
         await prisma.photo.create({
             data: {
-                url,
+                url, // Storing Data URI directly
                 date,
                 caption
             }
@@ -48,30 +36,16 @@ export async function uploadPhoto(formData: FormData) {
 
     } catch (error) {
         console.error('Upload error:', error);
-        return { success: false, error: 'Failed to upload photo' };
+        // Better error message handling
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        return { success: false, error: 'Failed to upload photo: ' + msg };
     }
 }
 
 export async function deletePhoto(photoId: string) {
     try {
-        // 1. Get photo to find file path
-        const photo = await prisma.photo.findUnique({ where: { id: photoId } });
-        if (!photo) return { success: false, error: 'Photo not found' };
-
-        // 2. Delete from DB
+        // Just delete from DB. No file cleanup needed since data is in the row.
         await prisma.photo.delete({ where: { id: photoId } });
-
-        // 3. Delete file
-        // photo.url is like "/uploads/xyz.jpg" -> convert to system path
-        // Remove leading /
-        const relativePath = photo.url.startsWith('/') ? photo.url.slice(1) : photo.url;
-        const filePath = path.join(process.cwd(), 'public', relativePath);
-
-        try {
-            await fs.unlink(filePath);
-        } catch (e) {
-            console.warn('Failed to delete file from disk, but removed from DB', e);
-        }
 
         revalidatePath('/photos');
         return { success: true };

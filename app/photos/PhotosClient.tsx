@@ -26,9 +26,9 @@ const compressImage = async (file: File): Promise<File> => {
                 let width = img.width;
                 let height = img.height;
 
-                // Max dimensions (1920px is good balance for web)
-                const MAX_WIDTH = 1920;
-                const MAX_HEIGHT = 1920;
+                // Max dimensions (1200px is optimum for DB storage)
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
 
                 if (width > height) {
                     if (width > MAX_WIDTH) {
@@ -57,7 +57,7 @@ const compressImage = async (file: File): Promise<File> => {
                     } else {
                         reject(new Error('Canvas to Blob failed'));
                     }
-                }, 'image/jpeg', 0.8); // 80% quality
+                }, 'image/jpeg', 0.6); // 60% quality for DB storage efficiency
             };
             img.onerror = reject;
         };
