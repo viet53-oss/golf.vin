@@ -1329,12 +1329,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     });
 
                                     const isActive = activeHole === hole.hole_number;
+                                    const isMissing = selectedPlayers.length > 0 && !isActive && !isSaved && hole.hole_number < activeHole;
 
                                     // Determine styling
                                     let btnClass = "bg-white text-black border border-black";
                                     if (isActive) {
                                         // Active hole: always white on blue (with or without data)
                                         btnClass = "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-1 z-10 scale-105 shadow-md";
+                                    } else if (isMissing) {
+                                        // Missing scores before current hole: red
+                                        btnClass = "bg-[#ff3b30] text-white border-[#ff3b30]";
                                     } else if (isSaved) {
                                         // Inactive saved holes: white on black
                                         btnClass = "bg-black text-white border border-black";
