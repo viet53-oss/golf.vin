@@ -23,7 +23,8 @@ export function LivePlayerSelectionModal({
     onSelectionChange,
     isOpen,
     onClose,
-    courseData
+    courseData,
+    isAdmin = false
 }: {
     allPlayers: Player[];
     selectedIds: string[];
@@ -40,6 +41,7 @@ export function LivePlayerSelectionModal({
             slope: number;
         } | null;
     } | null;
+    isAdmin?: boolean;
 }) {
     const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedIds);
 
@@ -127,7 +129,8 @@ export function LivePlayerSelectionModal({
                             const isSelected = localSelectedIds.includes(player.id);
                             const isInRound = playersInRound.includes(player.id);
                             const itIsMe = selectedIds.includes(player.id);
-                            const isDisabled = isInRound && !itIsMe;
+                            // Admin can toggle anyone. Non-admins can only toggle people not in round, or people they have already claimed.
+                            const isDisabled = !isAdmin && isInRound && !itIsMe;
 
                             return (
                                 <button

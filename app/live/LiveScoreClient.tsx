@@ -758,6 +758,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 }
             }
         }
+
+        // 3. Handle Removals (Admin Only)
+        // If an admin unselects a player who was already in the round, remove them from DB entirely
+        if (isAdmin && currentLiveRoundId && initialRound?.players) {
+            for (const lrPlayer of initialRound.players) {
+                const playerId = lrPlayer.is_guest ? lrPlayer.id : lrPlayer.player.id;
+                if (!newSelectedPlayerIds.includes(playerId)) {
+                    console.log("Admin removing player from round:", lrPlayer.id);
+                    await removePlayerFromLiveRound(lrPlayer.id);
+                }
+            }
+            // Refresh to update server-side round state
+            router.refresh();
+        }
     };
 
     const handleCreateNewRound = () => {
@@ -1163,6 +1177,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     selectedIds={selectedPlayers.map(p => p.id)}
                     playersInRound={initialRound?.players?.map((p: any) => p.is_guest ? p.id : p.player.id) || []}
                     onSelectionChange={handleAddPlayers}
+                    isAdmin={isAdmin}
                     courseData={defaultCourse ? {
                         courseName: defaultCourse.name,
                         teeBoxes: defaultCourse.tee_boxes,
