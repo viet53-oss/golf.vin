@@ -1491,34 +1491,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl py-0 px-1">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex flex-col gap-1">
-                                                        <button
-                                                            onClick={() => movePlayerOrder(index, 'up')}
-                                                            disabled={index === 0}
-                                                            className={`w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all ${index === 0 ? 'opacity-20' : ''}`}
-                                                            title="Move Up"
-                                                        >
-                                                            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" /></svg>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => movePlayerOrder(index, 'down')}
-                                                            disabled={index === selectedPlayers.length - 1}
-                                                            className={`w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all ${index === selectedPlayers.length - 1 ? 'opacity-20' : ''}`}
-                                                            title="Move Down"
-                                                        >
-                                                            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" /></svg>
-                                                        </button>
-                                                    </div>
                                                     <button
                                                         onClick={() => {
                                                             const newSelected = selectedPlayers.filter(p => p.id !== player.id);
                                                             setSelectedPlayers(newSelected);
                                                             localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
                                                         }}
-                                                        className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                                                        className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
                                                         title="Remove from Group"
                                                     >
-                                                        <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
+                                                        <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor"><path d="M11 4h2v12l5.5-5.5 1.42 1.42L12 19.84l-7.92-7.92 1.42-1.42L11 16V4z" /></svg>
                                                     </button>
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
