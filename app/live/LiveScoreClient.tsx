@@ -1678,12 +1678,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 }
 
                 {/* Score Legend */}
-                < div className="bg-white rounded-[100px] shadow-lg border-2 border-black py-1 px-5 mt-1 flex flex-wrap gap-5 items-center justify-center text-[15pt]" >
-                    <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-yellow-300 border-2 border-black/20"></div>Eagle (-2)</div>
-                    <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-green-300 border-2 border-black/20"></div>Birdie (-1)</div>
-                    <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-white border-2 border-black/20"></div>Par (E)</div>
-                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-orange-200 border-2 border-black/20"></div>Bogey (+1)</div>
-                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-red-300 border-2 border-black/20"></div>Double+ (+2)</div>
+                <div className="bg-white rounded-xl shadow-md p-2 m-1 flex flex-wrap gap-x-6 gap-y-2 items-center justify-center text-[15pt]">
+                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-yellow-300 shadow-sm"></div>Eagle (-2)</div>
+                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-green-300 shadow-sm"></div>Birdie (-1)</div>
+                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-white border-2 border-gray-300 shadow-sm"></div>Par (E)</div>
+                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-orange-200 shadow-sm"></div>Bogey (+1)</div>
+                    <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-red-300 shadow-sm"></div>Double+ (+2)</div>
                 </div>
 
                 {/* Save Round Button - Admin Only */}
@@ -1703,7 +1703,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     }
                                 });
                             }}
-                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-4 py-2 rounded-full shadow-lg transition-colors text-[15pt] mt-1 mb-1"
+                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-4 py-2 rounded-full shadow-md transition-all active:scale-95 text-[15pt] mt-1 mb-1"
                         >
                             💾 Save Round
                         </button>
