@@ -621,9 +621,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
     };
 
-
-
-
+    const movePlayerOrder = (index: number, direction: 'up' | 'down') => {
+        const newSelected = [...selectedPlayers];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        if (targetIndex >= 0 && targetIndex < newSelected.length) {
+            [newSelected[index], newSelected[targetIndex]] = [newSelected[targetIndex], newSelected[index]];
+            setSelectedPlayers(newSelected);
+            localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
+        }
+    };
     const handleAddPlayers = async (newSelectedPlayerIds: string[]) => {
         const newSelectedPlayers = allPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
         const selectedGuests = guestPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
@@ -1393,12 +1399,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             </div>
                             <div className="space-y-0">
                                 {[...selectedPlayers]
-                                    .sort((a, b) => {
-                                        const firstA = splitName(a.name).first.toLowerCase();
-                                        const firstB = splitName(b.name).first.toLowerCase();
-                                        return firstA.localeCompare(firstB);
-                                    })
-                                    .map(player => {
+                                    .map((player, index) => {
                                         const score = getScore(player.id, activeHole);
                                         // Calculate Totals for To Par
                                         const pScores = scores.get(player.id);
@@ -1451,6 +1452,28 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl py-0 px-1">
                                                 <div className="flex items-center gap-3">
+                                                    <div className="flex flex-col items-center justify-center mr-2">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                movePlayerOrder(index, 'up');
+                                                            }}
+                                                            disabled={index === 0}
+                                                            className={`text-[15pt] transition-all active:scale-95 ${index === 0 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-black'}`}
+                                                        >
+                                                            ▲
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                movePlayerOrder(index, 'down');
+                                                            }}
+                                                            disabled={index === selectedPlayers.length - 1}
+                                                            className={`text-[15pt] transition-all active:scale-95 ${index === selectedPlayers.length - 1 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-black'}`}
+                                                        >
+                                                            ▼
+                                                        </button>
+                                                    </div>
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
                                                         <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
