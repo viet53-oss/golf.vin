@@ -1162,51 +1162,53 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 <h2 className="text-[18pt] font-bold text-gray-900 text-right truncate ml-2">{defaultCourse?.name}</h2>
                             </div>
 
-                            <div style={{ minHeight: '140px' }} className="flex flex-col justify-center">
-                                {/* GPS Distance Display */}
-                                {(() => {
-                                    if (isAdmin) {
+                            {!allPlayersFinished && (
+                                <div style={{ minHeight: '140px' }} className="flex flex-col justify-center">
+                                    {/* GPS Distance Display */}
+                                    {(() => {
+                                        if (isAdmin) {
+                                            return (
+                                                <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
+                                                    <p className="font-medium text-[15pt] py-6">🛰️ GPS Hidden (Admin)</p>
+                                                </div>
+                                            );
+                                        }
+
+                                        const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
+
+                                        if (!userLocation) {
+                                            return (
+                                                <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
+                                                    <p className="font-medium text-[15pt] animate-pulse py-6">🛰️ Waiting for GPS...</p>
+                                                </div>
+                                            );
+                                        }
+
+                                        if (!currentHole?.latitude || !currentHole?.longitude) {
+                                            return (
+                                                <div className="bg-yellow-50 text-yellow-700 p-1 rounded-xl text-center mb-2 shadow-inner border-2 border-yellow-400">
+                                                    <p className="font-medium text-[15pt] py-6">📍 Coordinates missing for Hole {activeHole}</p>
+                                                </div>
+                                            );
+                                        }
+
+                                        const dist = calculateDistance(
+                                            userLocation.latitude,
+                                            userLocation.longitude,
+                                            Number(currentHole.latitude),
+                                            Number(currentHole.longitude)
+                                        );
+
                                         return (
-                                            <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
-                                                <p className="font-medium text-[15pt] py-6">🛰️ GPS Hidden (Admin)</p>
+                                            <div className="bg-green-600 text-white w-full mx-auto p-1 rounded-xl text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
+                                                <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-2 pb-4">
+                                                    {dist}
+                                                </p>
                                             </div>
                                         );
-                                    }
-
-                                    const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
-
-                                    if (!userLocation) {
-                                        return (
-                                            <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
-                                                <p className="font-medium text-[15pt] animate-pulse py-6">🛰️ Waiting for GPS...</p>
-                                            </div>
-                                        );
-                                    }
-
-                                    if (!currentHole?.latitude || !currentHole?.longitude) {
-                                        return (
-                                            <div className="bg-yellow-50 text-yellow-700 p-1 rounded-xl text-center mb-2 shadow-inner border-2 border-yellow-400">
-                                                <p className="font-medium text-[15pt] py-6">📍 Coordinates missing for Hole {activeHole}</p>
-                                            </div>
-                                        );
-                                    }
-
-                                    const dist = calculateDistance(
-                                        userLocation.latitude,
-                                        userLocation.longitude,
-                                        Number(currentHole.latitude),
-                                        Number(currentHole.longitude)
-                                    );
-
-                                    return (
-                                        <div className="bg-green-600 text-white w-full mx-auto p-1 rounded-xl text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
-                                            <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-2 pb-4">
-                                                {dist}
-                                            </p>
-                                        </div>
-                                    );
-                                })()}
-                            </div>
+                                    })()}
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-6 gap-1">
                                 {defaultCourse?.holes.map(hole => {
