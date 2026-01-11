@@ -1222,7 +1222,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* PLAYERS SECTION (Scoring) */}
                 {
                     selectedPlayers.length > 0 && (
-                        <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
+                        <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 py-1 px-2">
                             <div className="flex justify-between items-center mb-1">
                                 <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
                                 {
@@ -1424,7 +1424,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         }
 
                                         return (
-                                            <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-0">
+                                            <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl py-1 px-1">
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
