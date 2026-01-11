@@ -64,8 +64,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Initialize State from Server Data
     const [liveRoundId, setLiveRoundId] = useState<string | null>(initialRound?.id || null);
 
+    // Initialize admin status synchronously if possible
+    const [isAdmin, setIsAdmin] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const adminCookie = Cookies.get('admin_session');
+            return adminCookie === 'true';
+        }
+        return false;
+    });
+
     // Start with empty selection - each device manages its own group
     const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
+    const [isSaving, setIsSaving] = useState(false); // Used to show 'Saving' state on button
 
     const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
     const [roundModalMode, setRoundModalMode] = useState<'new' | 'edit'>('new');
@@ -320,11 +330,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     }, [initialRound]);
 
 
-    // Polling for updates (every 10 seconds)
+    // Polling for updates (every 20 seconds) - Increased from 10s to reduce jumps
     useEffect(() => {
         const interval = setInterval(() => {
             router.refresh();
-        }, 10000);
+        }, 20000);
         return () => clearInterval(interval);
     }, [router]);
 
@@ -451,19 +461,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         setHasUnsavedChanges(false);
         setPendingScores(new Map()); // Clear pending scores when changing holes
     }, [activeHole]);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [isSaving, setIsSaving] = useState(false); // Used to show 'Saving' state on button
-
-    // Check admin status
+    // Listen for admin status changes (sync with state changes from other components if any)
     useEffect(() => {
         const checkAdmin = () => {
             const adminCookie = Cookies.get('admin_session');
             setIsAdmin(adminCookie === 'true');
         };
 
-        checkAdmin();
-
-        // Listen for admin status changes
         window.addEventListener('admin-change', checkAdmin);
         return () => window.removeEventListener('admin-change', checkAdmin);
     }, []);
@@ -1149,49 +1153,51 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 <h2 className="text-[18pt] font-bold text-gray-900 text-right truncate ml-2">{defaultCourse?.name}</h2>
                             </div>
 
-                            {/* GPS Distance Display */}
-                            {(() => {
-                                if (isAdmin) {
+                            <div style={{ minHeight: '140px' }} className="flex flex-col justify-center">
+                                {/* GPS Distance Display */}
+                                {(() => {
+                                    if (isAdmin) {
+                                        return (
+                                            <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
+                                                <p className="font-medium text-[15pt] py-6">🛰️ GPS Hidden (Admin)</p>
+                                            </div>
+                                        );
+                                    }
+
+                                    const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
+
+                                    if (!userLocation) {
+                                        return (
+                                            <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
+                                                <p className="font-medium text-[15pt] animate-pulse py-6">🛰️ Waiting for GPS...</p>
+                                            </div>
+                                        );
+                                    }
+
+                                    if (!currentHole?.latitude || !currentHole?.longitude) {
+                                        return (
+                                            <div className="bg-yellow-50 text-yellow-700 p-1 rounded-xl text-center mb-2 shadow-inner border-2 border-yellow-400">
+                                                <p className="font-medium text-[15pt] py-6">📍 Coordinates missing for Hole {activeHole}</p>
+                                            </div>
+                                        );
+                                    }
+
+                                    const dist = calculateDistance(
+                                        userLocation.latitude,
+                                        userLocation.longitude,
+                                        Number(currentHole.latitude),
+                                        Number(currentHole.longitude)
+                                    );
+
                                     return (
-                                        <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
-                                            <p className="font-medium text-[15pt] py-6">🛰️ GPS Hidden (Admin)</p>
+                                        <div className="bg-green-600 text-white w-full mx-auto p-1 rounded-xl text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
+                                            <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-2 pb-4">
+                                                {dist}
+                                            </p>
                                         </div>
                                     );
-                                }
-
-                                const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
-
-                                if (!userLocation) {
-                                    return (
-                                        <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
-                                            <p className="font-medium text-[15pt] animate-pulse py-6">🛰️ Waiting for GPS...</p>
-                                        </div>
-                                    );
-                                }
-
-                                if (!currentHole?.latitude || !currentHole?.longitude) {
-                                    return (
-                                        <div className="bg-yellow-50 text-yellow-700 p-1 rounded-xl text-center mb-2 shadow-inner border-2 border-yellow-400">
-                                            <p className="font-medium text-[15pt] py-6">📍 Coordinates missing for Hole {activeHole}</p>
-                                        </div>
-                                    );
-                                }
-
-                                const dist = calculateDistance(
-                                    userLocation.latitude,
-                                    userLocation.longitude,
-                                    Number(currentHole.latitude),
-                                    Number(currentHole.longitude)
-                                );
-
-                                return (
-                                    <div className="bg-green-600 text-white w-full mx-auto p-1 rounded-xl text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
-                                        <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-2 pb-4">
-                                            {dist}
-                                        </p>
-                                    </div>
-                                );
-                            })()}
+                                })()}
+                            </div>
 
                             <div className="grid grid-cols-6 gap-1">
                                 {defaultCourse?.holes.map(hole => {
