@@ -1467,7 +1467,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             -
                                                         </button>
                                                     )}
-                                                    <div className="w-16 text-center font-bold text-[30pt] text-gray-800">
+                                                    <div className="w-16 text-center font-bold text-[35pt] text-gray-800">
                                                         {score || <span className="text-gray-800">{activeHolePar}</span>}
                                                     </div>
                                                     {canUpdate && (
