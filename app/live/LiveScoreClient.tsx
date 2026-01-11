@@ -1599,9 +1599,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             <div className="bg-[#1d4ed8] p-1 text-white">
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex items-center gap-3">
-                                                        {canUpdate && !selectedPlayers.some(sp => sp.id === p.id) && (
+                                                        {canUpdate && (isAdmin || !selectedPlayers.some(sp => sp.id === p.id)) && (
                                                             <button
                                                                 onClick={() => {
+                                                                    if (selectedPlayers.some(sp => sp.id === p.id)) {
+                                                                        document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
+                                                                        return;
+                                                                    }
                                                                     const hasExistingScores = p.thru > 0;
                                                                     const msg = hasExistingScores
                                                                         ? `This player already has scores recorded by another device. Are you sure you want to take over scoring for ${p.name}?`
