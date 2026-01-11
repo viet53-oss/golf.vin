@@ -1651,8 +1651,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             </button>
                                                         )}
                                                         <div className="flex flex-col">
-                                                            <div className="font-bold text-[17pt] leading-tight">{splitName(p.name).first}</div>
-                                                            <div className="text-[14pt] leading-tight opacity-90">{splitName(p.name).last}</div>
+                                                            <div className="font-bold text-[16pt] leading-tight">{splitName(p.name).first}</div>
+                                                            <div className="text-[13pt] leading-tight opacity-90">{splitName(p.name).last}</div>
                                                         </div>
                                                         <div className="flex items-center">
                                                             {/* Icons removed per request */}
