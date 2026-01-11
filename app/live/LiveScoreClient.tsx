@@ -1482,8 +1482,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             const newSelected = selectedPlayers.filter(p => p.id !== player.id);
                                                             setSelectedPlayers(newSelected);
                                                             localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
-                                                            // Scroll down to summary
-                                                            document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' });
                                                         }}
                                                         className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
                                                         title="Move to Summary"
@@ -1610,7 +1608,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                             <button
                                                                 onClick={() => {
                                                                     if (selectedPlayers.some(sp => sp.id === p.id)) {
-                                                                        document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
                                                                         return;
                                                                     }
                                                                     const hasExistingScores = p.thru > 0;
@@ -1623,8 +1620,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                         const newSelected = [...selectedPlayers, playerObj];
                                                                         setSelectedPlayers(newSelected);
                                                                         localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(sp => sp.id)));
-                                                                        // Scroll to top to show player was added
-                                                                        document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
                                                                     });
                                                                 }}
                                                                 className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center shadow-xl active:scale-95 transition-all border-2 border-white"
