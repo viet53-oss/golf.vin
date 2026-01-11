@@ -1424,7 +1424,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         }
 
                                         return (
-                                            <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-1">
+                                            <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl p-0">
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
