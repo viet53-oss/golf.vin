@@ -11,7 +11,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import AddToClubModal from '@/components/AddToClubModal';
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound, createDefaultLiveRound } from '@/app/actions/create-live-round';
 import { copyLiveToClub } from '@/app/actions/copy-live-to-club';
-import { removePlayerFromLiveRound } from '@/app/actions/remove-player-from-live-round';
+import { removePlayerFromLiveRound } from '@/app/actions/remove-player-from-live-round'; // Force reload
 
 interface Player {
     id: string;
