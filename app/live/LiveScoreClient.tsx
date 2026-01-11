@@ -1368,7 +1368,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
                                             })()} w-auto whitespace-nowrap text-white font-bold px-8 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 disabled:cursor-not-allowed' : ''}`}
                                         >
-                                            {isSaving ? 'Saving' : `Save Hole ${activeHole}`}
+                                            <div className="relative">
+                                                <span className={isSaving ? 'invisible' : 'visible'}>
+                                                    Save Hole {activeHole}
+                                                </span>
+                                                {isSaving && (
+                                                    <span className="absolute inset-0 flex items-center justify-center">
+                                                        Saving
+                                                    </span>
+                                                )}
+                                            </div>
                                         </button>
                                     )
                                 }
