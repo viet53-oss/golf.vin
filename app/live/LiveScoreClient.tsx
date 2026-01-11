@@ -1229,7 +1229,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
                                     <button
                                         onClick={() => document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' })}
-                                        className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 shadow-sm active:scale-95 transition-all border border-gray-200"
+                                        className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-[18pt] font-bold shadow-md active:scale-95 transition-all"
                                         title="Go to Summary"
                                     >
                                         ↓
