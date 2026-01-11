@@ -1223,9 +1223,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* PLAYERS SECTION (Scoring) */}
                 {
                     selectedPlayers.length > 0 && (
-                        <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 py-0 px-2">
+                        <div id="scoring-section" className="bg-white rounded-xl shadow-lg border-2 border-black my-1 py-0 px-2">
                             <div className="flex justify-between items-center mb-0">
-                                <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
+                                    <button
+                                        onClick={() => document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                        className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 shadow-sm active:scale-95 transition-all border border-gray-200"
+                                        title="Go to Summary"
+                                    >
+                                        ↓
+                                    </button>
+                                </div>
                                 {
                                     selectedPlayers.length > 0 && canUpdate && (
                                         <button
@@ -1465,6 +1474,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 ✏️
                                                             </button>
                                                         )}
+                                                        <button
+                                                            onClick={() => {
+                                                                const newSelected = selectedPlayers.filter(p => p.id !== player.id);
+                                                                setSelectedPlayers(newSelected);
+                                                                localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
+                                                            }}
+                                                            className="ml-1 text-red-500 hover:text-red-700 text-[12pt] font-semibold opacity-60 hover:opacity-100"
+                                                            title="Remove from my group"
+                                                        >
+                                                            ❌
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-4">
@@ -1501,8 +1521,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {/* Live Scores Summary */}
                 {
                     summaryPlayers.length > 0 && (
-                        <div className="mt-1 space-y-2">
+                        <div id="summary-section" className="mt-1 space-y-2">
                             <div className="flex gap-2 my-1">
+                                <button
+                                    onClick={() => document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="w-12 h-12 shrink-0 rounded-full bg-black text-white flex items-center justify-center text-[20pt] font-bold shadow-md active:scale-95 transition-transform"
+                                    title="Back to Scoring"
+                                >
+                                    ↑
+                                </button>
                                 <button
                                     onClick={() => router.refresh()}
                                     className="flex-1 bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
@@ -1572,10 +1599,17 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         {canUpdate && !selectedPlayers.some(sp => sp.id === p.id) && (
                                                             <button
                                                                 onClick={() => {
-                                                                    const playerObj = allPlayers.find(ap => ap.id === p.id) || p;
-                                                                    const newSelected = [...selectedPlayers, playerObj];
-                                                                    setSelectedPlayers(newSelected);
-                                                                    localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(sp => sp.id)));
+                                                                    const hasExistingScores = p.thru > 0;
+                                                                    const msg = hasExistingScores
+                                                                        ? `This player already has scores recorded by another device. Are you sure you want to take over scoring for ${p.name}?`
+                                                                        : `Add ${p.name} to your scoring group?`;
+
+                                                                    if (window.confirm(msg)) {
+                                                                        const playerObj = allPlayers.find(ap => ap.id === p.id) || p;
+                                                                        const newSelected = [...selectedPlayers, playerObj];
+                                                                        setSelectedPlayers(newSelected);
+                                                                        localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(sp => sp.id)));
+                                                                    }
                                                                 }}
                                                                 className="bg-white/20 hover:bg-white/30 text-white rounded-full px-4 py-2 text-[15pt] font-black border-2 border-white shadow-sm active:scale-95 transition-all flex items-center gap-2"
                                                             >
@@ -1884,16 +1918,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     </div>
                 )
             }
-            {confirmConfig && (
-                <ConfirmModal
-                    isOpen={confirmConfig.isOpen}
-                    title={confirmConfig.title}
-                    message={confirmConfig.message}
-                    isDestructive={confirmConfig.isDestructive}
-                    onConfirm={confirmConfig.onConfirm}
-                    onCancel={() => setConfirmConfig(null)}
-                />
-            )}
+            {
+                confirmConfig && (
+                    <ConfirmModal
+                        isOpen={confirmConfig.isOpen}
+                        title={confirmConfig.title}
+                        message={confirmConfig.message}
+                        isDestructive={confirmConfig.isDestructive}
+                        onConfirm={confirmConfig.onConfirm}
+                        onCancel={() => setConfirmConfig(null)}
+                    />
+                )
+            }
         </div >
     );
 }
