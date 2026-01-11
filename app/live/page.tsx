@@ -192,6 +192,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
 
     // 10. Get rounds for list
     const allLiveRounds = await prisma.liveRound.findMany({
+        where: isAdmin ? {} : { date: todayStr },
         orderBy: { created_at: 'desc' },
         select: { id: true, name: true, date: true, created_at: true }
     });
