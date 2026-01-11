@@ -64,15 +64,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Initialize State from Server Data
     const [liveRoundId, setLiveRoundId] = useState<string | null>(initialRound?.id || null);
 
-    // Initialize admin status synchronously if possible
-    const [isAdmin, setIsAdmin] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const adminCookie = Cookies.get('admin_session');
-            return adminCookie === 'true';
-        }
-        return false;
-    });
-
+    const [isAdmin, setIsAdmin] = useState(false); // Initialize to false, update in useEffect
     // Start with empty selection - each device manages its own group
     const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
     const [isSaving, setIsSaving] = useState(false); // Used to show 'Saving' state on button
@@ -461,12 +453,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         setHasUnsavedChanges(false);
         setPendingScores(new Map()); // Clear pending scores when changing holes
     }, [activeHole]);
-    // Listen for admin status changes (sync with state changes from other components if any)
+    // Check admin status on mount and listen for changes
     useEffect(() => {
         const checkAdmin = () => {
             const adminCookie = Cookies.get('admin_session');
             setIsAdmin(adminCookie === 'true');
         };
+
+        checkAdmin();
 
         window.addEventListener('admin-change', checkAdmin);
         return () => window.removeEventListener('admin-change', checkAdmin);
@@ -739,8 +733,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 if (result.success && result.roundId) {
                     // Navigate to the new round
                     router.push(`/live?roundId=${result.roundId}`);
-                    // Force a hard refresh to ensure state is clean
-                    setTimeout(() => window.location.reload(), 100);
+                    router.refresh();
                 } else {
                     showAlert('Error', 'Failed to create new round: ' + (result.error || 'Unknown error'));
                 }
@@ -981,9 +974,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             <main className="w-full px-1 pt-1 m-0 space-y-1">
                 {/* Round Selector - Admin Only */}
                 {isAdmin && allLiveRounds.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300">
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-[15pt] font-bold text-gray-900">Select Round:</label>
+                    <div style={{ minHeight: '80px' }} className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 flex flex-col justify-center">
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="text-[15pt] font-bold text-gray-900 ml-1">Select Round:</label>
                             {isAdmin && (
                                 <button
                                     onClick={handleCreateNewRound}
@@ -998,7 +991,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             value={liveRoundId || ''}
                             onChange={(e) => {
                                 if (e.target.value) {
-                                    window.location.href = `/live?roundId=${e.target.value}`;
+                                    router.push(`/live?roundId=${e.target.value}`);
                                 }
                             }}
                             className="flex-1 px-4 py-2 text-[15pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 min-w-0"
@@ -1780,8 +1773,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     isDestructive: false,
                                     onConfirm: async () => {
                                         setConfirmConfig(null);
-                                        alert('Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
-                                        window.location.reload();
+                                        showAlert('Success', 'Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
+                                        // Use silent refresh instead of reload to prevent jumping
+                                        router.refresh();
                                     }
                                 });
                             }}
