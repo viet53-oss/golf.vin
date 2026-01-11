@@ -14,7 +14,8 @@ export default function NewCoursePage() {
         id: `temp-hole-${i}`,
         hole_number: i + 1,
         par: 4,
-        difficulty: null
+        difficulty: null,
+        elements: []
     }));
 
     const initialCourse = {
