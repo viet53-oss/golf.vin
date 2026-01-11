@@ -425,7 +425,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         setPendingScores(new Map()); // Clear pending scores when changing holes
     }, [activeHole]);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
+    const [isSaving, setIsSaving] = useState(false); // Used to show 'Saving' state on button
 
     // Check admin status
     useEffect(() => {
