@@ -1072,6 +1072,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             <button
                                                 onClick={() => {
                                                     if (!liveRoundId) return;
+                                                    const password = prompt("Enter password to delete:");
+                                                    if (password !== 'cpgc-delete') {
+                                                        showAlert('Error', 'Incorrect password.');
+                                                        return;
+                                                    }
+
                                                     setConfirmConfig({
                                                         isOpen: true,
                                                         title: 'Delete Live Round',
@@ -1084,7 +1090,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 window.location.href = '/';
                                                             } catch (err) {
                                                                 console.error('Failed to delete round:', err);
-                                                                alert('Failed to delete round.');
+                                                                showAlert('Error', 'Failed to delete round.');
                                                             }
                                                         }
                                                     });
