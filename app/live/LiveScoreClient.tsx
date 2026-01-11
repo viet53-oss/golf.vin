@@ -1235,7 +1235,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
                                     <button
                                         onClick={() => document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' })}
-                                        className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-[18pt] font-bold shadow-md active:scale-95 transition-all"
+                                        className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center text-[22pt] font-black shadow-lg active:scale-95 transition-all"
                                         title="Go to Summary"
                                     >
                                         ↓
@@ -1459,10 +1459,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 movePlayerOrder(index, 'up');
                                                             }}
                                                             disabled={index === 0}
-                                                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95 ${index === 0 ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-black text-white shadow-md'}`}
+                                                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-md bg-black text-white ${index === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800'}`}
                                                             title="Move Up"
                                                         >
-                                                            <span className="text-[15pt] font-bold leading-none">↑</span>
+                                                            <span className="text-[14pt] font-black leading-none">↑</span>
                                                         </button>
                                                         <button
                                                             onClick={(e) => {
@@ -1470,10 +1470,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 movePlayerOrder(index, 'down');
                                                             }}
                                                             disabled={index === selectedPlayers.length - 1}
-                                                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95 ${index === selectedPlayers.length - 1 ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-black text-white shadow-md'}`}
+                                                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-md bg-black text-white ${index === selectedPlayers.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800'}`}
                                                             title="Move Down"
                                                         >
-                                                            <span className="text-[15pt] font-bold leading-none">↓</span>
+                                                            <span className="text-[14pt] font-black leading-none">↓</span>
                                                         </button>
                                                     </div>
                                                     <div className="flex flex-col items-start leading-tight">
@@ -1638,7 +1638,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                         document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
                                                                     }
                                                                 }}
-                                                                className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-[18pt] font-black border-2 border-white shadow-lg active:scale-95 transition-all"
+                                                                className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center text-[20pt] font-black border-2 border-white shadow-xl active:scale-95 transition-all"
                                                                 title="Add to My Group"
                                                             >
                                                                 ↑
