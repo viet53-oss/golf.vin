@@ -1231,16 +1231,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     selectedPlayers.length > 0 && (
                         <div id="scoring-section" className="bg-white rounded-xl shadow-lg border-2 border-black my-1 py-0 px-2">
                             <div className="flex justify-between items-center mb-0">
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
-                                    <button
-                                        onClick={() => document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' })}
-                                        className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center text-[22pt] font-black shadow-lg active:scale-95 transition-all"
-                                        title="Go to Summary"
-                                    >
-                                        ↓
-                                    </button>
-                                </div>
+                                <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
                                 {
                                     selectedPlayers.length > 0 && canUpdate && (
                                         <button
@@ -1452,30 +1443,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl py-0 px-1">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex flex-col gap-1 mr-2">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                movePlayerOrder(index, 'up');
-                                                            }}
-                                                            disabled={index === 0}
-                                                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-md bg-black text-white ${index === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800'}`}
-                                                            title="Move Up"
-                                                        >
-                                                            <span className="text-[14pt] font-black leading-none">↑</span>
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                movePlayerOrder(index, 'down');
-                                                            }}
-                                                            disabled={index === selectedPlayers.length - 1}
-                                                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-md bg-black text-white ${index === selectedPlayers.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800'}`}
-                                                            title="Move Down"
-                                                        >
-                                                            <span className="text-[14pt] font-black leading-none">↓</span>
-                                                        </button>
-                                                    </div>
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
                                                         <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
@@ -1504,11 +1471,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 const newSelected = selectedPlayers.filter(p => p.id !== player.id);
                                                                 setSelectedPlayers(newSelected);
                                                                 localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
+                                                                // Scroll down to summary
+                                                                document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' });
                                                             }}
-                                                            className="ml-1 text-red-500 hover:text-red-700 text-[12pt] font-semibold opacity-60 hover:opacity-100"
-                                                            title="Remove from my group"
+                                                            className="ml-1 w-9 h-9 rounded-full bg-black text-white flex items-center justify-center shadow-md active:scale-95 transition-all"
+                                                            title="Move to Summary"
                                                         >
-                                                            ❌
+                                                            <span className="text-[15pt] font-black leading-none">↓</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1548,13 +1517,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     summaryPlayers.length > 0 && (
                         <div id="summary-section" className="mt-1 space-y-2">
                             <div className="flex gap-2 my-1">
-                                <button
-                                    onClick={() => document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' })}
-                                    className="w-12 h-12 shrink-0 rounded-full bg-black text-white flex items-center justify-center text-[20pt] font-bold shadow-md active:scale-95 transition-transform"
-                                    title="Back to Scoring"
-                                >
-                                    ↑
-                                </button>
                                 <button
                                     onClick={() => router.refresh()}
                                     className="flex-1 bg-black text-white rounded-full py-2 text-[15pt] font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-95"
