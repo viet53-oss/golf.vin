@@ -1073,7 +1073,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 onClick={() => {
                                                     if (!liveRoundId) return;
                                                     const password = prompt("Enter password to delete:");
-                                                    if (password !== 'cpgc-delete') {
+                                                    if (password !== 'cpgc-Delete') {
                                                         showAlert('Error', 'Incorrect password.');
                                                         return;
                                                     }

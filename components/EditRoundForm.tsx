@@ -187,7 +187,7 @@ export default function EditRoundForm({
         if (isNew) return;
 
         const password = prompt("Enter password to delete:");
-        if (password !== 'cpgc-delete') {
+        if (password !== 'cpgc-Delete') {
             alert('Incorrect password.');
             return;
         }

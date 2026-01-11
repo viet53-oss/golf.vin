@@ -152,6 +152,11 @@ export function GuestPlayerModal({ isOpen, onClose, onAdd, onUpdate, onDelete, r
                     {editingGuest && (
                         <button
                             onClick={() => {
+                                const password = prompt("Enter password to delete:");
+                                if (password !== 'cpgc-Delete') {
+                                    alert('Incorrect password.');
+                                    return;
+                                }
                                 setConfirmConfig({
                                     isOpen: true,
                                     title: 'Delete Guest Player',

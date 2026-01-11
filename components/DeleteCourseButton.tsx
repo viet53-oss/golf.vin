@@ -9,8 +9,11 @@ export default function DeleteCourseButton({ courseId, canDelete }: { courseId: 
     const router = useRouter();
 
     const handleDelete = () => {
-        // Removed confirm dialog for faster cleanup as requested
-        // if (!confirm('Are you sure you want to delete this course permanently?')) return;
+        const password = prompt("Enter password to delete this course:");
+        if (password !== 'cpgc-Delete') {
+            if (password) alert('Incorrect password.');
+            return;
+        }
 
         startTransition(async () => {
             try {

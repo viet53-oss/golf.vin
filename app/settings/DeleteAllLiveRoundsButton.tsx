@@ -7,6 +7,12 @@ export default function DeleteAllLiveRoundsButton() {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = async () => {
+        const password = prompt("Enter password to delete ALL live rounds:");
+        if (password !== 'cpgc-Delete') {
+            if (password) alert('Incorrect password.');
+            return;
+        }
+
         if (!confirm('Are you sure you want to delete ALL live rounds? This cannot be undone.')) {
             return;
         }
