@@ -1470,6 +1470,19 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl py-0 px-1">
                                                 <div className="flex items-center gap-3">
+                                                    <button
+                                                        onClick={() => {
+                                                            const newSelected = selectedPlayers.filter(p => p.id !== player.id);
+                                                            setSelectedPlayers(newSelected);
+                                                            localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
+                                                            // Scroll down to summary
+                                                            document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' });
+                                                        }}
+                                                        className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                                                        title="Move to Summary"
+                                                    >
+                                                        <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor"><path d="M11 4h2v12l5.5-5.5 1.42 1.42L12 19.84l-7.92-7.92 1.42-1.42L11 16V4z" /></svg>
+                                                    </button>
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>
                                                         <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
@@ -1493,19 +1506,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                 ✏️
                                                             </button>
                                                         )}
-                                                        <button
-                                                            onClick={() => {
-                                                                const newSelected = selectedPlayers.filter(p => p.id !== player.id);
-                                                                setSelectedPlayers(newSelected);
-                                                                localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
-                                                                // Scroll down to summary
-                                                                document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth' });
-                                                            }}
-                                                            className="ml-1 w-9 h-9 rounded-full bg-black text-white flex items-center justify-center shadow-md active:scale-95 transition-all"
-                                                            title="Move to Summary"
-                                                        >
-                                                            <span className="text-[15pt] font-black leading-none">↓</span>
-                                                        </button>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-4">
@@ -1599,17 +1599,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             <div className="bg-[#1d4ed8] p-1 text-white">
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="flex flex-col">
-                                                            <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
-                                                            <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
-                                                        </div>
-                                                        <div className="flex items-center">
-                                                            {showRankIconInSummary && <span className="text-[20pt] leading-none">{showRankIconInSummary}</span>}
-                                                            {showFlagInSummary && <span className="text-[20pt] leading-none">🏁</span>}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex gap-2 items-center">
                                                         {canUpdate && !selectedPlayers.some(sp => sp.id === p.id) && (
                                                             <button
                                                                 onClick={() => {
@@ -1627,12 +1616,23 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                         document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
                                                                     });
                                                                 }}
-                                                                className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center text-[20pt] font-black border-2 border-white shadow-xl active:scale-95 transition-all"
+                                                                className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center shadow-xl active:scale-95 transition-all border-2 border-white"
                                                                 title="Add to My Group"
                                                             >
-                                                                ↑
+                                                                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z" /></svg>
                                                             </button>
                                                         )}
+                                                        <div className="flex flex-col">
+                                                            <div className="font-bold text-[15pt] leading-tight">{splitName(p.name).first}</div>
+                                                            <div className="text-[12pt] leading-tight opacity-90">{splitName(p.name).last}</div>
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            {showRankIconInSummary && <span className="text-[20pt] leading-none">{showRankIconInSummary}</span>}
+                                                            {showFlagInSummary && <span className="text-[20pt] leading-none">🏁</span>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex gap-2 items-center">
                                                         <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[15pt] min-w-[3rem] ${toParClass}`}>
                                                             {toParStr}
                                                         </div>
