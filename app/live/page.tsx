@@ -87,12 +87,19 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
             }
         });
 
-        if (activeRound) {
-            // Found existing
-        } else if (defaultCourse) {
+        if (!activeRound && defaultCourse) {
             try {
                 // Calculate par from holes
                 const coursePar = defaultCourse.holes.reduce((sum, hole) => sum + hole.par, 0);
+
+                // Get players from the most recent previous round
+                const previousRound = await prisma.liveRound.findFirst({
+                    where: { date: { lt: todayStr } },
+                    orderBy: [{ date: 'desc' }, { created_at: 'desc' }],
+                    include: { players: true }
+                });
+
+                const previousPlayers = previousRound?.players || [];
 
                 // Find White tee box or fallback to first available
                 const whiteTee = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes('white'));
@@ -106,7 +113,26 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
                         course_name: defaultCourse.name,
                         par: coursePar,
                         rating: defaultTeeBox?.rating ?? coursePar,
-                        slope: defaultTeeBox?.slope ?? 113
+                        slope: defaultTeeBox?.slope ?? 113,
+                        players: {
+                            create: previousPlayers.map(p => {
+                                // Try to find matching tee box by name in the new course
+                                const matchingTee = defaultCourse!.tee_boxes.find(t => t.name === p.tee_box_name) || defaultTeeBox;
+
+                                return {
+                                    player_id: p.player_id,
+                                    tee_box_id: matchingTee?.id,
+                                    tee_box_name: matchingTee?.name ?? 'White',
+                                    tee_box_rating: matchingTee?.rating ?? coursePar,
+                                    tee_box_slope: Math.round(matchingTee?.slope ?? 113),
+                                    tee_box_par: coursePar,
+                                    index_at_time: p.index_at_time,
+                                    course_handicap: p.course_handicap,
+                                    is_guest: p.is_guest,
+                                    guest_name: p.guest_name
+                                };
+                            })
+                        }
                     },
                     include: {
                         players: {
