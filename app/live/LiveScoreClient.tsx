@@ -1122,16 +1122,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                 if (!userLocation) {
                                     return (
-                                        <div className="bg-gray-100 text-gray-500 py-6 rounded-[80px] border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
-                                            <p className="font-medium text-[15pt] animate-pulse">🛰️ Waiting for GPS...</p>
+                                        <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
+                                            <p className="font-medium text-[15pt] animate-pulse py-6">🛰️ Waiting for GPS...</p>
                                         </div>
                                     );
                                 }
 
                                 if (!currentHole?.latitude || !currentHole?.longitude) {
                                     return (
-                                        <div className="bg-yellow-50 text-yellow-700 py-6 rounded-[80px] text-center mb-2 shadow-inner border-2 border-yellow-400">
-                                            <p className="font-medium text-[15pt]">📍 Coordinates missing for Hole {activeHole}</p>
+                                        <div className="bg-yellow-50 text-yellow-700 p-1 rounded-xl text-center mb-2 shadow-inner border-2 border-yellow-400">
+                                            <p className="font-medium text-[15pt] py-6">📍 Coordinates missing for Hole {activeHole}</p>
                                         </div>
                                     );
                                 }
@@ -1144,8 +1144,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 );
 
                                 return (
-                                    <div className="bg-green-600 text-white w-full mx-auto px-1 py-0 rounded-[100px] text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
-                                        <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-3 pb-5">
+                                    <div className="bg-green-600 text-white w-full mx-auto p-1 rounded-xl text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
+                                        <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-2 pb-4">
                                             {dist}
                                         </p>
                                     </div>
