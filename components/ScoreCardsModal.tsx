@@ -179,8 +179,7 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                             <div className="text-[12pt] leading-tight opacity-90">{splitName(p.player.name).last}</div>
                                         </div>
                                         <div className="flex items-center">
-                                            {showRankIconInSummary && <span className="text-[20pt] leading-none">{showRankIconInSummary}</span>}
-                                            {showFlagInSummary && <span className="text-[20pt] leading-none">🏁</span>}
+                                            {/* Icons removed per request */}
                                         </div>
                                     </div>
 
