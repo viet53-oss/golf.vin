@@ -455,16 +455,22 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
     // Sync activeHole to URL whenever it changes without scrolling
     useEffect(() => {
+        const currentHole = searchParams.get('hole');
+        if (currentHole === activeHole.toString()) return;
+
         const params = new URLSearchParams(searchParams.toString());
         params.set('hole', activeHole.toString());
         const newUrl = `${window.location.pathname}?${params.toString()}`;
 
         // Use router.replace with scroll: false to be absolutely sure Next.js doesn't scroll
         router.replace(newUrl, { scroll: false });
-
-        setHasUnsavedChanges(false);
-        setPendingScores(new Map()); // Clear pending scores when changing holes
     }, [activeHole, router, searchParams]);
+
+    // Cleanup state when moving to a new hole
+    useEffect(() => {
+        setHasUnsavedChanges(false);
+        setPendingScores(new Map());
+    }, [activeHole]);
     // Check admin status on mount and listen for changes
     useEffect(() => {
         const checkAdmin = () => {
