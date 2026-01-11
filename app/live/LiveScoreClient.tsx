@@ -1429,7 +1429,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 // Blue if: has unsaved changes OR hole is not yet scored
                                                 // Black if: hole is scored AND no unsaved changes
                                                 return (hasUnsavedChanges || !isHoleScored) ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800';
-                                            })()} w-auto whitespace-nowrap text-white font-bold px-8 py-2 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 disabled:cursor-not-allowed' : ''}`}
+                                            })()} w-auto whitespace-nowrap text-white font-bold px-8 py-2 mt-1 rounded-full shadow-sm transition-colors text-[20pt] flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 disabled:cursor-not-allowed' : ''}`}
                                         >
                                             <div className="relative">
                                                 <span className={isSaving ? 'invisible' : 'visible'}>
@@ -1516,8 +1516,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         <div className="text-gray-700 text-[15pt] leading-tight">{splitName(player.name).last}</div>
                                                     </div>
                                                     <div className="flex items-center gap-1">
-                                                        {showRankIconNextToName && <span className="text-[20pt] leading-none">{showRankIconNextToName}</span>}
-                                                        {showFlagNextToName && <span className="text-[20pt] leading-none">🏁</span>}
+                                                        {/* Icons removed per request */}
                                                         {(player.isGuest || player.id.startsWith('guest-')) && canUpdate && (
                                                             <button
                                                                 onClick={() => {
