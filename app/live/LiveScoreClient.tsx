@@ -1151,6 +1151,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                             {/* GPS Distance Display */}
                             {(() => {
+                                if (isAdmin) {
+                                    return (
+                                        <div className="bg-gray-100 text-gray-500 p-1 rounded-xl border-2 border-dashed border-gray-300 text-center mb-2 shadow-inner">
+                                            <p className="font-medium text-[15pt] py-6">🛰️ GPS Hidden (Admin)</p>
+                                        </div>
+                                    );
+                                }
+
                                 const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
 
                                 if (!userLocation) {
