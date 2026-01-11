@@ -175,8 +175,8 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-3">
                                         <div className="flex flex-col">
-                                            <div className="font-bold text-[15pt] leading-tight">{splitName(p.player.name).first}</div>
-                                            <div className="text-[12pt] leading-tight opacity-90">{splitName(p.player.name).last}</div>
+                                            <div className="font-bold text-[16pt] leading-tight">{splitName(p.player.name).first}</div>
+                                            <div className="text-[13pt] leading-tight opacity-90">{splitName(p.player.name).last}</div>
                                         </div>
                                         <div className="flex items-center">
                                             {/* Icons removed per request */}
