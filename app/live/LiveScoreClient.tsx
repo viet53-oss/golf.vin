@@ -1552,9 +1552,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 </button>
                                 <button
                                     onClick={() => setIsStatsModalOpen(true)}
-                                    className="w-16 bg-black text-white rounded-full py-2 text-[15pt] hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                    className="w-16 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                                 >
-                                    🖕
+                                    <span className="text-[35pt] leading-none">🖕</span>
                                 </button>
                             </div>
 
@@ -1813,7 +1813,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             {/* Birdies Section */}
                             <div className="bg-white rounded-xl shadow-lg p-3 border-2 border-green-500">
                                 <h2 className="text-[16pt] font-bold text-green-700 mb-3 flex items-center gap-2">
-                                    🖕 Birdies (1 Under Par)
+                                    <span className="text-[25pt]">🖕</span> Birdies (1 Under Par)
                                 </h2>
                                 <div className="space-y-2">
                                     {birdieLeaders.length > 0 ? (
