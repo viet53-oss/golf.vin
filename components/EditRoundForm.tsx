@@ -186,6 +186,12 @@ export default function EditRoundForm({
     const handleDeleteClick = () => {
         if (isNew) return;
 
+        const password = prompt("Enter password to delete:");
+        if (password !== 'cpgc-delete') {
+            alert('Incorrect password.');
+            return;
+        }
+
         setConfirmConfig({
             isOpen: true,
             title: 'Delete Round',
