@@ -1396,6 +1396,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                                     // Silent refresh to keep server data in sync without flashing the page
                                                     router.refresh();
+
+                                                    // Explicitly scroll back to scoring section to prevent jumping to top
+                                                    setTimeout(() => {
+                                                        document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
+                                                    }, 100);
                                                 } finally {
                                                     setIsSaving(false);
                                                 }
