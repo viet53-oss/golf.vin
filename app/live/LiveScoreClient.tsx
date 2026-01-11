@@ -257,7 +257,10 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 const savedIds = JSON.parse(saved);
                 // Combine allPlayers with guest players from database
                 const allAvailablePlayers = [...allPlayers, ...guestsFromDb];
-                const restored = allAvailablePlayers.filter((p: Player) => savedIds.includes(p.id));
+                const restored = savedIds.map((id: string) =>
+                    allAvailablePlayers.find((p: Player) => p.id === id)
+                ).filter((p: Player | undefined): p is Player => p !== undefined);
+
                 if (restored.length > 0) {
                     setSelectedPlayers(restored);
                 } else {
@@ -656,13 +659,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
     };
     const handleAddPlayers = async (newSelectedPlayerIds: string[]) => {
-        const newSelectedPlayers = allPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
-        const selectedGuests = guestPlayers.filter(p => newSelectedPlayerIds.includes(p.id));
-        const combinedSelection = [...newSelectedPlayers, ...selectedGuests];
+        const allAvailable = [...allPlayers, ...guestPlayers];
+        const combinedSelection = newSelectedPlayerIds.map(id =>
+            allAvailable.find(p => p.id === id)
+        ).filter((p): p is Player => p !== undefined);
 
         setSelectedPlayers(combinedSelection);
 
-        // 1. Ensure Live Round Exists (Auto-start or Auto-join)
+        const newSelectedPlayers = combinedSelection.filter(p => !p.isGuest && !p.id.startsWith('guest-'));
         let currentLiveRoundId = liveRoundId;
         if (!currentLiveRoundId) {
             // Check if there is already a live round for today to join
