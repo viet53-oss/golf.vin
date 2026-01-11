@@ -1322,14 +1322,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                             <div className="grid grid-cols-6 gap-1">
                                 {defaultCourse?.holes.map(hole => {
-                                    // Check if this hole has been saved (has scores)
-                                    const isSaved = selectedPlayers.some(p => {
+                                    // Use selected group if available, otherwise check all players in the round
+                                    const playersForStatus = selectedPlayers.length > 0 ? selectedPlayers : rankedPlayers;
+
+                                    const isSaved = playersForStatus.some(p => {
                                         const pScores = scores.get(p.id);
                                         return pScores && pScores.has(hole.hole_number);
                                     });
 
                                     const isActive = activeHole === hole.hole_number;
-                                    const isMissing = selectedPlayers.length > 0 && !isActive && !isSaved && hole.hole_number < activeHole;
+                                    const isMissing = playersForStatus.length > 0 && !isActive && !isSaved && hole.hole_number < activeHole;
 
                                     // Determine styling
                                     let btnClass = "bg-white text-black border border-black";
