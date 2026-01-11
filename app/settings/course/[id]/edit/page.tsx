@@ -10,7 +10,10 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
         where: { id },
         include: {
             tee_boxes: { orderBy: { rating: 'desc' } },
-            holes: { orderBy: { hole_number: 'asc' } }
+            holes: {
+                orderBy: { hole_number: 'asc' },
+                include: { elements: true }
+            }
         }
     });
 

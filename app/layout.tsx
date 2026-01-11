@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 
 import AppHeader from "@/components/AppHeader";
 import GlobalEnterNavigation from "@/components/GlobalEnterNavigation";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 export default function RootLayout({
   children,
@@ -39,6 +40,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <ServiceWorkerRegistration />
         <AppHeader />
         <GlobalEnterNavigation />
         {children}

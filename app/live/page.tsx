@@ -20,13 +20,13 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         where: { name: { contains: 'City Park North' } },
         include: {
             tee_boxes: true,
-            holes: { orderBy: { hole_number: 'asc' } }
+            holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } }
         }
     });
 
     if (!defaultCourse) {
         defaultCourse = await prisma.course.findFirst({
-            include: { tee_boxes: true, holes: { orderBy: { hole_number: 'asc' } } }
+            include: { tee_boxes: true, holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } } }
         });
     }
 
@@ -34,7 +34,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     const allCourses = await prisma.course.findMany({
         include: {
             tee_boxes: true,
-            holes: { orderBy: { hole_number: 'asc' } }
+            holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } }
         },
         orderBy: { name: 'asc' }
     });
@@ -184,7 +184,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
             where: { id: activeRound.course_id },
             include: {
                 tee_boxes: true,
-                holes: { orderBy: { hole_number: 'asc' } }
+                holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } }
             }
         });
         if (roundCourse) {

@@ -61,13 +61,32 @@ model Hole {
   hole_number Int
   par         Int
   difficulty  Int?
+  elements    HoleElement[]
   latitude    Float?
   longitude   Float?
-  course      Course      @relation(fields: [course_id], references: [id])
+  course      Course        @relation(fields: [course_id], references: [id])
   live_scores LiveScore[]
   scores      Score[]
 
   @@map("holes")
+}
+
+model HoleElement {
+  id              String  @id @default(uuid())
+  hole_id         String
+  side            String // 'LEFT' or 'RIGHT'
+  element_number  Int // 1, 2, 3
+  front_latitude  Float?
+  front_longitude Float?
+  back_latitude   Float?
+  back_longitude  Float?
+  water           Boolean @default(false)
+  bunker          Boolean @default(false)
+  tree            Boolean @default(false)
+  hole            Hole    @relation(fields: [hole_id], references: [id], onDelete: Cascade)
+
+  @@index([hole_id])
+  @@map("hole_elements")
 }
 
 model Round {

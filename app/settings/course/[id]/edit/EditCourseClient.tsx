@@ -12,7 +12,26 @@ type CourseData = {
     id: string;
     name: string;
     tee_boxes: { id: string; name: string; rating: number; slope: number }[];
-    holes: { id: string; hole_number: number; par: number; difficulty: number | null, latitude?: number | string | null, longitude?: number | string | null }[];
+    holes: {
+        id: string;
+        hole_number: number;
+        par: number;
+        difficulty: number | null;
+        latitude?: number | string | null;
+        longitude?: number | string | null;
+        elements: {
+            id?: string;
+            side: string;
+            element_number: number;
+            front_latitude?: number | string | null;
+            front_longitude?: number | string | null;
+            back_latitude?: number | string | null;
+            back_longitude?: number | string | null;
+            water?: boolean;
+            bunker?: boolean;
+            tree?: boolean;
+        }[]
+    }[];
 };
 
 export default function EditCourseClient({ initialCourse, isNew = false }: { initialCourse: CourseData, isNew?: boolean }) {
@@ -20,6 +39,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
     const [tees, setTees] = useState(initialCourse.tee_boxes);
     const [holes, setHoles] = useState(initialCourse.holes); // Should be sorted 1-18
     const [coursePar, setCoursePar] = useState(initialCourse.holes.reduce((sum, h) => sum + (h.par || 0), 0));
+    const [editingHoleIndex, setEditingHoleIndex] = useState<number | null>(null);
 
     useEffect(() => {
         const total = holes.reduce((sum, h) => sum + (h.par || 0), 0);
@@ -71,6 +91,75 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
         setTees(newTees);
     };
 
+    const handleElementChange = (holeIndex: number, side: 'LEFT' | 'RIGHT', elementNum: number, position: 'front' | 'back', value: string) => {
+        const newHoles = [...holes];
+        const hole = { ...newHoles[holeIndex] };
+        const elements = hole.elements ? [...hole.elements] : [];
+
+        let elementIndex = elements.findIndex(e => e.side === side && e.element_number === elementNum);
+
+        if (elementIndex === -1) {
+            elements.push({
+                side,
+                element_number: elementNum,
+                front_latitude: null,
+                front_longitude: null,
+                back_latitude: null,
+                back_longitude: null
+            });
+            elementIndex = elements.length - 1;
+        }
+
+        const element = { ...elements[elementIndex] };
+
+        const trimmed = value.trim();
+        const parts = trimmed.split(/[\s,]+/).filter(p => p.length > 0);
+        const lat = parts.length > 0 ? parts[0] : '';
+        const lon = parts.length >= 2 ? parts[1] : '';
+
+        if (position === 'front') {
+            element.front_latitude = lat;
+            element.front_longitude = lon;
+        } else {
+            element.back_latitude = lat;
+            element.back_longitude = lon;
+        }
+
+        elements[elementIndex] = element;
+        hole.elements = elements;
+        newHoles[holeIndex] = hole;
+        setHoles(newHoles);
+    };
+
+    const handleElementFeatureToggle = (holeIndex: number, side: 'LEFT' | 'RIGHT', elementNum: number, feature: 'water' | 'bunker' | 'tree', checked: boolean) => {
+        const newHoles = [...holes];
+        const hole = { ...newHoles[holeIndex] };
+        const elements = hole.elements ? [...hole.elements] : [];
+
+        let elementIndex = elements.findIndex(e => e.side === side && e.element_number === elementNum);
+
+        if (elementIndex === -1) {
+            elements.push({
+                side,
+                element_number: elementNum,
+                front_latitude: null,
+                front_longitude: null,
+                back_latitude: null,
+                back_longitude: null,
+                water: false,
+                bunker: false,
+                tree: false
+            });
+            elementIndex = elements.length - 1;
+        }
+
+        const element = { ...elements[elementIndex], [feature]: checked };
+        elements[elementIndex] = element;
+        hole.elements = elements;
+        newHoles[holeIndex] = hole;
+        setHoles(newHoles);
+    };
+
 
 
     const parseCoordinate = (val: any): number | null => {
@@ -106,7 +195,18 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                         par: h.par,
                         difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
-                        longitude: parseCoordinate(h.longitude)
+                        longitude: parseCoordinate(h.longitude),
+                        elements: h.elements?.map(e => ({
+                            side: e.side,
+                            element_number: e.element_number,
+                            front_latitude: parseCoordinate(e.front_latitude),
+                            front_longitude: parseCoordinate(e.front_longitude),
+                            back_latitude: parseCoordinate(e.back_latitude),
+                            back_longitude: parseCoordinate(e.back_longitude),
+                            water: e.water || false,
+                            bunker: e.bunker || false,
+                            tree: e.tree || false
+                        }))
                     }))
                 });
             } else {
@@ -119,7 +219,18 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                         par: h.par,
                         difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
-                        longitude: parseCoordinate(h.longitude)
+                        longitude: parseCoordinate(h.longitude),
+                        elements: h.elements?.map(e => ({
+                            side: e.side,
+                            element_number: e.element_number,
+                            front_latitude: parseCoordinate(e.front_latitude),
+                            front_longitude: parseCoordinate(e.front_longitude),
+                            back_latitude: parseCoordinate(e.back_latitude),
+                            back_longitude: parseCoordinate(e.back_longitude),
+                            water: e.water || false,
+                            bunker: e.bunker || false,
+                            tree: e.tree || false
+                        }))
                     }))
                 });
             }
@@ -161,9 +272,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                             onClick={() => router.push('/settings')}
                             className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-colors"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-                            </svg>
+                            Close
                         </button>
                     </div>
                 </div>
@@ -281,7 +390,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                         </tr>
 
                                         <tr className="border-t border-gray-100">
-                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">GPS</td>
+                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">CG</td>
                                             {frontNine.map((h: any, i: number) => (
                                                 <td key={h.id} className="p-1">
                                                     <input
@@ -291,6 +400,19 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                         value={h.latitude && h.longitude ? `${h.latitude} ${h.longitude}` : (h.latitude || h.longitude || '')}
                                                         onChange={(e) => handleHoleChange(i, 'gps', e.target.value)}
                                                     />
+                                                </td>
+                                            ))}
+                                        </tr>
+                                        <tr className="border-t border-gray-100">
+                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Elements</td>
+                                            {frontNine.map((h: any, i: number) => (
+                                                <td key={h.id} className="p-1">
+                                                    <button
+                                                        onClick={() => setEditingHoleIndex(i)}
+                                                        className="bg-blue-600 text-white text-xs px-2 py-1 rounded"
+                                                    >
+                                                        Edit
+                                                    </button>
                                                 </td>
                                             ))}
                                         </tr>
@@ -339,7 +461,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                         </tr>
 
                                         <tr className="border-t border-gray-100">
-                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">GPS</td>
+                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">CG</td>
                                             {backNine.map((h: any, i: number) => (
                                                 <td key={h.id} className="p-1">
                                                     <input
@@ -352,6 +474,19 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                 </td>
                                             ))}
                                         </tr>
+                                        <tr className="border-t border-gray-100">
+                                            <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Elements</td>
+                                            {backNine.map((h: any, i: number) => (
+                                                <td key={h.id} className="p-1">
+                                                    <button
+                                                        onClick={() => setEditingHoleIndex(frontNine.length + i)}
+                                                        className="bg-blue-600 text-white text-xs px-2 py-1 rounded"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            ))}
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -360,6 +495,130 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
 
                     </div >
                 </form >
+
+                {/* Elements Modal */}
+                {editingHoleIndex !== null && (
+                    <div className="fixed inset-0 bg-white z-[300] flex flex-col">
+                        <div className="p-4 border-b flex justify-between items-center bg-gray-50 shrink-0">
+                            <h3 className="text-xl font-bold">Hole {holes[editingHoleIndex].hole_number} Elements</h3>
+                            <button
+                                onClick={() => setEditingHoleIndex(null)}
+                                className="bg-black text-white px-4 py-2 rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 flex items-center"
+                            >
+                                Close
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <div className="grid grid-cols-2 gap-8">
+                                {/* Left Side */}
+                                <div>
+                                    <h4 className="font-bold text-lg mb-4 text-center border-b pb-2">Left Side</h4>
+                                    {[2, 1].map(num => {
+                                        const element = holes[editingHoleIndex].elements?.find(e => e.side === 'LEFT' && e.element_number === num);
+                                        return (
+                                            <div key={`left-${num}`} className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <h5 className="font-bold mb-2">Element {num}</h5>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Front (Lat Long)</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Lat Long"
+                                                            className="w-full p-1 text-sm border rounded"
+                                                            value={element?.front_latitude && element?.front_longitude ? `${element.front_latitude} ${element.front_longitude}` : (element?.front_latitude || element?.front_longitude || '')}
+                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'LEFT', num, 'front', e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Back (Lat Long)</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Lat Long"
+                                                            className="w-full p-1 text-sm border rounded"
+                                                            value={element?.back_latitude && element?.back_longitude ? `${element.back_latitude} ${element.back_longitude}` : (element?.back_latitude || element?.back_longitude || '')}
+                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'LEFT', num, 'back', e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="mt-2 flex gap-4">
+                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
+                                                        <input type="checkbox" checked={element?.water || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'LEFT', num, 'water', e.target.checked)} />
+                                                        Water
+                                                    </label>
+                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
+                                                        <input type="checkbox" checked={element?.bunker || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'LEFT', num, 'bunker', e.target.checked)} />
+                                                        Bunker
+                                                    </label>
+                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
+                                                        <input type="checkbox" checked={element?.tree || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'LEFT', num, 'tree', e.target.checked)} />
+                                                        Tree
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Right Side */}
+                                <div>
+                                    <h4 className="font-bold text-lg mb-4 text-center border-b pb-2">Right Side</h4>
+                                    {[2, 1].map(num => {
+                                        const element = holes[editingHoleIndex].elements?.find(e => e.side === 'RIGHT' && e.element_number === num);
+                                        return (
+                                            <div key={`right-${num}`} className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <h5 className="font-bold mb-2">Element {num}</h5>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Front (Lat Long)</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Lat Long"
+                                                            className="w-full p-1 text-sm border rounded"
+                                                            value={element?.front_latitude && element?.front_longitude ? `${element.front_latitude} ${element.front_longitude}` : (element?.front_latitude || element?.front_longitude || '')}
+                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'RIGHT', num, 'front', e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Back (Lat Long)</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Lat Long"
+                                                            className="w-full p-1 text-sm border rounded"
+                                                            value={element?.back_latitude && element?.back_longitude ? `${element.back_latitude} ${element.back_longitude}` : (element?.back_latitude || element?.back_longitude || '')}
+                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'RIGHT', num, 'back', e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="mt-2 flex gap-4">
+                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
+                                                        <input type="checkbox" checked={element?.water || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'RIGHT', num, 'water', e.target.checked)} />
+                                                        Water
+                                                    </label>
+                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
+                                                        <input type="checkbox" checked={element?.bunker || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'RIGHT', num, 'bunker', e.target.checked)} />
+                                                        Bunker
+                                                    </label>
+                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
+                                                        <input type="checkbox" checked={element?.tree || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'RIGHT', num, 'tree', e.target.checked)} />
+                                                        Tree
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 border-t bg-gray-50 flex justify-end shrink-0">
+                            <button
+                                onClick={() => setEditingHoleIndex(null)}
+                                className="bg-black text-white px-4 py-2 rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 flex items-center"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div >
         </>
     );

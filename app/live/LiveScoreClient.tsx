@@ -32,6 +32,20 @@ interface Hole {
     difficulty?: number | null;
     latitude?: number | null;
     longitude?: number | null;
+    elements?: HoleElement[];
+}
+
+interface HoleElement {
+    id: string;
+    side: string;
+    element_number: number;
+    front_latitude?: number | null;
+    front_longitude?: number | null;
+    back_latitude?: number | null;
+    back_longitude?: number | null;
+    water?: boolean;
+    bunker?: boolean;
+    tree?: boolean;
 }
 
 interface Course {
@@ -83,6 +97,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Track pending (unsaved) scores for the current hole only
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
     const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+    const [isGPSEnabled, setIsGPSEnabled] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('gps_enabled');
+            return saved !== null ? saved === 'true' : true;
+        }
+        return true;
+    });
     const [confirmConfig, setConfirmConfig] = useState<{
         isOpen: boolean;
         title: string;
@@ -118,9 +139,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         });
     };
 
+    // Persist GPS setting
+    useEffect(() => {
+        localStorage.setItem('gps_enabled', isGPSEnabled.toString());
+    }, [isGPSEnabled]);
+
     // GPS Logic with fallback for desktop
     useEffect(() => {
-        if (!navigator.geolocation) return;
+        if (!navigator.geolocation || !isGPSEnabled) {
+            // Clear location when GPS is disabled
+            if (!isGPSEnabled) {
+                setUserLocation(null);
+            }
+            return;
+        }
 
         let watchId: number | null = null;
         let hasGotLocation = false;
@@ -189,7 +221,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 navigator.geolocation.clearWatch(watchId);
             }
         };
-    }, []);
+    }, [isGPSEnabled]);
 
     // Disable scroll restoration to prevent jumps on refresh
     useEffect(() => {
@@ -1165,11 +1197,22 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     initialRound && (
                         <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 p-2">
                             <div className="flex justify-between items-center mb-1 border-b border-gray-100 pb-1">
-                                <h2 className="text-[15pt] font-black text-gray-900 tracking-tight shrink-0">GPS</h2>
-                                <h2 className="text-[18pt] font-bold text-gray-900 text-right truncate ml-2">{defaultCourse?.name}</h2>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-[15pt] font-black text-gray-900 tracking-tight shrink-0">GPS</h2>
+                                    <button
+                                        onClick={() => setIsGPSEnabled(!isGPSEnabled)}
+                                        className={`px-3 py-1 rounded-full text-[13pt] font-bold transition-all shadow-sm active:scale-95 ${isGPSEnabled
+                                            ? 'bg-green-600 text-white hover:bg-green-700'
+                                            : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                                            }`}
+                                    >
+                                        {isGPSEnabled ? '🛰️ ON' : '🛰️ OFF'}
+                                    </button>
+                                </div>
+                                <h2 className="text-[14pt] font-bold text-gray-900 text-right truncate">{defaultCourse?.name}</h2>
                             </div>
 
-                            {!allPlayersFinished && (
+                            {!allPlayersFinished && isGPSEnabled && (
                                 <div style={{ minHeight: '140px' }} className="flex flex-col justify-center">
                                     {/* GPS Distance Display */}
                                     {(() => {
@@ -1206,9 +1249,61 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             Number(currentHole.longitude)
                                         );
 
+                                        const getElement = (side: string, num: number) =>
+                                            currentHole.elements?.find(e => e.side === side && e.element_number === num);
+
+                                        const renderElement = (side: 'LEFT' | 'RIGHT', num: number, positionClass: string) => {
+                                            const el = getElement(side, num);
+                                            if (!el) return null;
+
+                                            const distFront = (el.front_latitude && el.front_longitude) ? calculateDistance(userLocation.latitude, userLocation.longitude, Number(el.front_latitude), Number(el.front_longitude)) : null;
+                                            const distBack = (el.back_latitude && el.back_longitude) ? calculateDistance(userLocation.latitude, userLocation.longitude, Number(el.back_latitude), Number(el.back_longitude)) : null;
+
+                                            if (!distFront && !distBack && !el.water && !el.bunker && !el.tree) return null;
+
+                                            const Icons = (
+                                                <div className="flex gap-0.5">
+                                                    {el.water && <span>💧</span>}
+                                                    {el.bunker && <div className="w-7 h-7 bg-[#d2b48c] border border-black/20" />}
+                                                    {el.tree && <span>🌳</span>}
+                                                </div>
+                                            );
+
+                                            const Numbers = (
+                                                <div className={`flex flex-col ${side === 'LEFT' ? 'items-start' : 'items-end'} leading-none`}>
+                                                    <span className={distBack === null ? 'invisible' : ''}>{distBack ?? '--'}</span>
+                                                    <span className={distFront === null ? 'invisible' : ''}>{distFront ?? '--'}</span>
+                                                </div>
+                                            );
+
+                                            return (
+                                                <div className={`absolute ${positionClass} flex items-center gap-1 text-white/90 text-[20pt] font-bold z-10`} style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                                                    {side === 'LEFT' ? (
+                                                        <>
+                                                            {Icons}
+                                                            {Numbers}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            {Numbers}
+                                                            {Icons}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            );
+                                        };
+
                                         return (
                                             <div className="bg-green-600 text-white w-full mx-auto p-1 rounded-xl text-center mb-2 border-2 border-black shadow-inner relative overflow-hidden">
-                                                <p className="font-black text-[115pt] leading-none flex items-center justify-center pt-2 pb-4">
+                                                {/* Left Elements */}
+                                                {renderElement('LEFT', 2, 'top-2 left-2')}
+                                                {renderElement('LEFT', 1, 'bottom-2 left-2')}
+
+                                                {/* Right Elements */}
+                                                {renderElement('RIGHT', 2, 'top-2 right-2')}
+                                                {renderElement('RIGHT', 1, 'bottom-2 right-2')}
+
+                                                <p className="font-black text-[50pt] leading-none flex items-center justify-center pt-2 pb-4">
                                                     {dist}
                                                 </p>
                                             </div>
