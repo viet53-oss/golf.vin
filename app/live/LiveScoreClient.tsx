@@ -1223,7 +1223,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 {
                     selectedPlayers.length > 0 && (
                         <div className="bg-white rounded-xl shadow-lg border-2 border-black my-1 py-1 px-2">
-                            <div className="flex justify-between items-center mb-1">
+                            <div className="flex justify-between items-center mb-0">
                                 <h2 className="text-[14pt] font-black text-gray-900 tracking-tight">Players</h2>
                                 {
                                     selectedPlayers.length > 0 && canUpdate && (
@@ -1366,7 +1366,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     )
                                 }
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-0">
                                 {[...selectedPlayers]
                                     .sort((a, b) => {
                                         const firstA = splitName(a.name).first.toLowerCase();
