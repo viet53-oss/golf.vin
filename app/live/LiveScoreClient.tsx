@@ -144,14 +144,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             });
                         },
                         (error) => {
-                            console.warn("GPS watch error:", error.message);
+                            // Silent watch error
                         },
                         { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 }
                     );
                 },
                 (error) => {
                     // High accuracy failed, try low accuracy (for desktop)
-                    console.warn("High accuracy GPS failed, trying low accuracy:", error.message);
+                    // Silent retry
 
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
@@ -163,25 +163,21 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                             // Start watching with low accuracy
                             watchId = navigator.geolocation.watchPosition(
-                                (position) => {
+                                (pos) => {
                                     setUserLocation({
-                                        latitude: position.coords.latitude,
-                                        longitude: position.coords.longitude
+                                        latitude: pos.coords.latitude,
+                                        longitude: pos.coords.longitude
                                     });
                                 },
-                                (error) => {
-                                    console.warn("GPS watch error:", error.message);
-                                },
+                                () => { /* Silent error */ },
                                 { enableHighAccuracy: false, timeout: 60000, maximumAge: 30000 }
                             );
                         },
-                        (error) => {
-                            console.warn("GPS location unavailable:", error.message);
-                        },
+                        () => { /* Silent error - handled by UI status */ },
                         { enableHighAccuracy: false, timeout: 60000, maximumAge: 30000 }
                     );
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+                { enableHighAccuracy: false, timeout: 20000, maximumAge: 10000 }
             );
         };
 
