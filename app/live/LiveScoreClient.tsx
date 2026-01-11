@@ -86,7 +86,34 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         message: string;
         onConfirm: () => void;
         isDestructive?: boolean;
+        confirmText?: string;
+        cancelText?: string;
+        hideCancel?: boolean;
     } | null>(null);
+
+    const showAlert = (title: string, message: string) => {
+        setConfirmConfig({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: () => setConfirmConfig(null),
+            hideCancel: true,
+            confirmText: 'OK'
+        });
+    };
+
+    const showConfirm = (title: string, message: string, onConfirm: () => void, isDestructive = false) => {
+        setConfirmConfig({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: () => {
+                onConfirm();
+                setConfirmConfig(null);
+            },
+            isDestructive
+        });
+    };
 
     // GPS Logic with fallback for desktop
     useEffect(() => {
@@ -534,7 +561,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
     const handleAddGuest = async (guest: { name: string; index: number; courseHandicap: number }) => {
         if (!liveRoundId || !initialRound) {
-            alert('No active live round found');
+            showAlert('Error', 'No active live round found');
             return;
         }
 
@@ -565,7 +592,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             // Refresh the page to load the new guest
             router.refresh();
         } else {
-            alert('Failed to add guest: ' + result.error);
+            showAlert('Error', 'Failed to add guest: ' + result.error);
         }
     };
 
@@ -584,7 +611,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             setEditingGuest(null);
             router.refresh();
         } else {
-            alert('Failed to update guest: ' + result.error);
+            showAlert('Error', 'Failed to update guest: ' + result.error);
         }
     };
 
@@ -599,13 +626,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             setEditingGuest(null);
             router.refresh();
         } else {
-            alert('Failed to delete guest: ' + result.error);
+            showAlert('Error', 'Failed to delete guest: ' + result.error);
         }
     };
 
     const handleCopyToClub = async (selectedPlayerIds: string[]) => {
         if (!liveRoundId) {
-            alert('No live round selected');
+            showAlert('Error', 'No live round selected');
             return;
         }
 
@@ -615,9 +642,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         });
 
         if (result.success) {
-            alert(result.message || 'Successfully copied to club scores!');
+            showAlert('Success', result.message || 'Successfully copied to club scores!');
         } else {
-            alert('Failed to copy: ' + result.error);
+            showAlert('Error', 'Failed to copy: ' + result.error);
         }
     };
 
@@ -659,7 +686,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     // Update URL silently
                     window.history.replaceState(null, '', `/live?roundId=${result.roundId}`);
                 } else {
-                    alert("Failed to start live round: " + result.error);
+                    showAlert('Error', "Failed to start live round: " + result.error);
                     return;
                 }
             }
@@ -711,7 +738,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     // Force a hard refresh to ensure state is clean
                     setTimeout(() => window.location.reload(), 100);
                 } else {
-                    alert('Failed to create new round: ' + (result.error || 'Unknown error'));
+                    showAlert('Error', 'Failed to create new round: ' + (result.error || 'Unknown error'));
                 }
             }
         });
@@ -1591,14 +1618,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                         ? `This player already has scores recorded by another device. Are you sure you want to take over scoring for ${p.name}?`
                                                                         : `Add ${p.name} to your scoring group?`;
 
-                                                                    if (window.confirm(msg)) {
+                                                                    showConfirm('Confirm Takeover', msg, () => {
                                                                         const playerObj = allPlayers.find(ap => ap.id === p.id) || p;
                                                                         const newSelected = [...selectedPlayers, playerObj];
                                                                         setSelectedPlayers(newSelected);
                                                                         localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(sp => sp.id)));
                                                                         // Scroll to top to show player was added
                                                                         document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
-                                                                    }
+                                                                    });
                                                                 }}
                                                                 className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center text-[20pt] font-black border-2 border-white shadow-xl active:scale-95 transition-all"
                                                                 title="Add to My Group"
@@ -1915,6 +1942,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                         title={confirmConfig.title}
                         message={confirmConfig.message}
                         isDestructive={confirmConfig.isDestructive}
+                        confirmText={confirmConfig.confirmText}
+                        cancelText={confirmConfig.cancelText}
+                        hideCancel={confirmConfig.hideCancel}
                         onConfirm={confirmConfig.onConfirm}
                         onCancel={() => setConfirmConfig(null)}
                     />

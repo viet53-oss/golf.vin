@@ -9,6 +9,7 @@ type ConfirmModalProps = {
     onConfirm: () => void;
     onCancel: () => void;
     isDestructive?: boolean;
+    hideCancel?: boolean;
 };
 
 export default function ConfirmModal({
@@ -19,7 +20,8 @@ export default function ConfirmModal({
     cancelText = 'Cancel',
     onConfirm,
     onCancel,
-    isDestructive = false
+    isDestructive = false,
+    hideCancel = false
 }: ConfirmModalProps) {
     if (!isOpen) return null;
 
@@ -31,17 +33,19 @@ export default function ConfirmModal({
                     <p className="text-[14pt] text-gray-600 mb-8 leading-relaxed">{message}</p>
 
                     <div className="flex gap-3 justify-center">
-                        <button
-                            onClick={onCancel}
-                            className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 text-[14pt] font-bold rounded-xl hover:bg-gray-200 transition-colors active:scale-95"
-                        >
-                            {cancelText}
-                        </button>
+                        {!hideCancel && (
+                            <button
+                                onClick={onCancel}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 text-[14pt] font-bold rounded-xl hover:bg-gray-200 transition-colors active:scale-95"
+                            >
+                                {cancelText}
+                            </button>
+                        )}
                         <button
                             onClick={onConfirm}
                             className={`flex-1 px-4 py-3 text-white text-[14pt] font-bold rounded-xl transition-colors shadow-lg active:scale-95 ${isDestructive
-                                    ? 'bg-red-600 hover:bg-red-700'
-                                    : 'bg-black hover:bg-gray-800'
+                                ? 'bg-red-600 hover:bg-red-700'
+                                : 'bg-black hover:bg-gray-800'
                                 }`}
                         >
                             {confirmText}
