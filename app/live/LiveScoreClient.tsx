@@ -194,6 +194,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         };
     }, []);
 
+    // Disable scroll restoration to prevent jumps on refresh
+    useEffect(() => {
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+    }, []);
+
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
         const R = 6371e3; // metres
         const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
@@ -446,16 +453,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         return 1;
     });
 
-    // Sync activeHole to URL whenever it changes
+    // Sync activeHole to URL whenever it changes without scrolling
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(searchParams.toString());
         params.set('hole', activeHole.toString());
         const newUrl = `${window.location.pathname}?${params.toString()}`;
-        window.history.replaceState(null, '', newUrl);
+
+        // Use router.replace with scroll: false to be absolutely sure Next.js doesn't scroll
+        router.replace(newUrl, { scroll: false });
 
         setHasUnsavedChanges(false);
         setPendingScores(new Map()); // Clear pending scores when changing holes
-    }, [activeHole]);
+    }, [activeHole, router, searchParams]);
     // Check admin status on mount and listen for changes
     useEffect(() => {
         const checkAdmin = () => {
@@ -735,8 +744,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 const result = await createDefaultLiveRound(today);
                 if (result.success && result.roundId) {
-                    // Navigate to the new round
-                    router.push(`/live?roundId=${result.roundId}`);
+                    // Navigate to the new round without scrolling
+                    router.push(`/live?roundId=${result.roundId}`, { scroll: false });
                     router.refresh();
                 } else {
                     showAlert('Error', 'Failed to create new round: ' + (result.error || 'Unknown error'));
@@ -995,7 +1004,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             value={liveRoundId || ''}
                             onChange={(e) => {
                                 if (e.target.value) {
-                                    router.push(`/live?roundId=${e.target.value}`);
+                                    router.push(`/live?roundId=${e.target.value}`, { scroll: false });
                                 }
                             }}
                             className="flex-1 px-4 py-2 text-[15pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 min-w-0"
@@ -1102,6 +1111,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     courseId={defaultCourse?.id}
                     existingRound={roundModalMode === 'edit' ? initialRound : null}
                     allCourses={allCourses}
+                    showAlert={showAlert}
                 />
 
                 {/* Player Selection Modal */}
@@ -1396,11 +1406,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                                     // Silent refresh to keep server data in sync without flashing the page
                                                     router.refresh();
-
-                                                    // Explicitly scroll back to scoring section to prevent jumping to top
-                                                    setTimeout(() => {
-                                                        document.getElementById('scoring-section')?.scrollIntoView({ behavior: 'smooth' });
-                                                    }, 100);
                                                 } finally {
                                                     setIsSaving(false);
                                                 }
@@ -1486,16 +1491,34 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         return (
                                             <div key={player.id} className="flex justify-between items-center bg-gray-50 rounded-xl py-0 px-1">
                                                 <div className="flex items-center gap-3">
+                                                    <div className="flex flex-col gap-1">
+                                                        <button
+                                                            onClick={() => movePlayerOrder(index, 'up')}
+                                                            disabled={index === 0}
+                                                            className={`w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all ${index === 0 ? 'opacity-20' : ''}`}
+                                                            title="Move Up"
+                                                        >
+                                                            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" /></svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => movePlayerOrder(index, 'down')}
+                                                            disabled={index === selectedPlayers.length - 1}
+                                                            className={`w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all ${index === selectedPlayers.length - 1 ? 'opacity-20' : ''}`}
+                                                            title="Move Down"
+                                                        >
+                                                            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" /></svg>
+                                                        </button>
+                                                    </div>
                                                     <button
                                                         onClick={() => {
                                                             const newSelected = selectedPlayers.filter(p => p.id !== player.id);
                                                             setSelectedPlayers(newSelected);
                                                             localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(p => p.id)));
                                                         }}
-                                                        className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
-                                                        title="Move to Summary"
+                                                        className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                                                        title="Remove from Group"
                                                     >
-                                                        <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor"><path d="M11 4h2v12l5.5-5.5 1.42 1.42L12 19.84l-7.92-7.92 1.42-1.42L11 16V4z" /></svg>
+                                                        <svg viewBox="0 0 24 24" className="w-7 h-7" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
                                                     </button>
                                                     <div className="flex flex-col items-start leading-tight">
                                                         <div className="font-bold text-gray-900 text-[18pt] leading-tight">{splitName(player.name).first}</div>

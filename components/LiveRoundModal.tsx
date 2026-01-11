@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createLiveRound, updateLiveRound } from '@/app/actions/create-live-round';
 
 interface LiveRoundModalProps {
@@ -17,6 +18,7 @@ interface LiveRoundModalProps {
         course_id?: string;
     } | null;
     allCourses?: any[]; // Using any[] for simplicity or define full type
+    showAlert: (title: string, message: string) => void;
 }
 
 export function LiveRoundModal({
@@ -24,8 +26,10 @@ export function LiveRoundModal({
     onClose,
     courseId,
     existingRound,
-    allCourses = []
+    allCourses = [],
+    showAlert
 }: LiveRoundModalProps) {
+    const router = useRouter();
     const today = new Date().toISOString().split('T')[0];
 
     const [name, setName] = useState('');
@@ -93,16 +97,17 @@ export function LiveRoundModal({
 
                 if (result.success) {
                     onClose();
-                    // Hard redirect to clear out all old scoring data and refresh with new course metadata
-                    window.location.href = `/live?roundId=${existingRound.id}&r=${Date.now()}`;
+                    // Move to the round without scrolling
+                    router.push(`/live?roundId=${existingRound.id}`, { scroll: false });
+                    router.refresh();
                 } else {
-                    alert('Save Failed: ' + result.error);
+                    showAlert('Error', 'Save Failed: ' + result.error);
                     setIsSaving(false);
                 }
             } else {
                 const cId = selectedCourseId || courseId;
                 if (!cId) {
-                    alert('Error: No Course ID selected.');
+                    showAlert('Error', 'No Course ID selected.');
                     setIsSaving(false);
                     return;
                 }
@@ -110,7 +115,7 @@ export function LiveRoundModal({
                     name: name || 'Live Round',
                     date: date || today,
                     courseId: cId,
-                    courseName: allCourses.find(c => c.id === cId)?.name || 'Unknown Course',
+                    courseName: allCourses.find((c: any) => c.id === cId)?.name || 'Unknown Course',
                     par: parVal,
                     rating: ratingVal,
                     slope: slopeVal
@@ -119,15 +124,15 @@ export function LiveRoundModal({
                 if (result.success && result.liveRoundId) {
                     onClose();
                     // Move to the new round
-                    window.location.href = `/live?roundId=${result.liveRoundId}`;
+                    router.push(`/live?roundId=${result.liveRoundId}`, { scroll: false });
                 } else {
-                    alert('Creation Failed: ' + (result.error || 'Server Error'));
+                    showAlert('Error', 'Creation Failed: ' + (result.error || 'Server Error'));
                     setIsSaving(false);
                 }
             }
         } catch (e) {
             console.error('CRASH:', e);
-            alert('A critical error occurred. Please refresh.');
+            showAlert('Error', 'A critical error occurred. Please refresh.');
             setIsSaving(false);
         }
     };
