@@ -1285,131 +1285,138 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 {
                                     selectedPlayers.length > 0 && canUpdate && (
                                         <button
-                                            onClick={async () => {
+                                            onClick={() => {
                                                 if (!liveRoundId || isSaving) return;
+                                                // Prevent double clicks but don't block
                                                 setIsSaving(true);
 
-                                                try {
-                                                    const updates: { playerId: string; strokes: number }[] = [];
-                                                    const newScores = new Map(scores);
+                                                // Capture current state values for async operation
+                                                const currentHole = activeHole;
+                                                const updates: { playerId: string; strokes: number }[] = [];
+                                                const newScores = new Map(scores);
 
-                                                    // Check if this hole was already scored (for all players)
-                                                    const wasAlreadyScored = selectedPlayers.every(p => {
-                                                        const playerScores = scores.get(p.id);
-                                                        return playerScores && playerScores.has(activeHole);
-                                                    });
+                                                // Check if this hole was already scored (for all players)
+                                                const wasAlreadyScored = selectedPlayers.every(p => {
+                                                    const playerScores = scores.get(p.id);
+                                                    return playerScores && playerScores.has(currentHole);
+                                                });
 
-                                                    // Check if anyone scored a birdie on this hole
-                                                    const birdiePlayerData: Array<{ name: string; totalBirdies: number }> = [];
-                                                    const eaglePlayerData: Array<{ name: string; totalEagles: number }> = [];
-                                                    const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
+                                                // Check if anyone scored a birdie on this hole
+                                                const birdiePlayerData: Array<{ name: string; totalBirdies: number }> = [];
+                                                const eaglePlayerData: Array<{ name: string; totalEagles: number }> = [];
+                                                const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === currentHole)?.par || 4;
 
-                                                    selectedPlayers.forEach(p => {
-                                                        const playerScores = new Map(newScores.get(p.id) || []);
+                                                selectedPlayers.forEach(p => {
+                                                    const playerScores = new Map(newScores.get(p.id) || []);
 
-                                                        // Use pending score if it exists, otherwise use saved score or par
-                                                        const pendingScore = pendingScores.get(p.id);
-                                                        const savedScore = playerScores.get(activeHole);
-                                                        const finalScore = pendingScore ?? savedScore ?? activeHolePar;
+                                                    // Use pending score if it exists, otherwise use saved score or par
+                                                    const pendingScore = pendingScores.get(p.id);
+                                                    const savedScore = playerScores.get(currentHole);
+                                                    const finalScore = pendingScore ?? savedScore ?? activeHolePar;
 
-                                                        // Update the score in the map
-                                                        playerScores.set(activeHole, finalScore);
-                                                        newScores.set(p.id, playerScores);
+                                                    // Update the score in the map
+                                                    playerScores.set(currentHole, finalScore);
+                                                    newScores.set(p.id, playerScores);
 
-                                                        // Add to updates for server
-                                                        updates.push({ playerId: p.id, strokes: finalScore });
+                                                    // Add to updates for server
+                                                    updates.push({ playerId: p.id, strokes: finalScore });
 
-                                                        // Check if this hole is a birdie
-                                                        if (finalScore === activeHolePar - 1) {
-                                                            // Register birdie locally to prevent global watcher duplicate trigger
-                                                            if (!knownBirdiesRef.current.has(p.id)) {
-                                                                knownBirdiesRef.current.set(p.id, new Set());
-                                                            }
-                                                            knownBirdiesRef.current.get(p.id)!.add(activeHole);
-
-                                                            // Calculate total birdies for this player in the round
-                                                            let totalBirdies = 0;
-                                                            playerScores.forEach((strokes, holeNum) => {
-                                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                                                const holePar = hole?.par || 4;
-                                                                if (strokes === holePar - 1) {
-                                                                    totalBirdies++;
-                                                                }
-                                                            });
-                                                            birdiePlayerData.push({ name: p.name, totalBirdies });
+                                                    // Check if this hole is a birdie
+                                                    if (finalScore === activeHolePar - 1) {
+                                                        // Register birdie locally to prevent global watcher duplicate trigger
+                                                        if (!knownBirdiesRef.current.has(p.id)) {
+                                                            knownBirdiesRef.current.set(p.id, new Set());
                                                         }
+                                                        knownBirdiesRef.current.get(p.id)!.add(currentHole);
 
-                                                        // Check if this hole is an eagle (or better)
-                                                        if (finalScore <= activeHolePar - 2) {
-                                                            // Register eagle locally to prevent global watcher duplicate trigger
-                                                            if (!knownEaglesRef.current.has(p.id)) {
-                                                                knownEaglesRef.current.set(p.id, new Set());
+                                                        // Calculate total birdies for this player in the round
+                                                        let totalBirdies = 0;
+                                                        playerScores.forEach((strokes, holeNum) => {
+                                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                            const holePar = hole?.par || 4;
+                                                            if (strokes === holePar - 1) {
+                                                                totalBirdies++;
                                                             }
-                                                            knownEaglesRef.current.get(p.id)!.add(activeHole);
-
-                                                            // Calculate total eagles for this player in the round
-                                                            let totalEagles = 0;
-                                                            playerScores.forEach((strokes, holeNum) => {
-                                                                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
-                                                                const holePar = hole?.par || 4;
-                                                                if (strokes <= holePar - 2) {
-                                                                    totalEagles++;
-                                                                }
-                                                            });
-                                                            eaglePlayerData.push({ name: p.name, totalEagles });
-                                                        }
-                                                    });
-
-                                                    // Update main scores state with pending changes
-                                                    setScores(newScores);
-
-                                                    // Save all scores to server
-                                                    if (updates.length > 0) {
-                                                        await saveLiveScore({
-                                                            liveRoundId,
-                                                            holeNumber: activeHole,
-                                                            playerScores: updates
                                                         });
+                                                        birdiePlayerData.push({ name: p.name, totalBirdies });
                                                     }
 
-                                                    // Show celebration if there's a birdie or eagle on this hole
-                                                    if (birdiePlayerData.length > 0) {
-                                                        setBirdiePlayers(birdiePlayerData);
-                                                    }
-                                                    if (eaglePlayerData.length > 0) {
-                                                        setEaglePlayers(eaglePlayerData);
-                                                    }
-
-                                                    // Clear pending scores and reset unsaved flag
-                                                    setPendingScores(new Map());
-                                                    setHasUnsavedChanges(false);
-
-                                                    // Only advance to next hole if this was a new hole (not an update)
-                                                    if (!wasAlreadyScored) {
-                                                        if (activeHole < 18) {
-                                                            setActiveHole(activeHole + 1);
-                                                        } else {
-                                                            // After 18th hole, find the first hole that has missing scores
-                                                            let nextHole = 1;
-                                                            for (let h = 1; h <= 18; h++) {
-                                                                const isHoleIncomplete = selectedPlayers.some(p => {
-                                                                    const pScores = newScores.get(p.id);
-                                                                    return !pScores || !pScores.has(h);
-                                                                });
-
-                                                                if (isHoleIncomplete) {
-                                                                    nextHole = h;
-                                                                    break;
-                                                                }
-                                                            }
-                                                            setActiveHole(nextHole);
+                                                    // Check if this hole is an eagle (or better)
+                                                    if (finalScore <= activeHolePar - 2) {
+                                                        // Register eagle locally to prevent global watcher duplicate trigger
+                                                        if (!knownEaglesRef.current.has(p.id)) {
+                                                            knownEaglesRef.current.set(p.id, new Set());
                                                         }
-                                                    }
+                                                        knownEaglesRef.current.get(p.id)!.add(currentHole);
 
-                                                    // Silent refresh to keep server data in sync without flashing the page
-                                                    router.refresh();
-                                                } finally {
-                                                    setIsSaving(false);
+                                                        // Calculate total eagles for this player in the round
+                                                        let totalEagles = 0;
+                                                        playerScores.forEach((strokes, holeNum) => {
+                                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                            const holePar = hole?.par || 4;
+                                                            if (strokes <= holePar - 2) {
+                                                                totalEagles++;
+                                                            }
+                                                        });
+                                                        eaglePlayerData.push({ name: p.name, totalEagles });
+                                                    }
+                                                });
+
+                                                // 1. UPDATE LOCAL STATE IMMEDIATELY (Optimistic)
+                                                setScores(newScores);
+
+                                                // Show celebration if there's a birdie or eagle on this hole
+                                                if (birdiePlayerData.length > 0) {
+                                                    setBirdiePlayers(birdiePlayerData);
+                                                }
+                                                if (eaglePlayerData.length > 0) {
+                                                    setEaglePlayers(eaglePlayerData);
+                                                }
+
+                                                // Clear pending scores and reset unsaved flag
+                                                setPendingScores(new Map());
+                                                setHasUnsavedChanges(false);
+
+                                                // Determine next hole
+                                                let nextHoleToSet = currentHole;
+                                                if (!wasAlreadyScored) {
+                                                    if (currentHole < 18) {
+                                                        nextHoleToSet = currentHole + 1;
+                                                    } else {
+                                                        // After 18th hole, find the first hole that has missing scores
+                                                        let foundNext = 1;
+                                                        for (let h = 1; h <= 18; h++) {
+                                                            const isHoleIncomplete = selectedPlayers.some(p => {
+                                                                const pScores = newScores.get(p.id);
+                                                                return !pScores || !pScores.has(h);
+                                                            });
+
+                                                            if (isHoleIncomplete) {
+                                                                foundNext = h;
+                                                                break;
+                                                            }
+                                                        }
+                                                        nextHoleToSet = foundNext;
+                                                    }
+                                                    setActiveHole(nextHoleToSet);
+                                                }
+
+                                                // 2. RELEASE UI LOCK IMMEDIATELY
+                                                setIsSaving(false);
+
+                                                // 3. BACKGROUND SERVER SAVE
+                                                if (updates.length > 0) {
+                                                    saveLiveScore({
+                                                        liveRoundId,
+                                                        holeNumber: currentHole,
+                                                        playerScores: updates
+                                                    }).then(() => {
+                                                        // Silent refresh to keep server data in sync
+                                                        router.refresh();
+                                                    }).catch((error) => {
+                                                        console.error("Background save failed:", error);
+                                                        alert("Failed to save scores to server. Please check your connection.");
+                                                    });
                                                 }
                                             }}
                                             disabled={isSaving}
