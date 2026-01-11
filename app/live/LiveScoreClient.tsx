@@ -1764,53 +1764,6 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         <div className="flex flex-col">
                                                             <div className="font-bold text-[16pt] leading-tight flex items-center gap-2">
                                                                 {splitName(p.name).first}
-                                                                {isAdmin && (
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            const password = prompt("Enter password to remove player:");
-                                                                            if (password !== 'cpgc-Delete') {
-                                                                                showAlert('Error', 'Incorrect password.');
-                                                                                return;
-                                                                            }
-
-                                                                            setConfirmConfig({
-                                                                                isOpen: true,
-                                                                                title: 'Remove Player',
-                                                                                message: `Are you sure you want to remove ${p.name} from this live round? This will delete all their scores for this round.`,
-                                                                                isDestructive: true,
-                                                                                onConfirm: async () => {
-                                                                                    setConfirmConfig(null);
-                                                                                    // Find the liveRoundPlayerId
-                                                                                    // Since p is a "SummaryPlayer", check if it has the ID we need. 
-                                                                                    // Actually p.id in rankedPlayers is the player.id, NOT the liveRoundPlayer.id necessarily.
-                                                                                    // We need to find the LiveRoundPlayer ID.
-                                                                                    // However, wait - looking at how 'p' is constructed in the code...
-                                                                                    // rankedPlayers is derived from 'scores'. 
-                                                                                    // We need the LiveRoundPlayer ID.
-
-                                                                                    // Let's find the player in initialRound.players if available
-                                                                                    const liveArray = initialRound?.players || [];
-                                                                                    const foundEntry = liveArray.find((lrp: any) => lrp.player?.id === p.id || lrp.id === p.id); // Check both for guests/regular
-
-                                                                                    if (foundEntry) {
-                                                                                        try {
-                                                                                            await removePlayerFromLiveRound(foundEntry.id);
-                                                                                            window.location.reload(); // Refresh to see changes
-                                                                                        } catch (err) {
-                                                                                            console.error(err);
-                                                                                            showAlert('Error', 'Failed to remove player.');
-                                                                                        }
-                                                                                    } else {
-                                                                                        showAlert('Error', 'Could not find player record to delete.');
-                                                                                    }
-                                                                                }
-                                                                            });
-                                                                        }}
-                                                                        className="bg-red-600 text-white text-[10pt] px-2 py-0.5 rounded font-bold hover:bg-red-700 transition-colors ml-2"
-                                                                    >
-                                                                        Delete
-                                                                    </button>
-                                                                )}
                                                             </div>
                                                             <div className="text-[13pt] leading-tight opacity-90">{splitName(p.name).last}</div>
                                                         </div>
