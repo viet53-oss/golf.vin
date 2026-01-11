@@ -1552,9 +1552,9 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 </button>
                                 <button
                                     onClick={() => setIsStatsModalOpen(true)}
-                                    className="w-16 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors shadow-md active:scale-95"
+                                    className="w-16 h-12 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors shadow-md active:scale-95"
                                 >
-                                    <span className="text-[35pt] leading-none">🖕</span>
+                                    <span className="text-[28pt] leading-none">🖕</span>
                                 </button>
                             </div>
 
