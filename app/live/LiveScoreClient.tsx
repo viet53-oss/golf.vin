@@ -176,7 +176,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             );
                         },
                         (error) => {
-                            console.error("GPS location unavailable:", error.message);
+                            console.warn("GPS location unavailable:", error.message);
                         },
                         { enableHighAccuracy: false, timeout: 60000, maximumAge: 30000 }
                     );
