@@ -1716,7 +1716,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                     <span className="text-[13pt] font-bold">{num}</span>
                                                                     <span className="text-[12pt] font-normal opacity-80">/{holePar}</span>
                                                                 </div>
-                                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-7 ${bgClass} ${score !== null ? 'text-gray-900 font-black' : 'text-gray-300 font-normal italic'}`}>
+                                                                <div className={`text-[16pt] font-bold px-2 py-0.5 rounded mt-7 ${bgClass} ${score !== null ? 'text-gray-900 font-bold' : 'text-gray-300 font-normal italic'}`}>
                                                                     {score || '-'}
                                                                 </div>
                                                             </div>
