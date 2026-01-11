@@ -126,55 +126,52 @@ export function LivePlayerSelectionModal({
                         {sortedPlayers.map(player => {
                             const isSelected = localSelectedIds.includes(player.id);
                             const isInRound = playersInRound.includes(player.id);
-                            const isDisabled = isInRound && !selectedIds.includes(player.id);
 
                             return (
                                 <button
                                     key={player.id}
                                     onClick={() => togglePlayer(player.id)}
-                                    disabled={isDisabled}
-                                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${isDisabled
-                                        ? 'border-gray-200 bg-gray-100 opacity-50 cursor-not-allowed'
-                                        : isSelected
-                                            ? 'border-blue-500 bg-blue-50 shadow-sm cursor-pointer'
-                                            : 'border-gray-100 bg-white hover:border-gray-200 cursor-pointer'
+                                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${isSelected
+                                        ? 'border-blue-500 bg-blue-50 shadow-sm cursor-pointer'
+                                        : 'border-gray-100 bg-white hover:border-gray-200 cursor-pointer'
                                         }`}
                                 >
-                                    <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center border-2 transition-colors ${isDisabled
-                                        ? 'bg-gray-200 border-gray-300'
-                                        : isSelected
-                                            ? 'bg-blue-600 border-blue-600'
-                                            : 'bg-white border-gray-300'
+                                    <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center border-2 transition-colors ${isSelected
+                                        ? 'bg-blue-600 border-blue-600'
+                                        : 'bg-white border-gray-300'
                                         }`}>
-                                        {isSelected && !isDisabled && (
+                                        {isSelected && (
                                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                                         )}
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2">
-                                            <span className={`text-[18pt] font-bold ${isDisabled ? 'text-gray-400' : isSelected ? 'text-blue-800' : 'text-gray-700'
+                                            <span className={`text-[18pt] font-bold ${isSelected ? 'text-blue-800' : 'text-gray-700'
                                                 }`}>
                                                 {player.name}
                                             </span>
                                             <div className="flex items-center gap-1">
+                                                {isInRound && (
+                                                    <span className="px-2 py-0.5 rounded bg-green-100 text-green-700 text-[10pt] font-bold uppercase tracking-wider">
+                                                        In Round
+                                                    </span>
+                                                )}
                                                 {/* Course Handicap */}
                                                 {(() => {
                                                     const courseHcp = getCourseHandicap(player);
                                                     return courseHcp !== null && (
-                                                        <span className={`text-[14pt] font-semibold ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        <span className={`text-[14pt] font-semibold text-gray-600`}>
                                                             ({courseHcp})
                                                         </span>
                                                     );
                                                 })()}
                                                 {/* Tee Box Indicator */}
                                                 {player.preferred_tee_box && (
-                                                    <span className={`px-2 py-0.5 rounded text-[12pt] font-bold ${isDisabled
-                                                        ? 'bg-gray-200 text-gray-400'
-                                                        : player.preferred_tee_box.toLowerCase().includes('white')
-                                                            ? 'bg-white text-black border border-black'
-                                                            : player.preferred_tee_box.toLowerCase().includes('gold')
-                                                                ? 'bg-yellow-400 text-black'
-                                                                : 'bg-gray-300 text-gray-700'
+                                                    <span className={`px-2 py-0.5 rounded text-[12pt] font-bold ${player.preferred_tee_box.toLowerCase().includes('white')
+                                                        ? 'bg-white text-black border border-black'
+                                                        : player.preferred_tee_box.toLowerCase().includes('gold')
+                                                            ? 'bg-yellow-400 text-black'
+                                                            : 'bg-gray-300 text-gray-700'
                                                         }`}>
                                                         {player.preferred_tee_box.toLowerCase().includes('white')
                                                             ? 'W'
@@ -185,9 +182,6 @@ export function LivePlayerSelectionModal({
                                                 )}
                                             </div>
                                         </div>
-                                        {isDisabled && (
-                                            <div className="text-[12pt] text-gray-500 italic mt-1">Already selected by another phone</div>
-                                        )}
                                     </div>
                                 </button>
                             );

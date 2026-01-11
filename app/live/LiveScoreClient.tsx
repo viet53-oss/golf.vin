@@ -1568,7 +1568,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         </div>
                                                     </div>
 
-                                                    <div className="flex gap-4 items-center">
+                                                    <div className="flex gap-2 items-center">
+                                                        {canUpdate && !selectedPlayers.some(sp => sp.id === p.id) && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    const playerObj = allPlayers.find(ap => ap.id === p.id) || p;
+                                                                    const newSelected = [...selectedPlayers, playerObj];
+                                                                    setSelectedPlayers(newSelected);
+                                                                    localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(sp => sp.id)));
+                                                                }}
+                                                                className="bg-white/20 hover:bg-white/30 text-white rounded-full px-4 py-2 text-[15pt] font-black border-2 border-white shadow-sm active:scale-95 transition-all flex items-center gap-2"
+                                                            >
+                                                                Score
+                                                            </button>
+                                                        )}
                                                         <div className={`bg-white font-bold rounded px-2 h-8 flex items-center justify-center text-[15pt] min-w-[3rem] ${toParClass}`}>
                                                             {toParStr}
                                                         </div>
