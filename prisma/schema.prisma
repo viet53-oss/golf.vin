@@ -236,6 +236,7 @@ model LiveRoundPlayer {
   back_nine       Int?
   guest_name      String?
   is_guest        Boolean     @default(false)
+  scorer_id       String?
   live_round      LiveRound   @relation(fields: [live_round_id], references: [id], onDelete: Cascade)
   player          Player?     @relation(fields: [player_id], references: [id])
   tee_box         TeeBox?     @relation(fields: [tee_box_id], references: [id])

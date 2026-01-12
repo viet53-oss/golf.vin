@@ -10,7 +10,7 @@ import { LiveRoundModal } from '@/components/LiveRoundModal';
 import { GuestPlayerModal } from '@/components/GuestPlayerModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import AddToClubModal from '@/components/AddToClubModal';
-import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound, createDefaultLiveRound } from '@/app/actions/create-live-round';
+import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound, createDefaultLiveRound, updatePlayerScorer } from '@/app/actions/create-live-round';
 import { copyLiveToClub } from '@/app/actions/copy-live-to-club';
 import { removePlayerFromLiveRound } from '@/app/actions/remove-player-from-live-round'; // Force reload
 
@@ -115,6 +115,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         cancelText?: string;
         hideCancel?: boolean;
     } | null>(null);
+
+    // Unique ID for this scoring device
+    const [clientScorerId] = useState(() => {
+        if (typeof window !== 'undefined') {
+            let id = localStorage.getItem('live_scoring_device_id');
+            if (!id) {
+                // Generate random ID
+                id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('live_scoring_device_id', id);
+            }
+            return id;
+        }
+        return '';
+    });
 
     const showAlert = (title: string, message: string) => {
         setConfirmConfig({
@@ -339,6 +353,27 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Sync local scores with server data when it updates (e.g. after refresh)
     useEffect(() => {
         if (initialRound?.players) {
+            // ENFORCE SINGLE DEVICE SCORING
+            if (clientScorerId) {
+                const takenOverIds = new Set<string>();
+                initialRound.players.forEach((p: any) => {
+                    const playerId = p.is_guest ? p.id : p.player.id;
+                    if (p.scorer_id && p.scorer_id !== clientScorerId) {
+                        takenOverIds.add(playerId);
+                    }
+                });
+
+                if (takenOverIds.size > 0) {
+                    setSelectedPlayers(prev => {
+                        const hasTakenOver = prev.some(p => takenOverIds.has(p.id));
+                        if (!hasTakenOver) return prev;
+                        const filtered = prev.filter(p => !takenOverIds.has(p.id));
+                        localStorage.setItem('live_scoring_my_group', JSON.stringify(filtered.map(p => p.id)));
+                        return filtered;
+                    });
+                }
+            }
+
             setScores(prev => {
                 const next = new Map(prev);
                 initialRound.players.forEach((p: any) => {
@@ -621,7 +656,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             courseHandicap: guest.courseHandicap,
             rating: initialRound.rating,
             slope: initialRound.slope,
-            par: initialRound.par
+            par: initialRound.par,
+            scorerId: clientScorerId
         });
 
         if (result.success && result.guestPlayerId) {
@@ -750,7 +786,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     const addResult = await addPlayerToLiveRound({
                         liveRoundId: currentLiveRoundId,
                         playerId: player.id,
-                        teeBoxId: teeBox.id
+                        teeBoxId: teeBox.id,
+                        scorerId: clientScorerId
                     });
 
                     if (!addResult.success) {
@@ -1759,6 +1796,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                         const playerObj = allPlayers.find(ap => ap.id === p.id) || p;
                                                                         const newSelected = [...selectedPlayers, playerObj];
                                                                         setSelectedPlayers(newSelected);
+
+                                                                        // Claim ownership on server
+                                                                        if (p.liveRoundPlayerId) {
+                                                                            updatePlayerScorer({
+                                                                                liveRoundPlayerId: p.liveRoundPlayerId,
+                                                                                scorerId: clientScorerId
+                                                                            });
+                                                                        }
+
                                                                         localStorage.setItem('live_scoring_my_group', JSON.stringify(newSelected.map(sp => sp.id)));
                                                                     });
                                                                 }}

@@ -157,6 +157,7 @@ export async function addPlayerToLiveRound(data: {
     liveRoundId: string;
     playerId: string;
     teeBoxId: string;
+    scorerId?: string;
 }) {
     try {
         // Get player and tee box data
@@ -183,6 +184,24 @@ export async function addPlayerToLiveRound(data: {
         const handicapIndex = player.index || 0;
         const par = teeBox.course.holes.reduce((sum, h) => sum + h.par, 0);
 
+        // Check if player already exists in round to prevent duplicates
+        const existing = await prisma.liveRoundPlayer.findFirst({
+            where: {
+                live_round_id: data.liveRoundId,
+                player_id: data.playerId
+            }
+        });
+
+        if (existing) {
+            // If exists, just update scorer_id
+            await prisma.liveRoundPlayer.update({
+                where: { id: existing.id },
+                data: { scorer_id: data.scorerId }
+            });
+            revalidatePath('/live');
+            return { success: true, liveRoundPlayerId: existing.id };
+        }
+
         // Create live round player
         const liveRoundPlayer = await prisma.liveRoundPlayer.create({
             data: {
@@ -194,7 +213,8 @@ export async function addPlayerToLiveRound(data: {
                 tee_box_slope: Math.round(teeBox.slope),
                 tee_box_par: par,
                 index_at_time: handicapIndex,
-                course_handicap: Math.round((handicapIndex * (teeBox.slope / 113)) + (teeBox.rating - par))
+                course_handicap: Math.round((handicapIndex * (teeBox.slope / 113)) + (teeBox.rating - par)),
+                scorer_id: data.scorerId
             }
         });
 
@@ -210,6 +230,26 @@ export async function addPlayerToLiveRound(data: {
 }
 
 /**
+ * Updates the scorer_id for a player (Claim/Takeover)
+ */
+export async function updatePlayerScorer(data: {
+    liveRoundPlayerId: string;
+    scorerId: string;
+}) {
+    try {
+        await prisma.liveRoundPlayer.update({
+            where: { id: data.liveRoundPlayerId },
+            data: { scorer_id: data.scorerId }
+        });
+        revalidatePath('/live');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to update player scorer:', error);
+        return { success: false, error: 'Failed to update scorer' };
+    }
+}
+
+/**
  * Adds a guest player to a live round
  */
 export async function addGuestToLiveRound(data: {
@@ -220,6 +260,7 @@ export async function addGuestToLiveRound(data: {
     rating: number;
     slope: number;
     par: number;
+    scorerId?: string;
 }) {
     try {
         // Create guest player in live round
@@ -233,7 +274,8 @@ export async function addGuestToLiveRound(data: {
                 tee_box_slope: data.slope,
                 tee_box_par: data.par,
                 index_at_time: data.index,
-                course_handicap: data.courseHandicap
+                course_handicap: data.courseHandicap,
+                scorer_id: data.scorerId
             }
         });
 
