@@ -100,32 +100,32 @@ export default function AppHeader() {
 
             {/* Login Modal */}
             {showLoginModal && (
-                <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-1">
-                    <div className="bg-white text-black p-1 rounded-lg shadow-2xl w-full">
-                        <h3 className="font-bold text-lg mb-4">Admin Access</h3>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
+                    <div className="bg-white text-black p-6 rounded-2xl shadow-2xl w-full max-w-sm">
+                        <h3 className="font-bold text-[15pt] mb-4 text-center">Admin Access</h3>
+                        <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Password</label>
+                                <label className="block text-[15pt] font-bold text-gray-700 mb-2">Password</label>
                                 <input
                                     type="password"
                                     autoFocus
                                     value={passwordInput}
                                     onChange={(e) => setPasswordInput(e.target.value)}
-                                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black border p-2 text-[14pt]"
+                                    className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-black focus:ring-black border p-3 text-[15pt]"
                                     placeholder="Enter password"
                                 />
                             </div>
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-3 pt-2">
                                 <button
                                     type="button"
                                     onClick={() => setShowLoginModal(false)}
-                                    className="px-1 py-2 text-sm text-gray-600 hover:text-gray-900"
+                                    className="px-4 py-2 text-[15pt] font-bold text-gray-600 hover:text-gray-900 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-1 py-2 bg-black text-white rounded text-sm font-bold hover:bg-gray-800"
+                                    className="px-4 py-2 bg-black text-white rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95"
                                 >
                                     Submit
                                 </button>
