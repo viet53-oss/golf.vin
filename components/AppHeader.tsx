@@ -92,7 +92,7 @@ export default function AppHeader() {
                             className="flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white px-1 py-1.5 rounded-full text-[14pt] font-bold transition-colors"
                         >
                             <LogInIcon className="w-3 h-3" />
-                            Login
+                            Admin
                         </button>
                     )}
                 </div>
@@ -127,7 +127,7 @@ export default function AppHeader() {
                                     type="submit"
                                     className="px-1 py-2 bg-black text-white rounded text-sm font-bold hover:bg-gray-800"
                                 >
-                                    Login
+                                    Submit
                                 </button>
                             </div>
                         </form>

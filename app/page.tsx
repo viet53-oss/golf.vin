@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import BirthdayPopup from "@/components/BirthdayPopup";
 
 const Trophy = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -49,6 +51,15 @@ export default async function Home() {
   const cookieStore = await cookies();
   const isAdmin = cookieStore.get('admin_session')?.value === 'true';
 
+  // Fetch players strictly for birthday check
+  const players = await prisma.player.findMany({
+    select: {
+      id: true,
+      name: true,
+      birthday: true,
+    }
+  });
+
   const menuItems = [
     { name: "Live Score", icon: Activity, href: "/live", color: "text-red-500" },
     { name: "Scores", icon: Trophy, href: "/scores", color: "text-amber-500" },
@@ -63,6 +74,8 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen relative flex flex-col font-sans">
+      <BirthdayPopup players={players} />
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
