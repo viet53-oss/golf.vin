@@ -1564,8 +1564,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     saveLiveScore({
                                                         liveRoundId,
                                                         holeNumber: currentHole,
-                                                        playerScores: updates
-                                                    }).then(() => {
+                                                        playerScores: updates,
+                                                        scorerId: clientScorerId
+                                                    }).then((result) => {
+                                                        if (!result.success) {
+                                                            console.error("Save failed:", result.error);
+                                                            if (result.error && result.error.includes('locked by another device')) {
+                                                                alert(result.error);
+                                                                // Force sync to remove stolen players
+                                                                router.refresh();
+                                                            } else {
+                                                                alert("Failed to save scores: " + (result.error || "Unknown error"));
+                                                            }
+                                                            return;
+                                                        }
                                                         // Silent refresh to keep server data in sync
                                                         router.refresh();
                                                     }).catch((error) => {

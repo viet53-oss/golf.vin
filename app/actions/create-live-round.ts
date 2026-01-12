@@ -347,6 +347,7 @@ export async function saveLiveScore(data: {
     liveRoundId: string;
     holeNumber: number;
     playerScores: Array<{ playerId: string; strokes: number }>;
+    scorerId?: string;
 }) {
     try {
         // Get the live round with course and holes
@@ -386,6 +387,21 @@ export async function saveLiveScore(data: {
             if (!liveRoundPlayer) {
                 console.warn(`Player ${ps.playerId} not found in live round`);
                 continue;
+            }
+
+            // ENFORCE OWNERSHIP
+            if (data.scorerId) {
+                if (liveRoundPlayer.scorer_id && liveRoundPlayer.scorer_id !== data.scorerId) {
+                    throw new Error(`Scoring locked by another device for ${liveRoundPlayer.guest_name || 'player'}`);
+                }
+
+                // Implicit Claim: If no scorer set, claim it now
+                if (!liveRoundPlayer.scorer_id) {
+                    await prisma.liveRoundPlayer.update({
+                        where: { id: liveRoundPlayer.id },
+                        data: { scorer_id: data.scorerId }
+                    });
+                }
             }
 
             // Save or update the score
