@@ -1311,7 +1311,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 {renderElement('RIGHT', 2, 'top-2 right-2')}
                                                 {renderElement('RIGHT', 1, 'bottom-2 right-2')}
 
-                                                <p className="font-black text-[70pt] leading-none flex items-center justify-center pt-2 pb-4">
+                                                <p className="font-black text-[90pt] leading-none flex items-center justify-center pt-2 pb-4">
                                                     {dist}
                                                 </p>
                                             </div>
