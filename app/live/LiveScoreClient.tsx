@@ -1222,7 +1222,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                                             }`}
                                     >
-                                        {isGPSEnabled ? '🛰️ ON' : '🛰️ OFF'}
+                                        {isGPSEnabled ? '🛰️ OFF' : '🛰️ ON'}
                                     </button>
                                 </div>
                                 <h2 className="text-[14pt] font-bold text-gray-900 text-right truncate">{defaultCourse?.name}</h2>
@@ -1272,7 +1272,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                             const Icons = (
                                                 <div className="flex gap-0.5">
                                                     {el.water && <span>💧</span>}
-                                                    {el.bunker && <div className="w-7 h-7 bg-[#d2b48c] border border-black/20" />}
+                                                    {el.bunker && <div className="w-7 h-7 bg-[#d2b48c] border border-black/20 rounded-full" />}
                                                     {el.tree && <span>🌳</span>}
                                                 </div>
                                             );
