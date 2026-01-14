@@ -94,28 +94,7 @@ export default async function Home() {
         <div className="mb-12 space-y-4 w-full">
 
           <h1 className="text-[30pt] md:text-[40pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] w-full mt-10">
-            <span className="relative inline-block">
-              C
-              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
-            </span>
-            ity{" "}
-            <span className="relative inline-block">
-              P
-              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
-            </span>
-            ark{" "}
-            <span className="relative inline-block">
-              G
-              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
-            </span>
-            olf{" "}
-            <span className="relative inline-block">
-              C
-              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-red-600 rounded-sm"></span>
-            </span>
-            lub
-            <br />
-            of New Orleans
+            Golf Live Score
           </h1>
           <div className="flex flex-col gap-1 text-shadow-md w-full">
             <p className="text-white text-[14pt] font-semibold drop-shadow-md leading-relaxed w-full">
