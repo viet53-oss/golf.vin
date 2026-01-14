@@ -97,11 +97,11 @@ export default async function Home() {
             Golf Live Score
           </h1>
           <div className="flex flex-col gap-1 text-shadow-md w-full">
-            <p className="text-white text-[14pt] font-semibold drop-shadow-md leading-relaxed w-full">
-              Teeing off sunrise every Saturday at Bayou Oaks City Park Golf North Course.
+            <p className="text-white text-[16pt] font-extrabold drop-shadow-md leading-relaxed w-full uppercase tracking-wide">
+              Greater New Orleans Golf Courses:
             </p>
-            <p className="text-white/80 text-[14pt] mt-1 drop-shadow-sm font-medium w-full">
-              1040 Filmore Ave, New Orleans, LA 70124.
+            <p className="text-white/90 text-[11pt] mt-2 drop-shadow-md font-semibold w-full leading-snug px-4">
+              Bayou Oaks At City Park, Joseph M. Bartholomew Municipal Golf Course, Golf Club at Audubon Park, Stonebridge Golf Club of New Orleans, English Turn Golf & Country Club, Timberlane Golf & Recreation, TPC Louisiana, Chateau Golf & Country Club, Grand Ridge Golf Club
             </p>
           </div>
         </div>
