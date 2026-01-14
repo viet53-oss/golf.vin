@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import EditRoundForm from '@/components/EditRoundForm';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewRoundPage() {
     // 1. Get all courses
     const allCourses = await prisma.course.findMany({
