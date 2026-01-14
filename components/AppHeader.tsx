@@ -43,7 +43,7 @@ export default function AppHeader() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (passwordInput === 'cpgc-V') {
+        if (passwordInput === 'Viet65') {
             Cookies.set('admin_session', 'true', { expires: 7 });
             setIsAdmin(true);
             setShowLoginModal(false);
