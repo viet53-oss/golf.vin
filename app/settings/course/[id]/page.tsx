@@ -11,8 +11,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     const course = await prisma.course.findUnique({
         where: { id },
         include: {
-            tee_boxes: { orderBy: { name: 'desc' } },
-            holes: { orderBy: { hole_number: 'asc' } }
+            teeBoxes: { orderBy: { name: 'desc' } },
+            holes: { orderBy: { holeNumber: 'asc' } }
         }
     });
 

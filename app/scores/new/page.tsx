@@ -9,7 +9,7 @@ export default async function NewRoundPage() {
     const allCourses = await prisma.course.findMany({
         include: {
             holes: true,
-            tee_boxes: true
+            teeBoxes: true
         },
         orderBy: { name: 'asc' }
     });
@@ -30,12 +30,12 @@ export default async function NewRoundPage() {
         id: 'new',
         date: localIsoDate,
         name: '',
-        is_tournament: false,
+        isTournament: false,
         course: {
             id: defaultCourse.id,
             name: defaultCourse.name,
             holes: defaultCourse.holes,
-            tee_boxes: defaultCourse.tee_boxes
+            teeBoxes: defaultCourse.teeBoxes
         },
         players: []
     };

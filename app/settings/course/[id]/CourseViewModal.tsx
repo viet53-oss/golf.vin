@@ -7,16 +7,16 @@ import { X, Edit } from 'lucide-react';
 type CourseData = {
     id: string;
     name: string;
-    tee_boxes: { id: string; name: string; rating: number; slope: number }[];
-    holes: { id: string; hole_number: number; par: number; difficulty: number | null }[];
+    teeBoxes: { id: string; name: string; rating: number; slope: number }[];
+    holes: { id: string; holeNumber: number; par: number; difficulty: number | null }[];
 };
 
 export default function CourseViewModal({ course, isAdmin }: { course: CourseData; isAdmin: boolean }) {
     const router = useRouter();
 
     // Group holes by Front/Back
-    const frontNine = course.holes.filter((h: any) => h.hole_number <= 9);
-    const backNine = course.holes.filter((h: any) => h.hole_number > 9);
+    const frontNine = course.holes.filter((h: any) => h.holeNumber <= 9);
+    const backNine = course.holes.filter((h: any) => h.holeNumber > 9);
 
     const frontPar = frontNine.reduce((sum: number, h: any) => sum + h.par, 0);
     const backPar = backNine.reduce((sum: number, h: any) => sum + h.par, 0);
@@ -52,7 +52,7 @@ export default function CourseViewModal({ course, isAdmin }: { course: CourseDat
             <div className="flex-1 overflow-y-auto px-1 py-6 bg-slate-50">
                 <div className="max-w-5xl mx-auto space-y-8">
                     {/* Tee Boxes Summary */}
-                    {course.tee_boxes.map((tee: any) => (
+                    {course.teeBoxes?.map((tee: any) => (
                         <div key={tee.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
                             <h2 className="text-2xl font-bold border-b-2 border-gray-100 pb-2">
                                 {tee.name} Tees
@@ -82,7 +82,7 @@ export default function CourseViewModal({ course, isAdmin }: { course: CourseDat
                                         <thead className="bg-gray-100 font-bold text-gray-700">
                                             <tr>
                                                 <th className="py-2 w-24 text-left pl-1">Hole</th>
-                                                {frontNine.map((h: any) => <th key={h.id} className="py-2 border-l border-gray-200">{h.hole_number}</th>)}
+                                                {frontNine.map((h: any) => <th key={h.id} className="py-2 border-l border-gray-200">{h.holeNumber}</th>)}
                                                 <th className="py-2 border-l border-gray-200 bg-gray-200">OUT</th>
                                             </tr>
                                         </thead>
@@ -110,7 +110,7 @@ export default function CourseViewModal({ course, isAdmin }: { course: CourseDat
                                         <thead className="bg-gray-100 font-bold text-gray-700">
                                             <tr>
                                                 <th className="py-2 w-24 text-left pl-1">Hole</th>
-                                                {backNine.map((h: any) => <th key={h.id} className="py-2 border-l border-gray-200">{h.hole_number}</th>)}
+                                                {backNine.map((h: any) => <th key={h.id} className="py-2 border-l border-gray-200">{h.holeNumber}</th>)}
                                                 <th className="py-2 border-l border-gray-200 bg-gray-200">IN</th>
                                                 <th className="py-2 border-l border-gray-200 bg-gray-300">TOT</th>
                                             </tr>
@@ -135,7 +135,7 @@ export default function CourseViewModal({ course, isAdmin }: { course: CourseDat
                         </div>
                     ))}
 
-                    {course.tee_boxes.length === 0 && <p className="text-gray-500 text-center">No tee boxes defined.</p>}
+                    {course.teeBoxes?.length === 0 && <p className="text-gray-500 text-center">No tee boxes defined.</p>}
                 </div>
             </div>
         </div>
