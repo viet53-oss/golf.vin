@@ -67,7 +67,7 @@ export default function AppHeader() {
                 <div className="flex items-center gap-2 px-1">
                     <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
                         <span role="img" aria-label="golf" className="text-xl">⛳</span>
-                        <span className="font-bold tracking-tight text-[18pt]">City Park Golf Club</span>
+                        <span className="font-bold tracking-tight text-[18pt]">Golf Live Score</span>
                     </Link>
                 </div>
 
