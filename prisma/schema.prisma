@@ -1,3 +1,10 @@
+// ============================================================================
+// SIMPLIFIED GOLF SCORING DATABASE SCHEMA
+// ============================================================================
+// This schema contains only the essential fields needed for golf scoring
+// Removed unnecessary fields and simplified relationships for better maintainability
+// ============================================================================
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,255 +13,256 @@ datasource db {
   provider = "postgresql"
 }
 
-model Player {
-  id                 String            @id @default(uuid())
-  name               String
-  email              String?           @unique
-  phone              String?
-  low_handicap_index Float?
-  index              Float             @default(0)
-  created_at         DateTime          @default(now())
-  address            String?
-  city               String?
-  state              String?
-  zip                String?
-  preferred_tee_box  String?
-  birthday           String?
-  year_joined        String?
-  manual_rounds      HandicapRound[]
-  live_round_players LiveRoundPlayer[]
-  rounds             RoundPlayer[]
+// ============================================================================
+// CORE MODELS
+// ============================================================================
 
+// Player - Golf club members and guests
+model Player {
+  id            String   @id @default(uuid())
+  name          String
+  email         String?  @unique
+  phone         String?
+  birthday      String?
+  
+  // Handicap Information
+  handicapIndex Float    @default(0)
+  
+  // Relationships
+  rounds        RoundPlayer[]
+  liveRounds    LiveRoundPlayer[]
+  
+  createdAt     DateTime @default(now())
+  
   @@map("players")
 }
 
+// Course - Golf courses
 model Course {
-  id          String      @id @default(uuid())
-  name        String
-  created_at  DateTime    @default(now())
-  holes       Hole[]
-  live_rounds LiveRound[]
-  rounds      Round[]
-  tee_boxes   TeeBox[]
-
+  id         String   @id @default(uuid())
+  name       String
+  
+  // Relationships
+  holes      Hole[]
+  teeBoxes   TeeBox[]
+  rounds     Round[]
+  liveRounds LiveRound[]
+  
+  createdAt  DateTime @default(now())
+  
   @@map("courses")
 }
 
+// TeeBox - Different tee positions on a course
 model TeeBox {
-  id                 String            @id @default(uuid())
-  course_id          String
-  name               String
-  rating             Float
-  slope              Float
-  created_at         DateTime          @default(now())
-  yardages           Int[]             @default([])
-  live_round_players LiveRoundPlayer[]
-  round_players      RoundPlayer[]
-  course             Course            @relation(fields: [course_id], references: [id])
-
+  id         String   @id @default(uuid())
+  courseId   String
+  name       String   // e.g., "Blue", "White", "Red"
+  rating     Float    // Course rating
+  slope      Int      // Slope rating
+  par        Int      // Total par for the course
+  
+  // Relationships
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  rounds     RoundPlayer[]
+  liveRounds LiveRoundPlayer[]
+  
+  createdAt  DateTime @default(now())
+  
   @@map("tee_boxes")
 }
 
+// Hole - Individual holes on a course
 model Hole {
-  id          String      @id @default(uuid())
-  course_id   String
-  hole_number Int
-  par         Int
-  difficulty  Int?
-  elements    HoleElement[]
+  id          String   @id @default(uuid())
+  courseId    String
+  holeNumber  Int      // 1-18
+  par         Int      // Par for this hole
+  name        String?  // e.g., "Hole 1", "The Island Green"
+  
+  // GPS Coordinates (optional)
   latitude    Float?
   longitude   Float?
-  course      Course        @relation(fields: [course_id], references: [id])
-  live_scores LiveScore[]
+  
+  // Relationships
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   scores      Score[]
-
+  liveScores  LiveScore[]
+  
+  @@unique([courseId, holeNumber])
   @@map("holes")
 }
 
-model HoleElement {
-  id              String  @id @default(uuid())
-  hole_id         String
-  side            String // 'LEFT' or 'RIGHT'
-  element_number  Int // 1, 2, 3
-  front_latitude  Float?
-  front_longitude Float?
-  back_latitude   Float?
-  back_longitude  Float?
-  water           Boolean @default(false)
-  bunker          Boolean @default(false)
-  tree            Boolean @default(false)
-  hole            Hole    @relation(fields: [hole_id], references: [id], onDelete: Cascade)
+// ============================================================================
+// REGULAR ROUNDS (Completed/Historical)
+// ============================================================================
 
-  @@index([hole_id])
-  @@map("hole_elements")
-}
-
+// Round - A completed round of golf
 model Round {
-  id            String        @id @default(uuid())
-  date          String
-  course_id     String
-  course_name   String?
-  created_at    DateTime      @default(now())
-  is_tournament Boolean       @default(false)
-  name          String?
-  completed     Boolean       @default(false)
-  is_live       Boolean       @default(false)
+  id            String   @id @default(uuid())
+  date          String   // YYYY-MM-DD format
+  courseId      String
+  courseName    String
+  
+  // Round Type
+  isTournament  Boolean  @default(false)
+  name          String?  // Tournament name if applicable
+  
+  // Relationships
+  course        Course   @relation(fields: [courseId], references: [id])
   players       RoundPlayer[]
-  course        Course        @relation(fields: [course_id], references: [id])
-
+  
+  createdAt     DateTime @default(now())
+  
   @@index([date])
-  @@index([course_id])
   @@map("rounds")
 }
 
+// RoundPlayer - Player's participation in a round
 model RoundPlayer {
-  id                   String   @id @default(uuid())
-  round_id             String
-  player_id            String
-  gross_score          Int?
-  adjusted_gross_score Int?
-  score_differential   Float?
-  index_at_time        Float?
-  tee_box_id           String?
-  created_at           DateTime @default(now())
-  back_nine            Int?
-  front_nine           Int?
-  index_after          Float?
-  payout               Float    @default(0)
-  points               Float    @default(0)
-  in_pool              Boolean  @default(false)
-  tee_box_name         String?
-  tee_box_par          Int?
-  tee_box_rating       Float?
-  tee_box_slope        Int?
-  course_handicap      Int?
-  player               Player   @relation(fields: [player_id], references: [id])
-  round                Round    @relation(fields: [round_id], references: [id])
-  tee_box              TeeBox?  @relation(fields: [tee_box_id], references: [id])
-  scores               Score[]
-
-  @@index([player_id])
-  @@index([round_id])
+  id              String   @id @default(uuid())
+  roundId         String
+  playerId        String
+  teeBoxId        String
+  name            String?  // Player name for easy identification
+  
+  // Scoring
+  grossScore      Int?     // Total strokes
+  courseHandicap  Int      // Handicap for this round
+  netScore        Int?     // Gross - Handicap
+  
+  // Nine scores (optional)
+  frontNine       Int?
+  backNine        Int?
+  
+  // Relationships
+  round           Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player          Player   @relation(fields: [playerId], references: [id])
+  teeBox          TeeBox   @relation(fields: [teeBoxId], references: [id])
+  scores          Score[]
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([roundId])
+  @@index([playerId])
   @@map("round_players")
 }
 
-model HandicapRound {
-  id                 String   @id @default(uuid())
-  player_id          String
-  date_played        String
-  score_differential Float
-  created_at         DateTime @default(now())
-  gross_score        Int?
-  player             Player   @relation(fields: [player_id], references: [id])
-
-  @@index([player_id])
-  @@index([date_played])
-  @@map("handicap_rounds")
-}
-
+// Score - Individual hole scores for a round
 model Score {
-  id                  String      @id @default(uuid())
-  round_player_id     String
-  hole_id             String
-  strokes             Int
-  putts               Int?
-  fairway_hit         Boolean?
-  green_in_regulation Boolean?
-  created_at          DateTime    @default(now())
-  hole                Hole        @relation(fields: [hole_id], references: [id])
-  round_player        RoundPlayer @relation(fields: [round_player_id], references: [id])
-
+  id              String      @id @default(uuid())
+  roundPlayerId   String
+  holeId          String
+  strokes         Int
+  name            String?     // e.g., "Player Name - Hole 1"
+  
+  // Additional stats (optional)
+  putts           Int?
+  fairwayHit      Boolean?
+  greenInReg      Boolean?    // Green in regulation
+  
+  // Relationships
+  roundPlayer     RoundPlayer @relation(fields: [roundPlayerId], references: [id], onDelete: Cascade)
+  hole            Hole        @relation(fields: [holeId], references: [id])
+  
+  @@unique([roundPlayerId, holeId])
   @@map("scores")
 }
 
-model Photo {
-  id          String   @id @default(uuid())
-  url         String
-  date        String
-  caption     String?
-  uploaded_at DateTime @default(now())
+// ============================================================================
+// LIVE ROUNDS (In-Progress)
+// ============================================================================
 
-  @@map("photos")
-}
-
-model Event {
-  id         String   @id @default(uuid())
-  name       String
-  date       String
-  location   String?
-  created_at DateTime @default(now())
-
-  @@map("events")
-}
-
-model MoneyEvent {
-  id          String   @id @default(uuid())
-  round_id    String
-  player_id   String
-  hole_number Int
-  event_type  String
-  amount      Float
-  created_at  DateTime @default(now())
-
-  @@index([round_id])
-  @@index([player_id])
-  @@map("money_events")
-}
-
+// LiveRound - A round currently being played
 model LiveRound {
-  id          String            @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
-  date        String
-  course_id   String
-  course_name String?
-  created_at  DateTime          @default(now())
-  updated_at  DateTime          @updatedAt
-  par         Int
-  rating      Float
-  slope       Int
+  date        String   // YYYY-MM-DD format
+  courseId    String
+  courseName  String
+  
+  // Relationships
+  course      Course   @relation(fields: [courseId], references: [id])
   players     LiveRoundPlayer[]
-  course      Course            @relation(fields: [course_id], references: [id])
-
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
   @@index([date])
-  @@index([course_id])
   @@map("live_rounds")
 }
 
+// LiveRoundPlayer - Player's participation in a live round
 model LiveRoundPlayer {
-  id              String      @id @default(uuid())
-  live_round_id   String
-  player_id       String?
-  tee_box_id      String?
-  tee_box_name    String
-  tee_box_rating  Float
-  tee_box_slope   Int
-  tee_box_par     Int
-  index_at_time   Float
-  course_handicap Int
-  gross_score     Int?
-  front_nine      Int?
-  back_nine       Int?
-  guest_name      String?
-  is_guest        Boolean     @default(false)
-  scorer_id       String?
-  live_round      LiveRound   @relation(fields: [live_round_id], references: [id], onDelete: Cascade)
-  player          Player?     @relation(fields: [player_id], references: [id])
-  tee_box         TeeBox?     @relation(fields: [tee_box_id], references: [id])
-  scores          LiveScore[]
+  id              String   @id @default(uuid())
+  liveRoundId     String
+  playerId        String?  // Null for guest players
+  teeBoxId        String
+  
+  // Snapshot Data
+  indexAtTime     Float    @default(0) @map("index_at_time")
+  scorerId        String?  @map("scorer_id")
+  teeBoxName      String?  @map("tee_box_name")
 
-  @@index([live_round_id])
-  @@index([player_id])
+  // Guest Player Info
+  isGuest         Boolean  @default(false)
+  guestName       String?
+  
+  // Scoring Info
+  courseHandicap  Int
+  grossScore      Int?
+  frontNine       Int?
+  backNine        Int?
+  
+  // Relationships
+  liveRound       LiveRound @relation(fields: [liveRoundId], references: [id], onDelete: Cascade)
+  player          Player?   @relation(fields: [playerId], references: [id])
+  teeBox          TeeBox    @relation(fields: [teeBoxId], references: [id])
+  scores          LiveScore[]
+  
+  @@index([liveRoundId])
   @@map("live_round_players")
 }
 
+// LiveScore - Individual hole scores for a live round
 model LiveScore {
-  id                   String          @id @default(uuid())
-  live_round_player_id String
-  hole_id              String
-  strokes              Int
-  hole                 Hole            @relation(fields: [hole_id], references: [id])
-  live_round_player    LiveRoundPlayer @relation(fields: [live_round_player_id], references: [id], onDelete: Cascade)
-
-  @@index([live_round_player_id])
+  id                  String          @id @default(uuid())
+  liveRoundPlayerId   String
+  holeId              String
+  strokes             Int
+  
+  // Relationships
+  liveRoundPlayer     LiveRoundPlayer @relation(fields: [liveRoundPlayerId], references: [id], onDelete: Cascade)
+  hole                Hole            @relation(fields: [holeId], references: [id])
+  
+  @@unique([liveRoundPlayerId, holeId])
   @@map("live_scores")
+}
+
+// ============================================================================
+// SUPPORTING MODELS
+// ============================================================================
+
+// Photo - Gallery photos
+model Photo {
+  id          String   @id @default(uuid())
+  url         String
+  date        String   // YYYY-MM-DD format
+  caption     String?
+  
+  uploadedAt  DateTime @default(now())
+  
+  @@map("photos")
+}
+
+// Event - Scheduled events
+model Event {
+  id         String   @id @default(uuid())
+  name       String
+  date       String   // YYYY-MM-DD format
+  location   String?
+  
+  createdAt  DateTime @default(now())
+  
+  @@map("events")
 }

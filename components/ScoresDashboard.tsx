@@ -52,32 +52,32 @@ type RoundWithPlayers = {
     id: string;
     date: string;
     name: string | null;
-    is_tournament: boolean;
+    isTournament: boolean;
     course: {
-        holes: Array<{ hole_number: number; par: number; difficulty: number }>;
-        tee_boxes: Array<{ name: string; rating: number; slope: number }>;
+        holes: Array<{ holeNumber: number; par: number; difficulty: number }>;
+        teeBoxes: Array<{ name: string; rating: number; slope: number }>;
     };
     players: Array<{
         id: string;
-        gross_score: number | null;
+        grossScore: number | null;
         player: {
             id: string;
             name: string;
             index: number;
             email?: string | null;
-            preferred_tee_box?: string | null;
+            preferredTeeBox?: string | null;
         };
         tee_box: {
             name: string;
             slope: number;
             rating: number;
         } | null;
-        index_at_time: number | null;
-        index_after: number | null;
+        indexAtTime: number | null;
+        indexAfter: number | null;
         points: number;
         payout: number;
         ytdPoints: number;
-        in_pool: boolean;
+        inPool: boolean;
         scores: any[];
     }>;
 };
@@ -163,10 +163,10 @@ export default function ScoresDashboard({
         const comparePlayers = (a: any, b: any) => comparePlayersUtil(a, b, round.course, par);
 
 
-        if (round.is_tournament) {
+        if (round.isTournament) {
             const sortedByIdx = [...allPlayers].sort((a, b) => {
-                const idxA = a.index_at_time ?? a.player?.index ?? 0;
-                const idxB = b.index_at_time ?? b.player?.index ?? 0;
+                const idxA = a.indexAtTime ?? a.player?.index ?? 0;
+                const idxB = b.indexAtTime ?? b.player?.index ?? 0;
                 return idxA - idxB;
             });
             const half = Math.floor(sortedByIdx.length / 2);
@@ -190,7 +190,7 @@ export default function ScoresDashboard({
         <div style="font-family: sans-serif;">
             <h2 style="margin-bottom: 5px;">${round.date ? format(new Date(round.date.split('T')[0] + 'T12:00:00'), 'MMMM d, yyyy') : 'Invalid Date'}</h2>
             ${round.name ? `<h3 style="color: blue; text-transform: uppercase;">${round.name}</h3>` : ''}
-            ${round.is_tournament ? `<p style="color: #b45309; font-weight: bold; text-transform: uppercase;">TOURNAMENT</p>` : ''}
+            ${round.isTournament ? `<p style="color: #b45309; font-weight: bold; text-transform: uppercase;">TOURNAMENT</p>` : ''}
         `;
 
         flights.forEach((flight, index) => {
@@ -206,7 +206,7 @@ export default function ScoresDashboard({
                     <tr style="border-bottom: 2px solid #e2e8f0;">
                         <th style="padding: 8px; text-align: left;">#</th>
                         <th style="padding: 8px; text-align: left;">Name</th>
-                        ${round.is_tournament ? `
+                        ${round.isTournament ? `
                         <th style="padding: 8px; text-align: left;">$</th>
                         <th style="padding: 8px; text-align: left;">Pts</th>
                         <th style="padding: 8px; text-align: left;">YTD</th>
@@ -222,8 +222,8 @@ export default function ScoresDashboard({
             `;
 
             flight.players.forEach((rp, idx) => {
-                const idxBefore = rp.index_at_time ?? rp.player.index;
-                const idxAfter = rp.index_after;
+                const idxBefore = rp.indexAtTime ?? rp.player.index;
+                const idxAfter = rp.indexAfter;
 
                 // Use shared utility for stats
                 const stats = calculatePlayerStats(rp, round.course, par);
@@ -236,7 +236,7 @@ export default function ScoresDashboard({
                     par
                 );
 
-                const gross = rp.gross_score;
+                const gross = rp.grossScore;
                 const net = gross !== null ? gross - courseHandicap : null;
 
                 html += `
@@ -246,7 +246,7 @@ export default function ScoresDashboard({
                             <div style="font-weight: bold; color: #2563eb; text-transform: uppercase; text-decoration: underline; text-decoration-color: red;">${rp.player.name.split(' ')[0]}</div>
                             <div>${rp.player.name.split(' ').slice(1).join(' ')}</div>
                         </td>
-                        ${round.is_tournament ? `
+                        ${round.isTournament ? `
                         <td style="padding: 8px; text-align: center; font-weight: bold; color: green; font-size: 1.1em;">
                             ${idx === 0 ? '$35' : idx === 1 ? '$25' : idx === 2 ? '$15' : '-'}
                         </td>
@@ -331,11 +331,11 @@ export default function ScoresDashboard({
                             <div className="flex justify-between items-start">
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-3">
-                                        <TrophyIcon className={`w-5 h-5 sm:w-7 sm:h-7 ${round.is_tournament ? 'text-yellow-500' : 'text-slate-300'}`} />
+                                        <TrophyIcon className={`w-5 h-5 sm:w-7 sm:h-7 ${round.isTournament ? 'text-yellow-500' : 'text-slate-300'}`} />
                                         <h2 className="font-black text-black text-[14pt] tracking-tight">
                                             {dateStr}
                                         </h2>
-                                        {round.is_tournament && (
+                                        {round.isTournament && (
                                             <span className="text-[14pt] font-black text-amber-700 bg-amber-100 px-1 sm:px-1 py-1 rounded border border-amber-200 uppercase tracking-widest leading-none">
                                                 Tournament
                                             </span>
@@ -353,7 +353,7 @@ export default function ScoresDashboard({
                                 <div className="flex flex-wrap gap-1 items-center justify-end">
                                     {
                                         (() => {
-                                            const hasPool = round.players.some(p => p.in_pool);
+                                            const hasPool = round.players.some(p => p.inPool);
                                             return (
                                                 <button
                                                     onClick={() => setSelectedPoolRoundId(round.id)}
@@ -406,11 +406,11 @@ export default function ScoresDashboard({
                             {(() => {
                                 // Prepare Flights
                                 let flights: { name: string; players: any[] }[] = [];
-                                if (round.is_tournament) {
+                                if (round.isTournament) {
                                     // First, sort by index to divide into flights
                                     const sortedByIdx = [...(round.players || [])].sort((a, b) => {
-                                        const idxA = a.index_at_time ?? a.player?.index ?? 0;
-                                        const idxB = b.index_at_time ?? b.player?.index ?? 0;
+                                        const idxA = a.indexAtTime ?? a.player?.index ?? 0;
+                                        const idxB = b.indexAtTime ?? b.player?.index ?? 0;
                                         return idxA - idxB;
                                     });
 
@@ -445,7 +445,7 @@ export default function ScoresDashboard({
                                                 <tr>
                                                     <th className="px-1 py-4 text-center w-6 sm:w-10">#</th>
                                                     <th className="px-1 py-4 text-left whitespace-nowrap">Name</th>
-                                                    {round.is_tournament && (
+                                                    {round.isTournament && (
                                                         <>
                                                             <th className="px-1 py-4 text-center text-green-600">$</th>
                                                             <th className="px-1 py-4 text-center">Pts</th>
@@ -465,8 +465,8 @@ export default function ScoresDashboard({
                                                     const firstName = player.name.split(' ')[0];
                                                     const lastName = player.name.split(' ').slice(1).join(' ');
 
-                                                    const idxBefore = rp.index_at_time ?? player.index;
-                                                    const idxAfter = rp.index_after;
+                                                    const idxBefore = rp.indexAtTime ?? player.index;
+                                                    const idxAfter = rp.indexAfter;
 
                                                     // Use shared utility for stats
                                                     const stats = calculatePlayerStats(rp, round.course, par);
@@ -484,7 +484,7 @@ export default function ScoresDashboard({
                                                     const idxDiff = (idxAfter ?? idxBefore) - idxBefore;
                                                     const idxColor = idxDiff > 0.05 ? "text-green-600" : idxDiff < -0.05 ? "text-red-600" : "text-black";
 
-                                                    const gross = rp.gross_score;
+                                                    const gross = rp.grossScore;
                                                     const net = gross !== null ? gross - courseHandicap : null;
 
                                                     const isLoading = isLoadingScorecard === rp.id;
@@ -509,7 +509,7 @@ export default function ScoresDashboard({
                                                                     {isLoading && <LoaderIcon className="w-3 h-3 animate-spin text-slate-300 mt-1" />}
                                                                 </button>
                                                             </td>
-                                                            {round.is_tournament && (
+                                                            {round.isTournament && (
                                                                 <>
                                                                     <td className="px-1 py-3 text-center">
                                                                         <span className="font-black text-green-600 text-[14pt]">

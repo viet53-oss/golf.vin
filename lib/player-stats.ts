@@ -4,27 +4,27 @@
  */
 
 export interface PlayerStatsInput {
-    gross_score: number | null;
-    index_at_time: number | null;
+    grossScore: number | null;
+    indexAtTime: number | null;
     player: {
         index: number;
-        preferred_tee_box?: string | null;
+        preferredTeeBox?: string | null;
     };
-    tee_box?: {
+    teeBox?: {
         slope: number;
         rating: number;
     } | null;
     scores?: Array<{
         strokes: number;
         hole: {
-            hole_number: number;
+            holeNumber: number;
             difficulty?: number | null;
         };
     }>;
 }
 
 export interface CourseData {
-    tee_boxes?: Array<{
+    teeBoxes?: Array<{
         name: string;
         slope: number;
         rating: number;
@@ -51,21 +51,21 @@ export function calculatePlayerStats(
     course: CourseData,
     par: number
 ): PlayerStats {
-    const idxBefore = rp.index_at_time ?? rp.player?.index ?? 0;
+    const idxBefore = rp.indexAtTime ?? rp.player?.index ?? 0;
 
     // Use assigned tee box first, fall back to player's preferred tee if missing
-    let activeTee = rp.tee_box;
+    let activeTee = rp.teeBox;
 
-    if (!activeTee && rp.player?.preferred_tee_box && course.tee_boxes) {
-        activeTee = course.tee_boxes.find((tb) =>
-            tb.name.toLowerCase() === rp.player.preferred_tee_box!.toLowerCase()
+    if (!activeTee && rp.player?.preferredTeeBox && course.teeBoxes) {
+        activeTee = course.teeBoxes.find((tb) =>
+            tb.name.toLowerCase() === rp.player.preferredTeeBox!.toLowerCase()
         ) || null;
     }
 
     const slope = activeTee?.slope ?? 113;
     const rating = activeTee?.rating ?? par;
     const courseHandicap = Math.round((idxBefore * (slope / 113)) + (rating - par));
-    const netTotal = (rp.gross_score ?? 999) - courseHandicap;
+    const netTotal = (rp.grossScore ?? 999) - courseHandicap;
 
     // Calculate Gross Hole Scores for Tie Breaker (sorted by difficulty)
     const scores = rp.scores || [];
@@ -74,7 +74,7 @@ export function calculatePlayerStats(
         const diff = h?.difficulty || 18;
 
         return {
-            holeNumber: h?.hole_number || 0,
+            holeNumber: h?.holeNumber || 0,
             difficulty: diff,
             grossScore: s.strokes
         };

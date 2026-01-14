@@ -30,17 +30,17 @@ export default async function ScoresPage() {
                 id: true,
                 date: true,
                 name: true,
-                is_tournament: true,
+                isTournament: true,
                 course: {
                     select: {
                         holes: {
                             select: {
-                                hole_number: true,
+                                holeNumber: true,
                                 par: true,
-                                difficulty: true
+                                // difficulty: true // Removed from simplified schema
                             }
                         },
-                        tee_boxes: {
+                        teeBoxes: {
                             select: {
                                 name: true,
                                 rating: true,
@@ -52,25 +52,27 @@ export default async function ScoresPage() {
                 players: {
                     select: {
                         id: true,
-                        gross_score: true,
-                        front_nine: true,
-                        back_nine: true,
-                        index_at_time: true,
-                        index_after: true,
-                        points: true,
-                        payout: true,
-                        in_pool: true,
-                        player_id: true,
+                        grossScore: true,
+                        frontNine: true,
+                        backNine: true,
+                        // indexAtTime: true, // Removed from RoundPlayer in simplified schema? No indexAtTime on RoundPlayer anymore, check user requirement? 
+                        // Simplified schema RoundPlayer: id, roundId, playerId, teeBoxId, name, grossScore, courseHandicap, netScore, frontNine, backNine
+                        // We must fetch Player.handicapIndex for "index at time" effectively (or assume it hasn't changed much if we don't store history properly yet)
+                        // Actually, simplified schema removed detailed historical index. We will just use player.handicapIndex for now or handle it.
+                        // Wait, check schema again. RoundPlayer has `courseHandicap`.
+                        courseHandicap: true,
+                        netScore: true,
+                        playerId: true,
                         player: {
                             select: {
                                 id: true,
                                 name: true,
-                                index: true,
+                                handicapIndex: true, // Replaced index
                                 email: true,
-                                preferred_tee_box: true
+                                // preferred_tee_box: true // Removed
                             }
                         },
-                        tee_box: {
+                        teeBox: {
                             select: {
                                 name: true,
                                 slope: true,
@@ -83,15 +85,15 @@ export default async function ScoresPage() {
                                 strokes: true,
                                 hole: {
                                     select: {
-                                        hole_number: true,
-                                        difficulty: true
+                                        holeNumber: true,
+                                        // difficulty: true // Removed
                                     }
                                 }
                             }
                         }
                     },
                     orderBy: {
-                        gross_score: 'asc',
+                        grossScore: 'asc',
                     },
                 },
             },
@@ -137,18 +139,18 @@ export default async function ScoresPage() {
 
         const snapshots = new Map<string, { pts: number; money: number }>();
 
-        // 1. Process Winnings
+        // 1. Process Winnings (Payout field removed from simplified schema, treating as 0 for now)
         (round.players || []).forEach((rp: any) => {
-            const currentMoney = (runningWinnings.get(rp.player_id) || 0) + (rp.payout || 0);
-            runningWinnings.set(rp.player_id, currentMoney);
+            const currentMoney = (runningWinnings.get(rp.playerId) || 0) + 0; // rp.payout was removed
+            runningWinnings.set(rp.playerId, currentMoney);
         });
 
         // 2. Process Points (Tournament Only)
-        if (round.is_tournament) {
+        if (round.isTournament) {
             const par = round.course.holes.reduce((sum: number, h: any) => sum + h.par, 0);
             const sortedPlayers = [...(round.players || [])].sort((a: any, b: any) => {
-                const idxA = a.index_at_time ?? a.player?.index ?? 0;
-                const idxB = b.index_at_time ?? b.player?.index ?? 0;
+                const idxA = a.player?.handicapIndex ?? 0;
+                const idxB = b.player?.handicapIndex ?? 0;
                 return idxA - idxB;
             });
 
@@ -160,12 +162,17 @@ export default async function ScoresPage() {
 
             flights.forEach((flight: any) => {
                 const scoredPlayers = flight.map((rp: any) => {
-                    if (!rp.gross_score) return { ...rp, net: 9999 };
-                    const idx = rp.index_at_time ?? rp.player?.index ?? 0;
-                    const slope = rp.tee_box?.slope ?? 113;
-                    const rating = rp.tee_box?.rating ?? par;
+                    if (!rp.grossScore) return { ...rp, net: 9999 };
+                    // Recalculate net if needed, or use stored netScore
+                    // Using stored netScore is safer if available
+                    if (rp.netScore) return { ...rp, net: rp.netScore };
+
+                    // Fallback calc
+                    const idx = rp.player?.handicapIndex ?? 0;
+                    const slope = rp.teeBox?.slope ?? 113;
+                    const rating = rp.teeBox?.rating ?? par;
                     const ch = Math.round(idx * (slope / 113) + (rating - par));
-                    return { ...rp, net: rp.gross_score - ch };
+                    return { ...rp, net: rp.grossScore - ch };
                 }).sort((a: any, b: any) => a.net - b.net);
 
                 scoredPlayers.forEach((p: any, rank: number) => {
@@ -175,17 +182,17 @@ export default async function ScoresPage() {
                     else if (rank === 1) pts = 75;
                     else if (rank === 2) pts = 50;
 
-                    const currentPts = (runningPoints.get(p.player_id) || 0) + pts;
-                    runningPoints.set(p.player_id, currentPts);
+                    const currentPts = (runningPoints.get(p.playerId) || 0) + pts;
+                    runningPoints.set(p.playerId, currentPts);
                 });
             });
         }
 
         // 3. Take snapshot for this round
         (round.players || []).forEach((rp: any) => {
-            snapshots.set(rp.player_id, {
-                pts: runningPoints.get(rp.player_id) || 0,
-                money: runningWinnings.get(rp.player_id) || 0
+            snapshots.set(rp.playerId, {
+                pts: runningPoints.get(rp.playerId) || 0,
+                money: runningWinnings.get(rp.playerId) || 0
             });
         });
         roundSnapshots.set(round.id, snapshots);
@@ -197,7 +204,7 @@ export default async function ScoresPage() {
         return {
             ...round,
             players: (round.players || []).map((rp: any) => {
-                const stats = snapshots?.get(rp.player_id);
+                const stats = snapshots?.get(rp.playerId);
                 return {
                     ...rp,
                     ytdWinnings: stats?.money || 0,

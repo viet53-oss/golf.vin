@@ -55,11 +55,11 @@ export default async function SettingsPage() {
 
     const courses = await prisma.course.findMany({
         include: {
-            tee_boxes: true,
+            teeBoxes: true,
             holes: true,
-            _count: {
-                select: { rounds: true, live_rounds: true }
-            }
+            // _count: {
+            //     select: { rounds: true }
+            // }
         },
         orderBy: { name: 'asc' }
     });
@@ -68,7 +68,7 @@ export default async function SettingsPage() {
         select: {
             id: true,
             name: true,
-            preferred_tee_box: true
+            // preferredTeeBox: true // Removed from schema
         },
         orderBy: { name: 'asc' }
     });
@@ -194,7 +194,7 @@ export default async function SettingsPage() {
                     </div>
                     <div className="p-3 space-y-4">
                         {courses.map((course: any) => {
-                            const canDelete = course._count.rounds === 0 && course._count.live_rounds === 0;
+                            const canDelete = (course._count?.rounds || 0) === 0 && (course._count?.live_rounds || 0) === 0;
                             return (
                                 <div key={course.id} className="border border-gray-200 rounded-lg p-3 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
                                     <div>

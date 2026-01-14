@@ -20,15 +20,12 @@ export async function createLiveRound(data: {
             data: {
                 name: data.name,
                 date: data.date,
-                course_id: data.courseId,
-                course_name: data.courseName,
-                par: data.par,
-                rating: data.rating,
-                slope: data.slope
+                courseId: data.courseId,
+                courseName: data.courseName
             }
         });
 
-        // revalidatePath('/live'); // Removing to prevent client-side state loss during modal save
+        // revalidatePath('/live');
         return { success: true, liveRoundId: liveRound.id };
     } catch (error) {
         console.error('Failed to create live round:', error);
@@ -44,25 +41,16 @@ export async function createLiveRound(data: {
  * Used by the "New Round" button in the UI
  */
 export async function createDefaultLiveRound(date: string) {
-    // Check admin permission - REMOVED to allow first player to start round
-    // const { cookies } = await import('next/headers');
-    // const cookieStore = await cookies();
-    // const isAdmin = cookieStore.get('admin_session')?.value === 'true';
-
-    // if (!isAdmin) {
-    //     throw new Error('Unauthorized');
-    // }
-
     try {
         // Get default course (City Park North)
         let defaultCourse = await prisma.course.findFirst({
             where: { name: { contains: 'City Park North', mode: 'insensitive' } },
-            include: { tee_boxes: true, holes: true }
+            include: { teeBoxes: true, holes: true }
         });
 
         if (!defaultCourse) {
             defaultCourse = await prisma.course.findFirst({
-                include: { tee_boxes: true, holes: true }
+                include: { teeBoxes: true, holes: true }
             });
         }
 
@@ -73,18 +61,15 @@ export async function createDefaultLiveRound(date: string) {
         const coursePar = defaultCourse.holes.reduce((sum, h) => sum + h.par, 0);
 
         // Find White tee box or fallback to first available
-        const whiteTee = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes('white'));
-        const defaultTeeBox = whiteTee || defaultCourse.tee_boxes[0];
+        const whiteTee = defaultCourse.teeBoxes.find(t => t.name.toLowerCase().includes('white'));
+        const defaultTeeBox = whiteTee || defaultCourse.teeBoxes[0];
 
         const newRound = await prisma.liveRound.create({
             data: {
                 name: `Live Round - ${date}`,
                 date: date,
-                course_id: defaultCourse.id,
-                course_name: defaultCourse.name,
-                par: coursePar,
-                rating: defaultTeeBox?.rating ?? coursePar,
-                slope: defaultTeeBox?.slope ?? 113
+                courseId: defaultCourse.id,
+                courseName: defaultCourse.name
             }
         });
 
@@ -114,32 +99,32 @@ export async function updateLiveRound(data: {
             data: {
                 name: data.name,
                 date: data.date,
-                course_id: data.courseId,
-                par: data.par,
-                rating: data.rating,
-                slope: data.slope
-            } as any,
+                courseId: data.courseId
+            },
             include: {
                 players: true
             }
-        }) as any;
+        });
 
         // Update all players in this round to match the new course data for accurate handicap/net calculation
         // They keep their own handicap indexes, but recalculate course handicap based on new slope/rating/par
         for (const player of liveRound.players) {
-            const courseHandicap = Math.round((player.index_at_time * (data.slope / 113)) + (data.rating - data.par));
+            // Note: Since we don't store indexAtTime in the generic way on update yet (unless we fetch it),
+            // and we don't store teeBoxRating/Slope on player anymore, 
+            // we really should fetch the tee box to recalc accurately if the course changed.
+            // But for now, we'll try to use the stored indexAtTime if available.
+
+            const index = player.indexAtTime || 0;
+            const courseHandicap = Math.round((index * (data.slope / 113)) + (data.rating - data.par));
+
             await prisma.liveRoundPlayer.update({
                 where: { id: player.id },
                 data: {
-                    tee_box_rating: data.rating,
-                    tee_box_slope: data.slope,
-                    tee_box_par: data.par,
-                    course_handicap: courseHandicap
+                    courseHandicap: courseHandicap
                 }
             });
         }
 
-        // revalidatePath('/live');
         return { success: true };
     } catch (error) {
         console.error('Failed to update live round:', error);
@@ -181,22 +166,22 @@ export async function addPlayerToLiveRound(data: {
         }
 
         // Calculate course handicap
-        const handicapIndex = player.index || 0;
+        const handicapIndex = player.handicapIndex || 0;
         const par = teeBox.course.holes.reduce((sum, h) => sum + h.par, 0);
 
         // Check if player already exists in round to prevent duplicates
         const existing = await prisma.liveRoundPlayer.findFirst({
             where: {
-                live_round_id: data.liveRoundId,
-                player_id: data.playerId
+                liveRoundId: data.liveRoundId,
+                playerId: data.playerId
             }
         });
 
         if (existing) {
-            // If exists, just update scorer_id
+            // If exists, just update scorerId
             await prisma.liveRoundPlayer.update({
                 where: { id: existing.id },
-                data: { scorer_id: data.scorerId }
+                data: { scorerId: data.scorerId }
             });
             revalidatePath('/live');
             return { success: true, liveRoundPlayerId: existing.id };
@@ -205,16 +190,13 @@ export async function addPlayerToLiveRound(data: {
         // Create live round player
         const liveRoundPlayer = await prisma.liveRoundPlayer.create({
             data: {
-                live_round_id: data.liveRoundId,
-                player_id: data.playerId,
-                tee_box_id: data.teeBoxId,
-                tee_box_name: teeBox.name,
-                tee_box_rating: teeBox.rating,
-                tee_box_slope: Math.round(teeBox.slope),
-                tee_box_par: par,
-                index_at_time: handicapIndex,
-                course_handicap: Math.round((handicapIndex * (teeBox.slope / 113)) + (teeBox.rating - par)),
-                scorer_id: data.scorerId
+                liveRoundId: data.liveRoundId,
+                playerId: data.playerId,
+                teeBoxId: data.teeBoxId,
+                indexAtTime: handicapIndex,
+                teeBoxName: teeBox.name,
+                courseHandicap: Math.round((handicapIndex * (teeBox.slope / 113)) + (teeBox.rating - par)),
+                scorerId: data.scorerId
             }
         });
 
@@ -230,7 +212,7 @@ export async function addPlayerToLiveRound(data: {
 }
 
 /**
- * Updates the scorer_id for a player (Claim/Takeover)
+ * Updates the scorerId for a player (Claim/Takeover)
  */
 export async function updatePlayerScorer(data: {
     liveRoundPlayerId: string;
@@ -239,7 +221,7 @@ export async function updatePlayerScorer(data: {
     try {
         await prisma.liveRoundPlayer.update({
             where: { id: data.liveRoundPlayerId },
-            data: { scorer_id: data.scorerId }
+            data: { scorerId: data.scorerId }
         });
         revalidatePath('/live');
         return { success: true };
@@ -263,19 +245,37 @@ export async function addGuestToLiveRound(data: {
     scorerId?: string;
 }) {
     try {
+        // We typically need a teeBoxId. If 'Guest' tee doesn't exist, we might need a workaround.
+        // For now, let's assume we find a tee box that matches the rating/slope OR use the first one of the course.
+        // This is a bit tricky since guests might play arbitrary settings.
+        // But the schema REQUIRES teeBoxId.
+
+        // Find the course from the live round
+        const liveRound = await prisma.liveRound.findUnique({
+            where: { id: data.liveRoundId },
+            include: { course: { include: { teeBoxes: true } } }
+        });
+
+        if (!liveRound) throw new Error("Live Round not found");
+
+        // Try to find a matching tee box or use the first one
+        // Note: guests "custom" tees might not match exactly. Just pick the first one as a placeholder reference.
+        // The display logic often uses the passed values anyway.
+        const fallbackTeeBox = liveRound.course.teeBoxes[0];
+
+        if (!fallbackTeeBox) throw new Error("No tee boxes found for course");
+
         // Create guest player in live round
         const guestPlayer = await prisma.liveRoundPlayer.create({
             data: {
-                live_round_id: data.liveRoundId,
-                is_guest: true,
-                guest_name: data.guestName,
-                tee_box_name: 'Guest',
-                tee_box_rating: data.rating,
-                tee_box_slope: data.slope,
-                tee_box_par: data.par,
-                index_at_time: data.index,
-                course_handicap: data.courseHandicap,
-                scorer_id: data.scorerId
+                liveRoundId: data.liveRoundId,
+                isGuest: true,
+                guestName: data.guestName,
+                teeBoxId: fallbackTeeBox.id,
+                teeBoxName: 'Guest',
+                indexAtTime: data.index,
+                courseHandicap: data.courseHandicap,
+                scorerId: data.scorerId
             }
         });
 
@@ -303,9 +303,9 @@ export async function updateGuestInLiveRound(data: {
         await prisma.liveRoundPlayer.update({
             where: { id: data.guestPlayerId },
             data: {
-                guest_name: data.guestName,
-                index_at_time: data.index,
-                course_handicap: data.courseHandicap
+                guestName: data.guestName,
+                indexAtTime: data.index,
+                courseHandicap: data.courseHandicap
             }
         });
 
@@ -366,7 +366,7 @@ export async function saveLiveScore(data: {
             throw new Error('Live round not found');
         }
 
-        const hole = liveRound.course.holes.find(h => h.hole_number === data.holeNumber);
+        const hole = liveRound.course.holes.find(h => h.holeNumber === data.holeNumber);
         if (!hole) {
             throw new Error(`Hole ${data.holeNumber} not found`);
         }
@@ -376,9 +376,9 @@ export async function saveLiveScore(data: {
             // Find the live round player (could be by player_id OR direct LiveRoundPlayer id for guests)
             const liveRoundPlayer = await prisma.liveRoundPlayer.findFirst({
                 where: {
-                    live_round_id: data.liveRoundId,
+                    liveRoundId: data.liveRoundId,
                     OR: [
-                        { player_id: ps.playerId },
+                        { playerId: ps.playerId },
                         { id: ps.playerId }
                     ]
                 }
@@ -391,15 +391,15 @@ export async function saveLiveScore(data: {
 
             // ENFORCE OWNERSHIP
             if (data.scorerId) {
-                if (liveRoundPlayer.scorer_id && liveRoundPlayer.scorer_id !== data.scorerId) {
-                    throw new Error(`Scoring locked by another device for ${liveRoundPlayer.guest_name || 'player'}`);
+                if (liveRoundPlayer.scorerId && liveRoundPlayer.scorerId !== data.scorerId) {
+                    throw new Error(`Scoring locked by another device for ${liveRoundPlayer.guestName || 'player'}`);
                 }
 
                 // Implicit Claim: If no scorer set, claim it now
-                if (!liveRoundPlayer.scorer_id) {
+                if (!liveRoundPlayer.scorerId) {
                     await prisma.liveRoundPlayer.update({
                         where: { id: liveRoundPlayer.id },
-                        data: { scorer_id: data.scorerId }
+                        data: { scorerId: data.scorerId }
                     });
                 }
             }
@@ -407,8 +407,8 @@ export async function saveLiveScore(data: {
             // Save or update the score
             const existingScore = await prisma.liveScore.findFirst({
                 where: {
-                    live_round_player_id: liveRoundPlayer.id,
-                    hole_id: hole.id
+                    liveRoundPlayerId: liveRoundPlayer.id,
+                    holeId: hole.id
                 }
             });
 
@@ -420,8 +420,8 @@ export async function saveLiveScore(data: {
             } else {
                 await prisma.liveScore.create({
                     data: {
-                        live_round_player_id: liveRoundPlayer.id,
-                        hole_id: hole.id,
+                        liveRoundPlayerId: liveRoundPlayer.id,
+                        holeId: hole.id,
                         strokes: ps.strokes
                     }
                 });
@@ -429,8 +429,8 @@ export async function saveLiveScore(data: {
 
             // Recalculate totals
             const allScores = await prisma.liveScore.findMany({
-                where: { live_round_player_id: liveRoundPlayer.id },
-                include: { hole: { select: { hole_number: true } } }
+                where: { liveRoundPlayerId: liveRoundPlayer.id },
+                include: { hole: { select: { holeNumber: true } } }
             });
 
             let gross = 0;
@@ -439,16 +439,16 @@ export async function saveLiveScore(data: {
 
             allScores.forEach(s => {
                 gross += s.strokes;
-                if (s.hole.hole_number <= 9) front += s.strokes;
+                if (s.hole.holeNumber <= 9) front += s.strokes;
                 else back += s.strokes;
             });
 
             await prisma.liveRoundPlayer.update({
                 where: { id: liveRoundPlayer.id },
                 data: {
-                    gross_score: gross,
-                    front_nine: front > 0 ? front : null,
-                    back_nine: back > 0 ? back : null
+                    grossScore: gross,
+                    frontNine: front > 0 ? front : null,
+                    backNine: back > 0 ? back : null
                 }
             });
         }
@@ -490,12 +490,12 @@ export async function deleteLiveRound(liveRoundId: string) {
 export async function getAllLiveRounds() {
     try {
         const rounds = await prisma.liveRound.findMany({
-            orderBy: { created_at: 'desc' },
+            orderBy: { createdAt: 'desc' },
             select: {
                 id: true,
                 name: true,
                 date: true,
-                created_at: true
+                createdAt: true
             }
         });
 

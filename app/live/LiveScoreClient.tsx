@@ -18,17 +18,17 @@ interface Player {
     id: string;
     name: string;
     index: number;
-    preferred_tee_box: string | null;
+    preferredTeeBox: string | null;
     isGuest?: boolean;
     liveRoundPlayerId?: string; // LiveRoundPlayer ID for server actions
     liveRoundData?: {
-        tee_box_name: string | null;
-        course_hcp: number | null;
+        teeBoxName: string | null;
+        courseHcp: number | null;
     } | null;
 }
 
 interface Hole {
-    hole_number: number;
+    holeNumber: number;
     par: number;
     difficulty?: number | null;
     latitude?: number | null;
@@ -39,11 +39,11 @@ interface Hole {
 interface HoleElement {
     id: string;
     side: string;
-    element_number: number;
-    front_latitude?: number | null;
-    front_longitude?: number | null;
-    back_latitude?: number | null;
-    back_longitude?: number | null;
+    elementNumber: number;
+    frontLatitude?: number | null;
+    frontLongitude?: number | null;
+    backLatitude?: number | null;
+    backLongitude?: number | null;
     water?: boolean;
     bunker?: boolean;
     tree?: boolean;
@@ -52,7 +52,7 @@ interface HoleElement {
 interface Course {
     id: string;
     name: string;
-    tee_boxes: {
+    teeBoxes: {
         id: string;
         name: string;
         rating: number;
@@ -70,7 +70,7 @@ interface LiveScoreClientProps {
         id: string;
         name: string;
         date: string;
-        created_at: string;
+        createdAt: string;
     }>;
     allCourses: Course[];
 }
@@ -290,11 +290,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             id: p.id, // Use LiveRoundPlayer ID
                             name: p.guest_name || 'Guest',
                             index: p.index_at_time,
-                            preferred_tee_box: null,
+                            preferredTeeBox: null,
                             isGuest: true,
                             liveRoundData: {
-                                tee_box_name: p.tee_box_name,
-                                course_hcp: p.course_handicap
+                                teeBoxName: p.teeBoxName || p.tee_box_name, // Handle both for safety
+                                courseHcp: p.courseHandicap || p.course_handicap
                             }
                         });
                     }
@@ -334,8 +334,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 const playerScores = new Map<number, number>();
                 if (p.scores) {
                     p.scores.forEach((s: any) => {
-                        if (s.hole?.hole_number) {
-                            playerScores.set(s.hole.hole_number, s.strokes);
+                        if (s.hole?.holeNumber) {
+                            playerScores.set(s.hole.holeNumber, s.strokes);
                         }
                     });
                 }
@@ -358,7 +358,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 const takenOverIds = new Set<string>();
                 initialRound.players.forEach((p: any) => {
                     const playerId = p.is_guest ? p.id : p.player.id;
-                    if (p.scorer_id && p.scorer_id !== clientScorerId) {
+                    if (p.scorerId && p.scorerId !== clientScorerId) {
                         takenOverIds.add(playerId);
                     }
                 });
@@ -381,8 +381,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     const serverPlayerScores = new Map<number, number>();
                     if (p.scores) {
                         p.scores.forEach((s: any) => {
-                            if (s.hole?.hole_number) {
-                                serverPlayerScores.set(s.hole.hole_number, s.strokes);
+                            if (s.hole?.holeNumber) {
+                                serverPlayerScores.set(s.hole.holeNumber, s.strokes);
                             }
                         });
                     }
@@ -431,23 +431,23 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
             if (p.scores) {
                 p.scores.forEach((s: any) => {
-                    if (s.hole?.hole_number && s.strokes) {
-                        const hole = defaultCourse.holes.find(h => h.hole_number === s.hole.hole_number);
+                    if (s.hole?.holeNumber && s.strokes) {
+                        const hole = defaultCourse.holes.find(h => h.holeNumber === s.hole.holeNumber);
                         if (hole) {
                             const diff = s.strokes - hole.par;
 
                             // Birdie Check
                             if (diff === -1) {
-                                if (!playerKnownSet.has(s.hole.hole_number)) {
-                                    playerKnownSet.add(s.hole.hole_number);
+                                if (!playerKnownSet.has(s.hole.holeNumber)) {
+                                    playerKnownSet.add(s.hole.holeNumber);
                                     if (hasInitializedRef.current) playerHasNewBirdie = true;
                                 }
                             }
 
                             // Eagle Check
                             if (diff <= -2) {
-                                if (!playerEagleSet.has(s.hole.hole_number)) {
-                                    playerEagleSet.add(s.hole.hole_number);
+                                if (!playerEagleSet.has(s.hole.holeNumber)) {
+                                    playerEagleSet.add(s.hole.holeNumber);
                                     if (hasInitializedRef.current) playerHasNewEagle = true;
                                 }
                             }
@@ -508,7 +508,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         // Find the first hole that isn't fully completed by all participants
         for (let h = 1; h <= 18; h++) {
             const allPlayersHaveScore = initialRound.players.every((p: any) => {
-                return p.scores && p.scores.some((s: any) => s.hole?.hole_number === h);
+                return p.scores && p.scores.some((s: any) => s.hole?.holeNumber === h);
             });
 
             if (!allPlayersHaveScore) {
@@ -570,8 +570,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     //     }
     // }, [selectedPlayers]); // Intentionally not including scores to avoid jumping while scoring
 
-    const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.par || 4;
-    const activeHoleDifficulty = defaultCourse?.holes.find(h => h.hole_number === activeHole)?.difficulty;
+    const activeHolePar = defaultCourse?.holes.find(h => h.holeNumber === activeHole)?.par || 4;
+    const activeHoleDifficulty = defaultCourse?.holes.find(h => h.holeNumber === activeHole)?.difficulty;
 
     // Helper to split name into first and last
     const splitName = (fullName: string) => {
@@ -602,31 +602,31 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         // Only use player's preferred tee box for City Park North
         const isCityParkNorth = defaultCourse.name.toLowerCase().includes('city park north');
 
-        if (isCityParkNorth && player.preferred_tee_box) {
-            const match = defaultCourse.tee_boxes.find(t => t.name.toLowerCase() === player.preferred_tee_box?.toLowerCase());
+        if (isCityParkNorth && player.preferredTeeBox) {
+            const match = defaultCourse.teeBoxes.find(t => t.name.toLowerCase() === player.preferredTeeBox?.toLowerCase());
             if (match) return match;
-            const partial = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes(player.preferred_tee_box!.toLowerCase()));
+            const partial = defaultCourse.teeBoxes.find(t => t.name.toLowerCase().includes(player.preferredTeeBox!.toLowerCase()));
             if (partial) return partial;
         }
 
         // For other courses, or if no preference, use the round's tee box
         // Try to get from initialRound first (the selected tee for this round)
         if (initialRound?.rating && initialRound?.slope) {
-            const roundTee = defaultCourse.tee_boxes.find(t =>
+            const roundTee = defaultCourse.teeBoxes.find(t =>
                 t.rating === initialRound.rating && t.slope === initialRound.slope
             );
             if (roundTee) return roundTee;
         }
 
         // Fallback to White tee or first available
-        const white = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes('white'));
-        return white || defaultCourse.tee_boxes[0];
+        const white = defaultCourse.teeBoxes.find(t => t.name.toLowerCase().includes('white'));
+        return white || defaultCourse.teeBoxes[0];
     };
 
     const getCourseHandicap = (player: Player): number => {
         // Prefer server-side snapshot if available
-        if (player.liveRoundData?.course_hcp !== undefined && player.liveRoundData.course_hcp !== null) {
-            return player.liveRoundData.course_hcp;
+        if (player.liveRoundData?.courseHcp !== undefined && player.liveRoundData.courseHcp !== null) {
+            return player.liveRoundData.courseHcp;
         }
 
         const teeBox = getPlayerTee(player);
@@ -926,14 +926,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 // Handle guest players
                 summaryPlayersMap.set(p.id, {
                     id: p.id,
-                    name: p.guest_name || 'Guest',
-                    index: p.index_at_time,
-                    preferred_tee_box: null,
+                    name: p.guestName || p.guest_name || 'Guest',
+                    index: p.indexAtTime || p.index_at_time,
+                    preferredTeeBox: null,
                     isGuest: true,
                     liveRoundPlayerId: p.id, // For guests, the ID is already the LiveRoundPlayer ID
                     liveRoundData: {
-                        tee_box_name: p.tee_box_name,
-                        course_hcp: p.course_handicap
+                        teeBoxName: p.teeBoxName || p.tee_box_name,
+                        courseHcp: p.courseHandicap || p.course_handicap
                     }
                 });
             } else {
@@ -941,12 +941,12 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 summaryPlayersMap.set(p.player.id, {
                     id: p.player.id,
                     name: p.player.name,
-                    index: p.player.index,
-                    preferred_tee_box: p.player.preferred_tee_box,
+                    index: p.player.handicapIndex ?? p.player.index,
+                    preferredTeeBox: p.player.preferredTeeBox ?? p.player.preferred_tee_box,
                     liveRoundPlayerId: p.id, // Store the LiveRoundPlayer ID
                     liveRoundData: {
-                        tee_box_name: p.tee_box_name,
-                        course_hcp: p.course_handicap
+                        teeBoxName: p.teeBoxName || p.tee_box_name,
+                        courseHcp: p.courseHandicap || p.course_handicap
                     }
                 });
             }
@@ -982,7 +982,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     back9 += strokes;
                 }
 
-                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                const hole = defaultCourse?.holes.find(h => h.holeNumber === holeNum);
                 const holePar = hole?.par || 4;
                 const difficulty = hole?.difficulty || holeNum;
 
@@ -1046,7 +1046,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
         if (playerScores) {
             playerScores.forEach((strokes, holeNum) => {
-                const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                const hole = defaultCourse?.holes.find(h => h.holeNumber === holeNum);
                 const holePar = hole?.par || 4;
                 const diff = strokes - holePar;
                 if (diff === -1) birdieCount++;
@@ -1122,13 +1122,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                     <div className="flex flex-wrap gap-x-2 gap-y-1 text-[15pt] text-gray-500 mt-1">
                                         <span>{initialRound?.date || todayStr}</span>
                                         <span>P:{initialRound?.par ?? defaultCourse?.holes.reduce((a, b) => a + b.par, 0)}</span>
-                                        <span>R:{initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating}</span>
-                                        <span>S:{initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope}</span>
+                                        <span>R:{initialRound?.rating ?? defaultCourse?.teeBoxes[0]?.rating}</span>
+                                        <span>S:{initialRound?.slope ?? defaultCourse?.teeBoxes[0]?.slope}</span>
                                         {(() => {
                                             // Find the tee box name based on rating and slope
-                                            const teeBox = defaultCourse?.tee_boxes.find(t =>
-                                                t.rating === (initialRound?.rating ?? defaultCourse?.tee_boxes[0]?.rating) &&
-                                                t.slope === (initialRound?.slope ?? defaultCourse?.tee_boxes[0]?.slope)
+                                            const teeBox = defaultCourse?.teeBoxes.find(t =>
+                                                t.rating === (initialRound?.rating ?? defaultCourse?.teeBoxes[0]?.rating) &&
+                                                t.slope === (initialRound?.slope ?? defaultCourse?.teeBoxes[0]?.slope)
                                             );
                                             const teeName = teeBox?.name || '';
                                             const teeIndicator = teeName.toLowerCase().includes('white') ? 'W'
@@ -1218,7 +1218,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     isAdmin={isAdmin}
                     courseData={defaultCourse ? {
                         courseName: defaultCourse.name,
-                        teeBoxes: defaultCourse.tee_boxes,
+                        teeBoxes: defaultCourse.teeBoxes,
                         par: defaultCourse.holes.reduce((sum, h) => sum + h.par, 0),
                         roundTeeBox: initialRound ? {
                             rating: initialRound.rating,
@@ -1269,7 +1269,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                 <div style={{ minHeight: '140px' }} className="flex flex-col justify-center">
                                     {/* GPS Distance Display */}
                                     {(() => {
-                                        const currentHole = defaultCourse?.holes.find(h => h.hole_number === activeHole);
+                                        const currentHole = defaultCourse?.holes.find(h => h.holeNumber === activeHole);
 
                                         if (!userLocation) {
                                             return (
@@ -1295,14 +1295,14 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         );
 
                                         const getElement = (side: string, num: number) =>
-                                            currentHole.elements?.find(e => e.side === side && e.element_number === num);
+                                            currentHole.elements?.find(e => e.side === side && e.elementNumber === num);
 
                                         const renderElement = (side: 'LEFT' | 'RIGHT', num: number, positionClass: string) => {
                                             const el = getElement(side, num);
                                             if (!el) return null;
 
-                                            const distFront = (el.front_latitude && el.front_longitude) ? calculateDistance(userLocation.latitude, userLocation.longitude, Number(el.front_latitude), Number(el.front_longitude)) : null;
-                                            const distBack = (el.back_latitude && el.back_longitude) ? calculateDistance(userLocation.latitude, userLocation.longitude, Number(el.back_latitude), Number(el.back_longitude)) : null;
+                                            const distFront = (el.frontLatitude && el.frontLongitude) ? calculateDistance(userLocation.latitude, userLocation.longitude, Number(el.frontLatitude), Number(el.frontLongitude)) : null;
+                                            const distBack = (el.backLatitude && el.backLongitude) ? calculateDistance(userLocation.latitude, userLocation.longitude, Number(el.backLatitude), Number(el.backLongitude)) : null;
 
                                             if (!distFront && !distBack && !el.water && !el.bunker && !el.tree) return null;
 
@@ -1364,11 +1364,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                     const isSaved = playersForStatus.some(p => {
                                         const pScores = scores.get(p.id);
-                                        return pScores && pScores.has(hole.hole_number);
+                                        return pScores && pScores.has(hole.holeNumber);
                                     });
 
-                                    const isActive = activeHole === hole.hole_number;
-                                    const isMissing = playersForStatus.length > 0 && !isActive && !isSaved && hole.hole_number < activeHole;
+                                    const isActive = activeHole === hole.holeNumber;
+                                    const isMissing = playersForStatus.length > 0 && !isActive && !isSaved && hole.holeNumber < activeHole;
 
                                     // Determine styling
                                     let btnClass = "bg-white text-black border border-black";
@@ -1385,15 +1385,15 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                                     return (
                                         <button
-                                            key={hole.hole_number}
-                                            onClick={() => setActiveHole(hole.hole_number)}
+                                            key={hole.holeNumber}
+                                            onClick={() => setActiveHole(hole.holeNumber)}
                                             className={`
                                             flex flex-col items-center justify-center py-3 rounded-2xl transition-all
                                             ${btnClass}
                                         `}
                                         >
                                             <div className="flex items-baseline">
-                                                <span className="text-[20pt] font-black leading-none">{hole.hole_number}</span>
+                                                <span className="text-[20pt] font-black leading-none">{hole.holeNumber}</span>
                                                 <span className="text-[15pt] font-bold leading-none opacity-80">/{hole.par}</span>
                                             </div>
                                         </button>
@@ -1459,7 +1459,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                 // Check if anyone scored a birdie on this hole
                                                 const birdiePlayerData: Array<{ name: string; totalBirdies: number }> = [];
                                                 const eaglePlayerData: Array<{ name: string; totalEagles: number }> = [];
-                                                const activeHolePar = defaultCourse?.holes.find(h => h.hole_number === currentHole)?.par || 4;
+                                                const activeHolePar = defaultCourse?.holes.find(h => h.holeNumber === currentHole)?.par || 4;
 
                                                 selectedPlayers.forEach(p => {
                                                     const playerScores = new Map(newScores.get(p.id) || []);
@@ -1487,7 +1487,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         // Calculate total birdies for this player in the round
                                                         let totalBirdies = 0;
                                                         playerScores.forEach((strokes, holeNum) => {
-                                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                            const hole = defaultCourse?.holes.find(h => h.holeNumber === holeNum);
                                                             const holePar = hole?.par || 4;
                                                             if (strokes === holePar - 1) {
                                                                 totalBirdies++;
@@ -1507,7 +1507,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                         // Calculate total eagles for this player in the round
                                                         let totalEagles = 0;
                                                         playerScores.forEach((strokes, holeNum) => {
-                                                            const hole = defaultCourse?.holes.find(h => h.hole_number === holeNum);
+                                                            const hole = defaultCourse?.holes.find(h => h.holeNumber === holeNum);
                                                             const holePar = hole?.par || 4;
                                                             if (strokes <= holePar - 2) {
                                                                 totalEagles++;
@@ -1623,7 +1623,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         if (pScores) {
                                             pScores.forEach((strokes, hNum) => {
                                                 totalScore += strokes;
-                                                const hPar = defaultCourse?.holes.find(h => h.hole_number === hNum)?.par || 4;
+                                                const hPar = defaultCourse?.holes.find(h => h.holeNumber === hNum)?.par || 4;
                                                 totalScoredPar += hPar;
                                             });
                                         }
@@ -1870,7 +1870,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
                                                         const score = getSavedScore(p.id, num);
                                                         const isActive = activeHole === num;
-                                                        const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                        const hole = defaultCourse?.holes.find(h => h.holeNumber === num);
                                                         const holePar = hole?.par || 4;
 
                                                         let bgClass = "bg-white";
@@ -1906,7 +1906,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                     {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
                                                         const score = getSavedScore(p.id, num);
                                                         const isActive = activeHole === num;
-                                                        const hole = defaultCourse?.holes.find(h => h.hole_number === num);
+                                                        const hole = defaultCourse?.holes.find(h => h.holeNumber === num);
                                                         const holePar = hole?.par || 4;
 
                                                         let bgClass = "bg-white";

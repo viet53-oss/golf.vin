@@ -19,22 +19,22 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     let defaultCourse = await prisma.course.findFirst({
         where: { name: { contains: 'City Park North' } },
         include: {
-            tee_boxes: true,
-            holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } }
+            teeBoxes: true,
+            holes: { orderBy: { holeNumber: 'asc' } }
         }
     });
 
     if (!defaultCourse) {
         defaultCourse = await prisma.course.findFirst({
-            include: { tee_boxes: true, holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } } }
+            include: { teeBoxes: true, holes: { orderBy: { holeNumber: 'asc' } } }
         });
     }
 
     // 1b. Get ALL courses for selection
     const allCourses = await prisma.course.findMany({
         include: {
-            tee_boxes: true,
-            holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } }
+            teeBoxes: true,
+            holes: { orderBy: { holeNumber: 'asc' } }
         },
         orderBy: { name: 'asc' }
     });
@@ -76,7 +76,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     if (!activeRound) {
         activeRound = await prisma.liveRound.findFirst({
             where: { date: todayStr },
-            orderBy: { created_at: 'desc' }, // Get the most recent round for today
+            orderBy: { createdAt: 'desc' }, // Get the most recent round for today
             include: {
                 players: {
                     include: {
@@ -93,15 +93,15 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
                 const coursePar = defaultCourse.holes.reduce((sum, hole) => sum + hole.par, 0);
 
                 // Find White tee box or fallback to first available
-                const whiteTee = defaultCourse.tee_boxes.find(t => t.name.toLowerCase().includes('white'));
-                const defaultTeeBox = whiteTee || defaultCourse.tee_boxes[0];
+                const whiteTee = defaultCourse.teeBoxes.find(t => t.name.toLowerCase().includes('white'));
+                const defaultTeeBox = whiteTee || defaultCourse.teeBoxes[0];
 
                 activeRound = await prisma.liveRound.create({
                     data: {
                         name: `Live Round - ${todayStr}`,
                         date: todayStr,
-                        course_id: defaultCourse.id,
-                        course_name: defaultCourse.name,
+                        courseId: defaultCourse.id,
+                        courseName: defaultCourse.name,
                         par: coursePar,
                         rating: defaultTeeBox?.rating ?? coursePar,
                         slope: defaultTeeBox?.slope ?? 113
@@ -134,19 +134,15 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     }
 
 
-    // 5. Final Fallback (Admin only for old rounds)
+
+
+    // 5. Final Fallback - Load most recent round if no round for today
     if (!activeRound) {
         console.log('LOG-11: Still no round. Falling back to latest in DB.');
 
-        // For non-admin users, only allow today's rounds
-        if (!isAdmin) {
-            console.log('LOG-11b: Non-admin user, no round for today. Redirecting to home.');
-            return redirect('/');
-        }
-
-        // Admin users can access old rounds
+        // Load the most recent round (any user can view)
         activeRound = await prisma.liveRound.findFirst({
-            orderBy: { created_at: 'desc' },
+            orderBy: { createdAt: 'desc' },
             include: {
                 players: {
                     include: {
@@ -159,30 +155,22 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
         if (activeRound) console.log('LOG-12: Fallback to:', activeRound.name, activeRound.date);
     }
 
-    // 6. If still no round exists, redirect to home
-    if (!activeRound) {
-        console.log('LOG-13: No rounds exist. Redirecting to home.');
-        return redirect('/');
-    }
+    // 6. If still no round exists, show empty state (don't redirect)
+    // The LiveScoreClient component will handle the empty state
 
-    // 7. Final safety check: Non-admin users should only see today's round
-    if (!isAdmin && activeRound && activeRound.date !== todayStr) {
-        console.log('LOG-13b: Non-admin user trying to access old round. Redirecting to today.');
-        return redirect('/live');
-    }
 
-    // 8. Redirect to ensure ID is in URL
+
     if (!roundIdFromUrl && activeRound) {
         return redirect(`/live?roundId=${activeRound.id}`);
     }
 
     // 9. If activeRound has a specific course_id, use that as the defaultCourse
-    if (activeRound?.course_id) {
+    if (activeRound?.courseId) {
         const roundCourse = await prisma.course.findUnique({
-            where: { id: activeRound.course_id },
+            where: { id: activeRound.courseId },
             include: {
-                tee_boxes: true,
-                holes: { include: { elements: true }, orderBy: { hole_number: 'asc' } }
+                teeBoxes: true,
+                holes: { orderBy: { holeNumber: 'asc' } }
             }
         });
         if (roundCourse) {
@@ -193,21 +181,21 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     // 10. Get rounds for list
     const allLiveRounds = await prisma.liveRound.findMany({
         where: isAdmin ? {} : { date: todayStr },
-        orderBy: { created_at: 'desc' },
-        select: { id: true, name: true, date: true, created_at: true }
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, name: true, date: true, createdAt: true }
     });
 
     return (
         <LiveScoreClient
             allPlayers={await prisma.player.findMany({
                 orderBy: { name: 'asc' },
-                select: { id: true, name: true, index: true, preferred_tee_box: true }
+                select: { id: true, name: true, handicapIndex: true }
             })}
             defaultCourse={defaultCourse ? JSON.parse(JSON.stringify(defaultCourse)) : null}
             allCourses={JSON.parse(JSON.stringify(allCourses))}
             initialRound={activeRound ? JSON.parse(JSON.stringify(activeRound)) : null}
             todayStr={todayStr}
-            allLiveRounds={allLiveRounds.map(r => ({ ...r, created_at: r.created_at.toISOString() }))}
+            allLiveRounds={allLiveRounds.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
         />
     );
 }

@@ -15,7 +15,7 @@ interface LiveRoundModalProps {
         par: number;
         rating: number;
         slope: number;
-        course_id?: string;
+        courseId?: string;
     } | null;
     allCourses?: any[]; // Using any[] for simplicity or define full type
     showAlert: (title: string, message: string) => void;
@@ -55,8 +55,8 @@ export function LiveRoundModal({
                 setDate(existingRound?.date || today);
 
                 // Find White tee or first available
-                const whiteTee = initialCourse.tee_boxes.find((t: any) => t.name.toLowerCase().includes('white'));
-                const initialTee = whiteTee || initialCourse.tee_boxes[0];
+                const whiteTee = initialCourse.teeBoxes.find((t: any) => t.name.toLowerCase().includes('white'));
+                const initialTee = whiteTee || initialCourse.teeBoxes[0];
 
                 if (initialTee) {
                     setSelectedTeeId(initialTee.id);
@@ -173,8 +173,8 @@ export function LiveRoundModal({
                                 if (c) {
                                     setName(c.name);
                                     // Default to first tee box or White if available
-                                    const whiteTee = c.tee_boxes.find((t: any) => t.name.toLowerCase().includes('white'));
-                                    const devTee = whiteTee || c.tee_boxes[0];
+                                    const whiteTee = c.teeBoxes.find((t: any) => t.name.toLowerCase().includes('white'));
+                                    const devTee = whiteTee || c.teeBoxes[0];
 
                                     if (devTee) {
                                         setSelectedTeeId(devTee.id);
@@ -207,7 +207,7 @@ export function LiveRoundModal({
                                 setSelectedTeeId(tId);
                                 const c = allCourses.find(fc => fc.id === selectedCourseId);
                                 if (c) {
-                                    const tee = c.tee_boxes.find((t: any) => t.id === tId);
+                                    const tee = c.teeBoxes.find((t: any) => t.id === tId);
                                     if (tee) {
                                         setRating(tee.rating);
                                         setSlope(tee.slope);
@@ -219,7 +219,7 @@ export function LiveRoundModal({
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:ring-2 focus:ring-black outline-none bg-white"
                         >
                             <option value="" disabled>-- Select Tee Box --</option>
-                            {allCourses.find(c => c.id === selectedCourseId)?.tee_boxes.map((t: any) => (
+                            {allCourses.find(c => c.id === selectedCourseId)?.teeBoxes.map((t: any) => (
                                 <option key={t.id} value={t.id}>
                                     {t.name} (R: {t.rating} / S: {t.slope})
                                 </option>

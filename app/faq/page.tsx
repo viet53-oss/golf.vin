@@ -9,7 +9,7 @@ export default async function FAQPage() {
         select: {
             id: true,
             name: true,
-            index: true,
+            handicapIndex: true,
         }
     });
 
