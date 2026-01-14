@@ -50,17 +50,25 @@ const Activity = ({ className }: { className?: string }) => (
 
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get('admin_session')?.value === 'true';
+  let players: Array<{ id: string; name: string; birthday: string | null }> = [];
+  let isAdmin = false;
 
-  // Fetch players strictly for birthday check
-  const players = await prisma.player.findMany({
-    select: {
-      id: true,
-      name: true,
-      birthday: true,
-    }
-  });
+  try {
+    const cookieStore = await cookies();
+    isAdmin = cookieStore.get('admin_session')?.value === 'true';
+
+    // Fetch players strictly for birthday check
+    players = await prisma.player.findMany({
+      select: {
+        id: true,
+        name: true,
+        birthday: true,
+      }
+    });
+  } catch (error) {
+    console.error('Error loading home page:', error);
+    // Continue rendering with empty data
+  }
 
   const menuItems = [
     { name: "Live Score", icon: Activity, href: "/live", color: "text-red-500" },
