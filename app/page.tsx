@@ -73,19 +73,8 @@ export default async function Home() {
 
 
   return (
-    <div className="min-h-screen relative flex flex-col font-sans">
+    <div className="min-h-screen relative flex flex-col font-sans bg-[#2e7d32]">
       <BirthdayPopup players={players} />
-
-      {/* Background Image */}
-      <div className="fixed inset-0 z-0">
-        <Image
-          src="/golf-club-group.jpg"
-          alt="Golf Club Group"
-          fill
-          className="object-cover object-top brightness-50"
-          priority
-        />
-      </div>
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-start text-center px-1 pb-10 w-full max-w-full pt-10">
