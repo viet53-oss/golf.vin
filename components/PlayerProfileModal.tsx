@@ -199,57 +199,54 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                         ) : (
                             // --- EDIT MODE ---
                             <div className="space-y-6">
-                                {/* Contact Inputs */}
-                                <div>
-                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Contact</h4>
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <div>
-                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Email</label>
-                                            <input name="email" defaultValue={player.email || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="email@example.com" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Phone</label>
-                                            <input name="phone" defaultValue={player.phone || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="555-555-5555" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Address Inputs */}
-                                <div>
-                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Address</h4>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Street Address</label>
-                                            <input name="address" defaultValue={player.address || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="123 Golf Lane" />
-                                        </div>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <div className="col-span-1">
-                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">City</label>
-                                                <input name="city" defaultValue={player.city || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <div className="space-y-6">
+                                    {/* Name Inputs */}
+                                    <div>
+                                        <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Name</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">First Name</label>
+                                                <input
+                                                    name="firstName"
+                                                    defaultValue={player.name.split(' ')[0]}
+                                                    className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                                    placeholder="First"
+                                                    required
+                                                />
                                             </div>
-                                            <div className="col-span-1">
-                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">State</label>
-                                                <input name="state" defaultValue={player.state || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                                            </div>
-                                            <div className="col-span-1">
-                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Zip</label>
-                                                <input name="zip" defaultValue={player.zip || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                            <div>
+                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Last Name</label>
+                                                <input
+                                                    name="lastName"
+                                                    defaultValue={player.name.split(' ').slice(1).join(' ')}
+                                                    className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                                    placeholder="Last"
+                                                />
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Personal Inputs */}
-                                <div>
-                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Personal</h4>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    {/* Contact Inputs */}
+                                    <div>
+                                        <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Contact</h4>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            <div>
+                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Email</label>
+                                                <input name="email" defaultValue={player.email || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="email@example.com" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Phone</label>
+                                                <input name="phone" defaultValue={player.phone || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="555-555-5555" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Personal Inputs */}
+                                    <div>
+                                        <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Personal</h4>
                                         <div>
                                             <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Birthday</label>
                                             <input type="date" name="birthday" defaultValue={player.birthday || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Player Since</label>
-                                            <input type="number" name="year_joined" defaultValue={player.year_joined || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="YYYY" />
                                         </div>
                                     </div>
                                 </div>
