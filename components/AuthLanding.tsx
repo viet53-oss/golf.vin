@@ -71,7 +71,8 @@ export default function AuthLanding() {
                 window.location.reload() // Refresh to update session state
             }
         } catch (e) {
-            setError('An unexpected error occurred')
+            console.error("Auth Error:", e);
+            setError('An unexpected error occurred: ' + (e instanceof Error ? e.message : String(e)))
         }
     }
 
