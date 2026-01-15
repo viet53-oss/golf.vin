@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { checkVietRounds } from '@/app/actions/check-viet-rounds';
-import { checkCoursePar } from '@/app/actions/check-course-par';
 import { checkLiveRounds } from '@/app/actions/check-live-rounds';
 
 export default function DiagnosticButton() {
@@ -10,9 +9,9 @@ export default function DiagnosticButton() {
 
     const handleCheck = async () => {
         const vietRounds = await checkVietRounds();
-        const courseData = await checkCoursePar();
+        // const courseData = await checkCoursePar(); // Removed
         const liveRounds = await checkLiveRounds();
-        setData({ vietRounds, courseData, liveRounds });
+        setData({ vietRounds, liveRounds });
     };
 
     return (
