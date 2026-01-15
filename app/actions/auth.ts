@@ -5,9 +5,6 @@ import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
 import { redirect } from 'next/navigation'
 
-const prismaClientSingleton = () => {
-    return new PrismaClient()
-}
 
 export async function serverPing() {
     console.log("SERVER PING RECEIVED");
