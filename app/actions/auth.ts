@@ -10,7 +10,7 @@ export async function login(prevState: any, formData: FormData) {
     const password = formData.get('password') as string
 
     if (!phone || !password) {
-        return { error: 'Phone and password are required' }
+        return { error: 'Phone and password are required', phone }
     }
 
     // Normalize phone (remove non-digits)
@@ -28,13 +28,13 @@ export async function login(prevState: any, formData: FormData) {
         })
 
         if (!player || !player.password) {
-            return { error: 'Invalid credentials' }
+            return { error: 'Invalid credentials', phone }
         }
 
         const isValid = await bcrypt.compare(password, player.password)
 
         if (!isValid) {
-            return { error: 'Invalid credentials' }
+            return { error: 'Invalid credentials', phone }
         }
 
         // Set session
@@ -55,7 +55,106 @@ export async function login(prevState: any, formData: FormData) {
         return { success: true }
     } catch (error) {
         console.error('Login error:', error)
+        return { error: 'An unexpected error occurred', phone }
+    }
+}
+
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function forgotPassword(prevState: any, formData: FormData) {
+    const email = formData.get('email') as string
+
+    if (!email) {
+        return { error: 'Email is required' }
+    }
+
+    try {
+        const player = await prisma.player.findFirst({
+            where: { email: email.trim() }
+        })
+
+        if (player) {
+            // Generate token
+            const token = crypto.randomUUID();
+            const expires = new Date(Date.now() + 3600 * 1000); // 1 hour
+
+            await prisma.player.update({
+                where: { id: player.id },
+                data: {
+                    resetToken: token,
+                    resetTokenExpiry: expires
+                }
+            });
+
+            // In production, use actual domain. Locally, use localhost.
+            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+            const resetLink = `${baseUrl}/reset-password?token=${token}`;
+
+            console.log('-------------------------------------------');
+            console.log('Generated reset link:', resetLink);
+            console.log('-------------------------------------------');
+
+            await resend.emails.send({
+                from: 'onboarding@resend.dev', // Can only send to own email on free tier without domain verification
+                to: email,
+                subject: 'Reset Your Golf Live Scores Password',
+                html: `
+                    <p>Hello ${player.name},</p>
+                    <p>You requested a password reset. Click the link below to set a new password:</p>
+                    <p><a href="${resetLink}">Reset Password</a></p>
+                    <p>This link will expire in 1 hour.</p>
+                    <p>If you didn't request this, you can ignore this email.</p>
+                `
+            });
+        }
+
+        // Always return success to prevent email enumeration
+        return { success: true, message: 'If an account exists with this email, a reset link has been sent.' }
+    } catch (error) {
+        console.error('Forgot password error:', error)
         return { error: 'An unexpected error occurred' }
+    }
+}
+
+export async function resetPassword(token: string, formData: FormData) {
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (!password || password !== confirmPassword) {
+        return { error: 'Passwords do not match or are empty' };
+    }
+
+    try {
+        const player = await prisma.player.findFirst({
+            where: {
+                resetToken: token,
+                resetTokenExpiry: {
+                    gt: new Date()
+                }
+            }
+        });
+
+        if (!player) {
+            return { error: 'Invalid or expired reset token' };
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await prisma.player.update({
+            where: { id: player.id },
+            data: {
+                password: hashedPassword,
+                resetToken: null,
+                resetTokenExpiry: null
+            }
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('Reset password error:', error);
+        return { error: 'Failed to reset password' };
     }
 }
 

@@ -30,6 +30,10 @@ model Player {
   
   // Handicap Information
   handicapIndex Float    @default(0)
+
+  // Auth
+  resetToken          String?  @unique
+  resetTokenExpiry    DateTime?
   
   // Relationships
   rounds        RoundPlayer[]
