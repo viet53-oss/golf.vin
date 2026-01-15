@@ -6,17 +6,31 @@ import bcrypt from 'bcryptjs'
 import { redirect } from 'next/navigation'
 
 export async function login(prevState: any, formData: FormData) {
-    if (!process.env.DATABASE_URL) {
-        return { error: 'System Config Error: DATABASE_URL is missing in Vercel environment variables.' };
-    }
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-
-    if (!email || !password) {
-        return { error: 'Email and password are required', email }
-    }
-
     try {
+        console.log("Login Action Started");
+
+        if (!process.env.DATABASE_URL) {
+            console.error("DATABASE_URL is missing");
+            return { error: 'System Config Error: DATABASE_URL is missing in Vercel environment variables.' };
+        }
+
+        const email = formData.get('email') as string
+        const password = formData.get('password') as string
+
+        if (!email || !password) {
+            return { error: 'Email and password are required', email }
+        }
+
+        console.log("Attempting to find user by email:", email);
+
+        // Test database connection explicitly first to fail fast with clear error
+        try {
+            await prisma.$connect();
+        } catch (dbError) {
+            console.error("Failed to connect to database:", dbError);
+            return { error: 'Database Connection Error: ' + (dbError instanceof Error ? dbError.message : String(dbError)) };
+        }
+
         const player = await prisma.player.findFirst({
             where: {
                 email: {
@@ -27,14 +41,19 @@ export async function login(prevState: any, formData: FormData) {
         })
 
         if (!player || !player.password) {
+            console.log("User not found or password missing.");
             return { error: 'Invalid credentials', email }
         }
 
+        console.log("User found, verifying password...");
         const isValid = await bcrypt.compare(password, player.password)
 
         if (!isValid) {
+            console.log("Invalid password.");
             return { error: 'Invalid credentials', email }
         }
+
+        console.log("Password valid, setting session...");
 
         // Set session
         const cookieStore = await cookies()
@@ -53,8 +72,8 @@ export async function login(prevState: any, formData: FormData) {
 
         return { success: true }
     } catch (error) {
-        console.error('Login error:', error)
-        return { error: 'Login Error: ' + (error instanceof Error ? error.message : String(error)), email }
+        console.error('CRITICAL LOGIN ERROR:', error)
+        return { error: 'Unexpected Login Error: ' + (error instanceof Error ? error.message : String(error)) }
     }
 }
 
