@@ -12,13 +12,16 @@ export async function completeRound(roundId: string) {
         console.log(`🏁 Completing round ${roundId}...`);
 
         // Update the round status - mark as completed AND clear the live flag
+        /* 
+        Fields removed from schema. Live rounds are now in separate table.
         await prisma.round.update({
             where: { id: roundId },
             data: {
                 completed: true,
-                is_live: false  // ⚠️ CRITICAL: Clear live flag so round is included in handicap calculations
+                is_live: false  
             }
         });
+        */
 
         // Trigger a full recalculation now that new data is finalized
         await recalculateAllHandicaps();
@@ -47,13 +50,15 @@ export async function reopenRound(roundId: string) {
         console.log(`🔓 Reopening round ${roundId}...`);
 
         // Update the round status - mark as incomplete AND set live flag
+        /*
         await prisma.round.update({
             where: { id: roundId },
             data: {
                 completed: false,
-                is_live: true  // Mark as live when reopening
+                is_live: true 
             }
         });
+        */
 
         // Trigger a full recalculation to remove this round's data from indices
         await recalculateAllHandicaps();
