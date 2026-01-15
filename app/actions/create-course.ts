@@ -23,7 +23,8 @@ export async function createCourse(data: {
                 create: data.tees.map(t => ({
                     name: t.name,
                     rating: t.rating,
-                    slope: t.slope
+                    slope: t.slope,
+                    par: data.holes.reduce((sum, h) => sum + h.par, 0)
                 }))
             },
             holes: {
