@@ -2,7 +2,18 @@
 import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {
-    return new PrismaClient()
+    console.log("PRISMA INIT: Initializing Client...");
+    console.log("PRISMA INIT: Env Check -> NODE_ENV:", process.env.NODE_ENV);
+    console.log("PRISMA INIT: Env Check -> DATABASE_URL:", process.env.DATABASE_URL ? "DEFINED (Length: " + process.env.DATABASE_URL.length + ")" : "UNDEFINED");
+
+    try {
+        return new PrismaClient({
+            log: ['query', 'info', 'warn', 'error'],
+        })
+    } catch (e) {
+        console.error("PRISMA INIT: CRITICAL FAILURE during new PrismaClient()", e);
+        throw e;
+    }
 }
 
 declare global {

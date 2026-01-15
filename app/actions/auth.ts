@@ -5,6 +5,15 @@ import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
 import { redirect } from 'next/navigation'
 
+const prismaClientSingleton = () => {
+    return new PrismaClient()
+}
+
+export async function serverPing() {
+    console.log("SERVER PING RECEIVED");
+    return { success: true, message: "pong", time: new Date().toISOString() };
+}
+
 export async function login(prevState: any, formData: FormData) {
     try {
         console.log("Login Action Started");
