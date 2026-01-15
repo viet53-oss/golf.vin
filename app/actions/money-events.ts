@@ -138,7 +138,7 @@ export async function autoDetectMoneyEvents(
         // Get hole par
         const hole = await prisma.hole.findUnique({
             where: { id: holeId },
-            select: { par: true, hole_number: true }
+            select: { par: true, holeNumber: true }
         });
 
         if (!hole) {
@@ -167,14 +167,14 @@ export async function autoDetectMoneyEvents(
             await createMoneyEvent({
                 roundId,
                 playerId,
-                holeNumber: hole.hole_number,
+                holeNumber: hole.holeNumber,
                 eventType: eventType as any,
                 amount
             });
 
             return {
                 success: true,
-                data: { eventType, amount, holeNumber: hole.hole_number }
+                data: { eventType, amount, holeNumber: hole.holeNumber }
             };
         }
 
