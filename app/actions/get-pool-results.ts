@@ -40,7 +40,7 @@ export async function getPoolResults(roundId: string) {
             select: {
                 date: true,
                 id: true,
-                is_tournament: true,
+                isTournament: true,
                 name: true,
                 _count: {
                     select: { players: true }
@@ -240,7 +240,7 @@ export async function getPoolResults(roundId: string) {
                     id: round.id,
                     date: round.date,
                     name: round.name,
-                    is_tournament: round.is_tournament,
+                    isTournament: round.isTournament,
                     players: round.players.map((rp: any) => ({
                         id: rp.id,
                         player_id: rp.player_id,
