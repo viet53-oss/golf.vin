@@ -32,40 +32,37 @@ export async function completeLiveRound(liveRoundId: string) {
         }
 
         // 2. Create a new Round in the main table
+        // 2. Create a new Round in the main table
         const newRound = await prisma.round.create({
             data: {
                 date: liveRound.date,
                 name: liveRound.name,
-                course_id: liveRound.course_id,
-                course_name: liveRound.course_name,
-                completed: true,
-                is_live: false,
-                is_tournament: false
+                courseId: liveRound.courseId,
+                courseName: liveRound.courseName,
+                isTournament: false
             }
         });
 
         // 3. Copy all players and their scores (excluding guests)
         for (const livePlayer of liveRound.players) {
             // Skip guest players as they don't have a permanent profile history
-            if (livePlayer.is_guest || !livePlayer.player_id) {
+            if (livePlayer.isGuest || !livePlayer.playerId) {
                 continue;
             }
 
             // Create RoundPlayer
             const roundPlayer = await prisma.roundPlayer.create({
                 data: {
-                    round_id: newRound.id,
-                    player_id: livePlayer.player_id,
-                    tee_box_id: livePlayer.tee_box_id,
-                    tee_box_name: livePlayer.tee_box_name,
-                    tee_box_rating: livePlayer.tee_box_rating,
-                    tee_box_slope: livePlayer.tee_box_slope,
-                    tee_box_par: livePlayer.tee_box_par,
-                    course_handicap: livePlayer.course_handicap,
-                    index_at_time: livePlayer.index_at_time,
-                    gross_score: livePlayer.gross_score,
-                    front_nine: livePlayer.front_nine,
-                    back_nine: livePlayer.back_nine
+                    roundId: newRound.id,
+                    playerId: livePlayer.playerId,
+                    teeBoxId: livePlayer.teeBoxId,
+                    // Remove non-existent fields if they are not in schema (checked previously)
+                    // Checking schema: RoundPlayer has grossScore, courseHandicap, frontNine, backNine
+                    // It does NOT have teeBoxName, teeBoxRating, etc.
+                    courseHandicap: livePlayer.courseHandicap,
+                    grossScore: livePlayer.grossScore,
+                    frontNine: livePlayer.frontNine,
+                    backNine: livePlayer.backNine
                 }
             });
 
@@ -73,8 +70,8 @@ export async function completeLiveRound(liveRoundId: string) {
             for (const liveScore of livePlayer.scores) {
                 await prisma.score.create({
                     data: {
-                        round_player_id: roundPlayer.id,
-                        hole_id: liveScore.hole_id,
+                        roundPlayerId: roundPlayer.id,
+                        holeId: liveScore.holeId,
                         strokes: liveScore.strokes
                     }
                 });
