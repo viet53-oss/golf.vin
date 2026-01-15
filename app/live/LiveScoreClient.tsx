@@ -1179,32 +1179,76 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         </button>
                                     )}
 
-                                    {/* Delete Button - Available to Everyone (Protected by Password) */}
+                                    {/* Delete Button - Context Aware */}
                                     <button
                                         onClick={() => {
                                             if (!liveRoundId) return;
-                                            const password = prompt("Enter password to delete:");
-                                            if (password !== 'cpgc-Delete') {
-                                                showAlert('Error', 'Incorrect password.');
-                                                return;
-                                            }
 
-                                            setConfirmConfig({
-                                                isOpen: true,
-                                                title: 'Delete Live Round',
-                                                message: 'Are you sure you want to delete this live round? This action cannot be undone.',
-                                                isDestructive: true,
-                                                onConfirm: async () => {
-                                                    setConfirmConfig(null);
-                                                    try {
-                                                        await deleteLiveRound(liveRoundId);
-                                                        window.location.href = '/';
-                                                    } catch (err) {
-                                                        console.error('Failed to delete round:', err);
-                                                        showAlert('Error', 'Failed to delete round.');
-                                                    }
+                                            // Identify current group's LiveRoundPlayer IDs
+                                            const currentGroupLiveIds: string[] = [];
+                                            selectedPlayers.forEach(sp => {
+                                                const match = initialRound?.players?.find((p: any) =>
+                                                    (p.isGuest && p.id === sp.id) ||
+                                                    (!p.isGuest && p.player.id === sp.id)
+                                                );
+                                                if (match) {
+                                                    currentGroupLiveIds.push(match.id);
                                                 }
                                             });
+
+                                            const allLiveIds = initialRound?.players?.map((p: any) => p.id) || [];
+                                            // Check if there are players NOT in our group
+                                            const othersExist = allLiveIds.some((id: string) => !currentGroupLiveIds.includes(id));
+
+                                            if (currentGroupLiveIds.length > 0 && othersExist) {
+                                                // LEAVE ROUND MODE (No password, just confirm)
+                                                setConfirmConfig({
+                                                    isOpen: true,
+                                                    title: 'Delete Group',
+                                                    message: `Remove your group (${currentGroupLiveIds.length} players) from the round? Other players will remain.`,
+                                                    isDestructive: true,
+                                                    onConfirm: async () => {
+                                                        setConfirmConfig(null);
+                                                        try {
+                                                            // Remove players sequentially
+                                                            for (const pid of currentGroupLiveIds) {
+                                                                await removePlayerFromLiveRound(pid);
+                                                            }
+                                                            // Clear local state
+                                                            setSelectedPlayers([]);
+                                                            localStorage.removeItem('live_scoring_my_group');
+                                                            window.location.reload();
+                                                        } catch (err) {
+                                                            console.error('Failed to remove group:', err);
+                                                            showAlert('Error', 'Failed to remove group.');
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                // DELETE ROUND MODE (Password Required)
+                                                const password = prompt("Enter password to delete round:");
+                                                if (password !== 'cpgc-Delete') {
+                                                    showAlert('Error', 'Incorrect password.');
+                                                    return;
+                                                }
+
+                                                setConfirmConfig({
+                                                    isOpen: true,
+                                                    title: 'Delete Live Round',
+                                                    message: 'Are you sure you want to delete this live round? This action cannot be undone.',
+                                                    isDestructive: true,
+                                                    onConfirm: async () => {
+                                                        setConfirmConfig(null);
+                                                        try {
+                                                            await deleteLiveRound(liveRoundId);
+                                                            window.location.href = '/';
+                                                        } catch (err) {
+                                                            console.error('Failed to delete round:', err);
+                                                            showAlert('Error', 'Failed to delete round.');
+                                                        }
+                                                    }
+                                                });
+                                            }
                                         }}
                                         className="bg-red-600 text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
                                     >
