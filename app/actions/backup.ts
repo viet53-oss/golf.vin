@@ -7,37 +7,33 @@ type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0
 
 export async function getBackupData() {
     try {
-        const [players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events, liveRounds, liveRoundPlayers, liveScores, moneyEvents] = await Promise.all([
+        const [players, courses, rounds, roundPlayers, scores, photos, events, liveRounds, liveRoundPlayers, liveScores] = await Promise.all([
             prisma.player.findMany(),
-            prisma.course.findMany({ include: { tee_boxes: true, holes: true } }),
+            prisma.course.findMany({ include: { teeBoxes: true, holes: true } }),
             prisma.round.findMany(),
             prisma.roundPlayer.findMany(),
-            prisma.handicapRound.findMany(),
             prisma.score.findMany(),
             prisma.photo.findMany(),
             prisma.event.findMany(),
             prisma.liveRound.findMany(),
             prisma.liveRoundPlayer.findMany(),
-            prisma.liveScore.findMany(),
-            prisma.moneyEvent.findMany()
+            prisma.liveScore.findMany()
         ]);
 
         const backup = {
-            version: 2, // Increment version for new backup format
+            version: 3, // Increment version for new backup format
             timestamp: new Date().toISOString(),
             data: {
                 players,
                 courses,
                 rounds,
                 roundPlayers,
-                handicapRounds,
                 scores,
                 photos,
                 events,
                 liveRounds,
                 liveRoundPlayers,
-                liveScores,
-                moneyEvents
+                liveScores
             }
         };
 
@@ -54,27 +50,19 @@ export async function restoreBackupData(jsonString: string) {
 
         if (!backup.data) throw new Error('Invalid backup format');
 
-        const { players, courses, rounds, roundPlayers, handicapRounds, scores, photos, events, liveRounds, liveRoundPlayers, liveScores, moneyEvents } = backup.data;
-
-        // Transactional Restore: Wipe and Replace strategy for consistency
-        // Note: In a real prod app, we might check for existing IDs or use upsert. 
-        // For this local/small app, a full state restore is often desired.
-        // However, wiping is scary. Let's try upsert for Players/Courses and maybe createMany for scores if missing.
-        // ACTUALLY, "Restore" usually means "Go back to this state".
-        // Let's implement a safe upset strategy where possible, but for Rounds/Scores, it's safer to delete conflicts?
-
-        // Let's go with a cleaner Wipe-All-And-Replace inside a transaction to ensure integrity.
-        // If it fails, nothing is lost.
+        // Allow partial restore if some fields are missing in older backups
+        const { players, courses, rounds, roundPlayers, scores, photos, events, liveRounds, liveRoundPlayers, liveScores } = backup.data;
 
         await prisma.$transaction(async (tx: TransactionClient) => {
             // 1. Clean existing data (Dependents first)
+            // Use try-catch or safe delete if tables don't exist? No, schema assumes they exist.
             await tx.liveScore.deleteMany();
             await tx.liveRoundPlayer.deleteMany();
             await tx.liveRound.deleteMany();
-            await tx.moneyEvent.deleteMany();
+            // await tx.moneyEvent.deleteMany(); // Removed from schema
             await tx.score.deleteMany();
             await tx.roundPlayer.deleteMany();
-            await tx.handicapRound.deleteMany();
+            // await tx.handicapRound.deleteMany(); // Removed
             await tx.round.deleteMany();
             await tx.photo.deleteMany();
             await tx.event.deleteMany();
@@ -88,29 +76,40 @@ export async function restoreBackupData(jsonString: string) {
                 await tx.player.createMany({ data: players });
             }
 
-            // 3. Restore Courses (Deep insert often tricky with createMany, so we map)
-            // Courses have relations (TeeBoxes, Holes). createMany doesn't support relations.
+            // 3. Restore Courses
             if (courses?.length) {
                 console.log('Restoring Courses...');
                 for (const course of courses) {
-                    // We must separate the relation data
-                    const { tee_boxes, holes, ...courseData } = course;
+                    // Check for both snake_case (legacy backup) and camelCase properties
+                    const teeBoxesData = course.teeBoxes || course.tee_boxes;
+                    const holesData = course.holes;
 
-                    // Prisma nested create does not accept the foreign key (course_id) as it's implied
-                    const cleanTeeBoxes = tee_boxes?.map((t: any) => {
-                        const { course_id, ...rest } = t;
-                        return rest;
+                    // Remove relation and legacy properties from courseData
+                    const { teeBoxes, tee_boxes, holes, course_id, ...courseData } = course;
+
+                    const cleanTeeBoxes = teeBoxesData?.map((t: any) => {
+                        const { courseId, course_id, ...rest } = t; // Remove FK
+                        return {
+                            ...rest,
+                            // Map snake_case to camelCase if needed, or rely on schema matching
+                            // Current schema uses camelCase for properties like courseId, but DB map might differ.
+                            // However, restore object should match prisma input types.
+                            // If backup has snake_case (e.g. course_id), we stripped it.
+                            // If backup is old, it might have snake_case fields for properties.
+                            // LET'S ASSUME backup matches schema or is "close enough" for simple fields.
+                            // IMPORTANT: Prisma CreateInput expects camelCase property names defined in schema.
+                        };
                     });
 
-                    const cleanHoles = holes?.map((h: any) => {
-                        const { course_id, ...rest } = h;
+                    const cleanHoles = holesData?.map((h: any) => {
+                        const { courseId, course_id, ...rest } = h;
                         return rest;
                     });
 
                     await tx.course.create({
                         data: {
                             ...courseData,
-                            tee_boxes: { create: cleanTeeBoxes },
+                            teeBoxes: { create: cleanTeeBoxes },
                             holes: { create: cleanHoles }
                         }
                     });
@@ -127,22 +126,20 @@ export async function restoreBackupData(jsonString: string) {
                 await tx.roundPlayer.createMany({ data: roundPlayers });
             }
 
-            // 6. Restore Manual Rounds
-            if (handicapRounds?.length) {
-                await tx.handicapRound.createMany({ data: handicapRounds });
-            }
+            // 6. Manual Rounds (HandicapRound) - REMOVED
+            // if (handicapRounds?.length) ...
 
-            // 7. Restore Scores (hole-by-hole data) - Optional for v1 backups
+            // 7. Restore Scores
             if (scores?.length) {
                 await tx.score.createMany({ data: scores });
             }
 
-            // 8. Restore Photos - Optional for v1 backups
+            // 8. Restore Photos
             if (photos?.length) {
                 await tx.photo.createMany({ data: photos });
             }
 
-            // 9. Restore Events - Optional for v1 backups
+            // 9. Restore Events
             if (events?.length) {
                 await tx.event.createMany({ data: events });
             }
@@ -162,10 +159,7 @@ export async function restoreBackupData(jsonString: string) {
                 await tx.liveScore.createMany({ data: liveScores });
             }
 
-            // 13. Restore Money Events
-            if (moneyEvents?.length) {
-                await tx.moneyEvent.createMany({ data: moneyEvents });
-            }
+            // 13. Money Events - Removed
         }, { timeout: 60000 });
 
         revalidatePath('/');
