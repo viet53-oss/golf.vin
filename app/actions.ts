@@ -172,6 +172,7 @@ export async function createLiveRound(data: {
             name: 'Live',
             rating: data.rating,
             slope: data.slope,
+            par: data.par,
         }
     });
 
