@@ -85,9 +85,8 @@ export async function login(prevState: any, formData: FormData) {
 
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function forgotPassword(prevState: any, formData: FormData) {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const email = formData.get('email') as string
 
     if (!email) {
