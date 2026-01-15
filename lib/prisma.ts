@@ -6,11 +6,7 @@ import { Pool } from 'pg'
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-    if (process.env.NODE_ENV === 'production') {
-        throw new Error("DATABASE_URL is missing in environment variables. Please check your Vercel project settings.");
-    } else {
-        console.warn("DATABASE_URL is missing in environment.");
-    }
+    console.warn("DATABASE_URL is missing in environment.");
 }
 
 const pool = new Pool({

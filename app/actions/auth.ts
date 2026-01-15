@@ -6,6 +6,9 @@ import bcrypt from 'bcryptjs'
 import { redirect } from 'next/navigation'
 
 export async function login(prevState: any, formData: FormData) {
+    if (!process.env.DATABASE_URL) {
+        return { error: 'System Config Error: DATABASE_URL is missing in Vercel environment variables.' };
+    }
     const phone = formData.get('phone') as string
     const password = formData.get('password') as string
 
