@@ -3,7 +3,6 @@ import Link from 'next/link';
 import RecalculateButton from './RecalculateButton';
 import FixLowIndexButton from './FixLowIndexButton';
 import SyncTeesButton from './SyncTeesButton';
-import BackfillTeeBoxButton from './BackfillTeeBoxButton';
 import DiagnosticButton from './DiagnosticButton';
 import BackupManager from './BackupManager';
 import MetaTagEditor from './MetaTagEditor';
@@ -144,13 +143,7 @@ export default async function SettingsPage() {
                                 </p>
                                 <SyncTeesButton />
                             </div>
-                            <div className="pt-2 border-t border-gray-200">
-                                <p className="text-[14pt] text-purple-600 font-bold mb-2">📊 Backfill Tee Box Data</p>
-                                <p className="text-[14pt] text-gray-500 mb-3">
-                                    Updates all historical rounds with saved tee box data (par, rating, slope). Run this once to fix old rounds showing incorrect course data.
-                                </p>
-                                <BackfillTeeBoxButton />
-                            </div>
+
 
                             <div className="pt-2 border-t border-gray-200">
                                 <p className="text-[14pt] text-orange-600 font-bold mb-2">🔍 Diagnostic</p>
