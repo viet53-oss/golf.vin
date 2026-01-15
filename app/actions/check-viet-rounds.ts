@@ -24,11 +24,11 @@ export async function checkVietRounds() {
         // Get Viet's recent rounds
         const rounds = await prisma.roundPlayer.findMany({
             where: {
-                player_id: viet.id
+                playerId: viet.id
             },
             include: {
                 round: true,
-                tee_box: true
+                teeBox: true
             },
             orderBy: {
                 round: {
@@ -40,29 +40,29 @@ export async function checkVietRounds() {
 
         const details = rounds.map(r => ({
             date: r.round.date,
-            course_name: r.round.course_name,
-            gross: r.gross_score,
+            courseName: r.round.courseName,
+            gross: r.grossScore,
             // Saved data
-            saved_name: r.tee_box_name,
-            saved_par: r.tee_box_par,
-            saved_rating: r.tee_box_rating,
-            saved_slope: r.tee_box_slope,
+            savedName: r.teeBoxName,
+            savedPar: r.teeBoxPar,
+            savedRating: r.teeBoxRating,
+            savedSlope: r.teeBoxSlope,
             // Current tee box
-            current_name: r.tee_box?.name,
-            current_rating: r.tee_box?.rating,
-            current_slope: r.tee_box?.slope,
+            currentName: r.teeBox?.name,
+            currentRating: r.teeBox?.rating,
+            currentSlope: r.teeBox?.slope,
             // Indices
-            index_before: r.index_at_time,
-            index_after: r.index_after
+            indexBefore: r.indexAtTime,
+            indexAfter: r.indexAfter
         }));
 
         return {
             success: true,
             player: {
                 name: viet.name,
-                current_index: viet.index,
-                low_index: viet.low_handicap_index,
-                preferred_tee: viet.preferred_tee_box
+                currentIndex: viet.index,
+                lowIndex: viet.lowHandicapIndex,
+                // preferredTee: viet.preferred_tee_box // Removed
             },
             rounds: details
         };
