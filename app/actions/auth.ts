@@ -55,7 +55,7 @@ export async function login(prevState: any, formData: FormData) {
         return { success: true }
     } catch (error) {
         console.error('Login error:', error)
-        return { error: 'An unexpected error occurred', phone }
+        return { error: 'Login Error: ' + (error instanceof Error ? error.message : String(error)), phone }
     }
 }
 
@@ -114,7 +114,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
         return { success: true, message: 'If an account exists with this email, a reset link has been sent.' }
     } catch (error) {
         console.error('Forgot password error:', error)
-        return { error: 'An unexpected error occurred' }
+        return { error: 'Forgot Password Error: ' + (error instanceof Error ? error.message : String(error)) }
     }
 }
 
@@ -154,7 +154,7 @@ export async function resetPassword(token: string, formData: FormData) {
         return { success: true };
     } catch (error) {
         console.error('Reset password error:', error);
-        return { error: 'Failed to reset password' };
+        return { error: 'Reset Password Error: ' + (error instanceof Error ? error.message : String(error)) };
     }
 }
 
@@ -230,7 +230,7 @@ export async function signup(prevState: any, formData: FormData) {
         return { success: true }
     } catch (e) {
         console.error(e)
-        return { error: 'Failed to create player' }
+        return { error: 'Signup Error: ' + (e instanceof Error ? e.message : String(e)) }
     }
 }
 
