@@ -34,7 +34,7 @@ function SubmitButton({ mode }: { mode: AuthMode }) {
 export default function AuthLanding() {
     const [mode, setMode] = useState<AuthMode>('signin')
     const [error, setError] = useState<string | null>(null)
-    const [lastPhone, setLastPhone] = useState<string>('')
+    const [lastEmail, setLastEmail] = useState<string>('')
     const [forgotPasswordMessage, setForgotPasswordMessage] = useState<string | null>(null)
 
     async function handleSubmit(formData: FormData) {
@@ -63,9 +63,9 @@ export default function AuthLanding() {
             if (result && 'error' in result && result.error) {
                 setError(result.error)
 
-                // Check if 'phone' exists in the result (it does for login error)
-                if ('phone' in result && result.phone) {
-                    setLastPhone(result.phone as string)
+                // Check if 'email' exists in the result (it does for login error)
+                if ('email' in result && result.email) {
+                    setLastEmail(result.email as string)
                 }
             } else if (result && 'success' in result && result.success) {
                 window.location.reload() // Refresh to update session state
@@ -179,30 +179,18 @@ export default function AuthLanding() {
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-1.5">
-                                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Email (Optional)</label>
-                                                    <div className="relative">
-                                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                                        <input
-                                                            name="email"
-                                                            type="email"
-                                                            placeholder="john@example.com"
-                                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
-                                                        />
-                                                    </div>
-                                                </div>
                                             </>
                                         )}
 
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Phone Number</label>
+                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Email Address</label>
                                             <div className="relative">
-                                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                                 <input
-                                                    name="phone"
-                                                    type="tel"
-                                                    defaultValue={lastPhone} // Pre-fill if error occurred
-                                                    placeholder="(555) 555-5555"
+                                                    name="email"
+                                                    type="email"
+                                                    defaultValue={lastEmail}
+                                                    placeholder="john@example.com"
                                                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
                                                     required
                                                 />
@@ -218,13 +206,28 @@ export default function AuthLanding() {
                                                 <input
                                                     name="password"
                                                     type="password"
-                                                    autoFocus={!!error} // Auto focus back to password on error
+                                                    autoFocus={!!error}
                                                     placeholder="••••••••"
                                                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
                                                     required
                                                 />
                                             </div>
                                         </div>
+
+                                        {mode === 'signup' && (
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Phone (Optional)</label>
+                                                <div className="relative">
+                                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                                    <input
+                                                        name="phone"
+                                                        type="tel"
+                                                        placeholder="(555) 555-5555"
+                                                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {mode === 'signup' && (
                                             <div className="space-y-1.5">
