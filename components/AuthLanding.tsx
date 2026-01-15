@@ -294,27 +294,29 @@ export default function AuthLanding() {
                                         <p className="text-gray-500 font-medium mb-2">
                                             {mode === 'signin' ? "Not a member yet?" : "Already have an account?"}
                                         </p>
-                                        <button
-                                            onClick={() => {
-                                                setMode(mode === 'signin' ? 'signup' : 'signin')
-                                                setError(null)
-                                            }}
-                                            className="text-[#1a4d2e] font-black text-lg hover:underline underline-offset-4 decoration-2"
-                                        >
-                                            {mode === 'signin' ? 'CREATE AN ACCOUNT' : 'SIGN IN TO YOURS'}
-                                        </button>
-
-                                        {mode === 'signin' && (
+                                        <div className="flex flex-col items-center gap-4">
                                             <button
                                                 onClick={() => {
-                                                    setMode('forgot-password')
+                                                    setMode(mode === 'signin' ? 'signup' : 'signin')
                                                     setError(null)
                                                 }}
-                                                className="mt-6 text-gray-400 font-bold text-sm hover:text-gray-600 transition-colors"
+                                                className="text-[#1a4d2e] font-black text-lg hover:underline underline-offset-4 decoration-2"
                                             >
-                                                Forgot your password?
+                                                {mode === 'signin' ? 'CREATE AN ACCOUNT' : 'SIGN IN TO YOURS'}
                                             </button>
-                                        )}
+
+                                            {mode === 'signin' && (
+                                                <button
+                                                    onClick={() => {
+                                                        setMode('forgot-password')
+                                                        setError(null)
+                                                    }}
+                                                    className="text-gray-400 font-bold text-sm hover:text-gray-600 transition-colors"
+                                                >
+                                                    Forgot your password?
+                                                </button>
+                                            )}
+                                        </div>
                                     </>
                                 )}
                             </div>
