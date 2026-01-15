@@ -1,8 +1,5 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useFormStatus } from 'react-dom'
-import { login, signup, forgotPassword, serverPing } from '@/app/actions/auth'
+import { login, signup, forgotPassword } from '@/app/actions/auth'
+import { systemCheck } from '@/app/actions/system-check'
 import { Dna, Phone, Lock, User, Mail, Calendar, Trophy, ChevronRight, ArrowLeft } from 'lucide-react'
 
 type AuthMode = 'signin' | 'signup' | 'forgot-password'
@@ -39,9 +36,9 @@ export default function AuthLanding() {
 
     useEffect(() => {
         // Test Server Connectivity on Mount
-        serverPing()
-            .then(res => console.log("Server Connectivity Test:", res))
-            .catch(err => console.error("Server Connectivity Error:", err));
+        systemCheck()
+            .then(res => console.log("System Check Result:", res))
+            .catch(err => console.error("System Check Error:", err));
     }, []);
 
     async function handleSubmit(formData: FormData) {
