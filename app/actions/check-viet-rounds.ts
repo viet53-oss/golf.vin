@@ -42,26 +42,18 @@ export async function checkVietRounds() {
             date: r.round.date,
             courseName: r.round.courseName,
             gross: r.grossScore,
-            // Saved data
-            savedName: r.teeBoxName,
-            savedPar: r.teeBoxPar,
-            savedRating: r.teeBoxRating,
-            savedSlope: r.teeBoxSlope,
-            // Current tee box
+            // Current tee box (from relation)
             currentName: r.teeBox?.name,
             currentRating: r.teeBox?.rating,
-            currentSlope: r.teeBox?.slope,
-            // Indices
-            indexBefore: r.indexAtTime,
-            indexAfter: r.indexAfter
+            currentSlope: r.teeBox?.slope
         }));
 
         return {
             success: true,
             player: {
                 name: viet.name,
-                currentIndex: viet.index,
-                lowIndex: viet.lowHandicapIndex,
+                currentIndex: viet.handicapIndex,
+                // lowIndex: viet.lowHandicapIndex, // Removed as it doesn't exist on type
                 // preferredTee: viet.preferred_tee_box // Removed
             },
             rounds: details
