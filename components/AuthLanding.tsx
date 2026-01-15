@@ -1,3 +1,7 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useFormStatus } from 'react-dom'
 import { login, signup, forgotPassword } from '@/app/actions/auth'
 import { systemCheck } from '@/app/actions/system-check'
 import { Dna, Phone, Lock, User, Mail, Calendar, Trophy, ChevronRight, ArrowLeft } from 'lucide-react'
