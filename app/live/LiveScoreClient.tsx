@@ -9,9 +9,9 @@ import { LivePlayerSelectionModal } from '@/components/LivePlayerSelectionModal'
 import { LiveRoundModal } from '@/components/LiveRoundModal';
 import { GuestPlayerModal } from '@/components/GuestPlayerModal';
 import ConfirmModal from '@/components/ConfirmModal';
-import AddToClubModal from '@/components/AddToClubModal';
+
 import { createLiveRound, addPlayerToLiveRound, saveLiveScore, deleteLiveRound, addGuestToLiveRound, updateGuestInLiveRound, deleteGuestFromLiveRound, createDefaultLiveRound, updatePlayerScorer } from '@/app/actions/create-live-round';
-import { copyLiveToClub } from '@/app/actions/copy-live-to-club';
+
 import { removePlayerFromLiveRound } from '@/app/actions/remove-player-from-live-round'; // Force reload
 
 interface Player {
@@ -71,6 +71,7 @@ interface LiveScoreClientProps {
         name: string;
         date: string;
         createdAt: string;
+        players?: Array<{ playerId: string | null; guestName: string | null; isGuest: boolean; id: string }>;
     }>;
     allCourses: Course[];
 }
@@ -90,7 +91,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
     const [guestPlayers, setGuestPlayers] = useState<Player[]>([]);
     const [editingGuest, setEditingGuest] = useState<{ id: string; name: string; index: number; courseHandicap: number } | null>(null);
-    const [isAddToClubModalOpen, setIsAddToClubModalOpen] = useState(false);
+
     const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
     const [birdiePlayers, setBirdiePlayers] = useState<Array<{ name: string; totalBirdies: number }>>([]);
     const [eaglePlayers, setEaglePlayers] = useState<Array<{ name: string; totalEagles: number }>>([]);
@@ -717,23 +718,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         }
     };
 
-    const handleCopyToClub = async (selectedPlayerIds: string[]) => {
-        if (!liveRoundId) {
-            showAlert('Error', 'No live round selected');
-            return;
-        }
 
-        const result = await copyLiveToClub({
-            liveRoundId,
-            playerIds: selectedPlayerIds
-        });
-
-        if (result.success) {
-            showAlert('Success', result.message || 'Successfully copied to club scores!');
-        } else {
-            showAlert('Error', 'Failed to copy: ' + result.error);
-        }
-    };
 
     const movePlayerOrder = (index: number, direction: 'up' | 'down') => {
         const newSelected = [...selectedPlayers];
@@ -1068,8 +1053,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Use summaryPlayers to include both local selections and server data
     const anyPlayerCompletedHole3 = summaryPlayers.length > 0 && summaryPlayers.some(p => scores.get(p.id)?.has(3));
 
-    // Hide Course and Group sections after hole 3 is completed by ANY player (except for admins)
-    const hideCourseAndGroupSections = !isAdmin && anyPlayerCompletedHole3;
+    // Always show Course and Group sections per user request
+    const hideCourseAndGroupSections = false;
 
     // Calculate Stats (Birdies/Eagles) for Modal
     const playerStats = rankedPlayers.map(player => {
@@ -1105,8 +1090,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             </header>
 
             <main className="w-full px-1 pt-1 m-0 space-y-1">
-                {/* Round Selector - Admin Only */}
-                {isAdmin && allLiveRounds.length > 0 && (
+                {/* Round Selector - Filtered for Everyone */}
+                {allLiveRounds.length > 0 && (
                     <div style={{ minHeight: '80px' }} className="bg-white rounded-xl shadow-lg p-1 border-4 border-gray-300 flex flex-col justify-center">
                         <div className="flex justify-between items-center mb-1">
                             <label className="text-[15pt] font-bold text-gray-900 ml-1">Select Round:</label>
@@ -1130,11 +1115,20 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                             className="flex-1 px-4 py-2 text-[15pt] border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 min-w-0"
                         >
                             <option value="">-- Select a Round --</option>
-                            {allLiveRounds.map(round => (
-                                <option key={round.id} value={round.id}>
-                                    {round.name} - {new Date(round.date).toLocaleDateString()}
-                                </option>
-                            ))}
+                            {allLiveRounds
+                                .filter(round => {
+                                    // Show round if ANY selected player is in it, OR if no players selected (show all)
+                                    if (selectedPlayers.length === 0) return true;
+                                    return round.players && round.players.some(rp =>
+                                        selectedPlayers.some(sp => sp.id === rp.playerId || sp.id === rp.id)
+                                    );
+                                })
+                                .map(round => (
+                                    <option key={round.id} value={round.id}>
+                                        {round.name} - {new Date(round.date).toLocaleDateString()}
+                                    </option>
+                                ))
+                            }
                         </select>
                     </div>
                 )}
@@ -1185,46 +1179,37 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                         </button>
                                     )}
 
-                                    {isAdmin && (
-                                        <>
-                                            <button
-                                                onClick={() => {
-                                                    if (!liveRoundId) return;
-                                                    const password = prompt("Enter password to delete:");
-                                                    if (password !== 'cpgc-Delete') {
-                                                        showAlert('Error', 'Incorrect password.');
-                                                        return;
-                                                    }
+                                    {/* Delete Button - Available to Everyone (Protected by Password) */}
+                                    <button
+                                        onClick={() => {
+                                            if (!liveRoundId) return;
+                                            const password = prompt("Enter password to delete:");
+                                            if (password !== 'cpgc-Delete') {
+                                                showAlert('Error', 'Incorrect password.');
+                                                return;
+                                            }
 
-                                                    setConfirmConfig({
-                                                        isOpen: true,
-                                                        title: 'Delete Live Round',
-                                                        message: 'Are you sure you want to delete this live round? This action cannot be undone.',
-                                                        isDestructive: true,
-                                                        onConfirm: async () => {
-                                                            setConfirmConfig(null);
-                                                            try {
-                                                                await deleteLiveRound(liveRoundId);
-                                                                window.location.href = '/';
-                                                            } catch (err) {
-                                                                console.error('Failed to delete round:', err);
-                                                                showAlert('Error', 'Failed to delete round.');
-                                                            }
-                                                        }
-                                                    });
-                                                }}
-                                                className="bg-red-600 text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
-                                            >
-                                                Delete
-                                            </button>
-                                            <button
-                                                onClick={() => setIsAddToClubModalOpen(true)}
-                                                className="bg-green-600 text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-green-700 transition-all shadow-md active:scale-95"
-                                            >
-                                                Add to Club
-                                            </button>
-                                        </>
-                                    )}
+                                            setConfirmConfig({
+                                                isOpen: true,
+                                                title: 'Delete Live Round',
+                                                message: 'Are you sure you want to delete this live round? This action cannot be undone.',
+                                                isDestructive: true,
+                                                onConfirm: async () => {
+                                                    setConfirmConfig(null);
+                                                    try {
+                                                        await deleteLiveRound(liveRoundId);
+                                                        window.location.href = '/';
+                                                    } catch (err) {
+                                                        console.error('Failed to delete round:', err);
+                                                        showAlert('Error', 'Failed to delete round.');
+                                                    }
+                                                }
+                                            });
+                                        }}
+                                        className="bg-red-600 text-white text-[15pt] font-bold px-4 py-2 rounded-full hover:bg-red-700 transition-all shadow-md active:scale-95"
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1439,11 +1424,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
                 {/* GROUP SECTION */}
                 {
-                    !hideCourseAndGroupSections && (selectedPlayers.length > 0 || canUpdate) && (
+                    !hideCourseAndGroupSections && (
                         <div className="bg-white rounded-xl shadow-lg border border-gray-200 my-1 p-2">
                             <div className="flex justify-between items-center">
                                 <h2 className="text-[15pt] font-black text-gray-900 tracking-tight">Group</h2>
-                                {canUpdate && !hideCourseAndGroupSections && (
+                                {!hideCourseAndGroupSections && (
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setIsPlayerModalOpen(true)}
@@ -1988,47 +1973,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     <div className="flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-red-300 shadow-sm"></div>Double+ (+2)</div>
                 </div>
 
-                {/* Save Round Button - Admin Only */}
-                {
-                    isAdmin && liveRoundId && selectedPlayers.length > 0 && (
-                        <button
-                            onClick={() => {
-                                setConfirmConfig({
-                                    isOpen: true,
-                                    title: 'Save Round',
-                                    message: 'Save this round? This will finalize all scores. This data is isolated and will NOT affect handicaps or main scores.',
-                                    isDestructive: false,
-                                    onConfirm: async () => {
-                                        setConfirmConfig(null);
-                                        showAlert('Success', 'Round saved successfully! Note: This is a live scoring session only and does not affect official handicaps.');
-                                        // Use silent refresh instead of reload to prevent jumping
-                                        router.refresh();
-                                    }
-                                });
-                            }}
-                            className="w-full bg-black hover:bg-gray-800 text-white font-bold px-4 py-2 rounded-full shadow-md transition-all active:scale-95 text-[15pt] mt-1 mb-1"
-                        >
-                            💾 Save Round
-                        </button>
-                    )
-                }
 
-                {/* Scorecard Reminder */}
-                <div className="w-auto mx-1 px-1 text-center py-4">
-                    <p className="text-[16pt] font-bold text-gray-900">
-                        (If not Sat, text Vincent to submit scorecard.)
-                    </p>
-                </div>
             </main >
 
             {/* Add to Club Modal */}
-            < AddToClubModal
-                isOpen={isAddToClubModalOpen}
-                onClose={() => setIsAddToClubModalOpen(false)}
-                players={rankedPlayers}
-                liveRoundId={liveRoundId || ''}
-                onSave={handleCopyToClub}
-            />
+
 
             {/* Stats Modal */}
             {

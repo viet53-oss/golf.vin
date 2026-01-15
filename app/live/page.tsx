@@ -101,10 +101,7 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
                         name: `Live Round - ${todayStr}`,
                         date: todayStr,
                         courseId: defaultCourse.id,
-                        courseName: defaultCourse.name,
-                        par: coursePar,
-                        rating: defaultTeeBox?.rating ?? coursePar,
-                        slope: defaultTeeBox?.slope ?? 113
+                        courseName: defaultCourse.name
                     },
                     include: {
                         players: {
@@ -182,15 +179,39 @@ export default async function LiveScorePage(props: { searchParams: Promise<{ rou
     const allLiveRounds = await prisma.liveRound.findMany({
         where: isAdmin ? {} : { date: todayStr },
         orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, date: true, createdAt: true }
+        select: {
+            id: true,
+            name: true,
+            date: true,
+            createdAt: true,
+            players: {
+                select: {
+                    playerId: true,
+                    guestName: true,
+                    isGuest: true,
+                    // We might need to match against selectedPlayers (which uses IDs)
+                    // Regular players use playerId (matches Player.id)
+                    // Guest players use guestName or we can just check if the ID matches the LiveRoundPlayer ID? 
+                    // SelectedPlayers stores: { id: string }
+                    // Regular player: id = Player.id
+                    // Guest player: id = LiveRoundPlayer.id
+                    id: true
+                }
+            }
+        }
     });
 
     return (
         <LiveScoreClient
-            allPlayers={await prisma.player.findMany({
+            allPlayers={(await prisma.player.findMany({
                 orderBy: { name: 'asc' },
                 select: { id: true, name: true, handicapIndex: true }
-            })}
+            })).map(p => ({
+                id: p.id,
+                name: p.name,
+                index: p.handicapIndex ?? 0,
+                preferredTeeBox: null
+            }))}
             defaultCourse={defaultCourse ? JSON.parse(JSON.stringify(defaultCourse)) : null}
             allCourses={JSON.parse(JSON.stringify(allCourses))}
             initialRound={activeRound ? JSON.parse(JSON.stringify(activeRound)) : null}

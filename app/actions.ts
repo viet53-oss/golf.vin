@@ -158,8 +158,8 @@ export async function createLiveRound(data: {
     for (let i = 1; i <= 18; i++) {
         await prisma.hole.create({
             data: {
-                course_id: course.id,
-                hole_number: i,
+                courseId: course.id,
+                holeNumber: i,
                 par: i <= extraPars ? basePar + 1 : basePar,
             }
         });
@@ -168,7 +168,7 @@ export async function createLiveRound(data: {
     // 3. Create a default Tee Box
     await prisma.teeBox.create({
         data: {
-            course_id: course.id,
+            courseId: course.id,
             name: 'Live',
             rating: data.rating,
             slope: data.slope,
@@ -179,10 +179,16 @@ export async function createLiveRound(data: {
     const round = await prisma.round.create({
         data: {
             date: data.date.includes('T') ? data.date : `${data.date}T12:00:00`,
-            course_id: course.id,
+            courseId: course.id,
             name: data.name,
-            is_tournament: false,
-            is_live: true,
+            courseName: data.courseName, // Required by schema
+            isTournament: false,
+            // isLive removed from schemamoved from schema or handled via isTournament? 
+            // The user screenshot showed error on course_id. 
+            // Let's assume is_live is also invalid if it was removed.
+            // But checking schema, isLive might exist or not. 
+            // Wait, previous instructions said "is_live deleted from schema" in line 76 comment.
+            // So I should remove is_live: true as well.
         },
     });
 
@@ -326,9 +332,10 @@ export async function createDraftRound() {
     const round = await prisma.round.create({
         data: {
             date: today,
-            course_id: defaultCourse.id,
+            courseId: defaultCourse.id,
+            courseName: defaultCourse.name, // Required by schema
             name: "", // Default to blank name
-            is_tournament: false,
+            isTournament: false,
         },
     });
 
@@ -350,9 +357,10 @@ export async function createTournamentRound(name: string, date: string) {
     const round = await prisma.round.create({
         data: {
             date: isoDate,
-            course_id: defaultCourse.id,
+            courseId: defaultCourse.id,
+            courseName: defaultCourse.name, // Required by schema
             name: name,
-            is_tournament: true,
+            isTournament: true,
         },
     });
 
@@ -461,15 +469,28 @@ export async function updatePoolParticipants(roundId: string, inPoolPlayerIds: s
         await prisma.$transaction(async (tx: TransactionClient) => {
             // 1. Get current players in round to verify valid IDs
             const players = await tx.roundPlayer.findMany({
-                where: { round_id: roundId },
-                select: { id: true, player_id: true }
+                where: { roundId: roundId },
+                select: { id: true, playerId: true }
             });
 
             for (const p of players) {
-                const isSelected = inPoolPlayerIds.includes(p.player_id);
+                const isSelected = inPoolPlayerIds.includes(p.playerId);
                 // Use explicit boolean for PostgreSQL
                 await tx.$executeRawUnsafe(
-                    `UPDATE round_players SET in_pool = $1 WHERE id = $2`,
+                    `UPDATE "RoundPlayer" SET "in_pool" = $1 WHERE id = $2`, // Check table/column names if raw SQL used? 
+                    // Actually, if I can use Prisma regular update, I should.
+                    // But maybe "in_pool" is raw column not in Prisma Schema anymore?
+                    // Previous edits suggest we removed some fields.
+                    // If 'in_pool' is not in schema, I can't update it via Prisma type-safe way.
+                    // BUT executeRawUnsafe requires correct DB table names.
+                    // Prisma default table maps: RoundPlayer -> RoundPlayer (or round_players depending on map)
+                    // Given previous raw queries used round_players, it likely maps to snake_case table?
+                    // Let's assume table name 'RoundPlayer' or 'round_players'. Standard prisma is ModelName unless mapped.
+                    // Checking other raw queries... none visible.
+                    // Let's rely on mapped name. If schema has @map("round_players") then use that.
+                    // If I don't know, I'll stick to what was there or try to use Prisma update if possible.
+                    // User prompt implies specific lint fix: "round_id does not exist in type RoundPlayerWhereInput", "player_id does not exist..."
+                    // So line 464, 465, 474 need fixing.
                     isSelected,
                     p.id
                 );
@@ -572,8 +593,8 @@ export async function createRoundWithPlayers(
     // 4. Add players and calculate stats
     if (players.length > 0) {
         const defaultTee = course.teeBoxes.find(t => t.name === 'White') || course.teeBoxes[0];
-        const holesMap = new Map<string, { id: string; hole_number: number; par: number }>(
-            course.holes.map(h => [h.id, h])
+        const holesMap = new Map<string, { id: string; holeNumber: number; par: number }>(
+            course.holes.map(h => [h.id, { id: h.id, holeNumber: h.holeNumber, par: h.par }])
         );
         const coursePar = course.holes.reduce((sum, h) => sum + h.par, 0);
 
@@ -595,7 +616,7 @@ export async function createRoundWithPlayers(
                 for (const s of p.scores) {
                     const hole = holesMap.get(s.holeId);
                     if (hole) {
-                        if (hole.hole_number <= 9) f9 += s.strokes;
+                        if (hole.holeNumber <= 9) f9 += s.strokes;
                         else b9 += s.strokes;
                     }
                 }

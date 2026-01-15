@@ -25,30 +25,37 @@ import { usePathname, useRouter } from 'next/navigation';
 
 export default function AppHeader() {
     const router = useRouter(); // Initialize router
-    const [isAdmin, setIsAdmin] = useState(true); // Default to true
+    const [isAdmin, setIsAdmin] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [passwordInput, setPasswordInput] = useState('');
 
-    // Force Admin for all time
     useEffect(() => {
-        Cookies.set('admin_session', 'true', { expires: 3650 }); // 10 years
-        setIsAdmin(true);
+        const session = Cookies.get('admin_session');
+        setIsAdmin(session === 'true');
     }, []);
 
     const handleLoginClick = () => {
+        setIsAdmin(false); // Reset to ensure clean state
         setShowLoginModal(true);
+        setPasswordInput('');
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setShowLoginModal(false);
+        if (passwordInput === 'Vaa') {
+            Cookies.set('admin_session', 'true', { expires: 1 }); // 1 day session
+            setIsAdmin(true);
+            setShowLoginModal(false);
+            window.location.reload(); // Refresh to apply admin state globally
+        } else {
+            alert('Incorrect password');
+        }
     };
 
     const handleLogout = () => {
-        // No-op or maybe refresh? User asked for "all time".
-        // giving them a way to refresh the cookie just in case.
-        Cookies.set('admin_session', 'true', { expires: 3650 });
-        window.location.reload();
+        Cookies.remove('admin_session');
+        setIsAdmin(false);
+        window.location.reload(); // Refresh to clear admin state globally
     };
 
     return (
