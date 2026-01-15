@@ -190,7 +190,7 @@ export default async function Home1() {
                 {/* Hero Section */}
                 <section className="mb-12 space-y-4 w-full">
                     <h1 className="text-[30pt] md:text-[40pt] font-extrabold text-white drop-shadow-xl tracking-tight leading-[1.1] w-full mt-10">
-                        Golf Live Score
+                        Golf Live Scores
                     </h1>
 
                     <div className="flex flex-col gap-1 text-shadow-md w-full">
@@ -217,12 +217,7 @@ export default async function Home1() {
                     ))}
                 </div>
 
-                {/* Footer */}
-                <footer className="mt-16 text-white/60 text-[14pt] space-y-1">
-                    <p className="font-bold text-white">CPGC.app</p>
-                    <p>Custom app by: Vchu.app</p>
-                    <p>Question: Info@Vchu.app</p>
-                </footer>
+
             </main>
         </div>
     );

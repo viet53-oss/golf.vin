@@ -78,6 +78,7 @@ model Hole {
   courseId    String
   holeNumber  Int      // 1-18
   par         Int      // Par for this hole
+  difficulty  Int?     // Handicap/Stroke Index (1-18)
   name        String?  // e.g., "Hole 1", "The Island Green"
   
   // GPS Coordinates (optional)

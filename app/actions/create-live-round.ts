@@ -181,20 +181,23 @@ export async function addPlayerToLiveRound(data: {
             // If exists, just update scorerId
             await prisma.liveRoundPlayer.update({
                 where: { id: existing.id },
-                data: { scorerId: data.scorerId }
+                data: {
+                    scorerId: data.scorerId
+                }
             });
             revalidatePath('/live');
             return { success: true, liveRoundPlayerId: existing.id };
         }
 
         // Create live round player
+        // Create live round player
         const liveRoundPlayer = await prisma.liveRoundPlayer.create({
             data: {
                 liveRoundId: data.liveRoundId,
                 playerId: data.playerId,
                 teeBoxId: data.teeBoxId,
-                indexAtTime: handicapIndex,
-                teeBoxName: teeBox.name,
+                indexAtTime: handicapIndex, // Snapshot
+                teeBoxName: teeBox.name, // Snapshot
                 courseHandicap: Math.round((handicapIndex * (teeBox.slope / 113)) + (teeBox.rating - par)),
                 scorerId: data.scorerId
             }
@@ -221,7 +224,9 @@ export async function updatePlayerScorer(data: {
     try {
         await prisma.liveRoundPlayer.update({
             where: { id: data.liveRoundPlayerId },
-            data: { scorerId: data.scorerId }
+            data: {
+                scorerId: data.scorerId
+            }
         });
         revalidatePath('/live');
         return { success: true };
@@ -272,7 +277,7 @@ export async function addGuestToLiveRound(data: {
                 isGuest: true,
                 guestName: data.guestName,
                 teeBoxId: fallbackTeeBox.id,
-                teeBoxName: 'Guest',
+                teeBoxName: fallbackTeeBox.name || 'Guest',
                 indexAtTime: data.index,
                 courseHandicap: data.courseHandicap,
                 scorerId: data.scorerId
@@ -399,7 +404,9 @@ export async function saveLiveScore(data: {
                 if (!liveRoundPlayer.scorerId) {
                     await prisma.liveRoundPlayer.update({
                         where: { id: liveRoundPlayer.id },
-                        data: { scorerId: data.scorerId }
+                        data: {
+                            scorerId: data.scorerId
+                        }
                     });
                 }
             }

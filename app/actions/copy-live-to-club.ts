@@ -24,7 +24,7 @@ export async function copyLiveToClub(data: {
                 players: {
                     include: {
                         player: true,
-                        tee_box: true,
+                        teeBox: true,
                         scores: {
                             include: {
                                 hole: true
@@ -50,7 +50,7 @@ export async function copyLiveToClub(data: {
         let mainRound = await prisma.round.findFirst({
             where: {
                 date: liveRound.date,
-                course_id: liveRound.course_id
+                courseId: liveRound.courseId
             }
         });
 
@@ -59,9 +59,10 @@ export async function copyLiveToClub(data: {
             mainRound = await prisma.round.create({
                 data: {
                     date: liveRound.date,
-                    course_id: liveRound.course_id,
+                    courseId: liveRound.courseId,
+                    courseName: liveRound.courseName,
                     name: liveRound.name,
-                    completed: true
+                    isTournament: false
                 }
             });
         }
@@ -71,8 +72,8 @@ export async function copyLiveToClub(data: {
 
         // Copy each selected player's data
         for (const livePlayer of selectedPlayers) {
-            // Skip guest players (they don't have a player_id)
-            if (livePlayer.is_guest || !livePlayer.player_id) {
+            // Skip guest players (they don't have a playerId)
+            if (livePlayer.isGuest || !livePlayer.playerId) {
                 skippedCount++;
                 continue;
             }
@@ -80,8 +81,8 @@ export async function copyLiveToClub(data: {
             // Check if this player already has scores in the main round
             const existingRoundPlayer = await prisma.roundPlayer.findFirst({
                 where: {
-                    round_id: mainRound.id,
-                    player_id: livePlayer.player_id
+                    roundId: mainRound.id,
+                    playerId: livePlayer.playerId
                 }
             });
 
@@ -90,21 +91,22 @@ export async function copyLiveToClub(data: {
                 continue; // Skip if already exists
             }
 
+            // Calculate net score if gross score is present
+            const netScore = livePlayer.grossScore !== null
+                ? livePlayer.grossScore - livePlayer.courseHandicap
+                : null;
+
             // Create the main round player entry
             const roundPlayer = await prisma.roundPlayer.create({
                 data: {
-                    round_id: mainRound.id,
-                    player_id: livePlayer.player_id,
-                    tee_box_id: livePlayer.tee_box_id,
-                    tee_box_name: livePlayer.tee_box_name,
-                    tee_box_par: livePlayer.tee_box_par,
-                    tee_box_rating: livePlayer.tee_box_rating,
-                    tee_box_slope: livePlayer.tee_box_slope,
-                    course_handicap: livePlayer.course_handicap,
-                    index_at_time: livePlayer.index_at_time,
-                    gross_score: livePlayer.gross_score,
-                    front_nine: livePlayer.front_nine,
-                    back_nine: livePlayer.back_nine
+                    roundId: mainRound.id,
+                    playerId: livePlayer.playerId,
+                    teeBoxId: livePlayer.teeBoxId,
+                    courseHandicap: livePlayer.courseHandicap,
+                    grossScore: livePlayer.grossScore,
+                    netScore: netScore,
+                    frontNine: livePlayer.frontNine,
+                    backNine: livePlayer.backNine
                 }
             });
 
@@ -112,8 +114,8 @@ export async function copyLiveToClub(data: {
             for (const liveScore of livePlayer.scores) {
                 await prisma.score.create({
                     data: {
-                        round_player_id: roundPlayer.id,
-                        hole_id: liveScore.hole_id,
+                        roundPlayerId: roundPlayer.id,
+                        holeId: liveScore.holeId,
                         strokes: liveScore.strokes
                     }
                 });

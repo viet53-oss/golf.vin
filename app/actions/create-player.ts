@@ -19,9 +19,9 @@ export async function createPlayer(formData: FormData) {
                 name: name.trim(),
                 email: email?.trim() || null,
                 phone: phone?.trim() || null,
-                preferred_tee_box: preferredTeeBox || 'White',
-                index: 0, // Default starting index
-                low_handicap_index: null
+                // preferred_tee_box removed
+                handicapIndex: 0, // was index
+                // low_handicap_index removed
             }
         });
 

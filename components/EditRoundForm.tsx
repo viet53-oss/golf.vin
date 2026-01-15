@@ -11,7 +11,7 @@ import ConfirmModal from './ConfirmModal';
 type Player = {
     id: string;
     name: string;
-    index: number;
+    handicapIndex: number;
 };
 
 type RoundPlayer = {
@@ -39,7 +39,7 @@ type RoundData = {
         id: string;
         name: string;
         holes: { par: number }[];
-        tee_boxes: { id: string; name: string; slope: number; rating: number }[];
+        teeBoxes: { id: string; name: string; slope: number; rating: number }[];
     };
     players: RoundPlayer[];
 };
@@ -51,7 +51,7 @@ export default function EditRoundForm({
 }: {
     round: RoundData;
     allPlayers: Player[];
-    allCourses?: { id: string; name: string; holes: { par: number }[]; tee_boxes: { id: string; name: string; slope: number; rating: number }[] }[];
+    allCourses?: { id: string; name: string; holes: { par: number }[]; teeBoxes: { id: string; name: string; slope: number; rating: number }[] }[];
 }) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
@@ -118,7 +118,7 @@ export default function EditRoundForm({
 
     // Helper for Course Handicap Display in List
     const coursePar = currentCourse.holes?.reduce((sum, h) => sum + h.par, 0) || 72;
-    const defaultTee = currentCourse.tee_boxes?.find(t => t.name === 'White') || currentCourse.tee_boxes?.[0];
+    const defaultTee = currentCourse.teeBoxes?.find(t => t.name === 'White') || currentCourse.teeBoxes?.[0];
 
     const getCourseHcp = (index: number) => {
         if (!defaultTee) return Math.round(index);
@@ -222,13 +222,13 @@ export default function EditRoundForm({
             // Optimistic update logic (reused for both New and Edit modes)
             const newPlayers: RoundPlayer[] = Array.from(selectedPlayerIds).map(pid => {
                 const player = allPlayers.find(p => p.id === pid)!;
-                const defaultTee = currentCourse.tee_boxes?.find(t => t.name === 'White') || currentCourse.tee_boxes?.[0] || null;
+                const defaultTee = currentCourse.teeBoxes?.find(t => t.name === 'White') || currentCourse.teeBoxes?.[0] || null;
                 return {
                     id: isNew ? `temp-${pid}` : `temp-opt-${pid}`, // temp ID for key
                     gross_score: null,
                     player: player,
                     tee_box: defaultTee,
-                    index_at_time: player.index,
+                    index_at_time: player.handicapIndex,
                     points: 0,
                     payout: 0
                 };
@@ -286,7 +286,7 @@ export default function EditRoundForm({
     };
 
     const handleTeeBoxChange = async (roundPlayerId: string, teeBoxId: string) => {
-        const selectedTee = currentCourse.tee_boxes.find(t => t.id === teeBoxId);
+        const selectedTee = currentCourse.teeBoxes.find(t => t.id === teeBoxId);
         if (!selectedTee) return;
 
         startTransition(async () => {
@@ -407,7 +407,7 @@ export default function EditRoundForm({
                         <div key={rp.id} className="flex items-center gap-2 px-1 py-1.5 opacity-50">
                             <input type="checkbox" checked disabled className="rounded border-gray-300" />
                             <span className="text-[14pt] text-gray-500">
-                                {rp.player.name} <span className="text-[14pt]">(HCP: {Math.round(rp.player.index)})</span>
+                                {rp.player.name} <span className="text-[14pt]">(HCP: {Math.round(rp.player.handicapIndex)})</span>
                                 <span className="ml-2 text-[14pt] font-bold">(Added)</span>
                             </span>
                         </div>
@@ -424,7 +424,7 @@ export default function EditRoundForm({
                                 onChange={() => togglePlayerSelection(p.id)}
                             />
                             <label htmlFor={`player-${p.id}`} className="text-[14pt] text-gray-900 cursor-pointer w-full">
-                                {p.name} <span className="text-gray-400 text-[14pt]">(HCP: {getCourseHcp(p.index)})</span>
+                                {p.name} <span className="text-gray-400 text-[14pt]">(HCP: {getCourseHcp(p.handicapIndex)})</span>
                             </label>
                         </div>
                     ))}
@@ -463,7 +463,7 @@ export default function EditRoundForm({
                                 statePlayers.map(rp => {
                                     const gross = rp.gross_score;
                                     // Calc logic duplicate from Scores page - ideally centralize
-                                    const idx = rp.index_at_time ?? rp.player.index;
+                                    const idx = rp.index_at_time ?? rp.player.handicapIndex;
                                     const slope = rp.tee_box?.slope ?? 113;
                                     const rating = rp.tee_box?.rating ?? 0; // If no tee, use 0 to signal invalid
                                     const coursePar = currentCourse.holes?.reduce((sum, h) => sum + h.par, 0) || 72;
@@ -489,7 +489,7 @@ export default function EditRoundForm({
                                                     disabled={isPending}
                                                 >
                                                     {!rp.tee_box && <option value="">Select Tee</option>}
-                                                    {currentCourse.tee_boxes?.map(t => (
+                                                    {currentCourse.teeBoxes?.map(t => (
                                                         <option key={t.id} value={t.id}>{t.name}</option>
                                                     ))}
                                                 </select>
@@ -555,7 +555,7 @@ export default function EditRoundForm({
                     currentBack={null}
                     currentPoints={selectedPlayer.points}
                     currentPayout={selectedPlayer.payout}
-                    playerIndex={selectedPlayer.player.index}
+                    playerIndex={selectedPlayer.player.handicapIndex}
                     indexAtTime={selectedPlayer.index_at_time}
                     teeBox={selectedPlayer.tee_box}
                     coursePar={currentCourse.holes?.reduce((sum, h) => sum + h.par, 0)}

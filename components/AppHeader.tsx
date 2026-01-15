@@ -25,16 +25,14 @@ import { usePathname, useRouter } from 'next/navigation';
 
 export default function AppHeader() {
     const router = useRouter(); // Initialize router
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(true); // Default to true
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [passwordInput, setPasswordInput] = useState('');
 
-    // Check login status on mount
+    // Force Admin for all time
     useEffect(() => {
-        const adminCookie = Cookies.get('admin_session');
-        if (adminCookie === 'true') {
-            setIsAdmin(true);
-        }
+        Cookies.set('admin_session', 'true', { expires: 3650 }); // 10 years
+        setIsAdmin(true);
     }, []);
 
     const handleLoginClick = () => {
@@ -43,21 +41,13 @@ export default function AppHeader() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (passwordInput === 'Viet65') {
-            Cookies.set('admin_session', 'true', { expires: 7 });
-            setIsAdmin(true);
-            setShowLoginModal(false);
-            window.dispatchEvent(new Event('admin-change')); // Notify other components
-            router.refresh();
-        } else {
-            alert('Incorrect Password');
-        }
+        setShowLoginModal(false);
     };
 
     const handleLogout = () => {
-        Cookies.remove('admin_session');
-        setIsAdmin(false);
-        window.dispatchEvent(new Event('admin-change')); // Notify other components
+        // No-op or maybe refresh? User asked for "all time".
+        // giving them a way to refresh the cookie just in case.
+        Cookies.set('admin_session', 'true', { expires: 3650 });
         window.location.reload();
     };
 
@@ -67,7 +57,7 @@ export default function AppHeader() {
                 <div className="flex items-center gap-2 px-1">
                     <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
                         <span role="img" aria-label="golf" className="text-xl">⛳</span>
-                        <span className="font-bold tracking-tight text-[18pt]">Golf Live Score</span>
+                        <span className="font-bold tracking-tight text-[18pt]">Golf Live Scores</span>
                     </Link>
                 </div>
 

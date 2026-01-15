@@ -11,31 +11,32 @@ const CloseIcon = ({ size = 24 }: { size?: number }) => (
 import { format } from 'date-fns';
 
 // Define types based on what we fetch
+// Define types based on what we fetch
 type ScorecardData = {
     id: string;
-    gross_score: number | null;
-    adjusted_gross_score: number | null;
-    score_differential: number | null;
-    index_at_time: number | null;
+    grossScore: number | null;
+    // adjusted_gross_score: number | null; // Not in schema
+    // score_differential: number | null; // Not in schema
+    // indexAtTime: number | null; // Not in schema
     player: {
         name: string;
-        index: number;
+        handicapIndex: number;
     };
     round: {
         date: string;
-        is_tournament: boolean;
+        isTournament: boolean;
         name: string | null;
         course: {
             name: string;
             holes: Array<{
                 id: string;
-                hole_number: number;
+                holeNumber: number;
                 par: number;
                 difficulty: number | null;
             }>;
         };
     };
-    tee_box: {
+    teeBox: {
         name: string;
         rating: number;
         slope: number;
@@ -44,7 +45,7 @@ type ScorecardData = {
         id: string;
         strokes: number;
         hole: {
-            hole_number: number;
+            holeNumber: number;
         };
     }>;
 };
@@ -58,21 +59,21 @@ interface ScorecardModalProps {
 export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
     if (!isOpen) return null;
 
-    const { player, round, tee_box, scores } = data;
+    const { player, round, teeBox, scores } = data;
     const course = round.course;
 
     // Organize scores by hole number for easy access
     const scoreMap = new Map<number, number>();
-    scores.forEach(s => scoreMap.set(s.hole.hole_number, s.strokes));
+    scores.forEach(s => scoreMap.set(s.hole.holeNumber, s.strokes));
 
     // Calculate Totals
-    const front9 = course.holes.filter(h => h.hole_number <= 9);
-    const back9 = course.holes.filter(h => h.hole_number > 9);
+    const front9 = course.holes.filter(h => h.holeNumber <= 9);
+    const back9 = course.holes.filter(h => h.holeNumber > 9);
 
     const calcTotal = (holes: typeof front9, metric: 'par' | 'score') => {
         return holes.reduce((sum, h) => {
             if (metric === 'par') return sum + h.par;
-            return sum + (scoreMap.get(h.hole_number) || 0);
+            return sum + (scoreMap.get(h.holeNumber) || 0);
         }, 0);
     };
 
@@ -85,10 +86,10 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
     const totalScore = front9Score + back9Score;
 
     // Handicap Calcs
-    const slope = tee_box?.slope || 113;
+    const slope = teeBox?.slope || 113;
     const par = course.holes.reduce((sum, h) => sum + h.par, 0);
-    const rating = tee_box?.rating || par;
-    const idx = data.index_at_time ?? data.player.index ?? 0;
+    const rating = teeBox?.rating || par;
+    const idx = data.player.handicapIndex ?? 0;
 
     // Match the logic from scores/page.tsx: (Index * Slope / 113) + (Rating - Par)
     const courseHcp = Math.round(idx * (slope / 113) + (rating - par));
@@ -130,7 +131,7 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                             {/* Header Row (Hole #) */}
                             <tr className="border-b border-gray-100">
                                 {holes.map(h => (
-                                    <td key={h.id} className="px-1 py-2 w-10 font-bold text-[14pt] text-black">{h.hole_number}</td>
+                                    <td key={h.id} className="px-1 py-2 w-10 font-bold text-[14pt] text-black">{h.holeNumber}</td>
                                 ))}
                             </tr>
                             {/* Par Row */}
@@ -142,7 +143,7 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                             {/* Score Row */}
                             <tr className="border-b border-gray-100">
                                 {holes.map(h => {
-                                    const score = scoreMap.get(h.hole_number);
+                                    const score = scoreMap.get(h.holeNumber);
                                     return (
                                         <td key={h.id} className={`px-1 py-2 w-10 font-black text-[14pt] ${getScoreClass(h.par, score)}`}>
                                             {score || '-'}
@@ -216,13 +217,13 @@ export function ScorecardModal({ data, isOpen, onClose }: ScorecardModalProps) {
                             <span>{course.name}</span>
                         </div>
                         <div className="flex justify-center items-center gap-3 mt-1 text-[14pt] text-gray-600 font-medium whitespace-nowrap overflow-x-auto no-scrollbar">
-                            <span className="text-blue-600">{tee_box?.name}</span>
+                            <span className="text-blue-600">{teeBox?.name}</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                             <span>Par {totalPar}</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                            <span>Rating {tee_box?.rating.toFixed(1)}</span>
+                            <span>Rating {teeBox?.rating.toFixed(1)}</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                            <span>Slope {tee_box?.slope}</span>
+                            <span>Slope {teeBox?.slope}</span>
                         </div>
                     </div>
 

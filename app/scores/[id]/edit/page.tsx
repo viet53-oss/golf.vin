@@ -12,7 +12,7 @@ export default async function EditRoundPage({ params }: { params: Promise<{ id: 
             course: {
                 include: {
                     holes: true,
-                    tee_boxes: true
+                    teeBoxes: true
                 }
             },
             players: {

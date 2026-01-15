@@ -47,12 +47,13 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({ key: 'last_name', direction: 'asc' });
 
     // Helper: Calculate Course Handicap
+    // Helper: Calculate Course Handicap
     const getCourseHandicap = (index: number, preferredTee: string | null) => {
         if (!course) return Math.round(index); // Fallback: just round index
 
         // Find the preferred tee or default to White
         const teeName = preferredTee || 'White';
-        const tee = course.tee_boxes.find((t: any) => t.name === teeName) || course.tee_boxes[0];
+        const tee = course.teeBoxes.find((t: any) => t.name === teeName) || course.teeBoxes[0];
 
         if (!tee) return Math.round(index);
 
@@ -73,23 +74,21 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
             // Calculate Stats (Live Index)
             const tournamentRounds: HandicapInput[] = player.rounds
-                .filter((r: any) => r.tee_box && r.gross_score !== null)
+                .filter((r: any) => r.teeBox && r.grossScore !== null)
                 .map((r: any) => ({
                     id: r.id,
                     date: r.round.date,
-                    score: (r.adjusted_gross_score || r.gross_score) ?? 0,
-                    rating: r.tee_box!.rating,
-                    slope: r.tee_box!.slope,
+                    score: (r.netScore || r.grossScore) ?? 0,
+                    rating: r.teeBox!.rating,
+                    slope: r.teeBox!.slope,
                 }));
-            const manualRounds: HandicapInput[] = player.manual_rounds.map((m: any) => ({
-                id: m.id,
-                date: m.date_played,
-                differential: m.score_differential
-            }));
-            const allRounds = [...tournamentRounds, ...manualRounds];
-            const { handicapIndex } = calculateHandicap(allRounds, player.low_handicap_index);
 
-            const courseHandicap = getCourseHandicap(handicapIndex, (player as any).preferred_tee_box);
+            // Manual rounds removed
+            const allRounds = [...tournamentRounds];
+            // low_handicap_index removed
+            const { handicapIndex } = calculateHandicap(allRounds, undefined);
+
+            const courseHandicap = getCourseHandicap(handicapIndex, 'White'); // Default to White
 
             const pointsBreakdown: Array<{ date: string; roundName?: string; amount: number; isTournament?: boolean }> = [];
             const currentYear = new Date().getFullYear();
@@ -100,7 +99,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
             player.rounds.forEach((rp: any) => {
                 const roundDate = rp.round.date;
                 const roundName = rp.round.name;
-                const isTournament = rp.round.is_tournament;
+                const isTournament = rp.round.isTournament;
 
                 // Money (Current Year Only)
                 if (rp.payout && rp.payout > 0) {
@@ -116,7 +115,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                 }
 
                 // Points (Tournament & Gross Score Only)
-                if (!isTournament || !rp.gross_score) return;
+                if (!isTournament || !rp.grossScore) return;
 
                 const roundYear = parseInt(roundDate?.split('-')[0] || '0');
                 if (roundYear !== currentYear) return;
@@ -128,8 +127,8 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
                 // Sort players by index for flighting (re-using logic from Scores to be consistent)
                 const sortedPlayers = [...rp.round.players].sort((a: any, b: any) => {
-                    const idxA = a.index_at_time ?? a.player?.index ?? 0;
-                    const idxB = b.index_at_time ?? b.player?.index ?? 0;
+                    const idxA = a.handicapIndex ?? a.player?.handicapIndex ?? 0;
+                    const idxB = b.handicapIndex ?? b.player?.handicapIndex ?? 0;
                     return idxA - idxB;
                 });
 
@@ -142,16 +141,16 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                 // Find which flight this player is in
                 flights.forEach((flight: any) => {
                     const scoredPlayers = flight.map((p: any) => {
-                        if (!p.gross_score) return { ...p, net: 9999 };
-                        const idx = p.index_at_time ?? p.player?.index ?? 0;
-                        const slope = p.tee_box?.slope ?? 113;
-                        const rating = p.tee_box?.rating ?? par;
+                        if (!p.grossScore) return { ...p, net: 9999 };
+                        const idx = p.handicapIndex ?? p.player?.handicapIndex ?? 0;
+                        const slope = p.teeBox?.slope ?? 113;
+                        const rating = p.teeBox?.rating ?? par;
                         const ch = Math.round(idx * (slope / 113) + (rating - par));
-                        return { ...p, net: p.gross_score - ch, player_id: p.player_id };
+                        return { ...p, net: p.grossScore - ch, playerId: p.playerId };
                     }).sort((a: any, b: any) => a.net - b.net);
 
                     // Find this player's rank in their flight
-                    const rank = scoredPlayers.findIndex((p: any) => p.player_id === player.id);
+                    const rank = scoredPlayers.findIndex((p: any) => p.playerId === player.id);
                     if (rank !== -1 && scoredPlayers[rank].net !== 9999) {
                         let pts = 20; // Participation
                         if (rank === 0) pts = 100; // 1st place
@@ -306,10 +305,11 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
 
     const handleCopyMembers = async () => {
         // Build Data Rows
+        // Build Data Rows
         const rows = displayedPlayers.map((p: any) => {
-            const preferredTee = (p as any).preferred_tee_box || 'White';
+            const preferredTee = 'White'; // Default to White as preferred_tee_box is removed
             const hcp = getCourseHandicap(p.liveIndex, preferredTee);
-            const teePrefix = preferredTee === 'White' ? 'W:' : 'G:';
+            const teePrefix = 'W:';
             const hcpDisplay = `${teePrefix} ${hcp}`;
             const index = p.liveIndex.toFixed(1);
 

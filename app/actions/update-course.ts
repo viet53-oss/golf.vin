@@ -11,22 +11,12 @@ export async function updateCourse(
         tees: { id?: string, name: string, rating: number, slope: number, yardages?: number[] }[],
         holes: {
             id?: string,
-            hole_number: number,
+            holeNumber: number,
             par: number,
             difficulty: number | null,
             latitude?: number | null,
             longitude?: number | null,
-            elements?: {
-                side: string,
-                element_number: number,
-                front_latitude?: number | null,
-                front_longitude?: number | null,
-                back_latitude?: number | null,
-                back_longitude?: number | null,
-                water?: boolean,
-                bunker?: boolean,
-                tree?: boolean
-            }[]
+            /* elements removed */
         }[]
     }
 ) {
@@ -53,28 +43,7 @@ export async function updateCourse(
                 await prisma.$executeRaw`UPDATE holes SET latitude = ${hole.latitude}, longitude = ${hole.longitude} WHERE id = ${hole.id}`;
             }
 
-            // Update Elements
-            if (hole.elements) {
-                // Delete existing elements for this hole to replace with new set
-                await prisma.holeElement.deleteMany({ where: { hole_id: hole.id } });
-
-                if (hole.elements.length > 0) {
-                    await prisma.holeElement.createMany({
-                        data: hole.elements.map(e => ({
-                            hole_id: hole.id!,
-                            side: e.side,
-                            element_number: e.element_number,
-                            front_latitude: e.front_latitude,
-                            front_longitude: e.front_longitude,
-                            back_latitude: e.back_latitude,
-                            back_longitude: e.back_longitude,
-                            water: e.water || false,
-                            bunker: e.bunker || false,
-                            tree: e.tree || false
-                        }))
-                    });
-                }
-            }
+            // Elements Removed
         }
     }
 
@@ -90,7 +59,7 @@ export async function updateCourse(
         } else {
             await prisma.teeBox.create({
                 data: {
-                    course_id: courseId,
+                    courseId: courseId,
                     name: tee.name,
                     rating: tee.rating,
                     slope: tee.slope
@@ -107,11 +76,11 @@ export async function updateCourse(
 export async function deleteCourse(courseId: string) {
     // 1. Check for rounds
     const roundsCount = await prisma.round.count({
-        where: { course_id: courseId }
+        where: { courseId: courseId }
     });
 
     const liveRoundsCount = await prisma.liveRound.count({
-        where: { course_id: courseId }
+        where: { courseId: courseId }
     });
 
     if (roundsCount > 0 || liveRoundsCount > 0) {
@@ -121,8 +90,8 @@ export async function deleteCourse(courseId: string) {
     try {
         // 2. Delete dependencies first (Holes, TeeBoxes)
         // Prisma cascade might handle this, but being explicit is safe
-        await prisma.hole.deleteMany({ where: { course_id: courseId } });
-        await prisma.teeBox.deleteMany({ where: { course_id: courseId } });
+        await prisma.hole.deleteMany({ where: { courseId: courseId } });
+        await prisma.teeBox.deleteMany({ where: { courseId: courseId } });
 
         // 3. Delete Course
         await prisma.course.delete({ where: { id: courseId } });

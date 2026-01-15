@@ -14,20 +14,20 @@ export async function getScorecardDetails(roundPlayerId: string) {
                         course: {
                             include: {
                                 holes: {
-                                    orderBy: { hole_number: 'asc' }
+                                    orderBy: { holeNumber: 'asc' }
                                 }
                             }
                         }
                     }
                 },
-                tee_box: true,
+                teeBox: true,
                 scores: {
                     include: {
                         hole: true
                     },
                     orderBy: {
                         hole: {
-                            hole_number: 'asc'
+                            holeNumber: 'asc'
                         }
                     }
                 }

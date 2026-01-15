@@ -98,13 +98,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     // Track pending (unsaved) scores for the current hole only
     const [pendingScores, setPendingScores] = useState<Map<string, number>>(new Map());
     const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-    const [isGPSEnabled, setIsGPSEnabled] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('gps_enabled');
-            return saved !== null ? saved === 'true' : true;
+    const [isGPSEnabled, setIsGPSEnabled] = useState(true);
+    const [isClient, setIsClient] = useState(false);
+
+    // Fix hydration mismatch
+    useEffect(() => {
+        setIsClient(true);
+        const saved = localStorage.getItem('gps_enabled');
+        if (saved !== null) {
+            setIsGPSEnabled(saved === 'true');
         }
-        return true;
-    });
+    }, []);
+
     const [confirmConfig, setConfirmConfig] = useState<{
         isOpen: boolean;
         title: string;
@@ -285,16 +290,16 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             const guestsFromDb: Player[] = [];
             if (initialRound?.players) {
                 initialRound.players.forEach((p: any) => {
-                    if (p.is_guest) {
+                    if (p.isGuest) {
                         guestsFromDb.push({
                             id: p.id, // Use LiveRoundPlayer ID
-                            name: p.guest_name || 'Guest',
-                            index: p.index_at_time,
+                            name: p.guestName || 'Guest',
+                            index: p.indexAtTime || 0,
                             preferredTeeBox: null,
                             isGuest: true,
                             liveRoundData: {
-                                teeBoxName: p.teeBoxName || p.tee_box_name, // Handle both for safety
-                                courseHcp: p.courseHandicap || p.course_handicap
+                                teeBoxName: p.teeBoxName,
+                                courseHcp: p.courseHandicap
                             }
                         });
                     }
@@ -340,7 +345,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     });
                 }
                 // Use LiveRoundPlayer ID for guests, player.id for regular players
-                const playerId = p.is_guest ? p.id : p.player.id;
+                const playerId = p.isGuest ? p.id : p.player.id;
                 initialMap.set(playerId, playerScores);
             });
         }
@@ -357,7 +362,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
             if (clientScorerId) {
                 const takenOverIds = new Set<string>();
                 initialRound.players.forEach((p: any) => {
-                    const playerId = p.is_guest ? p.id : p.player.id;
+                    const playerId = p.isGuest ? p.id : p.player.id;
                     if (p.scorerId && p.scorerId !== clientScorerId) {
                         takenOverIds.add(playerId);
                     }
@@ -388,7 +393,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     }
                     // Update local map with server data
                     // Use LiveRoundPlayer ID for guests, player.id for regular players
-                    const playerId = p.is_guest ? p.id : p.player.id;
+                    const playerId = p.isGuest ? p.id : p.player.id;
                     next.set(playerId, serverPlayerScores);
                 });
                 return next;
@@ -417,7 +422,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         const newEagles: { name: string; totalEagles: number }[] = [];
 
         initialRound.players.forEach((p: any) => {
-            const playerId = p.is_guest ? p.id : p.player.id;
+            const playerId = p.isGuest ? p.id : p.player.id;
 
             // Init Birdie Ref
             if (!knownBirdiesRef.current.has(playerId)) knownBirdiesRef.current.set(playerId, new Set());
@@ -458,13 +463,13 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
 
             if (playerHasNewBirdie) {
                 newBirdies.push({
-                    name: p.is_guest ? (p.guest_name || 'Guest') : p.player.name,
+                    name: p.isGuest ? (p.guestName || 'Guest') : p.player.name,
                     totalBirdies: playerKnownSet.size
                 });
             }
             if (playerHasNewEagle) {
                 newEagles.push({
-                    name: p.is_guest ? (p.guest_name || 'Guest') : p.player.name,
+                    name: p.isGuest ? (p.guestName || 'Guest') : p.player.name,
                     totalEagles: playerEagleSet.size
                 });
             }
@@ -801,7 +806,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
         // If an admin unselects a player who was already in the round, remove them from DB entirely
         if (isAdmin && currentLiveRoundId && initialRound?.players) {
             for (const lrPlayer of initialRound.players) {
-                const playerId = lrPlayer.is_guest ? lrPlayer.id : lrPlayer.player.id;
+                const playerId = lrPlayer.isGuest ? lrPlayer.id : lrPlayer.player.id;
                 if (!newSelectedPlayerIds.includes(playerId)) {
                     console.log("Admin removing player from round:", lrPlayer.id);
                     await removePlayerFromLiveRound(lrPlayer.id);
@@ -885,7 +890,8 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 if (p.isGuest) return false;
 
                 // Check if player is in the server-provided initialRound
-                const existsOnServer = initialRound?.players?.some((rp: any) => rp.player?.id === p.id);
+                // Use robust check for both possible locations of ID
+                const existsOnServer = initialRound?.players?.some((rp: any) => (rp.player?.id === p.id) || (rp.playerId === p.id));
                 return !existsOnServer;
             });
 
@@ -893,15 +899,42 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                 console.log("Found players missing from server (Ghost Players). Attempting repair:", missingFromServer.map(p => p.name));
 
                 let restoredCount = 0;
+                const failedIds = new Set<string>();
+
                 for (const p of missingFromServer) {
                     const teeBox = getPlayerTee(p);
                     if (teeBox && liveRoundId) {
-                        const res = await addPlayerToLiveRound({
-                            liveRoundId,
-                            playerId: p.id,
-                            teeBoxId: teeBox.id
-                        });
-                        if (res.success) restoredCount++;
+                        try {
+                            const res = await addPlayerToLiveRound({
+                                liveRoundId,
+                                playerId: p.id,
+                                teeBoxId: teeBox.id
+                            });
+
+                            if (res.success) {
+                                restoredCount++;
+                            } else {
+                                console.warn(`Failed to repair player ${p.name}: ${res.error}`);
+                                failedIds.add(p.id);
+                            }
+                        } catch (err) {
+                            console.error(`Error repairing player ${p.name}`, err);
+                            failedIds.add(p.id);
+                        }
+                    } else {
+                        // Missing tee box means we can't add them anyway -> stale
+                        failedIds.add(p.id);
+                    }
+                }
+
+                // Remove players that failed to sync (likely stale IDs from deleted DB records)
+                if (failedIds.size > 0) {
+                    console.log(`Removing ${failedIds.size} stale players from local selection.`);
+                    setSelectedPlayers(prev => prev.filter(p => !failedIds.has(p.id)));
+                    // Also clear from localstorage if empty
+                    const remaining = selectedPlayers.filter(p => !failedIds.has(p.id));
+                    if (remaining.length === 0) {
+                        localStorage.removeItem('live_scoring_my_group');
                     }
                 }
 
@@ -922,18 +955,18 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
     const summaryPlayersMap = new Map<string, Player>();
     if (initialRound?.players) {
         initialRound.players.forEach((p: any) => {
-            if (p.is_guest) {
+            if (p.isGuest) {
                 // Handle guest players
                 summaryPlayersMap.set(p.id, {
                     id: p.id,
-                    name: p.guestName || p.guest_name || 'Guest',
-                    index: p.indexAtTime || p.index_at_time,
+                    name: p.guestName || 'Guest',
+                    index: p.indexAtTime || 0,
                     preferredTeeBox: null,
                     isGuest: true,
                     liveRoundPlayerId: p.id, // For guests, the ID is already the LiveRoundPlayer ID
                     liveRoundData: {
-                        teeBoxName: p.teeBoxName || p.tee_box_name,
-                        courseHcp: p.courseHandicap || p.course_handicap
+                        teeBoxName: p.teeBoxName,
+                        courseHcp: p.courseHandicap
                     }
                 });
             } else {
@@ -942,11 +975,11 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     id: p.player.id,
                     name: p.player.name,
                     index: p.player.handicapIndex ?? p.player.index,
-                    preferredTeeBox: p.player.preferredTeeBox ?? p.player.preferred_tee_box,
+                    preferredTeeBox: null,
                     liveRoundPlayerId: p.id, // Store the LiveRoundPlayer ID
                     liveRoundData: {
-                        teeBoxName: p.teeBoxName || p.tee_box_name,
-                        courseHcp: p.courseHandicap || p.course_handicap
+                        teeBoxName: p.teeBoxName,
+                        courseHcp: p.courseHandicap
                     }
                 });
             }
@@ -1213,7 +1246,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                     onClose={() => setIsPlayerModalOpen(false)}
                     allPlayers={[...allPlayers, ...guestPlayers]}
                     selectedIds={selectedPlayers.map(p => p.id)}
-                    playersInRound={initialRound?.players?.map((p: any) => p.is_guest ? p.id : p.player.id) || []}
+                    playersInRound={initialRound?.players?.map((p: any) => p.isGuest ? p.id : p.player.id) || []}
                     onSelectionChange={handleAddPlayers}
                     isAdmin={isAdmin}
                     courseData={defaultCourse ? {
@@ -1691,7 +1724,7 @@ export default function LiveScoreClient({ allPlayers, defaultCourse, initialRoun
                                                                         id: player.id,
                                                                         name: player.name,
                                                                         index: player.index,
-                                                                        courseHandicap: player.liveRoundData?.course_hcp || 0
+                                                                        courseHandicap: player.liveRoundData?.courseHcp || 0
                                                                     });
                                                                     setIsGuestModalOpen(true);
                                                                 }}

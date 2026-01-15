@@ -7,7 +7,7 @@ export interface PlayerStatsInput {
     grossScore: number | null;
     indexAtTime: number | null;
     player: {
-        index: number;
+        handicapIndex: number;
         preferredTeeBox?: string | null;
     };
     teeBox?: {
@@ -51,7 +51,7 @@ export function calculatePlayerStats(
     course: CourseData,
     par: number
 ): PlayerStats {
-    const idxBefore = rp.indexAtTime ?? rp.player?.index ?? 0;
+    const idxBefore = rp.indexAtTime ?? rp.player?.handicapIndex ?? 0;
 
     // Use assigned tee box first, fall back to player's preferred tee if missing
     let activeTee = rp.teeBox;

@@ -5,24 +5,16 @@ import { calculateHandicap, HandicapInput } from '@/lib/handicap';
 
 /**
  * Recalculate handicap for a single player after a score update
- * This is more efficient than recalculating all players
  */
 export async function recalculatePlayerHandicap(playerId: string) {
-    // DEBUG: Stop execution to prove if this is being called
-    console.error("!!! RECALCULATE TRIGGERED !!!");
-    // throw new Error("DEBUG: Recalculate Player Handicap was TRIGGERED! Please tell the developer.");
-
     try {
         // Fetch player with all rounds
         const player = await prisma.player.findUnique({
             where: { id: playerId },
             include: {
                 rounds: {
-                    include: { round: true, tee_box: true },
+                    include: { round: true, teeBox: true },
                     orderBy: { round: { date: 'asc' } }
-                },
-                manual_rounds: {
-                    orderBy: { date_played: 'asc' }
                 }
             }
         });
@@ -32,95 +24,38 @@ export async function recalculatePlayerHandicap(playerId: string) {
             return;
         }
 
-        // Combine and Sort All Rounds Chronologically
-        type HistoryItem =
-            | { type: 'v3'; date: string; id: string; score: number; rating: number; slope: number; timestamp: number }
-            | { type: 'v2'; date: string; id: string; differential: number; timestamp: number };
+        const roundsRaw = player.rounds;
 
-        const v3RoundsRaw = player.rounds;
-        console.log(`[Recalc] Player ${player.name} has ${v3RoundsRaw.length} raw rounds.`);
-
-        const v3Rounds: HistoryItem[] = v3RoundsRaw
+        const history: HandicapInput[] = roundsRaw
             .filter((r: any) => {
-                // const isComplete = r.round.completed === true;
-                const isNotLive = r.round.is_live !== true;  // Exclude live rounds (include false and null)
-                const score = r.adjusted_gross_score || r.gross_score;
-                const isHighEnough = score > 60;
+                const isNotLive = r.round.isLive !== true;
+                const score = r.netScore || r.grossScore; // Use netScore if mostly reliable, or grossScore
 
-                // if (!isComplete) console.log(`[Recalc] Skipping round ${r.round.date} (Incomplete)`);
-                if (!isNotLive) console.log(`[Recalc] Skipping round ${r.round.date} (Live round)`);
-                else if (!isHighEnough) console.log(`[Recalc] Skipping round ${r.round.date} (Score too low: ${score})`);
-                else console.log(`[Recalc] INCLUDING round ${r.round.date} (Score: ${score})`);
+                // Assuming netScore is what we want or gross. 
+                // calculateHandicap usually takes Gross + Rating/Slope OR Differential.
+                // If we pass score/rating/slope, it calculates diff.
+                // If netScore is available, maybe use it? But formula usually starts with Gross.
+                // Let's stick to using grossScore and TeeBox info.
 
-                return r.tee_box && score && isNotLive && isHighEnough;
+                const validScore = r.grossScore && r.grossScore > 0;
+
+                return r.teeBox && validScore && isNotLive;
             })
             .map((r: any) => ({
-                type: 'v3',
-                date: r.round.date,
                 id: r.id,
-                score: r.adjusted_gross_score || r.gross_score || 0,
-                rating: r.tee_box!.rating,
-                slope: r.tee_box!.slope,
-                timestamp: new Date(r.round.date).getTime()
+                date: r.round.date,
+                score: r.grossScore || 0,
+                rating: r.teeBox!.rating,
+                slope: r.teeBox!.slope
             }));
 
-        const v2Rounds: HistoryItem[] = player.manual_rounds.map((r: any) => ({
-            type: 'v2',
-            date: r.date_played,
-            id: r.id,
-            differential: r.score_differential,
-            timestamp: new Date(r.date_played).getTime()
-        }));
+        // Calculate Final Player Index
+        // lowHandicapIndex is removed from schema, passing undefined/null or 0 if calc supports it
+        const finalStats = calculateHandicap(history, undefined);
 
-        // Sort by Date ASC (Oldest first)
-        const allHistory = [...v3Rounds, ...v2Rounds].sort((a, b) => a.timestamp - b.timestamp);
-
-        // Replay History
-        let currentHistory: HandicapInput[] = [];
-
-        for (const round of allHistory) {
-            // A. Calculate Index BEFORE this round
-            const statsBefore = calculateHandicap(convertToHandicapInput(currentHistory), player.low_handicap_index);
-            const indexBefore = statsBefore.handicapIndex;
-
-            // B. Add this round to history
-            if (round.type === 'v3') {
-                currentHistory.push({
-                    id: round.id,
-                    date: round.date,
-                    score: round.score,
-                    rating: round.rating,
-                    slope: round.slope
-                } as HandicapInput);
-            } else {
-                currentHistory.push({
-                    id: round.id,
-                    date: round.date,
-                    differential: round.differential
-                } as HandicapInput);
-            }
-
-            // C. Calculate Index AFTER this round
-            const statsAfter = calculateHandicap(convertToHandicapInput(currentHistory), player.low_handicap_index);
-            const indexAfter = statsAfter.handicapIndex;
-
-            // D. Update DB if it's a V3 round
-            if (round.type === 'v3') {
-                await prisma.roundPlayer.update({
-                    where: { id: round.id },
-                    data: {
-                        index_at_time: indexBefore,
-                        index_after: indexAfter
-                    } as any
-                });
-            }
-        }
-
-        // Update Final Player Index
-        const finalStats = calculateHandicap(convertToHandicapInput(currentHistory), player.low_handicap_index);
         await prisma.player.update({
             where: { id: player.id },
-            data: { index: finalStats.handicapIndex }
+            data: { handicapIndex: finalStats.handicapIndex }
         });
 
         console.log(`✅ Recalculated handicap for player ${player.name}: ${finalStats.handicapIndex.toFixed(1)}`);
@@ -128,15 +63,4 @@ export async function recalculatePlayerHandicap(playerId: string) {
     } catch (error) {
         console.error(`Error recalculating handicap for player ${playerId}:`, error);
     }
-}
-
-// Helper
-function convertToHandicapInput(history: any[]): HandicapInput[] {
-    return history.map(h => {
-        if (h.differential !== undefined) {
-            return { id: h.id, date: h.date, differential: h.differential } as HandicapInput;
-        } else {
-            return { id: h.id, date: h.date, score: h.score, rating: h.rating, slope: h.slope } as HandicapInput;
-        }
-    });
 }

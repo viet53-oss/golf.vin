@@ -63,7 +63,7 @@ type RoundWithPlayers = {
         player: {
             id: string;
             name: string;
-            index: number;
+            handicapIndex: number;
             email?: string | null;
             preferredTeeBox?: string | null;
         };
@@ -165,8 +165,8 @@ export default function ScoresDashboard({
 
         if (round.isTournament) {
             const sortedByIdx = [...allPlayers].sort((a, b) => {
-                const idxA = a.indexAtTime ?? a.player?.index ?? 0;
-                const idxB = b.indexAtTime ?? b.player?.index ?? 0;
+                const idxA = a.indexAtTime ?? a.player?.handicapIndex ?? 0;
+                const idxB = b.indexAtTime ?? b.player?.handicapIndex ?? 0;
                 return idxA - idxB;
             });
             const half = Math.floor(sortedByIdx.length / 2);
@@ -222,7 +222,7 @@ export default function ScoresDashboard({
             `;
 
             flight.players.forEach((rp, idx) => {
-                const idxBefore = rp.indexAtTime ?? rp.player.index;
+                const idxBefore = rp.indexAtTime ?? rp.player.handicapIndex ?? 0;
                 const idxAfter = rp.indexAfter;
 
                 // Use shared utility for stats
@@ -409,8 +409,8 @@ export default function ScoresDashboard({
                                 if (round.isTournament) {
                                     // First, sort by index to divide into flights
                                     const sortedByIdx = [...(round.players || [])].sort((a, b) => {
-                                        const idxA = a.indexAtTime ?? a.player?.index ?? 0;
-                                        const idxB = b.indexAtTime ?? b.player?.index ?? 0;
+                                        const idxA = a.indexAtTime ?? a.player?.handicapIndex ?? 0;
+                                        const idxB = b.indexAtTime ?? b.player?.handicapIndex ?? 0;
                                         return idxA - idxB;
                                     });
 
@@ -465,7 +465,7 @@ export default function ScoresDashboard({
                                                     const firstName = player.name.split(' ')[0];
                                                     const lastName = player.name.split(' ').slice(1).join(' ');
 
-                                                    const idxBefore = rp.indexAtTime ?? player.index;
+                                                    const idxBefore = rp.indexAtTime ?? player.handicapIndex ?? 0;
                                                     const idxAfter = rp.indexAfter;
 
                                                     // Use shared utility for stats

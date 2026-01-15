@@ -41,11 +41,6 @@ export interface HandicapHistoryResponse {
     history: HandicapHistoryItem[];
 }
 
-// Define the shape of V3 rounds with includes using type inference
-type RoundWithDetails = Awaited<ReturnType<typeof prisma.roundPlayer.findMany<{
-    include: { round: true; tee_box: true }
-}>>>[number];
-
 export async function getHandicapHistory(playerId: string): Promise<HandicapHistoryResponse> {
 
     // 1. Fetch Player
@@ -62,79 +57,50 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
                 mode: 'insensitive'
             }
         },
-        include: { tee_boxes: true, holes: true }
+        include: { teeBoxes: true, holes: true }
     });
 
-    const coursePar = course?.holes.reduce((sum: number, h: { par: number }) => sum + h.par, 0) || 68;
-    const tees = course?.tee_boxes.map((t: { name: string; rating: number; slope: number }) => ({ name: t.name, rating: t.rating, slope: t.slope })) || [];
+    const coursePar = course?.holes.reduce((sum: number, h: { par: number }) => sum + h.par, 0) || 72;
+    const tees = course?.teeBoxes.map((t: { name: string; rating: number; slope: number }) => ({ name: t.name, rating: t.rating, slope: t.slope })) || [];
 
-    // 3. Fetch All Rounds (V2 + V3)
-    const v2Rounds = await prisma.handicapRound.findMany({
-        where: { player_id: playerId },
-    });
-
-    const v3Rounds = await prisma.roundPlayer.findMany({
+    // 3. Fetch Rounds (V3/Current Schema Only)
+    // Note: Historical V2 rounds (handicapRound table) have been removed in the latest schema.
+    const rounds = await prisma.roundPlayer.findMany({
         where: {
-            player_id: playerId,
-            gross_score: { gte: 1 },
-            // round: { completed: true } // Removed to showing all scored rounds
+            playerId: playerId,
+            grossScore: { not: null }, // Only completed rounds
         },
-        include: { round: true, tee_box: true }
-    }) as RoundWithDetails[];
+        include: {
+            round: true,
+            teeBox: true
+        }
+    });
 
     // 4. Normalize & Sort (Ascending for calculation)
-    // Find preferred tee box for V2 rounds
-    const preferredTeeBox = player.preferred_tee_box && course
-        ? course.tee_boxes.find((tb: { name: string }) => tb.name.toLowerCase() === player.preferred_tee_box!.toLowerCase())
-        : null;
+    let allRounds = rounds.map(r => {
+        const teeBox = r.teeBox;
+        const rating = teeBox.rating;
+        const slope = teeBox.slope;
+        const par = teeBox.par || coursePar;
 
-    let allRounds = [
-        ...v2Rounds.map((r: { id: string; date_played: string; score_differential: number; gross_score: number | null }) => ({
+        // Use grossScore as adjusted since Net Double Bogey logic is not fully implemented in DB yet
+        const adjustedScore = r.grossScore!; // Verified not null by query
+
+        const diff = calculateScoreDifferential(adjustedScore, rating, slope);
+
+        return {
             id: r.id,
-            date: r.date_played,
-            type: 'V2' as const,
-            differential: r.score_differential,
-            gross: (r as any).gross_score || undefined,
-            // Add tee box info for V2 rounds using preferred tee
-            teeColor: preferredTeeBox?.name,
-            rating: preferredTeeBox?.rating,
-            slope: preferredTeeBox?.slope,
-            par: coursePar,
-        })),
-        ...v3Rounds.map((r: RoundWithDetails) => {
-            // PRIORITY 1: Use the tee box data SAVED with this round
-            // PRIORITY 2: Fall back to current tee box data if saved data is missing (old rounds)
-            const savedPar = r.tee_box_par;
-            const savedRating = r.tee_box_rating;
-            const savedSlope = r.tee_box_slope;
-            const savedTeeName = r.tee_box_name;
-
-            // Fallback to current tee box if saved data is missing
-            const teeBox = r.tee_box;
-            const rating = savedRating ?? teeBox?.rating ?? 72;
-            const slope = savedSlope ?? teeBox?.slope ?? 113;
-            const par = savedPar ?? coursePar;
-            const teeName = savedTeeName ?? teeBox?.name;
-
-            const adjustedScore = r.adjusted_gross_score || r.gross_score!;
-
-            // Calculate differential based on the actual tee box used
-            const diff = calculateScoreDifferential(adjustedScore, rating, slope);
-
-            return {
-                id: r.id,
-                date: r.round.date,
-                type: 'V3' as const,
-                differential: diff,
-                gross: r.gross_score!,
-                adjusted: adjustedScore,
-                teeColor: teeName,
-                rating,
-                slope,
-                par,
-            };
-        })
-    ];
+            date: r.round.date,
+            type: 'V3' as const,
+            differential: diff,
+            gross: r.grossScore!,
+            adjusted: adjustedScore,
+            teeColor: teeBox.name,
+            rating,
+            slope,
+            par,
+        };
+    });
 
     // Sort Ascending (Oldest First) to build history
     allRounds.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -142,11 +108,14 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
     // 5. Calculate Rolling History
     const historyWithIndex: HandicapHistoryItem[] = [];
     const windowRounds: HandicapInput[] = [];
-    let runningLowIndex: number | null = null; // Track the lowest index seen so far
+
+    // Low Handicap Index logic is not currently persisted in the new schema. 
+    // We will pass null for now, which disables capping logic based on Low HI.
+    const storedLowIndex: number | null = null;
 
     for (const round of allRounds) {
         // State BEFORE this round (using rounds 0 to n-1)
-        const calcBefore = calculateHandicap(windowRounds, player.low_handicap_index);
+        const calcBefore = calculateHandicap(windowRounds, storedLowIndex);
         const indexBefore = calcBefore.handicapIndex;
 
         // Add current round to window
@@ -158,7 +127,7 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         windowRounds.push(input);
 
         // State AFTER this round (using rounds 0 to n)
-        const calcAfter = calculateHandicap(windowRounds, player.low_handicap_index);
+        const calcAfter = calculateHandicap(windowRounds, storedLowIndex);
         const indexAfter = calcAfter.handicapIndex;
 
         // Did this specific round count towards the NEW index?
@@ -173,40 +142,17 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
             indexBefore,
             indexAfter,
             used,
-            isLowHi: false, // Calculate in Pass 2
+            isLowHi: false, // Low HI tracking is temporarily disabled
             isSoftCapped,
             isHardCapped
         });
     }
 
-    // Pass 2: Mark the LATEST round (chronologically) that achieved the player's Low Handicap Index
-    // Use the player's stored low_handicap_index from the database
-    const targetLowIndex = player.low_handicap_index;
-    const twelveMonthsAgo = new Date();
-    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
-
-    if (targetLowIndex !== null) {
-        // Search forward through the array to find the chronologically LATEST match
-        // (array is still in chronological order at this point, oldest first)
-        let latestLowHiIndex = -1;
-        for (let i = 0; i < historyWithIndex.length; i++) {
-            const r = historyWithIndex[i];
-            if (new Date(r.date) >= twelveMonthsAgo) {
-                // Use epsilon for floating point comparison
-                if (Math.abs(r.indexAfter - targetLowIndex) < 0.1) {
-                    latestLowHiIndex = i; // Keep updating to get the LATEST (most recent chronologically)
-                }
-            }
-        }
-
-        // Mark only that single round
-        if (latestLowHiIndex !== -1) {
-            historyWithIndex[latestLowHiIndex].isLowHi = true;
-        }
-    }
+    // Pass 2: Mark Low HI (Disabled for now as we don't store Low HI)
+    // logic removed
 
     // 6. Determine which rounds are used for the CURRENT index
-    const finalCalc = calculateHandicap(allRounds, player.low_handicap_index);
+    const finalCalc = calculateHandicap(allRounds, storedLowIndex);
     const finalUsedIds = new Set(
         finalCalc.differentials
             .filter(d => d.used)
@@ -226,8 +172,8 @@ export async function getHandicapHistory(playerId: string): Promise<HandicapHist
         player: {
             id: player.id,
             name: player.name,
-            currentIndex: finalCalc.handicapIndex, // Use recalculated index, not stored value
-            lowIndex: player.low_handicap_index
+            currentIndex: finalCalc.handicapIndex,
+            lowIndex: storedLowIndex
         },
         courseData: {
             par: coursePar,

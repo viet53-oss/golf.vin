@@ -16,7 +16,7 @@ export default async function PostScorePage() {
 
     try {
         courses = await prisma.course.findMany({
-            include: { tee_boxes: true }
+            include: { teeBoxes: true }
         });
     } catch (error) {
         console.error('Failed to fetch courses:', error);
@@ -68,7 +68,7 @@ export default async function PostScorePage() {
                             <option value="">Select Tee</option>
                             {courses.map((course: any) => (
                                 <optgroup key={course.id} label={course.name}>
-                                    {course.tee_boxes.map((tee: any) => (
+                                    {course.teeBoxes.map((tee: any) => (
                                         <option key={tee.id} value={tee.id}>
                                             {course.name} - {tee.name} ({tee.rating}/{tee.slope})
                                         </option>

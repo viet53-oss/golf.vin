@@ -11,32 +11,21 @@ import { createCourse } from '@/app/actions/create-course';
 type CourseData = {
     id: string;
     name: string;
-    tee_boxes: { id: string; name: string; rating: number; slope: number }[];
+    teeBoxes: { id: string; name: string; rating: number; slope: number }[];
     holes: {
         id: string;
-        hole_number: number;
+        holeNumber: number;
         par: number;
         difficulty: number | null;
         latitude?: number | string | null;
         longitude?: number | string | null;
-        elements: {
-            id?: string;
-            side: string;
-            element_number: number;
-            front_latitude?: number | string | null;
-            front_longitude?: number | string | null;
-            back_latitude?: number | string | null;
-            back_longitude?: number | string | null;
-            water?: boolean;
-            bunker?: boolean;
-            tree?: boolean;
-        }[]
+        // elements: any[] // Removed
     }[];
 };
 
 export default function EditCourseClient({ initialCourse, isNew = false }: { initialCourse: CourseData, isNew?: boolean }) {
     const [name, setName] = useState(initialCourse.name);
-    const [tees, setTees] = useState(initialCourse.tee_boxes);
+    const [tees, setTees] = useState(initialCourse.teeBoxes);
     const [holes, setHoles] = useState(initialCourse.holes); // Should be sorted 1-18
     const [coursePar, setCoursePar] = useState(initialCourse.holes.reduce((sum, h) => sum + (h.par || 0), 0));
     const [editingHoleIndex, setEditingHoleIndex] = useState<number | null>(null);
@@ -91,76 +80,10 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
         setTees(newTees);
     };
 
-    const handleElementChange = (holeIndex: number, side: 'LEFT' | 'RIGHT', elementNum: number, position: 'front' | 'back', value: string) => {
-        const newHoles = [...holes];
-        const hole = { ...newHoles[holeIndex] };
-        const elements = hole.elements ? [...hole.elements] : [];
-
-        let elementIndex = elements.findIndex(e => e.side === side && e.element_number === elementNum);
-
-        if (elementIndex === -1) {
-            elements.push({
-                side,
-                element_number: elementNum,
-                front_latitude: null,
-                front_longitude: null,
-                back_latitude: null,
-                back_longitude: null
-            });
-            elementIndex = elements.length - 1;
-        }
-
-        const element = { ...elements[elementIndex] };
-
-        const trimmed = value.trim();
-        const parts = trimmed.split(/[\s,]+/).filter(p => p.length > 0);
-        const lat = parts.length > 0 ? parts[0] : '';
-        const lon = parts.length >= 2 ? parts[1] : '';
-
-        if (position === 'front') {
-            element.front_latitude = lat;
-            element.front_longitude = lon;
-        } else {
-            element.back_latitude = lat;
-            element.back_longitude = lon;
-        }
-
-        elements[elementIndex] = element;
-        hole.elements = elements;
-        newHoles[holeIndex] = hole;
-        setHoles(newHoles);
-    };
-
-    const handleElementFeatureToggle = (holeIndex: number, side: 'LEFT' | 'RIGHT', elementNum: number, feature: 'water' | 'bunker' | 'tree', checked: boolean) => {
-        const newHoles = [...holes];
-        const hole = { ...newHoles[holeIndex] };
-        const elements = hole.elements ? [...hole.elements] : [];
-
-        let elementIndex = elements.findIndex(e => e.side === side && e.element_number === elementNum);
-
-        if (elementIndex === -1) {
-            elements.push({
-                side,
-                element_number: elementNum,
-                front_latitude: null,
-                front_longitude: null,
-                back_latitude: null,
-                back_longitude: null,
-                water: false,
-                bunker: false,
-                tree: false
-            });
-            elementIndex = elements.length - 1;
-        }
-
-        const element = { ...elements[elementIndex], [feature]: checked };
-        elements[elementIndex] = element;
-        hole.elements = elements;
-        newHoles[holeIndex] = hole;
-        setHoles(newHoles);
-    };
-
-
+    /*
+    const handleElementChange = ... // Removed
+    const handleElementFeatureToggle = ... // Removed
+    */
 
     const parseCoordinate = (val: any): number | null => {
         if (!val || typeof val !== 'string') return typeof val === 'number' ? val : null;
@@ -191,11 +114,12 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     name,
                     tees,
                     holes: holes.map(h => ({
-                        hole_number: h.hole_number,
+                        hole_number: h.holeNumber,
                         par: h.par,
                         difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
                         longitude: parseCoordinate(h.longitude),
+                        /*
                         elements: h.elements?.map(e => ({
                             side: e.side,
                             element_number: e.element_number,
@@ -207,6 +131,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                             bunker: e.bunker || false,
                             tree: e.tree || false
                         }))
+                        */
                     }))
                 });
             } else {
@@ -215,11 +140,12 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     tees,
                     holes: holes.map(h => ({
                         id: h.id,
-                        hole_number: h.hole_number,
+                        hole_number: h.holeNumber,
                         par: h.par,
                         difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
                         longitude: parseCoordinate(h.longitude),
+                        /*
                         elements: h.elements?.map(e => ({
                             side: e.side,
                             element_number: e.element_number,
@@ -231,6 +157,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                             bunker: e.bunker || false,
                             tree: e.tree || false
                         }))
+                        */
                     }))
                 });
             }
@@ -240,8 +167,8 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
 
 
     // Split holes for UI
-    const frontNine = holes.filter((h: any) => h.hole_number <= 9);
-    const backNine = holes.filter((h: any) => h.hole_number > 9);
+    const frontNine = holes.filter((h: any) => h.holeNumber <= 9);
+    const backNine = holes.filter((h: any) => h.holeNumber > 9);
 
     return (
         <>
@@ -358,7 +285,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                     <thead className="bg-gray-100 font-bold text-gray-700">
                                         <tr>
                                             <th className="py-2 px-1 text-left w-16">Hole</th>
-                                            {frontNine.map((h: any) => <th key={h.id} className="py-2 px-1 w-12">{h.hole_number}</th>)}
+                                            {frontNine.map((h: any) => <th key={h.id} className="py-2 px-1 w-12">{h.holeNumber}</th>)}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -403,6 +330,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                 </td>
                                             ))}
                                         </tr>
+                                        {/*}
                                         <tr className="border-t border-gray-100">
                                             <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Elements</td>
                                             {frontNine.map((h: any, i: number) => (
@@ -416,6 +344,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                 </td>
                                             ))}
                                         </tr>
+                                        */}
                                     </tbody>
                                 </table>
                             </div>
@@ -427,7 +356,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                     <thead className="bg-gray-100 font-bold text-gray-700">
                                         <tr>
                                             <th className="py-2 px-1 text-left w-16">Hole</th>
-                                            {backNine.map((h: any) => <th key={h.id} className="py-2 px-1 w-12">{h.hole_number}</th>)}
+                                            {backNine.map((h: any) => <th key={h.id} className="py-2 px-1 w-12">{h.holeNumber}</th>)}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -474,6 +403,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                 </td>
                                             ))}
                                         </tr>
+                                        {/*
                                         <tr className="border-t border-gray-100">
                                             <td className="py-2 px-1 text-left font-bold text-gray-500 w-16">Elements</td>
                                             {backNine.map((h: any, i: number) => (
@@ -487,6 +417,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                                                 </td>
                                             ))}
                                         </tr>
+                                        */}
                                     </tbody>
                                 </table>
                             </div>

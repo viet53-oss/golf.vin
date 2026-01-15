@@ -9,10 +9,10 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     const course = await prisma.course.findUnique({
         where: { id },
         include: {
-            tee_boxes: { orderBy: { rating: 'desc' } },
+            teeBoxes: { orderBy: { rating: 'desc' } },
             holes: {
-                orderBy: { hole_number: 'asc' },
-                include: { elements: true }
+                orderBy: { holeNumber: 'asc' },
+                // include: { elements: true } // Removed from schema
             }
         }
     });

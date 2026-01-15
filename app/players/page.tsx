@@ -18,35 +18,29 @@ export default async function PlayersPage() {
                 name: true,
                 email: true,
                 phone: true,
-                address: true,
-                city: true,
-                state: true,
-                zip: true,
-                preferred_tee_box: true,
+                // address/city/state/zip/year_joined removed
                 birthday: true,
-                year_joined: true,
-                index: true,
-                low_handicap_index: true,
-                created_at: true,
+                handicapIndex: true, // was index
+                // low_handicap_index: true, // Removed
+                createdAt: true,
                 // Only load essential round data for calculations
                 rounds: {
                     select: {
                         id: true,
-                        gross_score: true,
-                        adjusted_gross_score: true,
-                        front_nine: true,
-                        back_nine: true,
-                        index_at_time: true,
-                        index_after: true,
-                        points: true,
-                        payout: true,
-                        score_differential: true,
+                        grossScore: true,
+                        netScore: true, // was adjusted_gross_score
+                        frontNine: true,
+                        backNine: true,
+                        // handicapIndex removed (snapshot missing)
+                        // points removed
+                        // payout removed
+                        // scoreDifferential removed
                         round: {
                             select: {
                                 id: true,
                                 date: true,
                                 name: true,
-                                is_tournament: true,
+                                isTournament: true,
                                 course: {
                                     select: {
                                         holes: {
@@ -58,7 +52,7 @@ export default async function PlayersPage() {
                                 }
                             }
                         },
-                        tee_box: {
+                        teeBox: {
                             select: {
                                 name: true,
                                 slope: true,
@@ -72,17 +66,7 @@ export default async function PlayersPage() {
                         }
                     }
                 },
-                manual_rounds: {
-                    select: {
-                        id: true,
-                        date_played: true,
-                        score_differential: true,
-                        gross_score: true
-                    },
-                    orderBy: {
-                        date_played: 'desc'
-                    }
-                }
+                // manual_rounds removed
             }
         });
 
@@ -94,7 +78,7 @@ export default async function PlayersPage() {
                     mode: 'insensitive'
                 }
             },
-            include: { tee_boxes: true, holes: true }
+            include: { teeBoxes: true, holes: true }
         });
     } catch (error) {
         console.error("Failed to fetch players data:", error);

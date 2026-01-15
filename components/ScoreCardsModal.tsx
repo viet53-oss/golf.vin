@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 interface Hole {
-    hole_number: number;
+    holeNumber: number;
     par: number;
     difficulty?: number | null;
 }
@@ -11,7 +11,7 @@ interface Hole {
 interface Score {
     strokes: number;
     hole: {
-        hole_number: number;
+        holeNumber: number;
         difficulty?: number | null;
     };
 }
@@ -21,20 +21,20 @@ interface RoundPlayer {
     player: {
         name: string;
     };
-    gross_score: number;
+    grossScore: number;
     scores: Score[];
-    index_at_time: number;
-    tee_box: {
+    indexAtTime?: number;
+    teeBox: {
         name: string;
         rating: number;
         slope: number;
-    };
+    } | null;
 }
 
 interface ScoreCardsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    roundPlayers: RoundPlayer[];
+    roundPlayers: any[]; // Relaxed type to match incoming data more easily
     holes: Hole[];
     coursePar: number;
 }
@@ -60,26 +60,26 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
         let parTotal = 0;
         let thru = 0;
 
-        const slope = player.tee_box?.slope || 113;
-        const rating = player.tee_box?.rating || coursePar;
-        const index = player.index_at_time || 0;
+        const slope = player.teeBox?.slope || 113;
+        const rating = player.teeBox?.rating || coursePar;
+        const index = player.indexAtTime || 0;
         const courseHcp = Math.round(index * (slope / 113) + (rating - coursePar));
 
         const grossHoleScores: { difficulty: number; grossScore: number }[] = [];
 
-        playerScores.forEach((score) => {
+        playerScores.forEach((score: any) => {
             totalGross += score.strokes;
 
             // Track front 9 and back 9
-            if (score.hole.hole_number <= 9) {
+            if (score.hole.holeNumber <= 9) {
                 front9 += score.strokes;
             } else {
                 back9 += score.strokes;
             }
 
-            const hole = holes.find(h => h.hole_number === score.hole.hole_number);
+            const hole = holes.find(h => h.holeNumber === score.hole.holeNumber);
             const holePar = hole?.par || 4;
-            const difficulty = hole?.difficulty || score.hole.hole_number;
+            const difficulty = hole?.difficulty || score.hole.holeNumber;
 
             grossHoleScores.push({
                 difficulty,
@@ -214,9 +214,9 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                 {/* Row 1: Holes 1-9 */}
                                 <div className="grid grid-cols-9 border-b border-black">
                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
-                                        const scoreObj = p.scores.find(s => Number(s.hole.hole_number) === num);
+                                        const scoreObj = p.scores.find((s: any) => Number(s.hole.holeNumber) === num);
                                         const score = scoreObj?.strokes || null;
-                                        const hole = holes.find(h => Number(h.hole_number) === num);
+                                        const hole = holes.find(h => Number(h.holeNumber) === num);
                                         const holePar = hole?.par || 4;
 
                                         let bgClass = "bg-white";
@@ -245,9 +245,9 @@ export default function ScoreCardsModal({ isOpen, onClose, roundPlayers, holes, 
                                 {/* Row 2: Holes 10-18 */}
                                 <div className="grid grid-cols-9">
                                     {[10, 11, 12, 13, 14, 15, 16, 17, 18].map(num => {
-                                        const scoreObj = p.scores.find(s => Number(s.hole.hole_number) === num);
+                                        const scoreObj = p.scores.find((s: any) => Number(s.hole.holeNumber) === num);
                                         const score = scoreObj?.strokes || null;
-                                        const hole = holes.find(h => Number(h.hole_number) === num);
+                                        const hole = holes.find(h => Number(h.holeNumber) === num);
                                         const holePar = hole?.par || 4;
 
                                         let bgClass = "bg-white";
