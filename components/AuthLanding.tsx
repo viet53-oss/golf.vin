@@ -211,18 +211,6 @@ export default function AuthLanding() {
                                         <div className="space-y-1.5">
                                             <div className="flex justify-between items-center ml-1">
                                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
-                                                {mode === 'signin' && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setMode('forgot-password')
-                                                            setError(null)
-                                                        }}
-                                                        className="text-xs font-bold text-[#1a4d2e] hover:underline"
-                                                    >
-                                                        Forgot?
-                                                    </button>
-                                                )}
                                             </div>
                                             <div className="relative">
                                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
