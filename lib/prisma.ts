@@ -12,7 +12,12 @@ const prismaClientSingleton = () => {
         })
     } catch (e) {
         console.error("PRISMA INIT: CRITICAL FAILURE during new PrismaClient()", e);
-        throw e;
+        // Return a broken client that throws on access, instead of crashing the process
+        return new Proxy({}, {
+            get: function (_target, prop) {
+                throw new Error(`Prisma Client Failed to Initialize: ${e instanceof Error ? e.message : String(e)}`);
+            }
+        }) as unknown as PrismaClient;
     }
 }
 
