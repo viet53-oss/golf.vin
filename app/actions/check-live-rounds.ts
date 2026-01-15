@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 export async function checkLiveRounds() {
     try {
         const rounds = await prisma.liveRound.findMany({
-            orderBy: { created_at: 'desc' },
+            orderBy: { createdAt: 'desc' },
             take: 20,
             include: {
                 players: {
@@ -36,8 +36,8 @@ export async function checkLiveRounds() {
             name: r.name,
             date: r.date,
             isToday: r.date === today,
-            created_at: r.created_at.toISOString(),
-            course_name: r.course_name,
+            createdAt: r.createdAt.toISOString(),
+            courseName: r.courseName,
             playerCount: r.players.length,
             players: r.players.map(p => p.player?.name || 'Guest')
         }));
