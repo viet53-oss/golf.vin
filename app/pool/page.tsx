@@ -40,7 +40,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             select: {
                 date: true,
                 id: true,
-                is_tournament: true,
+                isTournament: true,
                 name: true,
                 _count: {
                     select: { players: true }
@@ -62,7 +62,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             players: {
                 include: {
                     player: true,
-                    tee_box: true,
+                    teeBox: true,
                     scores: {
                         include: { hole: true }
                     }
@@ -125,19 +125,19 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
     // 2a. All identified participants
     // We use the raw SQL map to guarantee we see the DB state
     const allPoolParticipants = playersRaw.filter((rp: any) => {
-        const rawStatus = poolStatusMap.get(rp.player_id);
+        const rawStatus = poolStatusMap.get(rp.playerId);
         return rawStatus === true;
     });
 
     // 2b. Participants ready for calculation (have scores and tee box)
-    const poolActivePlayers = allPoolParticipants.filter((rp: any) => rp.tee_box && rp.gross_score !== null);
+    const poolActivePlayers = allPoolParticipants.filter((rp: any) => rp.teeBox && rp.grossScore !== null);
 
     // Debugging
 
     // Sort active players by index for flighting
     const sortedPlayers = [...poolActivePlayers].sort((a, b) => {
-        const indexA = a.index_at_time ?? a.player.index;
-        const indexB = b.index_at_time ?? b.player.index;
+        const indexA = a.indexAtTime ?? a.player.handicapIndex;
+        const indexB = b.indexAtTime ?? b.player.handicapIndex;
         return indexA - indexB;
     });
 
@@ -156,24 +156,24 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
     // Helper to calc net
     const calc = (rp: any) => {
         // Matching logic from ScoresDashboard to ensure consistent Handicaps
-        const index = rp.index_at_time ?? rp.player.index;
-        const slope = rp.tee_box?.slope || 113;
-        const rating = rp.tee_box?.rating || par;
+        const index = rp.indexAtTime ?? rp.player.handicapIndex;
+        const slope = rp.teeBox?.slope || 113;
+        const rating = rp.teeBox?.rating || par;
 
         // Formula: (Index * (Slope/113)) + (Rating - Par)
         const courseHcp = Math.round((index * (slope / 113)) + (rating - par));
 
         // Calculate Front/Back from scores if not present on record
-        let frontGross = rp.front_nine;
-        let backGross = rp.back_nine;
+        let frontGross = rp.frontNine;
+        let backGross = rp.backNine;
 
         if (!frontGross || !backGross) {
             const scores = rp.scores || [];
             const f = scores
-                .filter((s: any) => s.hole.hole_number <= 9)
+                .filter((s: any) => s.hole.holeNumber <= 9)
                 .reduce((sum: number, s: any) => sum + s.strokes, 0);
             const b = scores
-                .filter((s: any) => s.hole.hole_number > 9)
+                .filter((s: any) => s.hole.holeNumber > 9)
                 .reduce((sum: number, s: any) => sum + s.strokes, 0);
 
             if (f > 0) frontGross = f;
@@ -181,9 +181,9 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
         }
 
         // Fallback to estimation only if absolutely no score data
-        frontGross = frontGross ?? Math.floor(rp.gross_score / 2);
-        backGross = backGross ?? Math.ceil(rp.gross_score / 2);
-        const totalGross = rp.gross_score;
+        frontGross = frontGross ?? Math.floor(rp.grossScore / 2);
+        backGross = backGross ?? Math.ceil(rp.grossScore / 2);
+        const totalGross = rp.grossScore;
 
         let frontHcp = 0;
         let backHcp = 0;
@@ -196,7 +196,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
                 const extraStroke = diff <= remainder ? 1 : 0;
                 const hcpStrokes = baseStrokes + extraStroke;
 
-                if (h.hole_number <= 9) frontHcp += hcpStrokes;
+                if (h.holeNumber <= 9) frontHcp += hcpStrokes;
                 else backHcp += hcpStrokes;
             });
         } else {
@@ -213,7 +213,7 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
             const h = s.hole;
             const diff = h.difficulty || 18;
             return {
-                holeNumber: h.hole_number,
+                holeNumber: h.holeNumber,
                 difficulty: diff,
                 grossScore: s.strokes
             };
@@ -357,10 +357,13 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
                             <PoolCopyButton
                                 date={round.date}
                                 roundName={round.name}
-                                isTournament={round.is_tournament}
+                                isTournament={round.isTournament}
                                 flights={processedFlights}
                             />
-                            <button className="p-2.5 bg-black rounded-lg hover:bg-gray-800 transition-colors shadow-sm text-white cursor-pointer">
+                            <button
+                                className="p-2.5 bg-black rounded-lg hover:bg-gray-800 transition-colors shadow-sm text-white cursor-pointer"
+                                title="Email Results"
+                            >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                             </button>
                         </div>
@@ -375,8 +378,8 @@ export default async function PoolPage(props: { searchParams: Promise<{ roundId?
                         <h2 className="text-[14pt] font-bold text-gray-700">Pool Participants</h2>
                         <PoolManagementButton
                             roundId={round.id}
-                            allPlayers={round.players.map((p: any) => ({ id: p.player_id, name: p.player.name }))}
-                            currentParticipantIds={allPoolParticipants.map((p: any) => p.player_id)}
+                            allPlayers={round.players.map((p: any) => ({ id: p.playerId, name: p.player.name }))}
+                            currentParticipantIds={allPoolParticipants.map((p: any) => p.playerId)}
                         />
                     </div>
 

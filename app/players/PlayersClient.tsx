@@ -500,7 +500,7 @@ export default function PlayersClient({ initialPlayers, course, isAdmin }: Playe
                                 <div className="flex flex-col items-center w-[35px]">
                                     <span className="text-[14pt] text-gray-400 font-bold tracking-wider">Tee</span>
                                     <span className="font-bold text-[14pt] text-gray-500">
-                                        {(player as any).preferred_tee_box ? (player as any).preferred_tee_box.charAt(0) : 'W'}
+                                        W
                                     </span>
                                 </div>
 

@@ -13,14 +13,14 @@ export async function syncAllRoundsToPreferredTees() {
 
         // 1. Fetch all players
         const players = await prisma.player.findMany({
-            select: { id: true, name: true, preferred_tee_box: true }
+            select: { id: true, name: true, preferredTeeBox: true }
         });
 
         let updatedCount = 0;
         let skippedCount = 0;
 
         for (const player of players) {
-            const pref = player.preferred_tee_box?.trim();
+            const pref = player.preferredTeeBox?.trim();
             if (!pref) {
                 skippedCount++;
                 continue;
@@ -28,12 +28,12 @@ export async function syncAllRoundsToPreferredTees() {
 
             // 2. Main Rounds (Score Page)
             const roundPlayers = await prisma.roundPlayer.findMany({
-                where: { player_id: player.id },
+                where: { playerId: player.id },
                 include: {
                     round: {
                         include: {
                             course: {
-                                include: { tee_boxes: true }
+                                include: { teeBoxes: true }
                             }
                         }
                     }
@@ -41,24 +41,21 @@ export async function syncAllRoundsToPreferredTees() {
             });
 
             for (const rp of roundPlayers) {
-                const tees = rp.round.course.tee_boxes;
+                const tees = rp.round.course.teeBoxes;
 
                 // Fine matching logic
-                let match = tees.find(t => t.name.toLowerCase() === pref.toLowerCase());
+                let match = tees.find((t: any) => t.name.toLowerCase() === pref.toLowerCase());
                 if (!match) {
-                    match = tees.find(t => t.name.toLowerCase().includes(pref.toLowerCase()));
+                    match = tees.find((t: any) => t.name.toLowerCase().includes(pref.toLowerCase()));
                 }
 
                 if (match) {
-                    // Update if ID is missing or mismatched, or if cached stats are out of date
-                    if (rp.tee_box_id !== match.id || rp.tee_box_rating !== match.rating || rp.tee_box_name !== match.name) {
+                    // Update if ID matches
+                    if (rp.teeBoxId !== match.id) {
                         await prisma.roundPlayer.update({
                             where: { id: rp.id },
                             data: {
-                                tee_box_id: match.id,
-                                tee_box_name: match.name,
-                                tee_box_rating: match.rating,
-                                tee_box_slope: match.slope
+                                teeBoxId: match.id,
                             }
                         });
                         updatedCount++;

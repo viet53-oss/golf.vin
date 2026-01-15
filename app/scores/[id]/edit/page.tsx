@@ -18,7 +18,7 @@ export default async function EditRoundPage({ params }: { params: Promise<{ id: 
             players: {
                 include: {
                     player: true,
-                    tee_box: true,
+                    teeBox: true,
                 },
                 orderBy: {
                     player: { name: 'asc' } // Sort loaded players by name
@@ -38,7 +38,7 @@ export default async function EditRoundPage({ params }: { params: Promise<{ id: 
     const allCourses = await prisma.course.findMany({
         include: {
             holes: true,
-            tee_boxes: true
+            teeBoxes: true
         },
         orderBy: { name: 'asc' }
     });

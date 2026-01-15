@@ -3,35 +3,42 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import bcrypt from 'bcryptjs';
 
 export async function updatePlayerProfile(formData: FormData) {
     const id = formData.get('id') as string;
 
-    // Extract fields
+    // Extract valid fields
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
-    const address = formData.get('address') as string;
-    const city = formData.get('city') as string;
-    const state = formData.get('state') as string;
-    const zip = formData.get('zip') as string;
     const birthday = formData.get('birthday') as string;
-    const year_joined = formData.get('year_joined') as string;
-    const preferred_tee_box = formData.get('preferred_tee_box') as string;
+    const dateStarted = formData.get('dateStarted') as string;
+    const preferredTeeBox = formData.get('preferredTeeBox') as string;
+    const handicapIndex = formData.get('handicapIndex') as string;
+    const password = formData.get('password') as string;
+
+    const name = `${firstName.trim()} ${lastName.trim()}`;
 
     try {
+        const updateData: any = {
+            name,
+            email: email || null,
+            phone: phone || null,
+            birthday: birthday || null,
+            dateStarted: dateStarted || null,
+            preferredTeeBox: preferredTeeBox || null,
+            handicapIndex: handicapIndex ? parseFloat(handicapIndex) : 0,
+        };
+
+        if (password && password.trim() !== '') {
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+
         await prisma.player.update({
             where: { id },
-            data: {
-                email: email || null,
-                phone: phone || null,
-                address: address || null,
-                city: city || null,
-                state: state || null,
-                zip: zip || null,
-                birthday: birthday || null,
-                year_joined: year_joined || null,
-                preferred_tee_box: preferred_tee_box || null,
-            },
+            data: updateData,
         });
 
         revalidatePath('/players');

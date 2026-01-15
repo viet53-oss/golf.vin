@@ -1,0 +1,231 @@
+'use client'
+
+import { useState } from 'react'
+import { useFormStatus } from 'react-dom'
+import { login, signup } from '@/app/actions/auth'
+import { Dna, Phone, Lock, User, Mail, Calendar, Trophy, ChevronRight } from 'lucide-react'
+
+type AuthMode = 'signin' | 'signup'
+
+function SubmitButton({ mode }: { mode: AuthMode }) {
+    const { pending } = useFormStatus()
+
+    return (
+        <button
+            type="submit"
+            disabled={pending}
+            className="w-full bg-[#1a4d2e] text-white font-bold text-xl py-4 rounded-2xl hover:bg-[#143d24] transition-all transform active:scale-[0.98] disabled:opacity-50 mt-6 uppercase tracking-wider shadow-lg shadow-green-900/20 flex items-center justify-center gap-2"
+        >
+            {pending ? 'Processing...' : (
+                <>
+                    {mode === 'signin' ? 'Sign In' : 'Create Account'}
+                    <ChevronRight size={24} />
+                </>
+            )}
+        </button>
+    )
+}
+
+export default function AuthLanding() {
+    const [mode, setMode] = useState<AuthMode>('signin')
+    const [error, setError] = useState<string | null>(null)
+
+    async function handleSubmit(formData: FormData) {
+        setError(null)
+        const action = mode === 'signin' ? login : signup
+
+        try {
+            const result = await action(null, formData)
+            if (result?.error) {
+                setError(result.error)
+            } else if (result?.success) {
+                window.location.reload() // Refresh to update session state
+            }
+        } catch (e) {
+            setError('An unexpected error occurred')
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-[#2e7d32] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
+            <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+
+                {/* Brand Side - Hidden on mobile, shown on desktop */}
+                <div className="hidden lg:flex flex-col text-white space-y-8 pr-12">
+                    <div className="space-y-4">
+                        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                            <span role="img" aria-label="golf" className="text-2xl">⛳</span>
+                            <span className="font-bold tracking-tight text-xl">GolfLS</span>
+                        </div>
+                        <h1 className="text-6xl font-black leading-tight drop-shadow-2xl">
+                            Master Your Game <br />
+                            <span className="text-green-300">In Real-Time.</span>
+                        </h1>
+                        <p className="text-xl text-green-50/90 max-w-lg leading-relaxed font-medium">
+                            Join the community of golfers tracking live scores, managing handicaps, and competing across Greater New Orleans.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                            <div className="text-green-300 mb-3"><Trophy size={32} /></div>
+                            <h3 className="font-bold text-lg mb-1">Live Tracking</h3>
+                            <p className="text-sm text-green-50/70">Real-time leaderboard updates for every hole.</p>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                            <div className="text-green-300 mb-3"><Dna size={32} /></div>
+                            <h3 className="font-bold text-lg mb-1">Dna Stats</h3>
+                            <p className="text-sm text-green-50/70">Advanced physical and performance analytics.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Auth Card Side */}
+                <div className="flex flex-col items-center">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl relative p-8 sm:p-10 border border-white/20">
+                        <div className="flex flex-col items-center">
+                            <div className="lg:hidden mb-6 flex flex-col items-center">
+                                <div className="text-[#1a4d2e] flex items-center gap-2 mb-2">
+                                    <span role="img" aria-label="golf" className="text-3xl">⛳</span>
+                                    <span className="font-bold tracking-tight text-2xl">GolfLS</span>
+                                </div>
+                            </div>
+
+
+                            <h1 className="text-4xl font-black text-black mb-8 text-center italic tracking-tight">
+                                {mode === 'signin' ? 'WELCOME BACK' : 'GET STARTED'}
+                            </h1>
+
+                            <form action={handleSubmit} className="w-full space-y-5">
+                                {mode === 'signup' && (
+                                    <>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">First Name</label>
+                                                <div className="relative">
+                                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                                    <input
+                                                        name="firstName"
+                                                        type="text"
+                                                        placeholder="John"
+                                                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Last Name</label>
+                                                <div className="relative">
+                                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                                    <input
+                                                        name="lastName"
+                                                        type="text"
+                                                        placeholder="Doe"
+                                                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Email (Optional)</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                                <input
+                                                    name="email"
+                                                    type="email"
+                                                    placeholder="john@example.com"
+                                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Phone Number</label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                        <input
+                                            name="phone"
+                                            type="tel"
+                                            placeholder="(555) 555-5555"
+                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Password</label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                        <input
+                                            name="password"
+                                            type="password"
+                                            placeholder="••••••••"
+                                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {mode === 'signup' && (
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="preferredTeeBox" className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Preferred Tee Box</label>
+                                        <div className="relative">
+                                            <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                            <select
+                                                id="preferredTeeBox"
+                                                name="preferredTeeBox"
+                                                className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1a4d2e]/20 focus:border-[#1a4d2e] transition-all font-medium appearance-none cursor-pointer"
+                                            >
+                                                <option value="">Select a tee box</option>
+                                                <option value="Black">Black</option>
+                                                <option value="Blue">Blue</option>
+                                                <option value="White">White</option>
+                                                <option value="Gold">Gold</option>
+                                                <option value="Green">Green</option>
+                                                <option value="Red">Red</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {error && (
+                                    <div className="p-4 rounded-2xl bg-red-50 text-red-600 text-sm font-bold text-center border border-red-100 animate-in shake duration-300">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <SubmitButton mode={mode} />
+                            </form>
+
+                            <div className="mt-8 text-center">
+                                <p className="text-gray-500 font-medium mb-2">
+                                    {mode === 'signin' ? "Not a member yet?" : "Already have an account?"}
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        setMode(mode === 'signin' ? 'signup' : 'signin')
+                                        setError(null)
+                                    }}
+                                    className="text-[#1a4d2e] font-black text-lg hover:underline underline-offset-4 decoration-2"
+                                >
+                                    {mode === 'signin' ? 'CREATE AN ACCOUNT' : 'SIGN IN TO YOURS'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Secondary Footer Info */}
+                    <p className="mt-8 text-white/50 text-xs font-bold uppercase tracking-widest text-center">
+                        &copy; 2026 GolfLS &bull; All Rights Reserved
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    )
+}

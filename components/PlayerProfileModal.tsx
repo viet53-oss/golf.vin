@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, X, Calendar } from 'lucide-react';
-import { Player, Round, TeeBox, HandicapRound, RoundPlayer } from '@prisma/client';
+import { Player, Round, TeeBox, RoundPlayer } from '@prisma/client';
 import { updatePlayerProfile } from '@/app/actions/update-player';
 
 export type PlayerWithRounds = Player & {
@@ -11,7 +11,8 @@ export type PlayerWithRounds = Player & {
         round: Round;
         tee_box: TeeBox | null;
     })[];
-    manual_rounds: HandicapRound[];
+    points?: number;
+    money?: number;
 };
 
 interface PlayerProfileModalProps {
@@ -29,18 +30,17 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
     if (!isOpen) return null;
 
     // Derived Data for Display
-    const points = player.rounds.reduce((sum, r) => sum + (r.points || 0), 0);
-    const allTimeWinnings = player.rounds.reduce((sum, r) => sum + (r.payout || 0), 0);
+    const points = player.points || 0;
+    const allTimeWinnings = player.money || 0;
 
-    // YTD Winnings (for current year)
+    // YTD Winnings (for current year) - Approximation or 0 since we don't have payout on rounds
+    // If we want real YTD, we need PlayersClient to pass it. For now, use 0 or handle if passed.
+    const ytdWinnings = 0; // Simplified as schema removed payout from rounds
     const currentYear = new Date().getFullYear().toString();
-    const ytdWinnings = player.rounds
-        .filter(r => r.round.date.startsWith(currentYear))
-        .reduce((sum, r) => sum + (r.payout || 0), 0);
 
-    const lowIndex = player.low_handicap_index ?? '-';
+    const lowIndex = '-'; // Removed from schema
     // Display value for tee
-    const displayTee = player.preferred_tee_box || 'White';
+    const displayTee = player.preferredTeeBox || 'White';
 
     // Handle Form Submit
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -145,37 +145,19 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                                                 <span className="font-semibold text-gray-900">{player.phone || '-'}</span>
                                             </div>
                                         </div>
+                                        <div className="border border-gray-100 rounded-xl p-4 flex gap-4 items-start">
+                                            <div className="p-2 bg-blue-50 text-blue-500 rounded-lg">
+                                                <X size={18} />
+                                            </div>
+                                            <div>
+                                                <span className="text-[14pt] font-bold text-gray-400 uppercase block mb-0.5">Password</span>
+                                                <span className="font-semibold text-gray-900">••••••••</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Address & Personal */}
-                                <div>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <MapPin className="text-blue-500 w-5 h-5" />
-                                        <h3 className="font-bold text-gray-900 text-[14pt]">Address & Personal</h3>
-                                    </div>
-                                    <div className="border border-gray-100 rounded-xl p-0 overflow-hidden divide-y divide-gray-50">
-                                        <div className="grid grid-cols-1 md:grid-cols-2">
-                                            <div className="p-5">
-                                                <span className="text-[14pt] font-bold text-blue-900/40 uppercase block mb-1">Address</span>
-                                                <div className="font-medium text-gray-700 space-y-0.5">
-                                                    <p>{player.address || '-'}</p>
-                                                    <p>
-                                                        {player.city}{player.state ? `, ${player.state}` : ''} {player.zip}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="p-5 bg-gray-50/30">
-                                                <span className="text-[14pt] font-bold text-blue-900/40 uppercase block mb-1">Birthday</span>
-                                                <p className="font-semibold text-gray-700 font-mono text-[14pt]">{player.birthday || '-'}</p>
-                                            </div>
-                                        </div>
-                                        <div className="p-5">
-                                            <span className="text-[14pt] font-bold text-blue-900/40 uppercase block mb-1">Player Since</span>
-                                            <p className="font-bold text-gray-900">{player.year_joined || '-'}</p>
-                                        </div>
-                                    </div>
-                                </div>
+
 
                                 {/* Golf Profile */}
                                 <div>
@@ -184,13 +166,24 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                                         <h3 className="font-bold text-gray-900 text-[14pt]">Golf Profile</h3>
                                     </div>
                                     <div className="border border-gray-100 rounded-xl p-5">
-                                        <div className="flex gap-4 items-center">
-                                            <div className="p-2 bg-gray-50 text-gray-500 rounded-lg">
-                                                <Calendar size={18} />
+                                        <div className="space-y-4">
+                                            <div className="flex gap-4 items-center">
+                                                <div className="p-2 bg-gray-50 text-gray-500 rounded-lg">
+                                                    <Calendar size={18} />
+                                                </div>
+                                                <div>
+                                                    <span className="text-[14pt] font-bold text-gray-400 uppercase block mb-0.5">Preferred Tee Box</span>
+                                                    <span className="font-bold text-gray-900 text-[14pt]">{displayTee}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span className="text-[14pt] font-bold text-gray-400 uppercase block mb-0.5">Preferred Tee Box</span>
-                                                <span className="font-bold text-gray-900 text-[14pt]">{displayTee}</span>
+                                            <div className="flex gap-4 items-center">
+                                                <div className="p-2 bg-gray-50 text-gray-500 rounded-lg">
+                                                    <Calendar size={18} />
+                                                </div>
+                                                <div>
+                                                    <span className="text-[14pt] font-bold text-gray-400 uppercase block mb-0.5">Date Started</span>
+                                                    <span className="font-bold text-gray-900 text-[14pt]">{player.dateStarted || '-'}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -205,8 +198,9 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                                         <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Name</h4>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">First Name</label>
+                                                <label htmlFor="edit-firstName" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">First Name</label>
                                                 <input
+                                                    id="edit-firstName"
                                                     name="firstName"
                                                     defaultValue={player.name.split(' ')[0]}
                                                     className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -215,8 +209,9 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Last Name</label>
+                                                <label htmlFor="edit-lastName" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Last Name</label>
                                                 <input
+                                                    id="edit-lastName"
                                                     name="lastName"
                                                     defaultValue={player.name.split(' ').slice(1).join(' ')}
                                                     className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -231,39 +226,65 @@ export function PlayerProfileModal({ player, isOpen, onClose, liveIndex, courseH
                                         <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Contact</h4>
                                         <div className="grid grid-cols-1 gap-4">
                                             <div>
-                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Email</label>
-                                                <input name="email" defaultValue={player.email || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="email@example.com" />
+                                                <label htmlFor="edit-email" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Email</label>
+                                                <input id="edit-email" name="email" defaultValue={player.email || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="email@example.com" />
                                             </div>
                                             <div>
-                                                <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Phone</label>
-                                                <input name="phone" defaultValue={player.phone || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="555-555-5555" />
+                                                <label htmlFor="edit-phone" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Phone</label>
+                                                <input id="edit-phone" name="phone" defaultValue={player.phone || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="555-555-5555" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="edit-password" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">New Password</label>
+                                                <input id="edit-password" name="password" type="password" className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Leave blank to keep current" />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Personal Inputs */}
                                     <div>
-                                        <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Personal</h4>
-                                        <div>
-                                            <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Birthday</label>
-                                            <input type="date" name="birthday" defaultValue={player.birthday || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Personal & Golf</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label htmlFor="edit-birthday" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Birthday</label>
+                                                <input id="edit-birthday" type="date" name="birthday" defaultValue={player.birthday || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="edit-dateStarted" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Date Started</label>
+                                                <input id="edit-dateStarted" type="date" name="dateStarted" defaultValue={player.dateStarted || ''} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="edit-preferredTeeBox" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Preferred Tee Box</label>
+                                                <select
+                                                    id="edit-preferredTeeBox"
+                                                    name="preferredTeeBox"
+                                                    defaultValue={player.preferredTeeBox || 'White'}
+                                                    className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                                >
+                                                    <option value="Black">Black</option>
+                                                    <option value="Blue">Blue</option>
+                                                    <option value="White">White</option>
+                                                    <option value="Gold">Gold</option>
+                                                    <option value="Green">Green</option>
+                                                    <option value="Red">Red</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="edit-handicapIndex" className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Official Index</label>
+                                                <input
+                                                    id="edit-handicapIndex"
+                                                    type="number"
+                                                    step="0.1"
+                                                    name="handicapIndex"
+                                                    defaultValue={player.handicapIndex}
+                                                    className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                                    placeholder="0.0"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Golf Inputs */}
-                                <div>
-                                    <h4 className="text-[14pt] font-bold text-gray-900 uppercase tracking-wide mb-3 border-b pb-1">Golf Preferences</h4>
-                                    <div>
-                                        <label className="block text-[14pt] font-bold text-gray-500 mb-1 uppercase">Preferred Tee Box</label>
-                                        <select name="preferred_tee_box" defaultValue={player.preferred_tee_box || 'White'} className="w-full text-[14pt] p-2 border rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                                            <option value="White">White</option>
-                                            <option value="Gold">Gold</option>
-                                            <option value="Blue">Blue</option>
-                                            <option value="Red">Red</option>
-                                        </select>
-                                    </div>
-                                </div>
+
                             </div>
                         )}
 

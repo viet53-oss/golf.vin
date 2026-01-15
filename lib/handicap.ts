@@ -102,9 +102,9 @@ export function calculateHandicap(
     const recentDifferentials = allDifferentials.slice(0, 20);
     const count = recentDifferentials.length;
 
-    if (count < 3) {
+    if (count < 6) {
         return {
-            handicapIndex: 0, // Or null/undefined if preferred for 'NH'
+            handicapIndex: 0, // 0 until 6 rounds (WHS uses fewer, but user requested 5+)
             differentials: recentDifferentials,
             isSoftCapped: false,
             isHardCapped: false,

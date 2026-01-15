@@ -23,7 +23,10 @@ model Player {
   name          String
   email         String?  @unique
   phone         String?
+  password      String?
   birthday      String?
+  dateStarted   String?
+  preferredTeeBox String?
   
   // Handicap Information
   handicapIndex Float    @default(0)
@@ -131,6 +134,10 @@ model RoundPlayer {
   grossScore      Int?     // Total strokes
   courseHandicap  Int      // Handicap for this round
   netScore        Int?     // Gross - Handicap
+  indexAtTime     Float?   @map("index_at_time")
+  points          Float    @default(0)
+  payout          Float    @default(0)
+  inPool          Boolean  @default(false) @map("in_pool")
   
   // Nine scores (optional)
   frontNine       Int?

@@ -114,7 +114,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     name,
                     tees,
                     holes: holes.map(h => ({
-                        hole_number: h.holeNumber,
+                        holeNumber: h.holeNumber,
                         par: h.par,
                         difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
@@ -140,7 +140,7 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     tees,
                     holes: holes.map(h => ({
                         id: h.id,
-                        hole_number: h.holeNumber,
+                        holeNumber: h.holeNumber,
                         par: h.par,
                         difficulty: h.difficulty,
                         latitude: parseCoordinate(h.latitude),
@@ -427,129 +427,12 @@ export default function EditCourseClient({ initialCourse, isNew = false }: { ini
                     </div >
                 </form >
 
-                {/* Elements Modal */}
-                {editingHoleIndex !== null && (
-                    <div className="fixed inset-0 bg-white z-[300] flex flex-col">
-                        <div className="p-4 border-b flex justify-between items-center bg-gray-50 shrink-0">
-                            <h3 className="text-xl font-bold">Hole {holes[editingHoleIndex].hole_number} Elements</h3>
-                            <button
-                                onClick={() => setEditingHoleIndex(null)}
-                                className="bg-black text-white px-4 py-2 rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 flex items-center"
-                            >
-                                Close
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-6">
-                            <div className="grid grid-cols-2 gap-8">
-                                {/* Left Side */}
-                                <div>
-                                    <h4 className="font-bold text-lg mb-4 text-center border-b pb-2">Left Side</h4>
-                                    {[2, 1].map(num => {
-                                        const element = holes[editingHoleIndex].elements?.find(e => e.side === 'LEFT' && e.element_number === num);
-                                        return (
-                                            <div key={`left-${num}`} className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                <h5 className="font-bold mb-2">Element {num}</h5>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Front (Lat Long)</label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Lat Long"
-                                                            className="w-full p-1 text-sm border rounded"
-                                                            value={element?.front_latitude && element?.front_longitude ? `${element.front_latitude} ${element.front_longitude}` : (element?.front_latitude || element?.front_longitude || '')}
-                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'LEFT', num, 'front', e.target.value)}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Back (Lat Long)</label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Lat Long"
-                                                            className="w-full p-1 text-sm border rounded"
-                                                            value={element?.back_latitude && element?.back_longitude ? `${element.back_latitude} ${element.back_longitude}` : (element?.back_latitude || element?.back_longitude || '')}
-                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'LEFT', num, 'back', e.target.value)}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="mt-2 flex gap-4">
-                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
-                                                        <input type="checkbox" checked={element?.water || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'LEFT', num, 'water', e.target.checked)} />
-                                                        Water
-                                                    </label>
-                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
-                                                        <input type="checkbox" checked={element?.bunker || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'LEFT', num, 'bunker', e.target.checked)} />
-                                                        Bunker
-                                                    </label>
-                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
-                                                        <input type="checkbox" checked={element?.tree || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'LEFT', num, 'tree', e.target.checked)} />
-                                                        Tree
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {/* Right Side */}
-                                <div>
-                                    <h4 className="font-bold text-lg mb-4 text-center border-b pb-2">Right Side</h4>
-                                    {[2, 1].map(num => {
-                                        const element = holes[editingHoleIndex].elements?.find(e => e.side === 'RIGHT' && e.element_number === num);
-                                        return (
-                                            <div key={`right-${num}`} className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                <h5 className="font-bold mb-2">Element {num}</h5>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Front (Lat Long)</label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Lat Long"
-                                                            className="w-full p-1 text-sm border rounded"
-                                                            value={element?.front_latitude && element?.front_longitude ? `${element.front_latitude} ${element.front_longitude}` : (element?.front_latitude || element?.front_longitude || '')}
-                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'RIGHT', num, 'front', e.target.value)}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-bold text-gray-500 mb-1">Back (Lat Long)</label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Lat Long"
-                                                            className="w-full p-1 text-sm border rounded"
-                                                            value={element?.back_latitude && element?.back_longitude ? `${element.back_latitude} ${element.back_longitude}` : (element?.back_latitude || element?.back_longitude || '')}
-                                                            onChange={(e) => handleElementChange(editingHoleIndex!, 'RIGHT', num, 'back', e.target.value)}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="mt-2 flex gap-4">
-                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
-                                                        <input type="checkbox" checked={element?.water || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'RIGHT', num, 'water', e.target.checked)} />
-                                                        Water
-                                                    </label>
-                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
-                                                        <input type="checkbox" checked={element?.bunker || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'RIGHT', num, 'bunker', e.target.checked)} />
-                                                        Bunker
-                                                    </label>
-                                                    <label className="flex items-center gap-1 text-sm font-bold text-gray-600">
-                                                        <input type="checkbox" checked={element?.tree || false} onChange={(e) => handleElementFeatureToggle(editingHoleIndex!, 'RIGHT', num, 'tree', e.target.checked)} />
-                                                        Tree
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-4 border-t bg-gray-50 flex justify-end shrink-0">
-                            <button
-                                onClick={() => setEditingHoleIndex(null)}
-                                className="bg-black text-white px-4 py-2 rounded-full text-[15pt] font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95 flex items-center"
-                            >
-                                Save
-                            </button>
-                        </div>
-                    </div>
-                )}
+                {/* Elements Modal - Removed as elements are not in current schema */}
+                {/* 
+                editingHoleIndex !== null && (
+                    ...
+                )
+                */}
             </div >
         </>
     );

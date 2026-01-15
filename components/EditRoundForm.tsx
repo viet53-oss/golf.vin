@@ -16,25 +16,25 @@ type Player = {
 
 type RoundPlayer = {
     id: string;
-    gross_score: number | null;
+    grossScore: number | null;
     player: Player;
-    tee_box: {
+    teeBox: {
         id: string;
         name: string;
         slope: number;
         rating: number;
     } | null;
-    index_at_time: number | null;
+    indexAtTime: number | null;
     points: number;
     payout: number;
-    hole_scores?: { holeId: string, strokes: number }[];
+    holeScores?: { holeId: string, strokes: number }[];
 };
 
 type RoundData = {
     id: string;
     date: string;
     name: string | null;
-    is_tournament: boolean;
+    isTournament: boolean;
     course: {
         id: string;
         name: string;
@@ -58,7 +58,7 @@ export default function EditRoundForm({
 
     const [date, setDate] = useState(round.date.split('T')[0]);
     const [name, setName] = useState(round.name || '');
-    const [isTournament, setIsTournament] = useState(round.is_tournament);
+    const [isTournament, setIsTournament] = useState(round.isTournament);
 
     // State for delete confirmation
     const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -142,7 +142,7 @@ export default function EditRoundForm({
             // since IDs won't match the new course
             setStatePlayers(prev => prev.map(p => ({
                 ...p,
-                tee_box: null
+                teeBox: null
             })));
         }
     };
@@ -156,15 +156,15 @@ export default function EditRoundForm({
                 // Create new round with current players and selected course
                 const playersData = statePlayers.map(p => ({
                     playerId: p.player.id,
-                    teeBoxId: p.tee_box?.id,
-                    gross: p.gross_score,
+                    teeBoxId: p.teeBox?.id,
+                    gross: p.grossScore,
                     points: p.points,
                     payout: p.payout,
-                    scores: p.hole_scores
+                    scores: p.holeScores
                 }));
 
                 await createRoundWithPlayers(
-                    { date: dateWithTime, name, is_tournament: isTournament, courseId: selectedCourseId },
+                    { date: dateWithTime, name, isTournament: isTournament, courseId: selectedCourseId },
                     playersData
                 );
             } else {
@@ -173,7 +173,7 @@ export default function EditRoundForm({
                 await updateRound(round.id, {
                     date: dateWithTime,
                     name,
-                    is_tournament: isTournament,
+                    isTournament: isTournament,
                     courseId: courseChanged ? selectedCourseId : undefined
                 });
             }
@@ -225,10 +225,10 @@ export default function EditRoundForm({
                 const defaultTee = currentCourse.teeBoxes?.find(t => t.name === 'White') || currentCourse.teeBoxes?.[0] || null;
                 return {
                     id: isNew ? `temp-${pid}` : `temp-opt-${pid}`, // temp ID for key
-                    gross_score: null,
+                    grossScore: null,
                     player: player,
-                    tee_box: defaultTee,
-                    index_at_time: player.handicapIndex,
+                    teeBox: defaultTee,
+                    indexAtTime: player.handicapIndex,
                     points: 0,
                     payout: 0
                 };
@@ -295,7 +295,7 @@ export default function EditRoundForm({
                     if (p.id === roundPlayerId) {
                         return {
                             ...p,
-                            tee_box: selectedTee
+                            teeBox: selectedTee
                         };
                     }
                     return p;
@@ -356,6 +356,7 @@ export default function EditRoundForm({
                         <label className="block text-[14pt] font-bold text-gray-700 mb-1">Date</label>
                         <input
                             type="date"
+                            title="Round Date"
                             className="w-full border border-gray-300 rounded px-1 py-2 text-[14pt]"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
@@ -366,6 +367,7 @@ export default function EditRoundForm({
                             <label className="block text-[14pt] font-bold text-gray-700 mb-1">Course</label>
                             <select
                                 className="w-full border border-gray-300 rounded px-1 py-2 text-[14pt]"
+                                title="Select Course"
                                 value={selectedCourseId}
                                 onChange={(e) => handleCourseChange(e.target.value)}
                             >
@@ -379,6 +381,7 @@ export default function EditRoundForm({
                         <label className="block text-[14pt] font-bold text-gray-700 mb-1">Name</label>
                         <input
                             type="text"
+                            title="Tournament/Round Name"
                             placeholder="e.g. Sunday Game"
                             className="w-full border border-gray-300 rounded px-1 py-2 text-[14pt]"
                             value={name}
@@ -461,15 +464,15 @@ export default function EditRoundForm({
                                 </tr>
                             ) : (
                                 statePlayers.map(rp => {
-                                    const gross = rp.gross_score;
+                                    const gross = rp.grossScore;
                                     // Calc logic duplicate from Scores page - ideally centralize
-                                    const idx = rp.index_at_time ?? rp.player.handicapIndex;
-                                    const slope = rp.tee_box?.slope ?? 113;
-                                    const rating = rp.tee_box?.rating ?? 0; // If no tee, use 0 to signal invalid
+                                    const idx = rp.indexAtTime ?? rp.player.handicapIndex;
+                                    const slope = rp.teeBox?.slope ?? 113;
+                                    const rating = rp.teeBox?.rating ?? 0; // If no tee, use 0 to signal invalid
                                     const coursePar = currentCourse.holes?.reduce((sum, h) => sum + h.par, 0) || 72;
 
                                     let courseHcp = 0;
-                                    if (rp.tee_box) {
+                                    if (rp.teeBox) {
                                         courseHcp = Math.round(idx * (slope / 113) + (rating - coursePar));
                                     } else {
                                         // If no tee box, just show Base Index? Or 0?
@@ -484,11 +487,12 @@ export default function EditRoundForm({
                                             <td className="py-3 text-center">
                                                 <select
                                                     className="border-none bg-transparent text-center font-medium focus:ring-2 focus:ring-blue-500 rounded p-1 cursor-pointer"
-                                                    value={rp.tee_box?.id || ''}
+                                                    title="Select Tee Box"
+                                                    value={rp.teeBox?.id || ''}
                                                     onChange={(e) => handleTeeBoxChange(rp.id, e.target.value)}
                                                     disabled={isPending}
                                                 >
-                                                    {!rp.tee_box && <option value="">Select Tee</option>}
+                                                    {!rp.teeBox && <option value="">Select Tee</option>}
                                                     {currentCourse.teeBoxes?.map(t => (
                                                         <option key={t.id} value={t.id}>{t.name}</option>
                                                     ))}
@@ -550,14 +554,14 @@ export default function EditRoundForm({
                     courseName={currentCourse.name}
                     courseId={currentCourse.id}
                     roundPlayerId={selectedPlayer.id}
-                    currentGross={selectedPlayer.gross_score}
+                    currentGross={selectedPlayer.grossScore}
                     currentFront={null}
                     currentBack={null}
                     currentPoints={selectedPlayer.points}
                     currentPayout={selectedPlayer.payout}
                     playerIndex={selectedPlayer.player.handicapIndex}
-                    indexAtTime={selectedPlayer.index_at_time}
-                    teeBox={selectedPlayer.tee_box}
+                    indexAtTime={selectedPlayer.indexAtTime}
+                    teeBox={selectedPlayer.teeBox}
                     coursePar={currentCourse.holes?.reduce((sum, h) => sum + h.par, 0)}
                     onSave={async (gross, front, back, pts, pay, holeScores) => {
                         const courseChanged = existingPlayerIds.size > 0 && currentCourse.id !== round.course.id;
@@ -569,10 +573,10 @@ export default function EditRoundForm({
                                 if (p.id === selectedPlayer.id) {
                                     return {
                                         ...p,
-                                        gross_score: gross,
+                                        grossScore: gross,
                                         points: pts,
                                         payout: pay,
-                                        hole_scores: holeScores
+                                        holeScores: holeScores
                                     };
                                 }
                                 return p;

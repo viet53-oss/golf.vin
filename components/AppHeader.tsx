@@ -22,16 +22,25 @@ const LogInIcon = ({ className }: { className?: string }) => (
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import AuthModal from './AuthModal';
+import { logout } from '@/app/actions/auth';
 
 export default function AppHeader() {
     const router = useRouter(); // Initialize router
     const [isAdmin, setIsAdmin] = useState(false);
-    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false); // Admin modal
     const [passwordInput, setPasswordInput] = useState('');
+
+    // User Auth State
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [showAuthModal, setShowAuthModal] = useState(false);
 
     useEffect(() => {
         const session = Cookies.get('admin_session');
         setIsAdmin(session === 'true');
+
+        const authStatus = Cookies.get('auth_status');
+        setIsAuthenticated(authStatus === 'true');
     }, []);
 
     const handleLoginClick = () => {
@@ -58,22 +67,51 @@ export default function AppHeader() {
         window.location.reload(); // Refresh to clear admin state globally
     };
 
+    // Server action import needs to be handled carefully in client component.
+    // We can't import server action directly if it's not passed as prop or imported from a file marked 'use server'.
+    // 'auth.ts' is marked 'use server', so it's fine.
+
+    // However, for logout, we need to invoke it.
+    const handleUserLogout = async () => {
+        // We need to dinamically import or assume it's available.
+        // Since we can't change imports easily with replace_file_content if they are top level...
+        // Wait, I can add imports at the top.
+        // But this tool only replaces a chunk.
+        // I'll need to use multi_replace to add imports AND update the body.
+        // For now, I'll assume I can add the import in a separate chunk.
+    }
+
     return (
         <>
             <div className="bg-black text-white py-1 flex justify-between items-center relative z-[100] mx-1 rounded-full mt-2 shadow-xl border border-white/10">
+                {/* Left side: Logo */}
                 <div className="flex items-center gap-2 px-1">
                     <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
                         <span role="img" aria-label="golf" className="text-xl">⛳</span>
-                        <span className="font-bold tracking-tight text-[18pt]">Golf Live Scores</span>
+                        <span className="font-bold tracking-tight text-[18pt] hidden sm:inline">GolfLS</span>
                     </Link>
                 </div>
 
+                {/* Center: Removed redundant logout button */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                </div>
+
                 <div className="flex items-center gap-4 px-1">
+                    {/* User Auth */}
+                    {!isAuthenticated && (
+                        <button
+                            onClick={() => setShowAuthModal(true)}
+                            className="bg-[#1a4d2e] hover:bg-[#143d24] text-white px-4 py-1.5 rounded-full text-[14pt] font-bold transition-colors"
+                        >
+                            Sign In
+                        </button>
+                    )}
+
                     {isAdmin ? (
                         <div className="flex items-center gap-3">
                             <span className="text-green-400 font-bold flex items-center gap-1 text-[14pt] uppercase tracking-wider">
                                 <ShieldIcon className="w-4 h-4" />
-                                Admin
+                                Logout
                             </span>
                             <button
                                 onClick={handleLogout}
@@ -83,19 +121,31 @@ export default function AppHeader() {
                                 Logout
                             </button>
                         </div>
+                    ) : isAuthenticated ? (
+                        <form action={logout}>
+                            <button
+                                type="submit"
+                                className="flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white px-1 py-1.5 rounded-full text-[14pt] font-bold transition-colors"
+                            >
+                                <LogOutIcon className="w-3 h-3" />
+                                Logout
+                            </button>
+                        </form>
                     ) : (
                         <button
                             onClick={handleLoginClick}
                             className="flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white px-1 py-1.5 rounded-full text-[14pt] font-bold transition-colors"
                         >
-                            <LogInIcon className="w-3 h-3" />
-                            Admin
+                            <LogOutIcon className="w-3 h-3" />
+                            Logout
                         </button>
                     )}
                 </div>
             </div>
 
-            {/* Login Modal */}
+            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+            {/* Login Modal (Admin) */}
             {showLoginModal && (
                 <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
                     <div className="bg-white text-black p-6 rounded-2xl shadow-2xl w-full max-w-sm">

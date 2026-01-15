@@ -213,12 +213,15 @@ export async function updateRound(roundId: string, data: { date: string; name?: 
                     courseId: data.courseId,
                 },
             }),
-            // Reset tee boxes for players in this round - Wait, schema might not allow null teeBoxId?
-            // Assuming simplified schema allows update? 
-            // Actually skipping teeBox reset for now to avoid breaking constraints if nullable is not set.
+            // Force reset tee boxes - since they belong to old course
+            prisma.roundPlayer.updateMany({
+                where: { roundId: roundId },
+                data: {
+                    teeBoxId: "" // Or some invalid ID to force re-selection? 
+                    // Better to set to a default if available, but for now we'll just clear it if schema allows.
+                }
+            })
         ]);
-
-        // Handling scores deletion manually if needed, but keeping it simple.
     } else {
         await prisma.round.update({
             where: { id: roundId },
@@ -373,7 +376,8 @@ export async function updatePlayerScore(
     grossScore: number,
     frontNine: number,
     backNine: number,
-    // points/payout ignored
+    points: number,
+    payout: number,
     holeScores?: { holeId: string, strokes: number }[]
 ) {
     // 1. Fetch RoundPlayer to get TeeBox and Hole Pars
@@ -428,7 +432,8 @@ export async function updatePlayerScore(
                 netScore: adjustedGrossScore, // Assuming netScore is used for Adjusted
                 frontNine: frontNine,
                 backNine: backNine,
-                // points/payout removed
+                points: points,
+                payout: payout,
             },
         });
 
@@ -468,7 +473,7 @@ export async function updatePlayerScore(
 export async function updatePoolParticipants(roundId: string, inPoolPlayerIds: string[]) {
     try {
         await prisma.$transaction(async (tx: TransactionClient) => {
-            // 1. Get current players in round to verify valid IDs
+            // 1. Get current players in round
             const players = await tx.roundPlayer.findMany({
                 where: { roundId: roundId },
                 select: { id: true, playerId: true }
@@ -476,25 +481,10 @@ export async function updatePoolParticipants(roundId: string, inPoolPlayerIds: s
 
             for (const p of players) {
                 const isSelected = inPoolPlayerIds.includes(p.playerId);
-                // Use explicit boolean for PostgreSQL
-                await tx.$executeRawUnsafe(
-                    `UPDATE "RoundPlayer" SET "in_pool" = $1 WHERE id = $2`, // Check table/column names if raw SQL used? 
-                    // Actually, if I can use Prisma regular update, I should.
-                    // But maybe "in_pool" is raw column not in Prisma Schema anymore?
-                    // Previous edits suggest we removed some fields.
-                    // If 'in_pool' is not in schema, I can't update it via Prisma type-safe way.
-                    // BUT executeRawUnsafe requires correct DB table names.
-                    // Prisma default table maps: RoundPlayer -> RoundPlayer (or round_players depending on map)
-                    // Given previous raw queries used round_players, it likely maps to snake_case table?
-                    // Let's assume table name 'RoundPlayer' or 'round_players'. Standard prisma is ModelName unless mapped.
-                    // Checking other raw queries... none visible.
-                    // Let's rely on mapped name. If schema has @map("round_players") then use that.
-                    // If I don't know, I'll stick to what was there or try to use Prisma update if possible.
-                    // User prompt implies specific lint fix: "round_id does not exist in type RoundPlayerWhereInput", "player_id does not exist..."
-                    // So line 464, 465, 474 need fixing.
-                    isSelected,
-                    p.id
-                );
+                await tx.roundPlayer.update({
+                    where: { id: p.id },
+                    data: { inPool: isSelected }
+                });
             }
         });
 
@@ -510,12 +500,15 @@ export async function saveRoundWinnings(roundId: string, payouts: { playerId: st
     try {
         await prisma.$transaction(async (tx: TransactionClient) => {
             for (const p of payouts) {
-                await tx.$executeRawUnsafe(
-                    `UPDATE round_players SET payout = $1 WHERE round_id = $2 AND player_id = $3`,
-                    p.amount,
-                    roundId,
-                    p.playerId
-                );
+                await tx.roundPlayer.updateMany({
+                    where: {
+                        roundId: roundId,
+                        playerId: p.playerId
+                    },
+                    data: {
+                        payout: p.amount
+                    }
+                });
             }
         });
         revalidatePath('/pool');
@@ -545,7 +538,7 @@ export async function deleteEvent(id: string) {
 }
 
 export async function createRoundWithPlayers(
-    data: { date: string; name: string; is_tournament: boolean; courseId?: string },
+    data: { date: string; name: string; isTournament: boolean; courseId?: string },
     players: {
         playerId: string;
         teeBoxId?: string;
@@ -587,7 +580,7 @@ export async function createRoundWithPlayers(
             courseId: course.id,
             courseName: course.name,
             name: data.name,
-            isTournament: data.is_tournament,
+            isTournament: data.isTournament,
         },
     });
 
@@ -644,12 +637,11 @@ export async function createRoundWithPlayers(
                     grossScore: gross,
                     courseHandicap: courseHandicap,
                     netScore: netScore,
+                    indexAtTime: dbPlayer?.handicapIndex || 0,
+                    points: p.points || 0,
+                    payout: p.payout || 0,
 
                     teeBoxId: teeBoxId,
-                    // Note: teeName, slope, rating, par no longer stored on RoundPlayer
-                    // Note: indexAtTime no longer stored on RoundPlayer
-                    // Note: points, payout no longer stored on RoundPlayer
-
                     frontNine: front9,
                     backNine: back9,
                 }

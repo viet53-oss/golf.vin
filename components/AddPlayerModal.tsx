@@ -94,6 +94,21 @@ export function AddPlayerModal({ isOpen, onClose }: AddPlayerModalProps) {
                         />
                     </div>
 
+                    {/* Password */}
+                    <div>
+                        <label htmlFor="password" className="block text-[14pt] font-bold text-gray-700 mb-2">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Optional"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:outline-none focus:ring-2 focus:ring-green-500"
+                            disabled={isSubmitting}
+                        />
+                    </div>
+
                     {/* Preferred Tee Box */}
                     <div>
                         <label htmlFor="preferredTeeBox" className="block text-[14pt] font-bold text-gray-700 mb-2">
@@ -105,9 +120,57 @@ export function AddPlayerModal({ isOpen, onClose }: AddPlayerModalProps) {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:outline-none focus:ring-2 focus:ring-green-500"
                             disabled={isSubmitting}
                         >
+                            <option value="Black">Black</option>
+                            <option value="Blue">Blue</option>
                             <option value="White">White</option>
                             <option value="Gold">Gold</option>
+                            <option value="Green">Green</option>
+                            <option value="Red">Red</option>
                         </select>
+                    </div>
+
+                    {/* Birthday */}
+                    <div>
+                        <label htmlFor="birthday" className="block text-[14pt] font-bold text-gray-700 mb-2">
+                            Birthday
+                        </label>
+                        <input
+                            type="date"
+                            id="birthday"
+                            name="birthday"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:outline-none focus:ring-2 focus:ring-green-500"
+                            disabled={isSubmitting}
+                        />
+                    </div>
+
+                    {/* Date Started */}
+                    <div>
+                        <label htmlFor="dateStarted" className="block text-[14pt] font-bold text-gray-700 mb-2">
+                            Date Started
+                        </label>
+                        <input
+                            type="date"
+                            id="dateStarted"
+                            name="dateStarted"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:outline-none focus:ring-2 focus:ring-green-500"
+                            disabled={isSubmitting}
+                        />
+                    </div>
+
+                    {/* Handicap Index */}
+                    <div>
+                        <label htmlFor="handicapIndex" className="block text-[14pt] font-bold text-gray-700 mb-2">
+                            Official Index
+                        </label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            id="handicapIndex"
+                            name="handicapIndex"
+                            placeholder="0.0"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[14pt] focus:outline-none focus:ring-2 focus:ring-green-500"
+                            disabled={isSubmitting}
+                        />
                     </div>
 
                     {/* Buttons */}

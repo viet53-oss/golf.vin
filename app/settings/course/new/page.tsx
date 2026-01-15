@@ -12,16 +12,15 @@ export default function NewCoursePage() {
     // 18 blank holes (default par 4)
     const blankHoles = Array.from({ length: 18 }).map((_, i) => ({
         id: `temp-hole-${i}`,
-        hole_number: i + 1,
+        holeNumber: i + 1,
         par: 4,
         difficulty: null,
-        elements: []
     }));
 
     const initialCourse = {
         id: 'new',
         name: '',
-        tee_boxes: blankTees,
+        teeBoxes: blankTees,
         holes: blankHoles
     };
 

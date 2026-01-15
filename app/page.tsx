@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import BirthdayPopup from "@/components/BirthdayPopup";
+import AuthLanding from "@/components/AuthLanding";
 
 export const dynamic = 'force-dynamic';
 
@@ -175,6 +176,13 @@ async function checkAdminStatus(): Promise<boolean> {
 // ============================================================================
 
 export default async function Home1() {
+    const cookieStore = await cookies();
+    const isAuthenticated = cookieStore.get('auth_status')?.value === 'true';
+
+    if (!isAuthenticated) {
+        return <AuthLanding />;
+    }
+
     const players = await getPlayers();
     const isAdmin = await checkAdminStatus();
 

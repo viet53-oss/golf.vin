@@ -1,7 +1,7 @@
 {
-    "name": "City Park Golf Club",
-    "short_name": "CPGC",
-    "description": "City Park Golf Club of New Orleans - Teeing off sunrise every Saturday",
+    "name": "GolfLS",
+    "short_name": "GolfLS",
+    "description": "Golf Live Scores - Track your game in real-time",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

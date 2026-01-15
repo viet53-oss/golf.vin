@@ -51,10 +51,13 @@ export async function updateCourse(
     // Handle updates and creation. Deletion is tricky in this simplified view, usually separate action.
     // For now, we only update existing or create new if passed without ID or with temp ID.
     for (const tee of data.tees) {
+        // Calculate total par for the course
+        const totalPar = data.holes.reduce((sum, h) => sum + h.par, 0) || 72;
+
         if (tee.id && !tee.id.startsWith('temp-')) {
             await prisma.teeBox.update({
                 where: { id: tee.id },
-                data: { name: tee.name, rating: tee.rating, slope: tee.slope }
+                data: { name: tee.name, rating: tee.rating, slope: tee.slope, par: totalPar }
             });
         } else {
             await prisma.teeBox.create({
@@ -62,7 +65,8 @@ export async function updateCourse(
                     courseId: courseId,
                     name: tee.name,
                     rating: tee.rating,
-                    slope: tee.slope
+                    slope: tee.slope,
+                    par: totalPar
                 }
             });
         }

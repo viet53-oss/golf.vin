@@ -1,9 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.cityparkgolf.app',
-  appName: 'City Park Golf',
-  webDir: 'public'
+  appId: 'com.golfls.app',
+  appName: 'GolfLS',
+  webDir: 'out'
 };
 
 export default config;

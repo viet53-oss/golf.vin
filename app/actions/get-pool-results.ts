@@ -11,7 +11,7 @@ export async function getPoolResults(roundId: string) {
             players: {
                 include: {
                     player: true,
-                    tee_box: true,
+                    teeBox: true,
                     scores: {
                         include: { hole: true }
                     }
@@ -29,6 +29,8 @@ export async function getPoolResults(roundId: string) {
         }
 
         // Fetch in_pool status via Raw SQL
+        // Note: Assuming raw SQL columns might still be snake_case in existing DB or match custom maps.
+        // If query fails, we might need to adjust column names to "playerId".
         const poolStatusRaw = await prisma.$queryRaw<{ player_id: string, in_pool: boolean }[]>`
             SELECT player_id, in_pool FROM round_players WHERE round_id = ${round.id}
         `;
@@ -50,11 +52,11 @@ export async function getPoolResults(roundId: string) {
 
         const playersRaw = round.players as any[];
         const allPoolParticipants = playersRaw.filter((rp: any) => {
-            const rawStatus = poolStatusMap.get(rp.player_id);
+            const rawStatus = poolStatusMap.get(rp.player_id) || poolStatusMap.get(rp.playerId);
             return rawStatus === true;
         });
 
-        const poolActivePlayers = allPoolParticipants.filter((rp: any) => rp.tee_box && rp.gross_score !== null);
+        const poolActivePlayers = allPoolParticipants.filter((rp: any) => rp.teeBox && rp.grossScore !== null);
 
         // Determine Flights
         const entryFee = 5.00;
@@ -67,31 +69,32 @@ export async function getPoolResults(roundId: string) {
         const par = round.course?.holes.reduce((sum: number, h: any) => sum + h.par, 0) || 72;
 
         const calc = (rp: any) => {
-            const index = rp.index_at_time ?? rp.player.index;
-            const slope = rp.tee_box?.slope || 113;
-            const rating = rp.tee_box?.rating || par;
+            // Historical rounds don't have indexAtTime usually, fallback to current player index
+            const index = rp.player.handicapIndex;
+            const slope = rp.teeBox?.slope || 113;
+            const rating = rp.teeBox?.rating || par;
 
             const courseHcp = Math.round((index * (slope / 113)) + (rating - par));
 
-            let frontGross = rp.front_nine;
-            let backGross = rp.back_nine;
+            let frontGross = rp.frontNine;
+            let backGross = rp.backNine;
 
             if (!frontGross || !backGross) {
                 const scores = rp.scores || [];
                 const f = scores
-                    .filter((s: any) => s.hole.hole_number <= 9)
+                    .filter((s: any) => s.hole.holeNumber <= 9)
                     .reduce((sum: number, s: any) => sum + s.strokes, 0);
                 const b = scores
-                    .filter((s: any) => s.hole.hole_number > 9)
+                    .filter((s: any) => s.hole.holeNumber > 9)
                     .reduce((sum: number, s: any) => sum + s.strokes, 0);
 
                 if (f > 0) frontGross = f;
                 if (b > 0) backGross = b;
             }
 
-            frontGross = frontGross ?? Math.floor((rp.gross_score || 0) / 2);
-            backGross = backGross ?? Math.ceil((rp.gross_score || 0) / 2);
-            const totalGross = rp.gross_score;
+            frontGross = frontGross ?? Math.floor((rp.grossScore || 0) / 2);
+            backGross = backGross ?? Math.ceil((rp.grossScore || 0) / 2);
+            const totalGross = rp.grossScore;
 
             let frontHcp = 0;
             let backHcp = 0;
@@ -104,7 +107,7 @@ export async function getPoolResults(roundId: string) {
                     const extraStroke = diff <= remainder ? 1 : 0;
                     const hcpStrokes = baseStrokes + extraStroke;
 
-                    if (h.hole_number <= 9) frontHcp += hcpStrokes;
+                    if (h.holeNumber <= 9) frontHcp += hcpStrokes;
                     else backHcp += hcpStrokes;
                 });
             } else {
@@ -120,7 +123,7 @@ export async function getPoolResults(roundId: string) {
                 const h = s.hole;
                 const diff = h.difficulty || 18;
                 return {
-                    holeNumber: h.hole_number,
+                    holeNumber: h.holeNumber,
                     difficulty: diff,
                     grossScore: s.strokes
                 };
@@ -229,11 +232,11 @@ export async function getPoolResults(roundId: string) {
             success: true,
             data: {
                 allPoolParticipants: allPoolParticipants.map(p => ({
-                    player_id: p.player_id,
+                    player_id: p.player_id || p.playerId,
                     player: { name: p.player.name }
                 })),
                 poolActivePlayers: poolActivePlayers.map(p => ({
-                    player_id: p.player_id,
+                    player_id: p.player_id || p.playerId,
                     player: { name: p.player.name }
                 })),
                 round: {
@@ -243,7 +246,7 @@ export async function getPoolResults(roundId: string) {
                     isTournament: round.isTournament,
                     players: round.players.map((rp: any) => ({
                         id: rp.id,
-                        player_id: rp.player_id,
+                        player_id: rp.playerId,
                         player: {
                             id: rp.player.id,
                             name: rp.player.name
@@ -262,3 +265,4 @@ export async function getPoolResults(roundId: string) {
         return { success: false, error: 'Internal server error' };
     }
 }
+
