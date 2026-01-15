@@ -14,14 +14,20 @@ export async function createPlayer(formData: FormData) {
     }
 
     try {
+        // Generate custom ID: FirstName + Last4Phone
+        const firstName = name.trim().split(' ')[0].replace(/[^a-zA-Z0-9]/g, '');
+        const cleanPhone = phone?.replace(/\D/g, '') || '';
+        const last4Phone = cleanPhone.length >= 4 ? cleanPhone.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
+
+        const customId = `${firstName}${last4Phone}`;
+
         await prisma.player.create({
             data: {
+                id: customId,
                 name: name.trim(),
                 email: email?.trim() || null,
                 phone: phone?.trim() || null,
-                // preferred_tee_box removed
-                handicapIndex: 0, // was index
-                // low_handicap_index removed
+                handicapIndex: 0,
             }
         });
 
