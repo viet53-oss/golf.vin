@@ -41,8 +41,8 @@ export default function AuthLanding() {
     useEffect(() => {
         // Test Server Connectivity on Mount
         systemCheck()
-            .then(res => console.log("System Check Result:", res))
-            .catch(err => console.error("System Check Error:", err));
+            .then(res => console.log("PRODUCTION DEBUG - System Check:", res))
+            .catch(err => console.error("PRODUCTION DEBUG - System Check Error:", err));
     }, []);
 
     async function handleSubmit(formData: FormData) {
